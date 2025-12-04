@@ -6,7 +6,7 @@ export default function MainTabs() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
+        headerShown: true, // still fine as a default
         tabBarActiveTintColor: autopackColors.apBlue,
         tabBarInactiveTintColor: '#999999',
       }}
@@ -15,7 +15,7 @@ export default function MainTabs() {
         name='hub'
         options={{
           title: 'Hub',
-          headerShown: false, // no header on main home tab
+          headerShown: false, // no header on Hub
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='home' color={color} size={size} />
           ),
@@ -26,6 +26,7 @@ export default function MainTabs() {
         name='agenda'
         options={{
           title: 'Agenda',
+          headerShown: false, // 👈 turn OFF header from the tab
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='calendar' color={color} size={size} />
           ),
