@@ -1,0 +1,3289 @@
+/* tslint:disable */
+/* eslint-disable */
+// this is an auto generated file. This will be overwritten
+
+import * as APITypes from "../API";
+type GeneratedMutation<InputType, OutputType> = string & {
+  __generatedMutationInput: InputType;
+  __generatedMutationOutput: OutputType;
+};
+
+export const createAPS = /* GraphQL */ `mutation CreateAPS(
+  $input: CreateAPSInput!
+  $condition: ModelAPSConditionInput
+) {
+  createAPS(input: $input, condition: $condition) {
+    id
+    year
+    codes
+    agenda {
+      id
+      eventId
+      createdAt
+      updatedAt
+      __typename
+    }
+    Registrants {
+      nextToken
+      __typename
+    }
+    Sponsors {
+      nextToken
+      __typename
+    }
+    Speakers {
+      nextToken
+      __typename
+    }
+    Companies {
+      nextToken
+      __typename
+    }
+    photos {
+      nextToken
+      __typename
+    }
+    exhibitors {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    exhibitorPromotions {
+      nextToken
+      __typename
+    }
+    exhibitorDeals {
+      nextToken
+      __typename
+    }
+    exhibitorPhotos {
+      nextToken
+      __typename
+    }
+    exhibitorHandouts {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSAgendaId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAPSMutationVariables,
+  APITypes.CreateAPSMutation
+>;
+export const updateAPS = /* GraphQL */ `mutation UpdateAPS(
+  $input: UpdateAPSInput!
+  $condition: ModelAPSConditionInput
+) {
+  updateAPS(input: $input, condition: $condition) {
+    id
+    year
+    codes
+    agenda {
+      id
+      eventId
+      createdAt
+      updatedAt
+      __typename
+    }
+    Registrants {
+      nextToken
+      __typename
+    }
+    Sponsors {
+      nextToken
+      __typename
+    }
+    Speakers {
+      nextToken
+      __typename
+    }
+    Companies {
+      nextToken
+      __typename
+    }
+    photos {
+      nextToken
+      __typename
+    }
+    exhibitors {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    exhibitorPromotions {
+      nextToken
+      __typename
+    }
+    exhibitorDeals {
+      nextToken
+      __typename
+    }
+    exhibitorPhotos {
+      nextToken
+      __typename
+    }
+    exhibitorHandouts {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSAgendaId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAPSMutationVariables,
+  APITypes.UpdateAPSMutation
+>;
+export const deleteAPS = /* GraphQL */ `mutation DeleteAPS(
+  $input: DeleteAPSInput!
+  $condition: ModelAPSConditionInput
+) {
+  deleteAPS(input: $input, condition: $condition) {
+    id
+    year
+    codes
+    agenda {
+      id
+      eventId
+      createdAt
+      updatedAt
+      __typename
+    }
+    Registrants {
+      nextToken
+      __typename
+    }
+    Sponsors {
+      nextToken
+      __typename
+    }
+    Speakers {
+      nextToken
+      __typename
+    }
+    Companies {
+      nextToken
+      __typename
+    }
+    photos {
+      nextToken
+      __typename
+    }
+    exhibitors {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    exhibitorPromotions {
+      nextToken
+      __typename
+    }
+    exhibitorDeals {
+      nextToken
+      __typename
+    }
+    exhibitorPhotos {
+      nextToken
+      __typename
+    }
+    exhibitorHandouts {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSAgendaId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAPSMutationVariables,
+  APITypes.DeleteAPSMutation
+>;
+export const createAPSBoard = /* GraphQL */ `mutation CreateAPSBoard(
+  $input: CreateAPSBoardInput!
+  $condition: ModelAPSBoardConditionInput
+) {
+  createAPSBoard(input: $input, condition: $condition) {
+    id
+    name
+    title
+    bio
+    company
+    email
+    linkedin
+    profilePic
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAPSBoardMutationVariables,
+  APITypes.CreateAPSBoardMutation
+>;
+export const updateAPSBoard = /* GraphQL */ `mutation UpdateAPSBoard(
+  $input: UpdateAPSBoardInput!
+  $condition: ModelAPSBoardConditionInput
+) {
+  updateAPSBoard(input: $input, condition: $condition) {
+    id
+    name
+    title
+    bio
+    company
+    email
+    linkedin
+    profilePic
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAPSBoardMutationVariables,
+  APITypes.UpdateAPSBoardMutation
+>;
+export const deleteAPSBoard = /* GraphQL */ `mutation DeleteAPSBoard(
+  $input: DeleteAPSBoardInput!
+  $condition: ModelAPSBoardConditionInput
+) {
+  deleteAPSBoard(input: $input, condition: $condition) {
+    id
+    name
+    title
+    bio
+    company
+    email
+    linkedin
+    profilePic
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAPSBoardMutationVariables,
+  APITypes.DeleteAPSBoardMutation
+>;
+export const createApsAgenda = /* GraphQL */ `mutation CreateApsAgenda(
+  $input: CreateApsAgendaInput!
+  $condition: ModelApsAgendaConditionInput
+) {
+  createApsAgenda(input: $input, condition: $condition) {
+    id
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    items {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAgendaMutationVariables,
+  APITypes.CreateApsAgendaMutation
+>;
+export const updateApsAgenda = /* GraphQL */ `mutation UpdateApsAgenda(
+  $input: UpdateApsAgendaInput!
+  $condition: ModelApsAgendaConditionInput
+) {
+  updateApsAgenda(input: $input, condition: $condition) {
+    id
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    items {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAgendaMutationVariables,
+  APITypes.UpdateApsAgendaMutation
+>;
+export const deleteApsAgenda = /* GraphQL */ `mutation DeleteApsAgenda(
+  $input: DeleteApsAgendaInput!
+  $condition: ModelApsAgendaConditionInput
+) {
+  deleteApsAgenda(input: $input, condition: $condition) {
+    id
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    items {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAgendaMutationVariables,
+  APITypes.DeleteApsAgendaMutation
+>;
+export const createApsRegistrant = /* GraphQL */ `mutation CreateApsRegistrant(
+  $input: CreateApsRegistrantInput!
+  $condition: ModelApsRegistrantConditionInput
+) {
+  createApsRegistrant(input: $input, condition: $condition) {
+    id
+    apsID
+    aps {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    firstName
+    lastName
+    email
+    phone
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    jobTitle
+    attendeeType
+    termsAccepted
+    interests
+    otherInterest
+    speedNetworking
+    speedNetworkingStatus
+    billingAddressFirstName
+    billingAddressLastName
+    billingAddressEmail
+    billingAddressPhone
+    billingAddressStreet
+    billingAddressCity
+    billingAddressState
+    billingAddressZip
+    sameAsAttendee
+    speakerTopic
+    learningObjectives
+    totalAmount
+    discountCode
+    status
+    morrisetteTransportation
+    morrisetteStatus
+    aristoTransportation
+    aristoStatus
+    magnaTransportation
+    magnaStatus
+    paymentConfirmation
+    registrationEmailSent
+    registrationEmailSentDate
+    registrationEmailReceived
+    registrationEmailReceivedDate
+    welcomeEmailSent
+    welcomeEmailSentDate
+    welcomeEmailReceived
+    welcomeEmailReceivedDate
+    paymentMethod
+    paymentLast4
+    approvedAt
+    headshot
+    presentation
+    presentationTitle
+    presentationSummary
+    bio
+    seatingChartRegistrant {
+      id
+      category
+      firstName
+      lastName
+      company
+      email
+      role
+      tableNumber
+      notes
+      seatingChartID
+      registrantID
+      createdAt
+      updatedAt
+      apsSeatingChartRegistrantsId
+      __typename
+    }
+    appUser {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSRegistrantsId
+    aPSCompanyRegistrantsId
+    apsRegistrantSeatingChartRegistrantId
+    apsRegistrantAppUserId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsRegistrantMutationVariables,
+  APITypes.CreateApsRegistrantMutation
+>;
+export const updateApsRegistrant = /* GraphQL */ `mutation UpdateApsRegistrant(
+  $input: UpdateApsRegistrantInput!
+  $condition: ModelApsRegistrantConditionInput
+) {
+  updateApsRegistrant(input: $input, condition: $condition) {
+    id
+    apsID
+    aps {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    firstName
+    lastName
+    email
+    phone
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    jobTitle
+    attendeeType
+    termsAccepted
+    interests
+    otherInterest
+    speedNetworking
+    speedNetworkingStatus
+    billingAddressFirstName
+    billingAddressLastName
+    billingAddressEmail
+    billingAddressPhone
+    billingAddressStreet
+    billingAddressCity
+    billingAddressState
+    billingAddressZip
+    sameAsAttendee
+    speakerTopic
+    learningObjectives
+    totalAmount
+    discountCode
+    status
+    morrisetteTransportation
+    morrisetteStatus
+    aristoTransportation
+    aristoStatus
+    magnaTransportation
+    magnaStatus
+    paymentConfirmation
+    registrationEmailSent
+    registrationEmailSentDate
+    registrationEmailReceived
+    registrationEmailReceivedDate
+    welcomeEmailSent
+    welcomeEmailSentDate
+    welcomeEmailReceived
+    welcomeEmailReceivedDate
+    paymentMethod
+    paymentLast4
+    approvedAt
+    headshot
+    presentation
+    presentationTitle
+    presentationSummary
+    bio
+    seatingChartRegistrant {
+      id
+      category
+      firstName
+      lastName
+      company
+      email
+      role
+      tableNumber
+      notes
+      seatingChartID
+      registrantID
+      createdAt
+      updatedAt
+      apsSeatingChartRegistrantsId
+      __typename
+    }
+    appUser {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSRegistrantsId
+    aPSCompanyRegistrantsId
+    apsRegistrantSeatingChartRegistrantId
+    apsRegistrantAppUserId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsRegistrantMutationVariables,
+  APITypes.UpdateApsRegistrantMutation
+>;
+export const deleteApsRegistrant = /* GraphQL */ `mutation DeleteApsRegistrant(
+  $input: DeleteApsRegistrantInput!
+  $condition: ModelApsRegistrantConditionInput
+) {
+  deleteApsRegistrant(input: $input, condition: $condition) {
+    id
+    apsID
+    aps {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    firstName
+    lastName
+    email
+    phone
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    jobTitle
+    attendeeType
+    termsAccepted
+    interests
+    otherInterest
+    speedNetworking
+    speedNetworkingStatus
+    billingAddressFirstName
+    billingAddressLastName
+    billingAddressEmail
+    billingAddressPhone
+    billingAddressStreet
+    billingAddressCity
+    billingAddressState
+    billingAddressZip
+    sameAsAttendee
+    speakerTopic
+    learningObjectives
+    totalAmount
+    discountCode
+    status
+    morrisetteTransportation
+    morrisetteStatus
+    aristoTransportation
+    aristoStatus
+    magnaTransportation
+    magnaStatus
+    paymentConfirmation
+    registrationEmailSent
+    registrationEmailSentDate
+    registrationEmailReceived
+    registrationEmailReceivedDate
+    welcomeEmailSent
+    welcomeEmailSentDate
+    welcomeEmailReceived
+    welcomeEmailReceivedDate
+    paymentMethod
+    paymentLast4
+    approvedAt
+    headshot
+    presentation
+    presentationTitle
+    presentationSummary
+    bio
+    seatingChartRegistrant {
+      id
+      category
+      firstName
+      lastName
+      company
+      email
+      role
+      tableNumber
+      notes
+      seatingChartID
+      registrantID
+      createdAt
+      updatedAt
+      apsSeatingChartRegistrantsId
+      __typename
+    }
+    appUser {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSRegistrantsId
+    aPSCompanyRegistrantsId
+    apsRegistrantSeatingChartRegistrantId
+    apsRegistrantAppUserId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsRegistrantMutationVariables,
+  APITypes.DeleteApsRegistrantMutation
+>;
+export const createApsAppUser = /* GraphQL */ `mutation CreateApsAppUser(
+  $input: CreateApsAppUserInput!
+  $condition: ModelApsAppUserConditionInput
+) {
+  createApsAppUser(input: $input, condition: $condition) {
+    id
+    registrantId
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      apsRegistrantAppUserId
+      __typename
+    }
+    qrCode
+    photos {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    sessionQuestions {
+      nextToken
+      __typename
+    }
+    exhibitorDeals {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppUserMutationVariables,
+  APITypes.CreateApsAppUserMutation
+>;
+export const updateApsAppUser = /* GraphQL */ `mutation UpdateApsAppUser(
+  $input: UpdateApsAppUserInput!
+  $condition: ModelApsAppUserConditionInput
+) {
+  updateApsAppUser(input: $input, condition: $condition) {
+    id
+    registrantId
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      apsRegistrantAppUserId
+      __typename
+    }
+    qrCode
+    photos {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    sessionQuestions {
+      nextToken
+      __typename
+    }
+    exhibitorDeals {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppUserMutationVariables,
+  APITypes.UpdateApsAppUserMutation
+>;
+export const deleteApsAppUser = /* GraphQL */ `mutation DeleteApsAppUser(
+  $input: DeleteApsAppUserInput!
+  $condition: ModelApsAppUserConditionInput
+) {
+  deleteApsAppUser(input: $input, condition: $condition) {
+    id
+    registrantId
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      apsRegistrantAppUserId
+      __typename
+    }
+    qrCode
+    photos {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    sessionQuestions {
+      nextToken
+      __typename
+    }
+    exhibitorDeals {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppUserMutationVariables,
+  APITypes.DeleteApsAppUserMutation
+>;
+export const createApsAppUserPhoto = /* GraphQL */ `mutation CreateApsAppUserPhoto(
+  $input: CreateApsAppUserPhotoInput!
+  $condition: ModelApsAppUserPhotoConditionInput
+) {
+  createApsAppUserPhoto(input: $input, condition: $condition) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSPhotosId
+    apsAppUserPhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppUserPhotoMutationVariables,
+  APITypes.CreateApsAppUserPhotoMutation
+>;
+export const updateApsAppUserPhoto = /* GraphQL */ `mutation UpdateApsAppUserPhoto(
+  $input: UpdateApsAppUserPhotoInput!
+  $condition: ModelApsAppUserPhotoConditionInput
+) {
+  updateApsAppUserPhoto(input: $input, condition: $condition) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSPhotosId
+    apsAppUserPhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppUserPhotoMutationVariables,
+  APITypes.UpdateApsAppUserPhotoMutation
+>;
+export const deleteApsAppUserPhoto = /* GraphQL */ `mutation DeleteApsAppUserPhoto(
+  $input: DeleteApsAppUserPhotoInput!
+  $condition: ModelApsAppUserPhotoConditionInput
+) {
+  deleteApsAppUserPhoto(input: $input, condition: $condition) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSPhotosId
+    apsAppUserPhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppUserPhotoMutationVariables,
+  APITypes.DeleteApsAppUserPhotoMutation
+>;
+export const createApsAppSession = /* GraphQL */ `mutation CreateApsAppSession(
+  $input: CreateApsAppSessionInput!
+  $condition: ModelApsAppSessionConditionInput
+) {
+  createApsAppSession(input: $input, condition: $condition) {
+    id
+    session
+    date
+    time
+    location
+    agendaId
+    agenda {
+      id
+      eventId
+      createdAt
+      updatedAt
+      __typename
+    }
+    sessionQuestions {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAgendaItemsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppSessionMutationVariables,
+  APITypes.CreateApsAppSessionMutation
+>;
+export const updateApsAppSession = /* GraphQL */ `mutation UpdateApsAppSession(
+  $input: UpdateApsAppSessionInput!
+  $condition: ModelApsAppSessionConditionInput
+) {
+  updateApsAppSession(input: $input, condition: $condition) {
+    id
+    session
+    date
+    time
+    location
+    agendaId
+    agenda {
+      id
+      eventId
+      createdAt
+      updatedAt
+      __typename
+    }
+    sessionQuestions {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAgendaItemsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppSessionMutationVariables,
+  APITypes.UpdateApsAppSessionMutation
+>;
+export const deleteApsAppSession = /* GraphQL */ `mutation DeleteApsAppSession(
+  $input: DeleteApsAppSessionInput!
+  $condition: ModelApsAppSessionConditionInput
+) {
+  deleteApsAppSession(input: $input, condition: $condition) {
+    id
+    session
+    date
+    time
+    location
+    agendaId
+    agenda {
+      id
+      eventId
+      createdAt
+      updatedAt
+      __typename
+    }
+    sessionQuestions {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAgendaItemsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppSessionMutationVariables,
+  APITypes.DeleteApsAppSessionMutation
+>;
+export const createApsAppSessionQuestion = /* GraphQL */ `mutation CreateApsAppSessionQuestion(
+  $input: CreateApsAppSessionQuestionInput!
+  $condition: ModelApsAppSessionQuestionConditionInput
+) {
+  createApsAppSessionQuestion(input: $input, condition: $condition) {
+    id
+    sessionId
+    session {
+      id
+      session
+      date
+      time
+      location
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    question
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAppUserSessionQuestionsId
+    apsAppSessionSessionQuestionsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppSessionQuestionMutationVariables,
+  APITypes.CreateApsAppSessionQuestionMutation
+>;
+export const updateApsAppSessionQuestion = /* GraphQL */ `mutation UpdateApsAppSessionQuestion(
+  $input: UpdateApsAppSessionQuestionInput!
+  $condition: ModelApsAppSessionQuestionConditionInput
+) {
+  updateApsAppSessionQuestion(input: $input, condition: $condition) {
+    id
+    sessionId
+    session {
+      id
+      session
+      date
+      time
+      location
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    question
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAppUserSessionQuestionsId
+    apsAppSessionSessionQuestionsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppSessionQuestionMutationVariables,
+  APITypes.UpdateApsAppSessionQuestionMutation
+>;
+export const deleteApsAppSessionQuestion = /* GraphQL */ `mutation DeleteApsAppSessionQuestion(
+  $input: DeleteApsAppSessionQuestionInput!
+  $condition: ModelApsAppSessionQuestionConditionInput
+) {
+  deleteApsAppSessionQuestion(input: $input, condition: $condition) {
+    id
+    sessionId
+    session {
+      id
+      session
+      date
+      time
+      location
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    question
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAppUserSessionQuestionsId
+    apsAppSessionSessionQuestionsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppSessionQuestionMutationVariables,
+  APITypes.DeleteApsAppSessionQuestionMutation
+>;
+export const createAPSSpeaker = /* GraphQL */ `mutation CreateAPSSpeaker(
+  $input: CreateAPSSpeakerInput!
+  $condition: ModelAPSSpeakerConditionInput
+) {
+  createAPSSpeaker(input: $input, condition: $condition) {
+    id
+    firstName
+    lastName
+    email
+    company
+    title
+    phone
+    linkedin
+    bio
+    presentationTitle
+    presentationSummary
+    headshot
+    mediaConsent
+    privacyConsent
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSSpeakersId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAPSSpeakerMutationVariables,
+  APITypes.CreateAPSSpeakerMutation
+>;
+export const updateAPSSpeaker = /* GraphQL */ `mutation UpdateAPSSpeaker(
+  $input: UpdateAPSSpeakerInput!
+  $condition: ModelAPSSpeakerConditionInput
+) {
+  updateAPSSpeaker(input: $input, condition: $condition) {
+    id
+    firstName
+    lastName
+    email
+    company
+    title
+    phone
+    linkedin
+    bio
+    presentationTitle
+    presentationSummary
+    headshot
+    mediaConsent
+    privacyConsent
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSSpeakersId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAPSSpeakerMutationVariables,
+  APITypes.UpdateAPSSpeakerMutation
+>;
+export const deleteAPSSpeaker = /* GraphQL */ `mutation DeleteAPSSpeaker(
+  $input: DeleteAPSSpeakerInput!
+  $condition: ModelAPSSpeakerConditionInput
+) {
+  deleteAPSSpeaker(input: $input, condition: $condition) {
+    id
+    firstName
+    lastName
+    email
+    company
+    title
+    phone
+    linkedin
+    bio
+    presentationTitle
+    presentationSummary
+    headshot
+    mediaConsent
+    privacyConsent
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSSpeakersId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAPSSpeakerMutationVariables,
+  APITypes.DeleteAPSSpeakerMutation
+>;
+export const createApsSponsor = /* GraphQL */ `mutation CreateApsSponsor(
+  $input: CreateApsSponsorInput!
+  $condition: ModelApsSponsorConditionInput
+) {
+  createApsSponsor(input: $input, condition: $condition) {
+    id
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    profile {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSSponsorsId
+    aPSCompanySponsorsId
+    apsSponsorProfileId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsSponsorMutationVariables,
+  APITypes.CreateApsSponsorMutation
+>;
+export const updateApsSponsor = /* GraphQL */ `mutation UpdateApsSponsor(
+  $input: UpdateApsSponsorInput!
+  $condition: ModelApsSponsorConditionInput
+) {
+  updateApsSponsor(input: $input, condition: $condition) {
+    id
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    profile {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSSponsorsId
+    aPSCompanySponsorsId
+    apsSponsorProfileId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsSponsorMutationVariables,
+  APITypes.UpdateApsSponsorMutation
+>;
+export const deleteApsSponsor = /* GraphQL */ `mutation DeleteApsSponsor(
+  $input: DeleteApsSponsorInput!
+  $condition: ModelApsSponsorConditionInput
+) {
+  deleteApsSponsor(input: $input, condition: $condition) {
+    id
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    profile {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSSponsorsId
+    aPSCompanySponsorsId
+    apsSponsorProfileId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsSponsorMutationVariables,
+  APITypes.DeleteApsSponsorMutation
+>;
+export const createAPSCompany = /* GraphQL */ `mutation CreateAPSCompany(
+  $input: CreateAPSCompanyInput!
+  $condition: ModelAPSCompanyConditionInput
+) {
+  createAPSCompany(input: $input, condition: $condition) {
+    id
+    name
+    email
+    type
+    description
+    website
+    phone
+    address
+    city
+    state
+    zip
+    country
+    logo
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    registrants {
+      nextToken
+      __typename
+    }
+    sponsors {
+      nextToken
+      __typename
+    }
+    exhibitorProfiles {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSCompaniesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAPSCompanyMutationVariables,
+  APITypes.CreateAPSCompanyMutation
+>;
+export const updateAPSCompany = /* GraphQL */ `mutation UpdateAPSCompany(
+  $input: UpdateAPSCompanyInput!
+  $condition: ModelAPSCompanyConditionInput
+) {
+  updateAPSCompany(input: $input, condition: $condition) {
+    id
+    name
+    email
+    type
+    description
+    website
+    phone
+    address
+    city
+    state
+    zip
+    country
+    logo
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    registrants {
+      nextToken
+      __typename
+    }
+    sponsors {
+      nextToken
+      __typename
+    }
+    exhibitorProfiles {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSCompaniesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAPSCompanyMutationVariables,
+  APITypes.UpdateAPSCompanyMutation
+>;
+export const deleteAPSCompany = /* GraphQL */ `mutation DeleteAPSCompany(
+  $input: DeleteAPSCompanyInput!
+  $condition: ModelAPSCompanyConditionInput
+) {
+  deleteAPSCompany(input: $input, condition: $condition) {
+    id
+    name
+    email
+    type
+    description
+    website
+    phone
+    address
+    city
+    state
+    zip
+    country
+    logo
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    registrants {
+      nextToken
+      __typename
+    }
+    sponsors {
+      nextToken
+      __typename
+    }
+    exhibitorProfiles {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSCompaniesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAPSCompanyMutationVariables,
+  APITypes.DeleteAPSCompanyMutation
+>;
+export const createApsAppExhibitorProfile = /* GraphQL */ `mutation CreateApsAppExhibitorProfile(
+  $input: CreateApsAppExhibitorProfileInput!
+  $condition: ModelApsAppExhibitorProfileConditionInput
+) {
+  createApsAppExhibitorProfile(input: $input, condition: $condition) {
+    id
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    sponsorId
+    sponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    title
+    phone
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    deals {
+      nextToken
+      __typename
+    }
+    photos {
+      nextToken
+      __typename
+    }
+    handouts {
+      nextToken
+      __typename
+    }
+    promotions {
+      nextToken
+      __typename
+    }
+    video
+    videoCaption
+    boothNumber
+    visits
+    views
+    likes
+    inquiries {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorsId
+    aPSCompanyExhibitorProfilesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppExhibitorProfileMutationVariables,
+  APITypes.CreateApsAppExhibitorProfileMutation
+>;
+export const updateApsAppExhibitorProfile = /* GraphQL */ `mutation UpdateApsAppExhibitorProfile(
+  $input: UpdateApsAppExhibitorProfileInput!
+  $condition: ModelApsAppExhibitorProfileConditionInput
+) {
+  updateApsAppExhibitorProfile(input: $input, condition: $condition) {
+    id
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    sponsorId
+    sponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    title
+    phone
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    deals {
+      nextToken
+      __typename
+    }
+    photos {
+      nextToken
+      __typename
+    }
+    handouts {
+      nextToken
+      __typename
+    }
+    promotions {
+      nextToken
+      __typename
+    }
+    video
+    videoCaption
+    boothNumber
+    visits
+    views
+    likes
+    inquiries {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorsId
+    aPSCompanyExhibitorProfilesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppExhibitorProfileMutationVariables,
+  APITypes.UpdateApsAppExhibitorProfileMutation
+>;
+export const deleteApsAppExhibitorProfile = /* GraphQL */ `mutation DeleteApsAppExhibitorProfile(
+  $input: DeleteApsAppExhibitorProfileInput!
+  $condition: ModelApsAppExhibitorProfileConditionInput
+) {
+  deleteApsAppExhibitorProfile(input: $input, condition: $condition) {
+    id
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    sponsorId
+    sponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    title
+    phone
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    deals {
+      nextToken
+      __typename
+    }
+    photos {
+      nextToken
+      __typename
+    }
+    handouts {
+      nextToken
+      __typename
+    }
+    promotions {
+      nextToken
+      __typename
+    }
+    video
+    videoCaption
+    boothNumber
+    visits
+    views
+    likes
+    inquiries {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorsId
+    aPSCompanyExhibitorProfilesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppExhibitorProfileMutationVariables,
+  APITypes.DeleteApsAppExhibitorProfileMutation
+>;
+export const createApsAppMessage = /* GraphQL */ `mutation CreateApsAppMessage(
+  $input: CreateApsAppMessageInput!
+  $condition: ModelApsAppMessageConditionInput
+) {
+  createApsAppMessage(input: $input, condition: $condition) {
+    id
+    type
+    message
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSMessagesId
+    apsAppUserMessagesId
+    apsAppExhibitorProfileInquiriesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppMessageMutationVariables,
+  APITypes.CreateApsAppMessageMutation
+>;
+export const updateApsAppMessage = /* GraphQL */ `mutation UpdateApsAppMessage(
+  $input: UpdateApsAppMessageInput!
+  $condition: ModelApsAppMessageConditionInput
+) {
+  updateApsAppMessage(input: $input, condition: $condition) {
+    id
+    type
+    message
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSMessagesId
+    apsAppUserMessagesId
+    apsAppExhibitorProfileInquiriesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppMessageMutationVariables,
+  APITypes.UpdateApsAppMessageMutation
+>;
+export const deleteApsAppMessage = /* GraphQL */ `mutation DeleteApsAppMessage(
+  $input: DeleteApsAppMessageInput!
+  $condition: ModelApsAppMessageConditionInput
+) {
+  deleteApsAppMessage(input: $input, condition: $condition) {
+    id
+    type
+    message
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSMessagesId
+    apsAppUserMessagesId
+    apsAppExhibitorProfileInquiriesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppMessageMutationVariables,
+  APITypes.DeleteApsAppMessageMutation
+>;
+export const createApsAppExhibitorPromotion = /* GraphQL */ `mutation CreateApsAppExhibitorPromotion(
+  $input: CreateApsAppExhibitorPromotionInput!
+  $condition: ModelApsAppExhibitorPromotionConditionInput
+) {
+  createApsAppExhibitorPromotion(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    promotion
+    link
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorPromotionsId
+    apsAppExhibitorProfilePromotionsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppExhibitorPromotionMutationVariables,
+  APITypes.CreateApsAppExhibitorPromotionMutation
+>;
+export const updateApsAppExhibitorPromotion = /* GraphQL */ `mutation UpdateApsAppExhibitorPromotion(
+  $input: UpdateApsAppExhibitorPromotionInput!
+  $condition: ModelApsAppExhibitorPromotionConditionInput
+) {
+  updateApsAppExhibitorPromotion(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    promotion
+    link
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorPromotionsId
+    apsAppExhibitorProfilePromotionsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppExhibitorPromotionMutationVariables,
+  APITypes.UpdateApsAppExhibitorPromotionMutation
+>;
+export const deleteApsAppExhibitorPromotion = /* GraphQL */ `mutation DeleteApsAppExhibitorPromotion(
+  $input: DeleteApsAppExhibitorPromotionInput!
+  $condition: ModelApsAppExhibitorPromotionConditionInput
+) {
+  deleteApsAppExhibitorPromotion(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    promotion
+    link
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorPromotionsId
+    apsAppExhibitorProfilePromotionsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppExhibitorPromotionMutationVariables,
+  APITypes.DeleteApsAppExhibitorPromotionMutation
+>;
+export const createApsAppExhibitorDeal = /* GraphQL */ `mutation CreateApsAppExhibitorDeal(
+  $input: CreateApsAppExhibitorDealInput!
+  $condition: ModelApsAppExhibitorDealConditionInput
+) {
+  createApsAppExhibitorDeal(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    deal
+    link
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorDealsId
+    apsAppUserExhibitorDealsId
+    apsAppExhibitorProfileDealsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppExhibitorDealMutationVariables,
+  APITypes.CreateApsAppExhibitorDealMutation
+>;
+export const updateApsAppExhibitorDeal = /* GraphQL */ `mutation UpdateApsAppExhibitorDeal(
+  $input: UpdateApsAppExhibitorDealInput!
+  $condition: ModelApsAppExhibitorDealConditionInput
+) {
+  updateApsAppExhibitorDeal(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    deal
+    link
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorDealsId
+    apsAppUserExhibitorDealsId
+    apsAppExhibitorProfileDealsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppExhibitorDealMutationVariables,
+  APITypes.UpdateApsAppExhibitorDealMutation
+>;
+export const deleteApsAppExhibitorDeal = /* GraphQL */ `mutation DeleteApsAppExhibitorDeal(
+  $input: DeleteApsAppExhibitorDealInput!
+  $condition: ModelApsAppExhibitorDealConditionInput
+) {
+  deleteApsAppExhibitorDeal(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    deal
+    link
+    userId
+    user {
+      id
+      registrantId
+      qrCode
+      createdAt
+      updatedAt
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorDealsId
+    apsAppUserExhibitorDealsId
+    apsAppExhibitorProfileDealsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppExhibitorDealMutationVariables,
+  APITypes.DeleteApsAppExhibitorDealMutation
+>;
+export const createApsAppExhibitorPhoto = /* GraphQL */ `mutation CreateApsAppExhibitorPhoto(
+  $input: CreateApsAppExhibitorPhotoInput!
+  $condition: ModelApsAppExhibitorPhotoConditionInput
+) {
+  createApsAppExhibitorPhoto(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorPhotosId
+    apsAppExhibitorProfilePhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppExhibitorPhotoMutationVariables,
+  APITypes.CreateApsAppExhibitorPhotoMutation
+>;
+export const updateApsAppExhibitorPhoto = /* GraphQL */ `mutation UpdateApsAppExhibitorPhoto(
+  $input: UpdateApsAppExhibitorPhotoInput!
+  $condition: ModelApsAppExhibitorPhotoConditionInput
+) {
+  updateApsAppExhibitorPhoto(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorPhotosId
+    apsAppExhibitorProfilePhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppExhibitorPhotoMutationVariables,
+  APITypes.UpdateApsAppExhibitorPhotoMutation
+>;
+export const deleteApsAppExhibitorPhoto = /* GraphQL */ `mutation DeleteApsAppExhibitorPhoto(
+  $input: DeleteApsAppExhibitorPhotoInput!
+  $condition: ModelApsAppExhibitorPhotoConditionInput
+) {
+  deleteApsAppExhibitorPhoto(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorPhotosId
+    apsAppExhibitorProfilePhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppExhibitorPhotoMutationVariables,
+  APITypes.DeleteApsAppExhibitorPhotoMutation
+>;
+export const createApsAppExhibitorHandout = /* GraphQL */ `mutation CreateApsAppExhibitorHandout(
+  $input: CreateApsAppExhibitorHandoutInput!
+  $condition: ModelApsAppExhibitorHandoutConditionInput
+) {
+  createApsAppExhibitorHandout(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    handout
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorHandoutsId
+    apsAppExhibitorProfileHandoutsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAppExhibitorHandoutMutationVariables,
+  APITypes.CreateApsAppExhibitorHandoutMutation
+>;
+export const updateApsAppExhibitorHandout = /* GraphQL */ `mutation UpdateApsAppExhibitorHandout(
+  $input: UpdateApsAppExhibitorHandoutInput!
+  $condition: ModelApsAppExhibitorHandoutConditionInput
+) {
+  updateApsAppExhibitorHandout(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    handout
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorHandoutsId
+    apsAppExhibitorProfileHandoutsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppExhibitorHandoutMutationVariables,
+  APITypes.UpdateApsAppExhibitorHandoutMutation
+>;
+export const deleteApsAppExhibitorHandout = /* GraphQL */ `mutation DeleteApsAppExhibitorHandout(
+  $input: DeleteApsAppExhibitorHandoutInput!
+  $condition: ModelApsAppExhibitorHandoutConditionInput
+) {
+  deleteApsAppExhibitorHandout(input: $input, condition: $condition) {
+    id
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    handout
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSExhibitorHandoutsId
+    apsAppExhibitorProfileHandoutsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAppExhibitorHandoutMutationVariables,
+  APITypes.DeleteApsAppExhibitorHandoutMutation
+>;
+export const createApsAddOn = /* GraphQL */ `mutation CreateApsAddOn(
+  $input: CreateApsAddOnInput!
+  $condition: ModelApsAddOnConditionInput
+) {
+  createApsAddOn(input: $input, condition: $condition) {
+    id
+    title
+    description
+    subheadline
+    location
+    date
+    time
+    company
+    altLink
+    type
+    limit
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAddOnMutationVariables,
+  APITypes.CreateApsAddOnMutation
+>;
+export const updateApsAddOn = /* GraphQL */ `mutation UpdateApsAddOn(
+  $input: UpdateApsAddOnInput!
+  $condition: ModelApsAddOnConditionInput
+) {
+  updateApsAddOn(input: $input, condition: $condition) {
+    id
+    title
+    description
+    subheadline
+    location
+    date
+    time
+    company
+    altLink
+    type
+    limit
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAddOnMutationVariables,
+  APITypes.UpdateApsAddOnMutation
+>;
+export const deleteApsAddOn = /* GraphQL */ `mutation DeleteApsAddOn(
+  $input: DeleteApsAddOnInput!
+  $condition: ModelApsAddOnConditionInput
+) {
+  deleteApsAddOn(input: $input, condition: $condition) {
+    id
+    title
+    description
+    subheadline
+    location
+    date
+    time
+    company
+    altLink
+    type
+    limit
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAddOnMutationVariables,
+  APITypes.DeleteApsAddOnMutation
+>;
+export const createApsSeatingChart = /* GraphQL */ `mutation CreateApsSeatingChart(
+  $input: CreateApsSeatingChartInput!
+  $condition: ModelApsSeatingChartConditionInput
+) {
+  createApsSeatingChart(input: $input, condition: $condition) {
+    id
+    registrants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsSeatingChartMutationVariables,
+  APITypes.CreateApsSeatingChartMutation
+>;
+export const updateApsSeatingChart = /* GraphQL */ `mutation UpdateApsSeatingChart(
+  $input: UpdateApsSeatingChartInput!
+  $condition: ModelApsSeatingChartConditionInput
+) {
+  updateApsSeatingChart(input: $input, condition: $condition) {
+    id
+    registrants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsSeatingChartMutationVariables,
+  APITypes.UpdateApsSeatingChartMutation
+>;
+export const deleteApsSeatingChart = /* GraphQL */ `mutation DeleteApsSeatingChart(
+  $input: DeleteApsSeatingChartInput!
+  $condition: ModelApsSeatingChartConditionInput
+) {
+  deleteApsSeatingChart(input: $input, condition: $condition) {
+    id
+    registrants {
+      nextToken
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsSeatingChartMutationVariables,
+  APITypes.DeleteApsSeatingChartMutation
+>;
+export const createApsSeatingChartRegistrant = /* GraphQL */ `mutation CreateApsSeatingChartRegistrant(
+  $input: CreateApsSeatingChartRegistrantInput!
+  $condition: ModelApsSeatingChartRegistrantConditionInput
+) {
+  createApsSeatingChartRegistrant(input: $input, condition: $condition) {
+    id
+    category
+    firstName
+    lastName
+    company
+    email
+    role
+    tableNumber
+    notes
+    seatingChartID
+    seatingChart {
+      id
+      createdAt
+      updatedAt
+      __typename
+    }
+    registrantID
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      apsRegistrantAppUserId
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsSeatingChartRegistrantsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsSeatingChartRegistrantMutationVariables,
+  APITypes.CreateApsSeatingChartRegistrantMutation
+>;
+export const updateApsSeatingChartRegistrant = /* GraphQL */ `mutation UpdateApsSeatingChartRegistrant(
+  $input: UpdateApsSeatingChartRegistrantInput!
+  $condition: ModelApsSeatingChartRegistrantConditionInput
+) {
+  updateApsSeatingChartRegistrant(input: $input, condition: $condition) {
+    id
+    category
+    firstName
+    lastName
+    company
+    email
+    role
+    tableNumber
+    notes
+    seatingChartID
+    seatingChart {
+      id
+      createdAt
+      updatedAt
+      __typename
+    }
+    registrantID
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      apsRegistrantAppUserId
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsSeatingChartRegistrantsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsSeatingChartRegistrantMutationVariables,
+  APITypes.UpdateApsSeatingChartRegistrantMutation
+>;
+export const deleteApsSeatingChartRegistrant = /* GraphQL */ `mutation DeleteApsSeatingChartRegistrant(
+  $input: DeleteApsSeatingChartRegistrantInput!
+  $condition: ModelApsSeatingChartRegistrantConditionInput
+) {
+  deleteApsSeatingChartRegistrant(input: $input, condition: $condition) {
+    id
+    category
+    firstName
+    lastName
+    company
+    email
+    role
+    tableNumber
+    notes
+    seatingChartID
+    seatingChart {
+      id
+      createdAt
+      updatedAt
+      __typename
+    }
+    registrantID
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      apsRegistrantAppUserId
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsSeatingChartRegistrantsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsSeatingChartRegistrantMutationVariables,
+  APITypes.DeleteApsSeatingChartRegistrantMutation
+>;
