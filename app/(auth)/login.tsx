@@ -160,7 +160,8 @@ export default function LoginScreen() {
               'Your account has not been confirmed. Please check your email.';
             break;
           case 'UserNotFoundException':
-            errorMessage = 'No account found with this email address.';
+            errorMessage =
+              'No account found with this email address. This is an invite-only app. Please contact your administrator.';
             break;
           case 'TooManyRequestsException':
             errorMessage = 'Too many sign-in attempts. Please try again later.';
