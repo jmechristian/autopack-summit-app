@@ -20,6 +20,14 @@ export const onCreateAPS = /* GraphQL */ `subscription OnCreateAPS($filter: Mode
       updatedAt
       __typename
     }
+    startDate
+    endDate
+    location
+    address
+    city
+    state
+    zip
+    website
     Registrants {
       nextToken
       __typename
@@ -90,6 +98,14 @@ export const onUpdateAPS = /* GraphQL */ `subscription OnUpdateAPS($filter: Mode
       updatedAt
       __typename
     }
+    startDate
+    endDate
+    location
+    address
+    city
+    state
+    zip
+    website
     Registrants {
       nextToken
       __typename
@@ -160,6 +176,14 @@ export const onDeleteAPS = /* GraphQL */ `subscription OnDeleteAPS($filter: Mode
       updatedAt
       __typename
     }
+    startDate
+    endDate
+    location
+    address
+    city
+    state
+    zip
+    website
     Registrants {
       nextToken
       __typename
@@ -283,6 +307,14 @@ export const onCreateApsAgenda = /* GraphQL */ `subscription OnCreateApsAgenda($
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -309,6 +341,14 @@ export const onUpdateApsAgenda = /* GraphQL */ `subscription OnUpdateApsAgenda($
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -335,6 +375,14 @@ export const onDeleteApsAgenda = /* GraphQL */ `subscription OnDeleteApsAgenda($
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -363,6 +411,14 @@ export const onCreateApsRegistrant = /* GraphQL */ `subscription OnCreateApsRegi
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -486,6 +542,14 @@ export const onUpdateApsRegistrant = /* GraphQL */ `subscription OnUpdateApsRegi
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -609,6 +673,14 @@ export const onDeleteApsRegistrant = /* GraphQL */ `subscription OnDeleteApsRegi
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1635,6 +1707,14 @@ export const onCreateApsAppUserPhoto = /* GraphQL */ `subscription OnCreateApsAp
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1673,6 +1753,14 @@ export const onUpdateApsAppUserPhoto = /* GraphQL */ `subscription OnUpdateApsAp
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1711,6 +1799,14 @@ export const onDeleteApsAppUserPhoto = /* GraphQL */ `subscription OnDeleteApsAp
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1960,6 +2056,14 @@ export const onCreateAPSSpeaker = /* GraphQL */ `subscription OnCreateAPSSpeaker
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1998,6 +2102,14 @@ export const onUpdateAPSSpeaker = /* GraphQL */ `subscription OnUpdateAPSSpeaker
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2036,6 +2148,14 @@ export const onDeleteAPSSpeaker = /* GraphQL */ `subscription OnDeleteAPSSpeaker
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2082,6 +2202,14 @@ export const onCreateApsSponsor = /* GraphQL */ `subscription OnCreateApsSponsor
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2149,6 +2277,14 @@ export const onUpdateApsSponsor = /* GraphQL */ `subscription OnUpdateApsSponsor
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2216,6 +2352,14 @@ export const onDeleteApsSponsor = /* GraphQL */ `subscription OnDeleteApsSponsor
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2274,6 +2418,14 @@ export const onCreateAPSCompany = /* GraphQL */ `subscription OnCreateAPSCompany
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2323,6 +2475,14 @@ export const onUpdateAPSCompany = /* GraphQL */ `subscription OnUpdateAPSCompany
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2372,6 +2532,14 @@ export const onDeleteAPSCompany = /* GraphQL */ `subscription OnDeleteAPSCompany
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2444,6 +2612,14 @@ export const onCreateApsAppExhibitorProfile = /* GraphQL */ `subscription OnCrea
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2531,6 +2707,14 @@ export const onUpdateApsAppExhibitorProfile = /* GraphQL */ `subscription OnUpda
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2618,6 +2802,14 @@ export const onDeleteApsAppExhibitorProfile = /* GraphQL */ `subscription OnDele
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2701,6 +2893,14 @@ export const onCreateApsAppMessage = /* GraphQL */ `subscription OnCreateApsAppM
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2759,6 +2959,14 @@ export const onUpdateApsAppMessage = /* GraphQL */ `subscription OnUpdateApsAppM
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2817,6 +3025,14 @@ export const onDeleteApsAppMessage = /* GraphQL */ `subscription OnDeleteApsAppM
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2866,6 +3082,14 @@ export const onCreateApsAppExhibitorPromotion = /* GraphQL */ `subscription OnCr
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2914,6 +3138,14 @@ export const onUpdateApsAppExhibitorPromotion = /* GraphQL */ `subscription OnUp
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -2962,6 +3194,14 @@ export const onDeleteApsAppExhibitorPromotion = /* GraphQL */ `subscription OnDe
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3019,6 +3259,14 @@ export const onCreateApsAppExhibitorDeal = /* GraphQL */ `subscription OnCreateA
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3077,6 +3325,14 @@ export const onUpdateApsAppExhibitorDeal = /* GraphQL */ `subscription OnUpdateA
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3135,6 +3391,14 @@ export const onDeleteApsAppExhibitorDeal = /* GraphQL */ `subscription OnDeleteA
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3185,6 +3449,14 @@ export const onCreateApsAppExhibitorPhoto = /* GraphQL */ `subscription OnCreate
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3234,6 +3506,14 @@ export const onUpdateApsAppExhibitorPhoto = /* GraphQL */ `subscription OnUpdate
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3283,6 +3563,14 @@ export const onDeleteApsAppExhibitorPhoto = /* GraphQL */ `subscription OnDelete
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3330,6 +3618,14 @@ export const onCreateApsAppExhibitorHandout = /* GraphQL */ `subscription OnCrea
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3377,6 +3673,14 @@ export const onUpdateApsAppExhibitorHandout = /* GraphQL */ `subscription OnUpda
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3424,6 +3728,14 @@ export const onDeleteApsAppExhibitorHandout = /* GraphQL */ `subscription OnDele
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3458,6 +3770,14 @@ export const onCreateApsAddOn = /* GraphQL */ `subscription OnCreateApsAddOn($fi
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3491,6 +3811,14 @@ export const onUpdateApsAddOn = /* GraphQL */ `subscription OnUpdateApsAddOn($fi
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -3524,6 +3852,14 @@ export const onDeleteApsAddOn = /* GraphQL */ `subscription OnDeleteApsAddOn($fi
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId

@@ -20,6 +20,14 @@ export const getAPS = /* GraphQL */ `query GetAPS($id: ID!) {
       updatedAt
       __typename
     }
+    startDate
+    endDate
+    location
+    address
+    city
+    state
+    zip
+    website
     Registrants {
       nextToken
       __typename
@@ -81,6 +89,14 @@ export const listAPS = /* GraphQL */ `query ListAPS($filter: ModelAPSFilterInput
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -145,6 +161,14 @@ export const getApsAgenda = /* GraphQL */ `query GetApsAgenda($id: ID!) {
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -192,6 +216,14 @@ export const getApsRegistrant = /* GraphQL */ `query GetApsRegistrant($id: ID!) 
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -825,6 +857,14 @@ export const getApsAppUserPhoto = /* GraphQL */ `query GetApsAppUserPhoto($id: I
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1010,6 +1050,14 @@ export const getAPSSpeaker = /* GraphQL */ `query GetAPSSpeaker($id: ID!) {
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1089,6 +1137,14 @@ export const getApsSponsor = /* GraphQL */ `query GetApsSponsor($id: ID!) {
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1170,6 +1226,14 @@ export const getAPSCompany = /* GraphQL */ `query GetAPSCompany($id: ID!) {
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1274,6 +1338,14 @@ export const getApsAppExhibitorProfile = /* GraphQL */ `query GetApsAppExhibitor
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1392,6 +1464,14 @@ export const getApsAppMessage = /* GraphQL */ `query GetApsAppMessage($id: ID!) 
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1467,6 +1547,14 @@ export const getApsAppExhibitorPromotion = /* GraphQL */ `query GetApsAppExhibit
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1552,6 +1640,14 @@ export const getApsAppExhibitorDeal = /* GraphQL */ `query GetApsAppExhibitorDea
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1632,6 +1728,14 @@ export const getApsAppExhibitorPhoto = /* GraphQL */ `query GetApsAppExhibitorPh
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1708,6 +1812,14 @@ export const getApsAppExhibitorHandout = /* GraphQL */ `query GetApsAppExhibitor
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId
@@ -1771,6 +1883,14 @@ export const getApsAddOn = /* GraphQL */ `query GetApsAddOn($id: ID!) {
       id
       year
       codes
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
       createdAt
       updatedAt
       aPSAgendaId

@@ -1,0 +1,412 @@
+// src/graphql/customQueries.ts
+// Custom GraphQL queries with full nested data for APS event
+
+export const getAPSBasic = /* GraphQL */ `
+  query GetAPSBasic($id: ID!) {
+    getAPS(id: $id) {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+// Query to get registrant by email
+export const getRegistrantByEmail = /* GraphQL */ `
+  query GetRegistrantByEmail($apsID: ID!, $email: String!) {
+    apsRegistrantsByApsID(
+      apsID: $apsID
+      filter: { email: { eq: $email } }
+      limit: 1
+    ) {
+      items {
+        id
+        apsID
+        firstName
+        lastName
+        email
+        phone
+        companyId
+        company {
+          id
+          name
+          email
+          type
+          description
+          website
+          phone
+          logo
+          __typename
+        }
+        jobTitle
+        attendeeType
+        interests
+        status
+        headshot
+        bio
+        qrCode
+        createdAt
+        updatedAt
+        __typename
+      }
+    }
+  }
+`;
+
+// Query to get app user by registrant ID with full profile
+export const getAppUserByRegistrantId = /* GraphQL */ `
+  query GetAppUserByRegistrantId($registrantId: ID!) {
+    apsAppUsersByRegistrantId(
+      registrantId: $registrantId
+      limit: 1
+    ) {
+      items {
+        id
+        registrantId
+        registrant {
+          id
+          apsID
+          firstName
+          lastName
+          email
+          phone
+          companyId
+          company {
+            id
+            name
+            email
+            type
+            description
+            website
+            phone
+            logo
+            __typename
+          }
+          jobTitle
+          attendeeType
+          interests
+          status
+          headshot
+          bio
+          qrCode
+          __typename
+        }
+        profile {
+          id
+          userId
+          firstName
+          lastName
+          email
+          phone
+          company
+          jobTitle
+          attendeeType
+          profilePicture
+          bio
+          linkedin
+          twitter
+          facebook
+          instagram
+          youtube
+          website
+          location
+          resume
+          affiliates {
+            items {
+              id
+              affiliate
+              role
+              startDate
+              endDate
+              __typename
+            }
+            __typename
+          }
+          education {
+            items {
+              id
+              school
+              degree
+              fieldOfStudy
+              __typename
+            }
+            __typename
+          }
+          interests {
+            items {
+              id
+              interest
+              __typename
+            }
+            __typename
+          }
+          createdAt
+          updatedAt
+          __typename
+        }
+        photos {
+          items {
+            id
+            photo
+            caption
+            approved
+            eventId
+            __typename
+          }
+          __typename
+        }
+        messages {
+          items {
+            id
+            type
+            message
+            exhibitorId
+            eventId
+            createdAt
+            __typename
+          }
+          __typename
+        }
+        createdAt
+        updatedAt
+        __typename
+      }
+    }
+  }
+`;
+
+export const getAPSWithAgenda = /* GraphQL */ `
+  query GetAPSWithAgenda($id: ID!) {
+    getAPS(id: $id) {
+      id
+      year
+      codes
+      agenda {
+        id
+        eventId
+        items {
+          items {
+            id
+            session
+            date
+            time
+            location
+            sessionQuestions {
+              items {
+                id
+                question
+                userId
+                createdAt
+                __typename
+              }
+              __typename
+            }
+            createdAt
+            updatedAt
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const getAPSWithRegistrants = /* GraphQL */ `
+  query GetAPSWithRegistrants($id: ID!, $limit: Int, $nextToken: String) {
+    getAPS(id: $id) {
+      id
+      year
+      codes
+      Registrants(limit: $limit, nextToken: $nextToken) {
+        items {
+          id
+          apsID
+          firstName
+          lastName
+          email
+          phone
+          companyId
+          company {
+            id
+            name
+            email
+            type
+            logo
+            __typename
+          }
+          jobTitle
+          attendeeType
+          interests
+          status
+          headshot
+          bio
+          qrCode
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const getAPSWithSpeakers = /* GraphQL */ `
+  query GetAPSWithSpeakers($id: ID!, $eventId: ID!) {
+    getAPS(id: $id) {
+      id
+      year
+      codes
+      __typename
+    }
+    aPSSpeakersByEventId(eventId: $eventId) {
+      items {
+        id
+        firstName
+        lastName
+        email
+        company
+        title
+        phone
+        linkedin
+        bio
+        presentationTitle
+        presentationSummary
+        headshot
+        mediaConsent
+        privacyConsent
+        eventId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const getAPSWithExhibitors = /* GraphQL */ `
+  query GetAPSWithExhibitors($id: ID!, $eventId: ID!) {
+    getAPS(id: $id) {
+      id
+      year
+      codes
+      __typename
+    }
+    apsAppExhibitorProfilesByEventId(eventId: $eventId) {
+      items {
+        id
+        companyId
+        company {
+          id
+          name
+          email
+          type
+          description
+          website
+          phone
+          logo
+          __typename
+        }
+        sponsorId
+        title
+        phone
+        eventId
+        deals {
+          items {
+            id
+            deal
+            link
+            __typename
+          }
+          __typename
+        }
+        photos {
+          items {
+            id
+            photo
+            caption
+            approved
+            __typename
+          }
+          __typename
+        }
+        handouts {
+          items {
+            id
+            handout
+            __typename
+          }
+          __typename
+        }
+        promotions {
+          items {
+            id
+            promotion
+            link
+            __typename
+          }
+          __typename
+        }
+        video
+        videoCaption
+        boothNumber
+        visits
+        views
+        likes
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const getAPSWithAddOns = /* GraphQL */ `
+  query GetAPSWithAddOns($id: ID!, $eventId: ID!) {
+    getAPS(id: $id) {
+      id
+      year
+      codes
+      __typename
+    }
+    apsAddOnsByEventId(eventId: $eventId) {
+      items {
+        id
+        title
+        description
+        subheadline
+        location
+        date
+        time
+        company
+        altLink
+        type
+        limit
+        eventId
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+

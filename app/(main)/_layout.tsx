@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { AuthGuard } from '../../src/components/AuthGuard';
 import { autopackColors } from '../../src/theme';
 
 export default function MainTabs() {
   return (
-    <Tabs
+    <AuthGuard>
+      <Tabs
       screenOptions={{
         headerShown: true, // still fine as a default
         tabBarActiveTintColor: autopackColors.apBlue,
@@ -63,5 +65,6 @@ export default function MainTabs() {
         }}
       />
     </Tabs>
+    </AuthGuard>
   );
 }
