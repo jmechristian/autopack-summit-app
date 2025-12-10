@@ -17,6 +17,9 @@
       },
       "auth": {
         "autopacksummitappfefbe6f1": {}
+      },
+      "storage": {
+        "apsapp": {}
       }
     }
   }

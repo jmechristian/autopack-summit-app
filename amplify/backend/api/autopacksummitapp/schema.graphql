@@ -10,6 +10,21 @@ enum CompanyType {
   SPONSOR
 }
 
+enum RegistrantType {
+  OEM
+  TIER1
+  SOLUTIONPROVIDER
+  SPONSOR
+  SPEAKER
+  STAFF
+}
+
+enum RegistrantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 # Main Event Type
 type APS @model @auth(rules: [{ allow: public }]) {
   id: ID!
@@ -27,6 +42,7 @@ type APS @model @auth(rules: [{ allow: public }]) {
   exhibitorDeals: [ApsAppExhibitorDeal] @hasMany(indexName: "byEvent")
   exhibitorPhotos: [ApsAppExhibitorPhoto] @hasMany(indexName: "byEvent")
   exhibitorHandouts: [ApsAppExhibitorHandout] @hasMany(indexName: "byEvent")
+  addOns: [ApsAddOn] @hasMany(indexName: "byEvent")
 }
 
 # Board Members
@@ -61,7 +77,7 @@ type ApsRegistrant @model @auth(rules: [{ allow: public }]) {
   companyId: ID @index(name: "byCompany")
   company: APSCompany @belongsTo(fields: ["companyId"])
   jobTitle: String
-  attendeeType: String
+  attendeeType: RegistrantType!
   termsAccepted: Boolean
   interests: [String]
   otherInterest: String
@@ -80,7 +96,7 @@ type ApsRegistrant @model @auth(rules: [{ allow: public }]) {
   learningObjectives: String
   totalAmount: Int
   discountCode: String
-  status: String
+  status: RegistrantStatus!
   morrisetteTransportation: String
   morrisetteStatus: String
   aristoTransportation: String
@@ -106,6 +122,7 @@ type ApsRegistrant @model @auth(rules: [{ allow: public }]) {
   bio: String
   seatingChartRegistrant: ApsSeatingChartRegistrant @hasOne
   appUser: ApsAppUser @hasOne
+  qrCode: String
 }
 
 # App User (for mobile app)
@@ -113,11 +130,64 @@ type ApsAppUser @model @auth(rules: [{ allow: public }]) {
   id: ID!
   registrantId: ID! @index(name: "byRegistrant")
   registrant: ApsRegistrant! @belongsTo(fields: ["registrantId"])
-  qrCode: String
   photos: [ApsAppUserPhoto] @hasMany(indexName: "byUser")
   messages: [ApsAppMessage] @hasMany(indexName: "byUser")
   sessionQuestions: [ApsAppSessionQuestion] @hasMany(indexName: "byUser")
   exhibitorDeals: [ApsAppExhibitorDeal] @hasMany(indexName: "byUser")
+  profile: ApsAppUserProfile @hasOne
+}
+
+# App User Profile
+type ApsAppUserProfile @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: ApsAppUser! @belongsTo(fields: ["userId"])
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  company: String
+  jobTitle: String
+  attendeeType: RegistrantType
+  affiliates: [ProfileAffiliate] @hasMany(indexName: "byUser")
+  profilePicture: String
+  bio: String
+  linkedin: String
+  twitter: String
+  facebook: String
+  instagram: String
+  youtube: String
+  website: [String]
+  location: String
+  education: [ProfileEducation] @hasMany(indexName: "byUser")
+  interests: [ProfileInterest] @hasMany(indexName: "byUser")
+  resume: String
+}
+
+type ProfileAffiliate @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  profileId: ID! @index(name: "byUser")
+  profile: ApsAppUserProfile! @belongsTo(fields: ["profileId"])
+  affiliate: String
+  role: String
+  startDate: String
+  endDate: String
+}
+
+type ProfileEducation @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  profileId: ID! @index(name: "byUser")
+  profile: ApsAppUserProfile! @belongsTo(fields: ["profileId"])
+  school: String
+  degree: String
+  fieldOfStudy: String
+}
+
+type ProfileInterest @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  profileId: ID! @index(name: "byUser")
+  profile: ApsAppUserProfile! @belongsTo(fields: ["profileId"])
+  interest: String
 }
 
 # App User Photos
@@ -302,6 +372,8 @@ type ApsAddOn @model @auth(rules: [{ allow: public }]) {
   altLink: String
   type: String
   limit: Int
+  eventId: ID! @index(name: "byEvent")
+  event: APS! @belongsTo(fields: ["eventId"])
 }
 
 # Seating Charts

@@ -64,6 +64,10 @@ export const onCreateAPS = /* GraphQL */ `subscription OnCreateAPS($filter: Mode
       nextToken
       __typename
     }
+    addOns {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSAgendaId
@@ -130,6 +134,10 @@ export const onUpdateAPS = /* GraphQL */ `subscription OnUpdateAPS($filter: Mode
       nextToken
       __typename
     }
+    addOns {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSAgendaId
@@ -193,6 +201,10 @@ export const onDeleteAPS = /* GraphQL */ `subscription OnDeleteAPS($filter: Mode
       __typename
     }
     exhibitorHandouts {
+      nextToken
+      __typename
+    }
+    addOns {
       nextToken
       __typename
     }
@@ -445,11 +457,12 @@ export const onCreateApsRegistrant = /* GraphQL */ `subscription OnCreateApsRegi
     appUser {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
+    qrCode
     createdAt
     updatedAt
     aPSRegistrantsId
@@ -567,11 +580,12 @@ export const onUpdateApsRegistrant = /* GraphQL */ `subscription OnUpdateApsRegi
     appUser {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
+    qrCode
     createdAt
     updatedAt
     aPSRegistrantsId
@@ -689,11 +703,12 @@ export const onDeleteApsRegistrant = /* GraphQL */ `subscription OnDeleteApsRegi
     appUser {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
+    qrCode
     createdAt
     updatedAt
     aPSRegistrantsId
@@ -765,6 +780,7 @@ export const onCreateApsAppUser = /* GraphQL */ `subscription OnCreateApsAppUser
       presentationTitle
       presentationSummary
       bio
+      qrCode
       createdAt
       updatedAt
       aPSRegistrantsId
@@ -773,7 +789,6 @@ export const onCreateApsAppUser = /* GraphQL */ `subscription OnCreateApsAppUser
       apsRegistrantAppUserId
       __typename
     }
-    qrCode
     photos {
       nextToken
       __typename
@@ -790,8 +805,33 @@ export const onCreateApsAppUser = /* GraphQL */ `subscription OnCreateApsAppUser
       nextToken
       __typename
     }
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
     createdAt
     updatedAt
+    apsAppUserProfileId
     __typename
   }
 }
@@ -857,6 +897,7 @@ export const onUpdateApsAppUser = /* GraphQL */ `subscription OnUpdateApsAppUser
       presentationTitle
       presentationSummary
       bio
+      qrCode
       createdAt
       updatedAt
       aPSRegistrantsId
@@ -865,7 +906,6 @@ export const onUpdateApsAppUser = /* GraphQL */ `subscription OnUpdateApsAppUser
       apsRegistrantAppUserId
       __typename
     }
-    qrCode
     photos {
       nextToken
       __typename
@@ -882,8 +922,33 @@ export const onUpdateApsAppUser = /* GraphQL */ `subscription OnUpdateApsAppUser
       nextToken
       __typename
     }
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
     createdAt
     updatedAt
+    apsAppUserProfileId
     __typename
   }
 }
@@ -949,6 +1014,7 @@ export const onDeleteApsAppUser = /* GraphQL */ `subscription OnDeleteApsAppUser
       presentationTitle
       presentationSummary
       bio
+      qrCode
       createdAt
       updatedAt
       aPSRegistrantsId
@@ -957,7 +1023,6 @@ export const onDeleteApsAppUser = /* GraphQL */ `subscription OnDeleteApsAppUser
       apsRegistrantAppUserId
       __typename
     }
-    qrCode
     photos {
       nextToken
       __typename
@@ -974,14 +1039,579 @@ export const onDeleteApsAppUser = /* GraphQL */ `subscription OnDeleteApsAppUser
       nextToken
       __typename
     }
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
     createdAt
     updatedAt
+    apsAppUserProfileId
     __typename
   }
 }
 ` as GeneratedSubscription<
   APITypes.OnDeleteApsAppUserSubscriptionVariables,
   APITypes.OnDeleteApsAppUserSubscription
+>;
+export const onCreateApsAppUserProfile = /* GraphQL */ `subscription OnCreateApsAppUserProfile(
+  $filter: ModelSubscriptionApsAppUserProfileFilterInput
+) {
+  onCreateApsAppUserProfile(filter: $filter) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      createdAt
+      updatedAt
+      apsAppUserProfileId
+      __typename
+    }
+    firstName
+    lastName
+    email
+    phone
+    company
+    jobTitle
+    attendeeType
+    affiliates {
+      nextToken
+      __typename
+    }
+    profilePicture
+    bio
+    linkedin
+    twitter
+    facebook
+    instagram
+    youtube
+    website
+    location
+    education {
+      nextToken
+      __typename
+    }
+    interests {
+      nextToken
+      __typename
+    }
+    resume
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsAppUserProfileSubscriptionVariables,
+  APITypes.OnCreateApsAppUserProfileSubscription
+>;
+export const onUpdateApsAppUserProfile = /* GraphQL */ `subscription OnUpdateApsAppUserProfile(
+  $filter: ModelSubscriptionApsAppUserProfileFilterInput
+) {
+  onUpdateApsAppUserProfile(filter: $filter) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      createdAt
+      updatedAt
+      apsAppUserProfileId
+      __typename
+    }
+    firstName
+    lastName
+    email
+    phone
+    company
+    jobTitle
+    attendeeType
+    affiliates {
+      nextToken
+      __typename
+    }
+    profilePicture
+    bio
+    linkedin
+    twitter
+    facebook
+    instagram
+    youtube
+    website
+    location
+    education {
+      nextToken
+      __typename
+    }
+    interests {
+      nextToken
+      __typename
+    }
+    resume
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsAppUserProfileSubscriptionVariables,
+  APITypes.OnUpdateApsAppUserProfileSubscription
+>;
+export const onDeleteApsAppUserProfile = /* GraphQL */ `subscription OnDeleteApsAppUserProfile(
+  $filter: ModelSubscriptionApsAppUserProfileFilterInput
+) {
+  onDeleteApsAppUserProfile(filter: $filter) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      createdAt
+      updatedAt
+      apsAppUserProfileId
+      __typename
+    }
+    firstName
+    lastName
+    email
+    phone
+    company
+    jobTitle
+    attendeeType
+    affiliates {
+      nextToken
+      __typename
+    }
+    profilePicture
+    bio
+    linkedin
+    twitter
+    facebook
+    instagram
+    youtube
+    website
+    location
+    education {
+      nextToken
+      __typename
+    }
+    interests {
+      nextToken
+      __typename
+    }
+    resume
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsAppUserProfileSubscriptionVariables,
+  APITypes.OnDeleteApsAppUserProfileSubscription
+>;
+export const onCreateProfileAffiliate = /* GraphQL */ `subscription OnCreateProfileAffiliate(
+  $filter: ModelSubscriptionProfileAffiliateFilterInput
+) {
+  onCreateProfileAffiliate(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    affiliate
+    role
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    apsAppUserProfileAffiliatesId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateProfileAffiliateSubscriptionVariables,
+  APITypes.OnCreateProfileAffiliateSubscription
+>;
+export const onUpdateProfileAffiliate = /* GraphQL */ `subscription OnUpdateProfileAffiliate(
+  $filter: ModelSubscriptionProfileAffiliateFilterInput
+) {
+  onUpdateProfileAffiliate(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    affiliate
+    role
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    apsAppUserProfileAffiliatesId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateProfileAffiliateSubscriptionVariables,
+  APITypes.OnUpdateProfileAffiliateSubscription
+>;
+export const onDeleteProfileAffiliate = /* GraphQL */ `subscription OnDeleteProfileAffiliate(
+  $filter: ModelSubscriptionProfileAffiliateFilterInput
+) {
+  onDeleteProfileAffiliate(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    affiliate
+    role
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    apsAppUserProfileAffiliatesId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteProfileAffiliateSubscriptionVariables,
+  APITypes.OnDeleteProfileAffiliateSubscription
+>;
+export const onCreateProfileEducation = /* GraphQL */ `subscription OnCreateProfileEducation(
+  $filter: ModelSubscriptionProfileEducationFilterInput
+) {
+  onCreateProfileEducation(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    school
+    degree
+    fieldOfStudy
+    createdAt
+    updatedAt
+    apsAppUserProfileEducationId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateProfileEducationSubscriptionVariables,
+  APITypes.OnCreateProfileEducationSubscription
+>;
+export const onUpdateProfileEducation = /* GraphQL */ `subscription OnUpdateProfileEducation(
+  $filter: ModelSubscriptionProfileEducationFilterInput
+) {
+  onUpdateProfileEducation(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    school
+    degree
+    fieldOfStudy
+    createdAt
+    updatedAt
+    apsAppUserProfileEducationId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateProfileEducationSubscriptionVariables,
+  APITypes.OnUpdateProfileEducationSubscription
+>;
+export const onDeleteProfileEducation = /* GraphQL */ `subscription OnDeleteProfileEducation(
+  $filter: ModelSubscriptionProfileEducationFilterInput
+) {
+  onDeleteProfileEducation(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    school
+    degree
+    fieldOfStudy
+    createdAt
+    updatedAt
+    apsAppUserProfileEducationId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteProfileEducationSubscriptionVariables,
+  APITypes.OnDeleteProfileEducationSubscription
+>;
+export const onCreateProfileInterest = /* GraphQL */ `subscription OnCreateProfileInterest(
+  $filter: ModelSubscriptionProfileInterestFilterInput
+) {
+  onCreateProfileInterest(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    interest
+    createdAt
+    updatedAt
+    apsAppUserProfileInterestsId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateProfileInterestSubscriptionVariables,
+  APITypes.OnCreateProfileInterestSubscription
+>;
+export const onUpdateProfileInterest = /* GraphQL */ `subscription OnUpdateProfileInterest(
+  $filter: ModelSubscriptionProfileInterestFilterInput
+) {
+  onUpdateProfileInterest(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    interest
+    createdAt
+    updatedAt
+    apsAppUserProfileInterestsId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateProfileInterestSubscriptionVariables,
+  APITypes.OnUpdateProfileInterestSubscription
+>;
+export const onDeleteProfileInterest = /* GraphQL */ `subscription OnDeleteProfileInterest(
+  $filter: ModelSubscriptionProfileInterestFilterInput
+) {
+  onDeleteProfileInterest(filter: $filter) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    interest
+    createdAt
+    updatedAt
+    apsAppUserProfileInterestsId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteProfileInterestSubscriptionVariables,
+  APITypes.OnDeleteProfileInterestSubscription
 >;
 export const onCreateApsAppUserPhoto = /* GraphQL */ `subscription OnCreateApsAppUserPhoto(
   $filter: ModelSubscriptionApsAppUserPhotoFilterInput
@@ -992,9 +1622,9 @@ export const onCreateApsAppUserPhoto = /* GraphQL */ `subscription OnCreateApsAp
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     photo
@@ -1030,9 +1660,9 @@ export const onUpdateApsAppUserPhoto = /* GraphQL */ `subscription OnUpdateApsAp
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     photo
@@ -1068,9 +1698,9 @@ export const onDeleteApsAppUserPhoto = /* GraphQL */ `subscription OnDeleteApsAp
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     photo
@@ -1213,9 +1843,9 @@ export const onCreateApsAppSessionQuestion = /* GraphQL */ `subscription OnCreat
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     createdAt
@@ -1252,9 +1882,9 @@ export const onUpdateApsAppSessionQuestion = /* GraphQL */ `subscription OnUpdat
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     createdAt
@@ -1291,9 +1921,9 @@ export const onDeleteApsAppSessionQuestion = /* GraphQL */ `subscription OnDelet
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     createdAt
@@ -2041,9 +2671,9 @@ export const onCreateApsAppMessage = /* GraphQL */ `subscription OnCreateApsAppM
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     exhibitorId
@@ -2099,9 +2729,9 @@ export const onUpdateApsAppMessage = /* GraphQL */ `subscription OnUpdateApsAppM
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     exhibitorId
@@ -2157,9 +2787,9 @@ export const onDeleteApsAppMessage = /* GraphQL */ `subscription OnDeleteApsAppM
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     exhibitorId
@@ -2379,9 +3009,9 @@ export const onCreateApsAppExhibitorDeal = /* GraphQL */ `subscription OnCreateA
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     eventId
@@ -2437,9 +3067,9 @@ export const onUpdateApsAppExhibitorDeal = /* GraphQL */ `subscription OnUpdateA
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     eventId
@@ -2495,9 +3125,9 @@ export const onDeleteApsAppExhibitorDeal = /* GraphQL */ `subscription OnDeleteA
     user {
       id
       registrantId
-      qrCode
       createdAt
       updatedAt
+      apsAppUserProfileId
       __typename
     }
     eventId
@@ -2823,8 +3453,19 @@ export const onCreateApsAddOn = /* GraphQL */ `subscription OnCreateApsAddOn($fi
     altLink
     type
     limit
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
     createdAt
     updatedAt
+    aPSAddOnsId
     __typename
   }
 }
@@ -2845,8 +3486,19 @@ export const onUpdateApsAddOn = /* GraphQL */ `subscription OnUpdateApsAddOn($fi
     altLink
     type
     limit
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
     createdAt
     updatedAt
+    aPSAddOnsId
     __typename
   }
 }
@@ -2867,8 +3519,19 @@ export const onDeleteApsAddOn = /* GraphQL */ `subscription OnDeleteApsAddOn($fi
     altLink
     type
     limit
+    eventId
+    event {
+      id
+      year
+      codes
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
     createdAt
     updatedAt
+    aPSAddOnsId
     __typename
   }
 }
@@ -3003,6 +3666,7 @@ export const onCreateApsSeatingChartRegistrant = /* GraphQL */ `subscription OnC
       presentationTitle
       presentationSummary
       bio
+      qrCode
       createdAt
       updatedAt
       aPSRegistrantsId
@@ -3094,6 +3758,7 @@ export const onUpdateApsSeatingChartRegistrant = /* GraphQL */ `subscription OnU
       presentationTitle
       presentationSummary
       bio
+      qrCode
       createdAt
       updatedAt
       aPSRegistrantsId
@@ -3185,6 +3850,7 @@ export const onDeleteApsSeatingChartRegistrant = /* GraphQL */ `subscription OnD
       presentationTitle
       presentationSummary
       bio
+      qrCode
       createdAt
       updatedAt
       aPSRegistrantsId
