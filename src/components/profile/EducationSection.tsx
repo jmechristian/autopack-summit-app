@@ -10,7 +10,7 @@ import * as APITypes from '../../API';
 
 interface EducationSectionProps {
   profile: APITypes.ApsAppUserProfile;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
 }
 
 export function EducationSection({ profile, onUpdate }: EducationSectionProps) {
@@ -41,7 +41,7 @@ export function EducationSection({ profile, onUpdate }: EducationSectionProps) {
           onPress: async () => {
             try {
               await deleteEducation(edu.id);
-              onUpdate();
+              await onUpdate();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete education');
             }
@@ -64,7 +64,7 @@ export function EducationSection({ profile, onUpdate }: EducationSectionProps) {
           ...data,
         });
       }
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       throw error;
     }

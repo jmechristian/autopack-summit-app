@@ -1,6 +1,6 @@
 // src/components/profile/EditablePersonalInfo.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { Button, Input } from '@rneui/themed';
 import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../theme';
@@ -9,7 +9,7 @@ import * as APITypes from '../../API';
 
 interface EditablePersonalInfoProps {
   profile: APITypes.ApsAppUserProfile;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
 }
 
 export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfoProps) {
@@ -51,7 +51,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
         bio: formData.bio.trim() || undefined,
       });
       setIsEditing(false);
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update profile');
     } finally {
@@ -74,6 +74,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
 
   const renderField = (label: string, value: string, key: keyof typeof formData) => {
     if (isEditing) {
+      const isBio = key === 'bio';
       return (
         <Input
           key={key}
@@ -81,8 +82,10 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
           value={formData[key]}
           onChangeText={(text) => setFormData({ ...formData, [key]: text })}
           containerStyle={styles.inputContainer}
-          multiline={key === 'bio'}
-          numberOfLines={key === 'bio' ? 4 : 1}
+          multiline={isBio}
+          numberOfLines={isBio ? 6 : 1}
+          inputStyle={isBio ? styles.textAreaInput : undefined}
+          textAlignVertical={isBio ? 'top' : 'center'}
         />
       );
     }
@@ -124,7 +127,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
         )}
       </View>
 
-      <ScrollView style={styles.content}>
+      <View style={styles.content}>
         {renderField('First Name', formData.firstName, 'firstName')}
         {renderField('Last Name', formData.lastName, 'lastName')}
         {renderField('Email', formData.email, 'email')}
@@ -132,7 +135,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
         {renderField('Company', formData.company, 'company')}
         {renderField('Job Title', formData.jobTitle, 'jobTitle')}
         {renderField('Bio', formData.bio, 'bio')}
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -171,7 +174,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   content: {
-    maxHeight: 400,
+    width: '100%',
   },
   fieldRow: {
     marginBottom: 16,
@@ -189,6 +192,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     paddingHorizontal: 0,
     marginBottom: 8,
+  },
+  textAreaInput: {
+    minHeight: 120,
+    paddingTop: 12,
   },
 });
 

@@ -1,6 +1,6 @@
 // app/(auth)/login.tsx
 import { Ionicons } from '@expo/vector-icons';
-import { signIn } from 'aws-amplify/auth';
+import { signIn, signOut as amplifySignOut, getCurrentUser } from 'aws-amplify/auth';
 
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -39,13 +39,43 @@ export default function LoginScreen() {
       return;
     }
 
+    // Clear any existing session to avoid "user already signed in" errors
+    try {
+      await getCurrentUser();
+      await amplifySignOut();
+      console.log('Existing session detected and signed out before login');
+    } catch {
+      // no existing session, ignore
+    }
+
     try {
       setIsLoading(true);
 
-      const result = await signIn({
-        username: email,
-        password,
-      });
+      let result;
+      let attemptedRetry = false;
+
+      const attemptSignIn = async () =>
+        signIn({
+          username: email,
+          password,
+        });
+
+      try {
+        result = await attemptSignIn();
+      } catch (firstErr: any) {
+        // If already signed in, sign out then retry once
+        if (
+          firstErr?.name === 'UserAlreadySignedInException' ||
+          firstErr?.name === 'UserAlreadyAuthenticatedException'
+        ) {
+          console.warn('User already signed in, signing out and retrying...');
+          await amplifySignOut();
+          attemptedRetry = true;
+          result = await attemptSignIn();
+        } else {
+          throw firstErr;
+        }
+      }
 
       console.log('signIn result:', JSON.stringify(result, null, 2));
 

@@ -26,6 +26,12 @@ import { updateProfile } from '../../src/utils/profileMutations';
 import { useApsStore } from '../../src/store/apsStore';
 import { autopackColors } from '../../src/theme';
 import * as APITypes from '../../src/API';
+import {
+  initiateLinkedInAuth,
+  exchangeCodeForToken,
+  fetchLinkedInProfile,
+  mapLinkedInToProfile,
+} from '../../src/utils/linkedInAuth';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
@@ -37,6 +43,7 @@ export default function Profile() {
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
+  const [importingLinkedIn, setImportingLinkedIn] = useState(false);
 
   const handleProfilePictureUpload = async () => {
     try {
@@ -113,6 +120,68 @@ export default function Profile() {
   const handleResumeView = () => {
     if (profile?.resume) {
       Linking.openURL(profile.resume);
+    }
+  };
+
+  const handleLinkedInImport = async () => {
+    try {
+      setImportingLinkedIn(true);
+
+      // Step 1: Initiate OAuth flow
+      const authResult = await initiateLinkedInAuth();
+      if (!authResult) {
+        Alert.alert('Cancelled', 'LinkedIn import was cancelled');
+        return;
+      }
+
+      // Step 2: Exchange code for token
+      const accessToken = await exchangeCodeForToken(authResult.code, authResult.codeVerifier);
+
+      // Step 3: Fetch LinkedIn profile data
+      const linkedInData = await fetchLinkedInProfile(accessToken);
+
+      // Step 4: Map to our profile format
+      const profileData = mapLinkedInToProfile(linkedInData);
+
+      // Step 5: Update profile
+      const updateData: any = {
+        id: profile!.id,
+      };
+
+      if (profileData.firstName) updateData.firstName = profileData.firstName;
+      if (profileData.lastName) updateData.lastName = profileData.lastName;
+      if (profileData.email) updateData.email = profileData.email;
+      if (profileData.bio) updateData.bio = profileData.bio;
+
+      await updateProfile(updateData);
+
+      // Step 6: If profile picture URL exists, download and upload it
+      if (profileData.profilePicture) {
+        try {
+          // For now, just save the LinkedIn profile picture URL directly
+          // In production, you might want to download and re-upload to S3 for consistency
+          await updateProfile({
+            id: profile!.id,
+            profilePicture: profileData.profilePicture,
+          });
+        } catch (imageError) {
+          console.warn('Failed to import profile picture:', imageError);
+          // Continue without profile picture
+        }
+      }
+
+      // Step 7: Refresh profile
+      await refreshProfile();
+
+      Alert.alert('Success', 'Profile imported from LinkedIn successfully');
+    } catch (error) {
+      console.error('LinkedIn import error:', error);
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to import from LinkedIn'
+      );
+    } finally {
+      setImportingLinkedIn(false);
     }
   };
 
@@ -205,6 +274,18 @@ export default function Profile() {
           />
         </View>
       )}
+
+      {/* LinkedIn Import Button */}
+      <View style={styles.linkedInSection}>
+        <Button
+          title="Import from LinkedIn"
+          icon={<Ionicons name="logo-linkedin" size={20} color="#fff" />}
+          onPress={handleLinkedInImport}
+          buttonStyle={styles.linkedInButton}
+          loading={importingLinkedIn}
+          disabled={importingLinkedIn}
+        />
+      </View>
 
       {/* Personal Info Section */}
       <EditablePersonalInfo profile={profile} onUpdate={refreshProfile} />
@@ -319,6 +400,13 @@ const styles = StyleSheet.create({
   },
   qrCodeButton: {
     backgroundColor: autopackColors.apBlue,
+    borderRadius: 8,
+  },
+  linkedInSection: {
+    marginBottom: 16,
+  },
+  linkedInButton: {
+    backgroundColor: '#0077B5', // LinkedIn brand color
     borderRadius: 8,
   },
   resumeSection: {

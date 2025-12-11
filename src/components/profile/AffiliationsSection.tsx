@@ -10,7 +10,7 @@ import * as APITypes from '../../API';
 
 interface AffiliationsSectionProps {
   profile: APITypes.ApsAppUserProfile;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
 }
 
 export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionProps) {
@@ -41,7 +41,7 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
           onPress: async () => {
             try {
               await deleteAffiliate(affiliate.id);
-              onUpdate();
+              await onUpdate();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete affiliate');
             }
@@ -64,7 +64,7 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
           ...data,
         });
       }
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       throw error;
     }

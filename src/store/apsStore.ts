@@ -14,7 +14,12 @@ import {
   getAPSWithExhibitors,
   getAPSWithAddOns,
 } from '../graphql/customQueries';
-import { apsAppUserProfilesByUserId } from '../graphql/queries';
+import {
+  apsAppUserProfilesByUserId,
+  profileAffiliatesByProfileId,
+  profileEducationsByProfileId,
+  profileInterestsByProfileId,
+} from '../graphql/queries';
 
 // Types
 type APSBasic = {
@@ -136,6 +141,58 @@ const initialState = {
 
 export const useApsStore = create<ApsStore>((set, get) => ({
   ...initialState,
+
+  // Helper: hydrate profile relations (affiliates/education/interests)
+  // so they are present immediately without requiring a save to appear.
+  // Returns a profile with hydrated relations.
+  async hydrateProfileRelations(profile: APITypes.ApsAppUserProfile | null) {
+    if (!profile?.id) return profile;
+    const profileId = profile.id;
+
+    try {
+      const [affResp, eduResp, intResp] = await Promise.all([
+        graphqlClient.graphql({
+          query: profileAffiliatesByProfileId,
+          variables: { profileId, limit: 100 },
+        }),
+        graphqlClient.graphql({
+          query: profileEducationsByProfileId,
+          variables: { profileId, limit: 100 },
+        }),
+        graphqlClient.graphql({
+          query: profileInterestsByProfileId,
+          variables: { profileId, limit: 100 },
+        }),
+      ]);
+
+      const affiliatesData = affResp.data as {
+        profileAffiliatesByProfileId?: { items?: Array<APITypes.ProfileAffiliate | null> };
+      };
+      const educationData = eduResp.data as {
+        profileEducationsByProfileId?: { items?: Array<APITypes.ProfileEducation | null> };
+      };
+      const interestsData = intResp.data as {
+        profileInterestsByProfileId?: { items?: Array<APITypes.ProfileInterest | null> };
+      };
+
+      const affiliates =
+        affiliatesData.profileAffiliatesByProfileId?.items?.filter((a) => a !== null) || [];
+      const education =
+        educationData.profileEducationsByProfileId?.items?.filter((e) => e !== null) || [];
+      const interests =
+        interestsData.profileInterestsByProfileId?.items?.filter((i) => i !== null) || [];
+
+      return {
+        ...profile,
+        affiliates: { items: affiliates as APITypes.ProfileAffiliate[] },
+        education: { items: education as APITypes.ProfileEducation[] },
+        interests: { items: interests as APITypes.ProfileInterest[] },
+      };
+    } catch (error) {
+      console.error('Error hydrating profile relations:', error);
+      return profile;
+    }
+  },
   
   validateUserRegistrant: async (email?: string) => {
     const userEmail = email || (await getCurrentUserEmail());
@@ -285,6 +342,11 @@ export const useApsStore = create<ApsStore>((set, get) => ({
             }
             
             console.log('✅ Found app user with profile:', appUser.profile ? 'Yes' : 'No');
+            // Hydrate relations so affiliates/education/interests are present immediately
+            appUser = {
+              ...appUser,
+              profile: await get().hydrateProfileRelations(appUser.profile || null),
+            };
             set({
               currentAppUser: appUser,
               loading: { ...get().loading, currentAppUser: false },
@@ -388,6 +450,11 @@ export const useApsStore = create<ApsStore>((set, get) => ({
           console.error('Error fetching profile separately:', error);
         }
       }
+      // Hydrate relations so affiliates/education/interests are present immediately
+      appUser = {
+        ...appUser,
+        profile: await get().hydrateProfileRelations(appUser.profile || null),
+      };
       set({
         currentAppUser: appUser,
         loading: { ...get().loading, currentAppUser: false },
@@ -628,10 +695,74 @@ export const useApsStore = create<ApsStore>((set, get) => ({
   },
   
   refreshProfile: async () => {
-    // Re-validate to refresh app user data with latest profile
-    const email = await getCurrentUserEmail();
-    if (email) {
-      await get().validateUserRegistrant(email);
+    const current = get().currentAppUser;
+    if (!current?.registrantId) {
+      console.log('⚠️ Cannot refresh profile: no current app user or registrantId');
+      return;
+    }
+
+    try {
+      const appUserResponse = await graphqlClient.graphql({
+        query: getAppUserByRegistrantId,
+        variables: {
+          registrantId: current.registrantId,
+        },
+      });
+
+      const appUserData = appUserResponse.data as {
+        apsAppUsersByRegistrantId?: {
+          items: ApsAppUser[];
+        };
+      };
+
+      let refreshed = appUserData.apsAppUsersByRegistrantId?.items?.[0] || null;
+
+      if (refreshed && !refreshed.profile) {
+        console.log('⚠️ Refresh: profile missing, fetching separately by userId...');
+        try {
+          const profileResponse = await graphqlClient.graphql({
+            query: apsAppUserProfilesByUserId,
+            variables: { userId: refreshed.id, limit: 1 },
+          });
+
+          const profileData = profileResponse.data as {
+            apsAppUserProfilesByUserId?: {
+              items: Array<APITypes.ApsAppUserProfile | null>;
+            };
+          };
+
+          const profiles =
+            profileData.apsAppUserProfilesByUserId?.items?.filter((p) => p !== null) as
+              | APITypes.ApsAppUserProfile[]
+              | undefined;
+
+          if (profiles && profiles.length > 0) {
+            refreshed = { ...refreshed, profile: profiles[0] };
+          } else {
+            console.log('❌ Refresh: profile not found even with separate query');
+          }
+        } catch (error) {
+          console.error('Error fetching profile during refresh:', error);
+        }
+      }
+
+      // Ensure profile relations are hydrated
+      if (refreshed?.profile) {
+        refreshed = {
+          ...refreshed,
+          profile: await get().hydrateProfileRelations(refreshed.profile),
+        };
+      }
+
+      if (refreshed) {
+        set({
+          currentAppUser: refreshed,
+          loading: { ...get().loading, currentAppUser: false },
+          error: { ...get().error, currentAppUser: null },
+        });
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
     }
   },
 }));

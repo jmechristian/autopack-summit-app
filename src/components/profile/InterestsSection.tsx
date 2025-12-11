@@ -10,7 +10,7 @@ import * as APITypes from '../../API';
 
 interface InterestsSectionProps {
   profile: APITypes.ApsAppUserProfile;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
 }
 
 export function InterestsSection({ profile, onUpdate }: InterestsSectionProps) {
@@ -41,7 +41,7 @@ export function InterestsSection({ profile, onUpdate }: InterestsSectionProps) {
           onPress: async () => {
             try {
               await deleteInterest(interest.id);
-              onUpdate();
+              await onUpdate();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete interest');
             }
@@ -64,7 +64,7 @@ export function InterestsSection({ profile, onUpdate }: InterestsSectionProps) {
           ...data,
         });
       }
-      onUpdate();
+      await onUpdate();
     } catch (error) {
       throw error;
     }

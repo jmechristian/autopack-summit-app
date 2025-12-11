@@ -10,7 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jmepackschool.autopacksummitapp"
+      "bundleIdentifier": "com.jmepackschool.autopacksummitapp",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We use your photo library so you can select and upload a profile picture.",
+        "NSCameraUsageDescription": "We use the camera to let you capture a profile picture.",
+        "NSPhotoLibraryAddUsageDescription": "We need access to save your uploaded or captured profile picture."
+      }
     },
     "android": {
       "adaptiveIcon": {
