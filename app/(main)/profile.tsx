@@ -22,7 +22,7 @@ import { AffiliationsSection } from '../../src/components/profile/AffiliationsSe
 import { EducationSection } from '../../src/components/profile/EducationSection';
 import { InterestsSection } from '../../src/components/profile/InterestsSection';
 import { uploadProfilePicture, uploadResume } from '../../src/utils/storageUtils';
-import { updateProfile } from '../../src/utils/profileMutations';
+import { updateProfile, createAffiliate, createEducation } from '../../src/utils/profileMutations';
 import { useApsStore } from '../../src/store/apsStore';
 import { autopackColors } from '../../src/theme';
 import * as APITypes from '../../src/API';
@@ -134,14 +134,18 @@ export default function Profile() {
         return;
       }
 
-      // Step 2: Exchange code for token
-      const accessToken = await exchangeCodeForToken(authResult.code, authResult.codeVerifier);
+      // Step 2: Exchange code for token (standard OAuth, no PKCE)
+      const accessToken = await exchangeCodeForToken(authResult.code);
 
       // Step 3: Fetch LinkedIn profile data
       const linkedInData = await fetchLinkedInProfile(accessToken);
 
       // Step 4: Map to our profile format
       const profileData = mapLinkedInToProfile(linkedInData);
+      
+      console.log('\n📋 ========== MAPPED PROFILE DATA ==========');
+      console.log(JSON.stringify(profileData, null, 2));
+      console.log('📋 =========================================\n');
 
       // Step 5: Update profile
       const updateData: any = {
@@ -170,7 +174,44 @@ export default function Profile() {
         }
       }
 
-      // Step 7: Refresh profile
+      // Step 7: Import positions as affiliations
+      if (profileData.positions && profileData.positions.length > 0) {
+        try {
+          for (const position of profileData.positions) {
+            await createAffiliate({
+              profileId: profile!.id,
+              affiliate: position.company,
+              role: position.title,
+              startDate: position.startDate || undefined,
+              endDate: position.endDate || undefined,
+            });
+          }
+          console.log(`✅ Imported ${profileData.positions.length} positions as affiliations`);
+        } catch (affiliateError) {
+          console.warn('Failed to import some affiliations:', affiliateError);
+          // Continue - some may have been created
+        }
+      }
+
+      // Step 8: Import education
+      if (profileData.education && profileData.education.length > 0) {
+        try {
+          for (const edu of profileData.education) {
+            await createEducation({
+              profileId: profile!.id,
+              school: edu.school,
+              degree: edu.degree || undefined,
+              fieldOfStudy: edu.fieldOfStudy || undefined,
+            });
+          }
+          console.log(`✅ Imported ${profileData.education.length} education entries`);
+        } catch (educationError) {
+          console.warn('Failed to import some education entries:', educationError);
+          // Continue - some may have been created
+        }
+      }
+
+      // Step 9: Refresh profile
       await refreshProfile();
 
       Alert.alert('Success', 'Profile imported from LinkedIn successfully');
