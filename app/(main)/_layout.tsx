@@ -49,6 +49,7 @@ export default function MainTabs() {
         name='community'
         options={{
           title: 'Community',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='people' color={color} size={size} />
           ),

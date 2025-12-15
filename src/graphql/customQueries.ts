@@ -410,3 +410,82 @@ export const getAPSWithAddOns = /* GraphQL */ `
   }
 `;
 
+// Community: list all app users with full nested profile data
+export const listApsAppUsersWithProfiles = /* GraphQL */ `
+  query ListApsAppUsersWithProfiles($limit: Int, $nextToken: String) {
+    listApsAppUsers(limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        profile {
+          firstName
+          id
+          lastName
+          email
+          company
+          jobTitle
+          profilePicture
+          location
+          userId
+        }
+      }
+      nextToken
+    }
+  }
+`;
+
+// Community: get a single user's profile by app user id (userId) with nested relations
+export const getCommunityProfileByUserId = /* GraphQL */ `
+  query GetCommunityProfileByUserId($userId: ID!) {
+    apsAppUserProfilesByUserId(userId: $userId, limit: 1) {
+      items {
+        id
+        userId
+        firstName
+        lastName
+        email
+        phone
+        company
+        jobTitle
+        profilePicture
+        bio
+        linkedin
+        twitter
+        facebook
+        instagram
+        youtube
+        website
+        location
+        resume
+        affiliates {
+          items {
+            id
+            affiliate
+            role
+            startDate
+            endDate
+            createdAt
+          }
+        }
+        education {
+          items {
+            id
+            school
+            degree
+            fieldOfStudy
+            createdAt
+          }
+        }
+        interests {
+          items {
+            id
+            interest
+            createdAt
+          }
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+

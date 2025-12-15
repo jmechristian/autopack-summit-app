@@ -17,6 +17,7 @@ enum RegistrantType {
   SPONSOR
   SPEAKER
   STAFF
+  EXHIBITOR
 }
 
 enum RegistrantStatus {
@@ -129,7 +130,12 @@ type ApsRegistrant @model @auth(rules: [{ allow: public }]) {
   presentationSummary: String
   bio: String
   seatingChartRegistrant: ApsSeatingChartRegistrant @hasOne
-  appUser: ApsAppUser @hasOne
+
+  # ✅ FIX: make the hasOne key explicit so resolvers can traverse registrant -> appUser
+  appUserId: ID
+  appUser: ApsAppUser @hasOne(fields: ["appUserId"])
+
+  notes: [ApsAppUserNote] @hasMany(indexName: "byRegistrant", fields: ["id"])
   qrCode: String
 }
 
@@ -142,7 +148,47 @@ type ApsAppUser @model @auth(rules: [{ allow: public }]) {
   messages: [ApsAppMessage] @hasMany(indexName: "byUser")
   sessionQuestions: [ApsAppSessionQuestion] @hasMany(indexName: "byUser")
   exhibitorDeals: [ApsAppExhibitorDeal] @hasMany(indexName: "byUser")
-  profile: ApsAppUserProfile @hasOne
+  contacts: [ApsAppUserContact] @hasMany(indexName: "byUser")
+  notes: [ApsAppUserNote] @hasMany(indexName: "byUser")
+  leads: [ApsAppUserLead] @hasMany(indexName: "byUser")
+
+  # ✅ FIX: make the hasOne key explicit so resolvers can traverse user -> profile
+  profileId: ID
+  profile: ApsAppUserProfile @hasOne(fields: ["profileId"])
+}
+
+# App User Contact
+type ApsAppUserContact @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: ApsAppUser! @belongsTo(fields: ["userId"])
+  favorite: Boolean
+  contact: ApsAppUserProfile! @belongsTo(fields: ["contactId"])
+  contactId: ID! @index(name: "byContact")
+}
+
+# App User Note
+type ApsAppUserNote @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: ApsAppUser! @belongsTo(fields: ["userId"])
+  note: String
+  sessionId: ID @index(name: "bySession")
+  session: ApsAppSession @belongsTo(fields: ["sessionId"])
+  exhibitorId: ID @index(name: "byExhibitor")
+  exhibitor: ApsAppExhibitorProfile @belongsTo(fields: ["exhibitorId"])
+  registrantId: ID @index(name: "byRegistrant")
+  registrant: ApsRegistrant @belongsTo(fields: ["registrantId"])
+}
+
+# App User Lead
+type ApsAppUserLead @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser")
+  user: ApsAppUser! @belongsTo(fields: ["userId"])
+  favorite: Boolean
+  contact: ApsAppUserProfile! @belongsTo(fields: ["contactId"])
+  contactId: ID! @index(name: "byContact")
 }
 
 # App User Profile
@@ -170,6 +216,10 @@ type ApsAppUserProfile @model @auth(rules: [{ allow: public }]) {
   education: [ProfileEducation] @hasMany(indexName: "byUser")
   interests: [ProfileInterest] @hasMany(indexName: "byUser")
   resume: String
+
+  # Reverse relationships required for @belongsTo in Contact/Lead
+  contacts: [ApsAppUserContact] @hasMany(indexName: "byContact", fields: ["id"])
+  leads: [ApsAppUserLead] @hasMany(indexName: "byContact", fields: ["id"])
 }
 
 type ProfileAffiliate @model @auth(rules: [{ allow: public }]) {
@@ -220,6 +270,7 @@ type ApsAppSession @model @auth(rules: [{ allow: public }]) {
   agendaId: ID @index(name: "byAgenda")
   agenda: ApsAgenda @belongsTo(fields: ["agendaId"])
   sessionQuestions: [ApsAppSessionQuestion] @hasMany(indexName: "bySession")
+  notes: [ApsAppUserNote] @hasMany(indexName: "bySession", fields: ["id"])
 }
 
 # Session Questions
@@ -306,6 +357,7 @@ type ApsAppExhibitorProfile @model @auth(rules: [{ allow: public }]) {
   views: Int
   likes: Int
   inquiries: [ApsAppMessage] @hasMany(indexName: "byExhibitor")
+  notes: [ApsAppUserNote] @hasMany(indexName: "byExhibitor", fields: ["id"])
 }
 
 # Messages

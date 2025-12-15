@@ -53,16 +53,43 @@ export default function LoginScreen() {
 
       let result;
       let attemptedRetry = false;
+      let attemptedPasswordAuthFallback = false;
 
-      const attemptSignIn = async () =>
+      const attemptSignInDefault = async () =>
         signIn({
           username: email,
           password,
         });
 
+      const attemptSignInUserPasswordAuth = async () =>
+        signIn({
+          username: email,
+          password,
+          // JS-only fallback (Expo Go / missing native SRP module) — requires Cognito app client support.
+          options: { authFlowType: 'USER_PASSWORD_AUTH' } as any,
+        });
+
       try {
-        result = await attemptSignIn();
+        // Prefer default (SRP) — works in properly built native apps.
+        result = await attemptSignInDefault();
       } catch (firstErr: any) {
+        const combined =
+          `${firstErr?.name || ''} ${firstErr?.message || ''} ${firstErr?.underlyingError?.message || ''}`.toLowerCase();
+
+        // If SRP fails due to missing native module (common when running in Expo Go),
+        // retry with USER_PASSWORD_AUTH if enabled on the Cognito app client.
+        if (
+          combined.includes("@aws-amplify/react-native") ||
+          combined.includes("doesn't seem to be linked") ||
+          combined.includes('computemodpow') ||
+          combined.includes('native module')
+        ) {
+          attemptedPasswordAuthFallback = true;
+          result = await attemptSignInUserPasswordAuth();
+        } else {
+          throw firstErr;
+        }
+
         // If already signed in, sign out then retry once
         if (
           firstErr?.name === 'UserAlreadySignedInException' ||
@@ -71,9 +98,12 @@ export default function LoginScreen() {
           console.warn('User already signed in, signing out and retrying...');
           await amplifySignOut();
           attemptedRetry = true;
-          result = await attemptSignIn();
+          // Retry using the same flow we used most recently.
+          result = attemptedPasswordAuthFallback
+            ? await attemptSignInUserPasswordAuth()
+            : await attemptSignInDefault();
         } else {
-          throw firstErr;
+          // (If we got here, we already handled/rewrapped above.)
         }
       }
 
@@ -175,7 +205,11 @@ export default function LoginScreen() {
         errorDetails._extractionError = String(extractErr);
       }
 
-      console.error('Error details:', JSON.stringify(errorDetails, null, 2));
+      try {
+        console.error('Error details:', JSON.stringify(errorDetails, null, 2));
+      } catch (stringifyErr) {
+        // If logging fails, don't crash the login flow.
+      }
 
       // Try to extract a user-friendly error message
       let errorMessage = 'Failed to sign in. Please check your credentials.';
