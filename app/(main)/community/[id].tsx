@@ -9,12 +9,16 @@ import {
   StyleSheet,
   Text,
   View,
+  Alert,
 } from 'react-native';
 import { autopackColors } from '../../../src/theme';
-import { getCommunityProfileByUserId } from '../../../src/graphql/customQueries';
+import { getCommunityProfileByProfileId } from '../../../src/graphql/customQueries';
 import { graphqlClient } from '../../../src/utils/graphqlClient';
 import { useCommunityStore } from '../../../src/store/communityStore';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
+import { createApsAppUserLead, deleteApsAppUserLead } from '../../../src/graphql/mutations';
+import { apsAppUserLeadsByUserId } from '../../../src/graphql/queries';
+import * as Contacts from 'expo-contacts';
 
 type Profile = {
   id: string;
@@ -32,7 +36,7 @@ type Profile = {
   facebook?: string | null;
   instagram?: string | null;
   youtube?: string | null;
-  website?: string | null;
+  website?: string[] | null;
   location?: string | null;
   resume?: string | null;
   affiliates?: { items?: Array<any> | null } | null;
@@ -48,16 +52,20 @@ function nameOf(p: Profile | null) {
 export default function CommunityProfileScreen() {
   const currentAppUser = useCurrentAppUser();
   const params = useLocalSearchParams<{ id?: string }>();
-  const userId = params.id;
+  const profileId = params.id;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [addingLead, setAddingLead] = useState(false);
+  const [addingPhoneContact, setAddingPhoneContact] = useState(false);
+  const [leadRecordId, setLeadRecordId] = useState<string | null>(null);
 
   const toggleFavorite = useCommunityStore((s) => s.toggleFavorite);
   const favoriteContactIds = useCommunityStore((s) => s.favoriteContactIds);
   const pendingContactIds = useCommunityStore((s) => s.pendingContactIds);
   const loadFavorites = useCommunityStore((s) => s.loadFavorites);
+  const contactRecordIdByContactId = useCommunityStore((s) => s.contactRecordIdByContactId);
 
   useEffect(() => {
     if (currentAppUser?.id) {
@@ -68,8 +76,8 @@ export default function CommunityProfileScreen() {
   useEffect(() => {
     let mounted = true;
     async function run() {
-      if (!userId) {
-        setError('Missing user id');
+      if (!profileId) {
+        setError('Missing profile id');
         setLoading(false);
         return;
       }
@@ -78,17 +86,15 @@ export default function CommunityProfileScreen() {
       setLoading(true);
       try {
         const resp = await graphqlClient.graphql({
-          query: getCommunityProfileByUserId,
-          variables: { userId },
+          query: getCommunityProfileByProfileId,
+          variables: { id: profileId },
         });
 
         const data = resp.data as {
-          apsAppUserProfilesByUserId?: {
-            items?: Array<Profile | null>;
-          };
+          getApsAppUserProfile?: Profile | null;
         };
 
-        const p = data.apsAppUserProfilesByUserId?.items?.find(Boolean) || null;
+        const p = data.getApsAppUserProfile || null;
         if (mounted) setProfile(p as Profile | null);
       } catch (e: any) {
         console.error('Error loading community profile:', e);
@@ -101,13 +107,47 @@ export default function CommunityProfileScreen() {
     return () => {
       mounted = false;
     };
-  }, [userId]);
+  }, [profileId]);
 
   const displayName = useMemo(() => nameOf(profile) || 'Profile', [profile]);
   const contactId = profile?.id;
   const fav = !!(contactId && favoriteContactIds[contactId]);
   const pending = !!(contactId && pendingContactIds[contactId]);
   const isSelf = !!contactId && !!currentAppUser?.profileId && currentAppUser.profileId === contactId;
+  const isInContacts = !!(contactId && contactRecordIdByContactId[contactId]);
+  const isInLeads = !!leadRecordId;
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadLeadStatus() {
+      if (!currentAppUser?.id || !contactId || isSelf) {
+        if (mounted) setLeadRecordId(null);
+        return;
+      }
+      try {
+        const resp = await graphqlClient.graphql({
+          query: apsAppUserLeadsByUserId,
+          variables: {
+            userId: currentAppUser.id,
+            limit: 1,
+            filter: { contactId: { eq: contactId } },
+          },
+        });
+        const data = resp.data as {
+          apsAppUserLeadsByUserId?: { items?: Array<{ id: string } | null> | null };
+        };
+        const id = (data.apsAppUserLeadsByUserId?.items || []).find(Boolean)?.id || null;
+        if (mounted) setLeadRecordId(id);
+      } catch (e) {
+        console.error('Load lead status failed:', e);
+        if (mounted) setLeadRecordId(null);
+      }
+    }
+    loadLeadStatus();
+    return () => {
+      mounted = false;
+    };
+  }, [currentAppUser?.id, contactId, isSelf]);
 
   if (loading) {
     return (
@@ -198,6 +238,123 @@ export default function CommunityProfileScreen() {
         </View>
       </View>
 
+      {!isSelf && (
+        <View style={styles.actionsCard}>
+          <Pressable
+            disabled={!currentAppUser?.id || !contactId || pending}
+            onPress={async () => {
+              if (!currentAppUser?.id || !contactId) return;
+              try {
+                // Single source of truth: toggles “in contacts” by creating/deleting ApsAppUserContact
+                await toggleFavorite({ currentUserId: currentAppUser.id, contactId });
+                await loadFavorites(currentAppUser.id);
+                Alert.alert(
+                  isInContacts ? 'Removed' : 'Added',
+                  isInContacts ? 'Removed from your contacts.' : 'Added to your contacts.'
+                );
+              } catch (e) {
+                console.error('Toggle contact failed:', e);
+                Alert.alert('Update failed', 'Please try again.');
+              }
+            }}
+            style={[styles.actionBtn, pending && styles.actionBtnDisabled]}
+          >
+            <Ionicons name={isInContacts ? 'person-remove-outline' : 'person-add-outline'} size={18} color="#fff" />
+            <Text style={styles.actionBtnText}>
+              {pending ? 'Updating…' : isInContacts ? 'Remove from contacts' : 'Add to contacts'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            disabled={!currentAppUser?.id || !contactId || addingLead}
+            onPress={async () => {
+              if (!currentAppUser?.id || !contactId) return;
+              setAddingLead(true);
+              try {
+                if (leadRecordId) {
+                  await graphqlClient.graphql({
+                    query: deleteApsAppUserLead,
+                    variables: { input: { id: leadRecordId } },
+                  });
+                  setLeadRecordId(null);
+                  Alert.alert('Removed', 'Removed from your leads.');
+                  return;
+                }
+
+                const resp = await graphqlClient.graphql({
+                  query: createApsAppUserLead,
+                  variables: { input: { userId: currentAppUser.id, contactId, favorite: false } },
+                });
+                const data = resp.data as { createApsAppUserLead?: { id?: string | null } | null };
+                const createdId = data.createApsAppUserLead?.id || null;
+                setLeadRecordId(createdId);
+                Alert.alert('Added', 'Lead saved in app.');
+              } catch (e: any) {
+                console.error('Add lead failed:', e);
+                Alert.alert('Add lead failed', 'Please try again.');
+              } finally {
+                setAddingLead(false);
+              }
+            }}
+            style={[styles.actionBtn, styles.actionBtnAlt, addingLead && styles.actionBtnDisabled]}
+          >
+            <Ionicons name={isInLeads ? 'trash-outline' : 'briefcase-outline'} size={18} color="#fff" />
+            <Text style={styles.actionBtnText}>
+              {addingLead ? 'Updating…' : isInLeads ? 'Remove lead' : 'Add lead'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            disabled={!contactId || addingPhoneContact}
+            onPress={async () => {
+              if (!profile) return;
+              setAddingPhoneContact(true);
+              try {
+                const { status } = await Contacts.requestPermissionsAsync();
+                if (status !== 'granted') {
+                  Alert.alert('Permission required', 'Please allow Contacts access to save to your phone.');
+                  return;
+                }
+
+                const first = (profile.firstName || '').trim();
+                const last = (profile.lastName || '').trim();
+                const hasName = !!(first || last);
+                const fallbackName = hasName
+                  ? ''
+                  : (profile.email || '').split('@')[0]?.trim() || 'APS Contact';
+
+                await Contacts.addContactAsync({
+                  // Ensure iOS treats this as a person contact and displays a name (not just company)
+                  contactType: Contacts.ContactTypes.Person,
+                  firstName: hasName ? (first || undefined) : fallbackName,
+                  lastName: hasName ? (last || undefined) : undefined,
+                  company: profile.company || undefined,
+                  jobTitle: profile.jobTitle || undefined,
+                  emails: profile.email ? [{ email: profile.email, label: 'work' }] : undefined,
+                  phoneNumbers: profile.phone ? [{ number: profile.phone, label: 'mobile' }] : undefined,
+                  urlAddresses:
+                    Array.isArray(profile.website) && profile.website.length
+                      ? profile.website
+                          .filter(Boolean)
+                          .map((url) => ({ url, label: 'website' }))
+                      : undefined,
+                });
+                Alert.alert('Saved', 'Added to your phone contacts.');
+              } catch (e: any) {
+                console.error('Add to phone contacts failed:', e);
+                Alert.alert('Save failed', 'Could not add to phone contacts.');
+              } finally {
+                setAddingPhoneContact(false);
+              }
+            }}
+            style={[styles.actionBtn, styles.actionBtnMuted, addingPhoneContact && styles.actionBtnDisabled]}
+          >
+            <Ionicons name="call-outline" size={18} color="#fff" />
+            <Text style={styles.actionBtnText}>{addingPhoneContact ? 'Saving…' : 'Add to phone contacts'}</Text>
+          </Pressable>
+        </View>
+      )}
+
       {!!profile.bio && (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Bio</Text>
@@ -284,6 +441,38 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontWeight: '900', color: '#111827', marginBottom: 6 },
   body: { color: '#111827', lineHeight: 20 },
+
+  actionsCard: {
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fff',
+    gap: 10,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: autopackColors.apBlue,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  actionBtnAlt: {
+    backgroundColor: '#111827',
+  },
+  actionBtnMuted: {
+    backgroundColor: '#6b7280',
+  },
+  actionBtnDisabled: {
+    opacity: 0.6,
+  },
+  actionBtnText: {
+    color: '#fff',
+    fontWeight: '800',
+  },
 
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { backgroundColor: '#f3f4f6', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },

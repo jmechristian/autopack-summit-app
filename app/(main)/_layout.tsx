@@ -56,6 +56,15 @@ export default function MainTabs() {
         }}
       />
 
+      {/* Hidden routes (not shown in tab bar) */}
+      <Tabs.Screen
+        name='scan'
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
       <Tabs.Screen
         name='profile'
         options={{

@@ -3,12 +3,12 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { graphqlClient } from '../utils/graphqlClient';
 import { apsAppUserContactsByUserId } from '../graphql/queries';
-import { createApsAppUserContact, deleteApsAppUserContact, updateApsAppUserContact } from '../graphql/mutations';
+import { createApsAppUserContact, deleteApsAppUserContact } from '../graphql/mutations';
 
 type CommunityStore = {
   /**
-   * Favorites are stored by CONTACT profile id (ApsAppUserProfile.id).
-   * This maps cleanly to ApsAppUserContact.contactId in the schema.
+   * Contacts are stored by CONTACT profile id (ApsAppUserProfile.id).
+   * In the Community UI, the “star” indicates whether this profile is in your contacts.
    */
   favoriteContactIds: Record<string, true>;
 
@@ -62,9 +62,8 @@ export const useCommunityStore = create<CommunityStore>()(
         const ids: Record<string, string> = {};
         for (const item of all) {
           ids[item.contactId] = item.id;
-          if (item.favorite !== false) {
-            favs[item.contactId] = true;
-          }
+          // Treat any existing ApsAppUserContact record as “in contacts” for UI.
+          favs[item.contactId] = true;
         }
 
         set({
@@ -80,39 +79,23 @@ export const useCommunityStore = create<CommunityStore>()(
         if (get().pendingContactIds[contactId]) return;
         set({ pendingContactIds: { ...get().pendingContactIds, [contactId]: true } });
 
-        const wasFav = !!get().favoriteContactIds[contactId];
         const existingRecordId = get().contactRecordIdByContactId[contactId];
+        const inContacts = !!existingRecordId;
 
         try {
-          if (wasFav) {
-            // Optimistic UI: unstar immediately
+          if (inContacts) {
+            // Optimistic UI: remove immediately
             const { [contactId]: _removed, ...restFavs } = get().favoriteContactIds;
             const { [contactId]: _removedId, ...restIds } = get().contactRecordIdByContactId;
             set({ favoriteContactIds: restFavs, contactRecordIdByContactId: restIds });
-
-            if (!existingRecordId) {
-              // No record id -> reload and bail (to avoid creating a duplicate later)
-              await get().loadFavorites(currentUserId);
-              throw new Error('Missing contact record id for delete. Please try again.');
-            }
 
             await graphqlClient.graphql({
               query: deleteApsAppUserContact,
               variables: { input: { id: existingRecordId } },
             });
           } else {
-            // Optimistic UI: star immediately
+            // Optimistic UI: add immediately
             set({ favoriteContactIds: { ...get().favoriteContactIds, [contactId]: true } });
-
-            if (existingRecordId) {
-              // If a record exists, ensure favorite=true
-              await graphqlClient.graphql({
-                query: updateApsAppUserContact,
-                variables: { input: { id: existingRecordId, favorite: true } },
-              });
-              // keep record mapping as-is
-              return;
-            }
 
             const resp = await graphqlClient.graphql({
               query: createApsAppUserContact,

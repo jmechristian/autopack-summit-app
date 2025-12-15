@@ -1,5 +1,6 @@
 // app/(main)/hub.tsx
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ScrollView,
@@ -136,7 +137,7 @@ export default function HubScreen() {
             activeOpacity={0.85}
             style={styles.leadButton}
             onPress={() => {
-              // TODO: wire up lead / scan action
+              router.push('/(main)/scan');
             }}
           >
             <Ionicons

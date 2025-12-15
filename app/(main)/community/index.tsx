@@ -14,13 +14,13 @@ import {
 } from 'react-native';
 import { graphqlClient } from '../../../src/utils/graphqlClient';
 import { autopackColors } from '../../../src/theme';
-import { listApsAppUsersWithProfiles } from '../../../src/graphql/customQueries';
+import { listApsAppUserProfiles } from '../../../src/graphql/queries';
 import { useCommunityStore } from '../../../src/store/communityStore';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 
 type CommunityProfile = {
-  userId: string;
-  profileId: string;
+  profileId: string; // ApsAppUserProfile.id
+  userId: string; // ApsAppUserProfile.userId (ApsAppUser.id)
   firstName?: string | null;
   lastName?: string | null;
   company?: string | null;
@@ -75,47 +75,43 @@ export default function CommunityIndex() {
       let nextToken: string | null | undefined = null;
       do {
         const resp = await graphqlClient.graphql({
-          query: listApsAppUsersWithProfiles,
+          query: listApsAppUserProfiles,
           variables: { limit: 1000, nextToken },
         });
 
         const data = resp.data as {
-          listApsAppUsers?: {
+          listApsAppUserProfiles?: {
             items?: Array<{
               id: string;
-              profile?: {
-                id: string;
-                userId?: string | null;
-                firstName?: string | null;
-                lastName?: string | null;
-                company?: string | null;
-                jobTitle?: string | null;
-                profilePicture?: string | null;
-                location?: string | null;
-                email?: string | null;
-              } | null;
+              userId: string;
+              firstName?: string | null;
+              lastName?: string | null;
+              company?: string | null;
+              jobTitle?: string | null;
+              profilePicture?: string | null;
+              location?: string | null;
+              email?: string | null;
             } | null>;
             nextToken?: string | null;
           };
         };
 
-        const items = data.listApsAppUsers?.items || [];
+        const items = data.listApsAppUserProfiles?.items || [];
         for (const item of items) {
-          if (!item?.profile?.id) continue;
-          const p = item.profile;
+          if (!item?.id || !item.userId) continue;
           all.push({
-            userId: p.userId || item.id,
-            profileId: p.id,
-            firstName: p.firstName,
-            lastName: p.lastName,
-            company: p.company,
-            jobTitle: p.jobTitle,
-            profilePicture: p.profilePicture,
-            location: p.location,
-            email: p.email,
+            userId: item.userId,
+            profileId: item.id,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            company: item.company,
+            jobTitle: item.jobTitle,
+            profilePicture: item.profilePicture,
+            location: item.location,
+            email: item.email,
           });
         }
-        nextToken = data.listApsAppUsers?.nextToken;
+        nextToken = data.listApsAppUserProfiles?.nextToken;
       } while (nextToken);
 
       // Sort by last name, then first name
@@ -215,7 +211,7 @@ export default function CommunityIndex() {
       ) : (
         <SectionList
           sections={sections}
-          keyExtractor={(item) => `${item.userId}:${item.profileId}`}
+          keyExtractor={(item) => item.profileId}
           stickySectionHeadersEnabled
           refreshing={refreshing}
           onRefresh={onRefresh}
@@ -245,7 +241,7 @@ export default function CommunityIndex() {
                   onPress={() =>
                     router.push({
                       pathname: '/(main)/community/[id]',
-                      params: { id: item.userId },
+                      params: { id: item.profileId },
                     })
                   }
                 >
@@ -322,7 +318,7 @@ export default function CommunityIndex() {
                     onPress={() =>
                       router.push({
                         pathname: '/(main)/community/[id]',
-                        params: { id: item.userId },
+                        params: { id: item.profileId },
                       })
                     }
                     style={styles.iconBtn}

@@ -489,3 +489,65 @@ export const getCommunityProfileByUserId = /* GraphQL */ `
   }
 `;
 
+// Community: get a single profile by profile id with nested relations
+export const getCommunityProfileByProfileId = /* GraphQL */ `
+  query GetCommunityProfileByProfileId($id: ID!) {
+    getApsAppUserProfile(id: $id) {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      affiliates {
+        items {
+          id
+          affiliate
+          role
+          startDate
+          endDate
+          createdAt
+          __typename
+        }
+        __typename
+      }
+      education {
+        items {
+          id
+          school
+          degree
+          fieldOfStudy
+          createdAt
+          __typename
+        }
+        __typename
+      }
+      interests {
+        items {
+          id
+          interest
+          createdAt
+          __typename
+        }
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
