@@ -158,18 +158,6 @@ export const getAppUserByRegistrantId = /* GraphQL */ `
           }
           __typename
         }
-        messages {
-          items {
-            id
-            type
-            message
-            exhibitorId
-            eventId
-            createdAt
-            __typename
-          }
-          __typename
-        }
         createdAt
         updatedAt
         __typename

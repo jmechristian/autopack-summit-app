@@ -16,6 +16,8 @@ import { getCommunityProfileByProfileId } from '../../../src/graphql/customQueri
 import { graphqlClient } from '../../../src/utils/graphqlClient';
 import { useCommunityStore } from '../../../src/store/communityStore';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
+import { useEngageStore } from '../../../src/store/engageStore';
+import { APS_ID } from '../../../src/config/apsConfig';
 import { createApsAppUserLead, deleteApsAppUserLead } from '../../../src/graphql/mutations';
 import { apsAppUserLeadsByUserId } from '../../../src/graphql/queries';
 import * as Contacts from 'expo-contacts';
@@ -53,6 +55,11 @@ export default function CommunityProfileScreen() {
   const currentAppUser = useCurrentAppUser();
   const params = useLocalSearchParams<{ id?: string }>();
   const profileId = params.id;
+
+  const getOrCreateContactRequest = useEngageStore((s) => s.getOrCreateContactRequest);
+  const ensureDmThreadForAcceptedRequest = useEngageStore(
+    (s) => s.ensureDmThreadForAcceptedRequest
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -232,8 +239,51 @@ export default function CommunityProfileScreen() {
               }
             />
           </Pressable>
-          <Pressable hitSlop={10} onPress={() => {}} style={styles.iconBtn}>
-            <Ionicons name='chatbubble-outline' size={22} color='#6b7280' />
+          <Pressable
+            hitSlop={10}
+            disabled={isSelf || !profile?.userId}
+            onPress={async () => {
+              if (isSelf || !profile?.userId) return;
+              try {
+                const { status } = await getOrCreateContactRequest({
+                  eventId: APS_ID,
+                  otherUserId: profile.userId,
+                });
+
+                if (status !== 'ACCEPTED') {
+                  Alert.alert(
+                    'Request sent',
+                    'You can message once they accept your request.'
+                  );
+                  return;
+                }
+
+                const { threadId } = await ensureDmThreadForAcceptedRequest({
+                  eventId: APS_ID,
+                  otherUserId: profile.userId,
+                });
+
+                router.push(`/(main)/engage/messages/${threadId}`);
+              } catch (e: any) {
+                const msg = (e?.message || '').toLowerCase();
+                if (msg.includes('not accepted')) {
+                  Alert.alert(
+                    'Waiting for acceptance',
+                    'You can message once they accept your request.'
+                  );
+                  return;
+                }
+                console.error('Message request flow failed:', e);
+                Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+              }
+            }}
+            style={styles.iconBtn}
+          >
+            <Ionicons
+              name='chatbubble-outline'
+              size={22}
+              color={isSelf ? '#d1d5db' : '#6b7280'}
+            />
           </Pressable>
         </View>
       </View>

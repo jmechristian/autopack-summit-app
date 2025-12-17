@@ -1,8 +1,5 @@
-# This "input" configures a global authorization rule to enable public access to
-# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
-input AMPLIFY {
-  globalAuthRule: AuthRule = { allow: public }
-} # FOR TESTING ONLY!
+# NOTE: Messaging + other user-scoped data must NOT rely on global public auth.
+# Keep auth explicit per-model via @auth rules.
 # Enum: CompanyType
 enum CompanyType {
   OEMTIER1
@@ -46,7 +43,6 @@ type APS @model @auth(rules: [{ allow: public }]) {
   Companies: [APSCompany] @hasMany(indexName: "byEvent")
   photos: [ApsAppUserPhoto] @hasMany(indexName: "byEvent")
   exhibitors: [ApsAppExhibitorProfile] @hasMany(indexName: "byEvent")
-  messages: [ApsAppMessage] @hasMany(indexName: "byEvent")
   exhibitorPromotions: [ApsAppExhibitorPromotion] @hasMany(indexName: "byEvent")
   exhibitorDeals: [ApsAppExhibitorDeal] @hasMany(indexName: "byEvent")
   exhibitorPhotos: [ApsAppExhibitorPhoto] @hasMany(indexName: "byEvent")
@@ -145,12 +141,13 @@ type ApsAppUser @model @auth(rules: [{ allow: public }]) {
   registrantId: ID! @index(name: "byRegistrant")
   registrant: ApsRegistrant! @belongsTo(fields: ["registrantId"])
   photos: [ApsAppUserPhoto] @hasMany(indexName: "byUser")
-  messages: [ApsAppMessage] @hasMany(indexName: "byUser")
   sessionQuestions: [ApsAppSessionQuestion] @hasMany(indexName: "byUser")
   exhibitorDeals: [ApsAppExhibitorDeal] @hasMany(indexName: "byUser")
   contacts: [ApsAppUserContact] @hasMany(indexName: "byUser")
   notes: [ApsAppUserNote] @hasMany(indexName: "byUser")
   leads: [ApsAppUserLead] @hasMany(indexName: "byUser")
+  sentDmMessages: [ApsDmMessage]
+    @hasMany(indexName: "bySenderCreated", fields: ["id"])
 
   # ✅ FIX: make the hasOne key explicit so resolvers can traverse user -> profile
   profileId: ID
@@ -179,6 +176,14 @@ type ApsAppUserNote @model @auth(rules: [{ allow: public }]) {
   exhibitor: ApsAppExhibitorProfile @belongsTo(fields: ["exhibitorId"])
   registrantId: ID @index(name: "byRegistrant")
   registrant: ApsRegistrant @belongsTo(fields: ["registrantId"])
+
+  # Notes about a contact (profile)
+  profileId: ID @index(name: "byProfile")
+  profile: ApsAppUserProfile @belongsTo(fields: ["profileId"])
+
+  # Notes about a company
+  companyId: ID @index(name: "byCompany")
+  company: APSCompany @belongsTo(fields: ["companyId"])
 }
 
 # App User Lead
@@ -220,6 +225,9 @@ type ApsAppUserProfile @model @auth(rules: [{ allow: public }]) {
   # Reverse relationships required for @belongsTo in Contact/Lead
   contacts: [ApsAppUserContact] @hasMany(indexName: "byContact", fields: ["id"])
   leads: [ApsAppUserLead] @hasMany(indexName: "byContact", fields: ["id"])
+
+  # Notes about this profile (contact notes)
+  notes: [ApsAppUserNote] @hasMany(indexName: "byProfile", fields: ["id"])
 }
 
 type ProfileAffiliate @model @auth(rules: [{ allow: public }]) {
@@ -333,6 +341,7 @@ type APSCompany @model @auth(rules: [{ allow: public }]) {
   registrants: [ApsRegistrant] @hasMany(indexName: "byCompany")
   sponsors: [ApsSponsor] @hasMany(indexName: "byCompany")
   exhibitorProfiles: [ApsAppExhibitorProfile] @hasMany(indexName: "byCompany")
+  notes: [ApsAppUserNote] @hasMany(indexName: "byCompany", fields: ["id"])
 }
 
 # Exhibitor Profiles
@@ -356,21 +365,7 @@ type ApsAppExhibitorProfile @model @auth(rules: [{ allow: public }]) {
   visits: Int
   views: Int
   likes: Int
-  inquiries: [ApsAppMessage] @hasMany(indexName: "byExhibitor")
   notes: [ApsAppUserNote] @hasMany(indexName: "byExhibitor", fields: ["id"])
-}
-
-# Messages
-type ApsAppMessage @model @auth(rules: [{ allow: public }]) {
-  id: ID!
-  type: String
-  message: String
-  userId: ID @index(name: "byUser")
-  user: ApsAppUser @belongsTo(fields: ["userId"])
-  exhibitorId: ID @index(name: "byExhibitor")
-  exhibitor: ApsAppExhibitorProfile @belongsTo(fields: ["exhibitorId"])
-  eventId: ID! @index(name: "byEvent")
-  event: APS! @belongsTo(fields: ["eventId"])
 }
 
 # Exhibitor Promotions
@@ -456,4 +451,196 @@ type ApsSeatingChartRegistrant @model @auth(rules: [{ allow: public }]) {
   seatingChart: ApsSeatingChart! @belongsTo(fields: ["seatingChartID"])
   registrantID: ID! @index(name: "byRegistrant")
   registrant: ApsRegistrant! @belongsTo(fields: ["registrantID"])
+}
+
+# Messaging
+
+# Contact / chat gating
+#
+# Goal: user A cannot DM user B until user B has accepted A's contact/chat request.
+# This is enforced at the application layer (AppSync @auth cannot express cross-model
+# conditional checks). The model below is the canonical "is this pair accepted?"
+# record the app checks before creating/using a DM thread.
+#
+# requestKey is deterministic and unique per event + user pair, so both sides can
+# read/update the same record once created.
+type ApsContactRequest
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "owners"
+        identityClaim: "sub"
+        provider: userPools
+      }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  eventId: ID!
+
+  # unique: e:<eventId>|u:<a>|u:<b> where a/b are sorted Cognito subs
+  requestKey: String! @index(name: "byRequestKey")
+
+  userAId: ID! # Cognito sub (sorted)
+  userBId: ID! # Cognito sub (sorted)
+  owners: [String!]! # [userAId, userBId] for @auth multi-owner access
+  # who initiated this request (must be either userAId or userBId)
+  requestedByUserId: ID!
+    @index(name: "byRequester", sortKeyFields: ["createdAt"])
+
+  # PENDING | ACCEPTED | DECLINED | BLOCKED
+  status: String! @index(name: "byStatusUpdated", sortKeyFields: ["updatedAt"])
+
+  acceptedAt: AWSDateTime
+  declinedAt: AWSDateTime
+  blockedAt: AWSDateTime
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ApsDmThread
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "owners"
+        identityClaim: "sub"
+        provider: userPools
+      }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  eventId: ID!
+  dmKey: String! @index(name: "byDmKey") # unique: u:<a>|u:<b> sorted
+  userAId: ID! # Cognito sub (sorted)
+  userBId: ID! # Cognito sub (sorted)
+  owners: [String!]! # [userAId, userBId] for @auth multi-owner access
+  # Relationships required by Gen1 for @belongsTo on child models
+  participantStates: [ApsDmParticipantState]
+    @hasMany(indexName: "byThread", fields: ["id"])
+  messages: [ApsDmMessage]
+    @hasMany(indexName: "byThreadCreated", fields: ["id"])
+
+  lastMessageAt: AWSDateTime
+  lastMessagePreview: String
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ApsDmParticipantState
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "userId"
+        identityClaim: "sub"
+        provider: userPools
+      }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  eventId: ID!
+
+  threadId: ID! @index(name: "byThread", sortKeyFields: ["userId"])
+  thread: ApsDmThread! @belongsTo(fields: ["threadId"])
+
+  userId: ID! @index(name: "byUserLast", sortKeyFields: ["lastMessageAt"]) # Cognito sub
+  lastReadAt: AWSDateTime
+  unreadCount: Int
+  lastMessageAt: AWSDateTime
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ApsDmMessage
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "owners"
+        identityClaim: "sub"
+        provider: userPools
+      }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  eventId: ID!
+
+  threadId: ID! @index(name: "byThreadCreated", sortKeyFields: ["createdAt"])
+  thread: ApsDmThread! @belongsTo(fields: ["threadId"])
+
+  senderUserId: ID!
+    @index(name: "bySenderCreated", sortKeyFields: ["createdAt"])
+  sender: ApsAppUser! @belongsTo(fields: ["senderUserId"])
+  owners: [String!]! # [thread.userAId, thread.userBId] for @auth multi-owner access
+  type: String # "text" | "image" | "system"
+  body: String
+
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ApsAdminAnnouncement
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: groups, groups: ["Admin"], provider: userPools }
+      { allow: private, operations: [read], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  eventId: ID! @index(name: "byEventCreated", sortKeyFields: ["createdAt"])
+
+  title: String
+  body: String!
+  deepLink: String # optional, e.g. "app://announcements/<id>"
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ApsPushToken
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "userId"
+        identityClaim: "sub"
+        provider: userPools
+      }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  userId: ID! @index(name: "byUserUpdated", sortKeyFields: ["updatedAt"]) # Cognito sub
+  token: String!
+  platform: String
+  updatedAt: AWSDateTime!
+  createdAt: AWSDateTime!
+}
+
+# --- Auth directive fix ---
+# Amplify Gen1 sometimes generates `ModelApsDmMessageConnection` with `@aws_api_key`
+# only, which breaks USER_POOLS callers when querying `items`.
+# We explicitly declare it here so it supports BOTH auth modes (API key + user pools).
+type ModelApsDmMessageConnection @aws_api_key @aws_cognito_user_pools {
+  items: [ApsDmMessage]!
+  nextToken: String
 }

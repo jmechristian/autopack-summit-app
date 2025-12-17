@@ -1,10 +1,14 @@
 // src/components/AuthGuard.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useApsStore } from '../store/apsStore';
 import { signOut } from '../utils/authUtils';
 import { autopackColors } from '../theme';
+import {
+  initPushNotificationHandlers,
+  registerAndUpsertPushToken,
+} from '../utils/pushNotifications';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,6 +17,7 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const [isValidating, setIsValidating] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const pushInitRef = useRef(false);
   const currentAppUser = useApsStore((state) => state.currentAppUser);
   const loading = useApsStore((state) => state.loading.currentAppUser);
   const authError = useApsStore((state) => state.authError);
@@ -35,6 +40,25 @@ export function AuthGuard({ children }: AuthGuardProps) {
     
     validate();
   }, [validateUserRegistrant, loadBasicInfo]);
+
+  // Push notifications: once the user is validated, register token + set up tap handling.
+  useEffect(() => {
+    if (!currentAppUser?.id) return;
+    if (pushInitRef.current) return;
+    pushInitRef.current = true;
+
+    const cleanup = initPushNotificationHandlers({
+      onAnnouncementId: (id) => {
+        router.push(`/(main)/engage/announcements/${id}`);
+      },
+    });
+
+    registerAndUpsertPushToken().catch((e) => {
+      console.error('Push token registration failed:', e);
+    });
+
+    return cleanup;
+  }, [currentAppUser?.id]);
   
   const handleSignOut = async () => {
     setIsSigningOut(true);

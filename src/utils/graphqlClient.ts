@@ -2,21 +2,49 @@
 import { generateClient } from 'aws-amplify/api';
 import type { GraphQLQuery } from '@aws-amplify/api';
 
-// Lazy-loaded GraphQL client instance
-// This ensures Amplify is configured before the client is created
-let _graphqlClient: ReturnType<typeof generateClient> | null = null;
+/**
+ * IMPORTANT:
+ * - Most existing app models in this backend are still `@auth(rules: [{ allow: public }])`,
+ *   which is typically satisfied via API Key.
+ * - Newer models (DM, announcements, push tokens) are Cognito User Pools-only.
+ *
+ * To avoid regressions when AppSync's *default* auth mode is switched to User Pools, we
+ * explicitly create an API Key client for legacy/public models, and also expose a
+ * User Pools client for protected models (used in step 2).
+ */
 
-export function getGraphQLClient() {
-  if (!_graphqlClient) {
-    _graphqlClient = generateClient();
+type GraphQLAuthMode = 'apiKey' | 'userPool';
+
+// Lazy-loaded GraphQL client instances (ensures Amplify is configured before creation)
+let _apiKeyClient: ReturnType<typeof generateClient> | null = null;
+let _userPoolClient: ReturnType<typeof generateClient> | null = null;
+
+export function getGraphQLClient(authMode: GraphQLAuthMode = 'apiKey') {
+  if (authMode === 'userPool') {
+    if (!_userPoolClient) {
+      _userPoolClient = generateClient({ authMode: 'userPool' });
+    }
+    return _userPoolClient;
   }
-  return _graphqlClient;
+
+  if (!_apiKeyClient) {
+    _apiKeyClient = generateClient({ authMode: 'apiKey' });
+  }
+  return _apiKeyClient;
 }
 
 // Export for convenience (but prefer getGraphQLClient() for lazy loading)
+// Default: API key (legacy/public models).
 export const graphqlClient = new Proxy({} as ReturnType<typeof generateClient>, {
   get(_target, prop) {
-    return getGraphQLClient()[prop as keyof ReturnType<typeof generateClient>];
+    return getGraphQLClient('apiKey')[prop as keyof ReturnType<typeof generateClient>];
+  },
+});
+
+// Secondary client for Cognito User Pools protected models (DM, announcements, push tokens).
+export const graphqlAuthClient = new Proxy({} as ReturnType<typeof generateClient>, {
+  get(_target, prop) {
+    return getGraphQLClient('userPool')[prop as keyof ReturnType<typeof generateClient>];
   },
 });
 
