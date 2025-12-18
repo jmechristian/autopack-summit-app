@@ -15,7 +15,8 @@
         "NSPhotoLibraryUsageDescription": "We use your photo library so you can select and upload a profile picture.",
         "NSCameraUsageDescription": "We use the camera to let you capture a profile picture.",
         "NSPhotoLibraryAddUsageDescription": "We need access to save your uploaded or captured profile picture.",
-        "NSContactsUsageDescription": "We use your contacts to save scanned attendee contact details to your phone."
+        "NSContactsUsageDescription": "We use your contacts to save scanned attendee contact details to your phone.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -51,6 +52,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a28f9527-bfd5-49ae-b62c-a4ce791bc274"
+      }
     }
   }
 }

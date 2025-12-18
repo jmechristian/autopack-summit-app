@@ -10,7 +10,7 @@ export default function EngageLayout() {
       />
       <Stack.Screen
         name='announcements/[id]'
-        options={{ title: 'Announcement' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen name='messages/index' options={{ title: 'Messages' }} />
       <Stack.Screen name='messages/[threadId]' options={{ title: 'Chat' }} />

@@ -614,6 +614,31 @@ type ApsAdminAnnouncement
   updatedAt: AWSDateTime!
 }
 
+# Per-user engage read state (for accurate unread badge counts).
+# v1: announcements are "mark all read when opened" using lastSeenAnnouncementAt.
+type ApsUserEngageState
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      {
+        allow: owner
+        ownerField: "userId"
+        identityClaim: "sub"
+        provider: userPools
+      }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  # Deterministic id recommended: e:<eventId>|u:<sub>
+  id: ID!
+  eventId: ID!
+  userId: ID!
+  lastSeenAnnouncementAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 type ApsPushToken
   @model
   @aws_cognito_user_pools

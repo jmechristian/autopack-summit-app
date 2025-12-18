@@ -1,63 +1,73 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { autopackColors } from '../../../src/theme';
+import { StyleSheet, Text, View } from 'react-native';
+import { useEngageStore } from '../../../src/store/engageStore';
+import { AppBadge } from '../../../src/ui/AppBadge';
+import { AppCard } from '../../../src/ui/AppCard';
+import { AppScreen } from '../../../src/ui/AppScreen';
+import { ui } from '../../../src/ui/tokens';
 
-function Card(props: { title: string; subtitle: string; onPress: () => void }) {
+function Card(props: {
+  title: string;
+  subtitle: string;
+  badge?: number;
+  onPress: () => void;
+}) {
   return (
-    <Pressable onPress={props.onPress} style={styles.card}>
-      <Text style={styles.cardTitle}>{props.title}</Text>
+    <AppCard onPress={props.onPress} style={styles.card}>
+      <View style={styles.cardTitleRow}>
+        <Text style={styles.cardTitle}>{props.title}</Text>
+        <AppBadge value={props.badge} />
+      </View>
       <Text style={styles.cardSubtitle}>{props.subtitle}</Text>
-    </Pressable>
+    </AppCard>
   );
 }
 
 export default function EngageHome() {
+  const unread = useEngageStore((s) => s.unread);
   return (
-    <View style={styles.container}>
+    <AppScreen style={{ gap: ui.space.md }}>
       <Card
         title='Announcements'
         subtitle='Admin announcements and updates'
+        badge={unread.announcements}
         onPress={() => router.push('/(main)/engage/announcements')}
       />
       <Card
         title='Messages'
         subtitle='Direct messages with approved contacts'
+        badge={unread.messages}
         onPress={() => router.push('/(main)/engage/messages')}
       />
       <Card
         title='Requests'
         subtitle='Approve or decline incoming message requests'
+        badge={unread.requests}
         onPress={() => router.push('/(main)/engage/requests')}
       />
-    </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-    gap: 12,
-  },
-  card: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 16,
-    backgroundColor: '#fff',
-  },
+  card: { padding: ui.space.lg },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: autopackColors.apBlue,
+    color: ui.colors.primary,
     marginBottom: 6,
   },
   cardSubtitle: {
-    color: '#6B7280',
+    color: ui.colors.muted,
     fontSize: 14,
     lineHeight: 20,
   },
+  // spacing between cards
+  // (AppScreen uses padding; we do gap on wrapper by using marginBottom per card)
+  // Keep it simple with a bottom margin on each card.
+  // eslint-disable-next-line react-native/no-unused-styles
+  _spacer: {},
 });
 
 

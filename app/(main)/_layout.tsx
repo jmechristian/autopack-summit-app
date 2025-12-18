@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { AuthGuard } from '../../src/components/AuthGuard';
 import { autopackColors } from '../../src/theme';
+import { useEngageStore } from '../../src/store/engageStore';
 
 export default function MainTabs() {
+  const engageBadgeCount = useEngageStore((s) => s.getEngageBadgeCount());
   return (
     <AuthGuard>
       <Tabs
@@ -39,6 +41,9 @@ export default function MainTabs() {
         name='engage'
         options={{
           title: 'Engage',
+          headerShown: false,
+          tabBarBadge: engageBadgeCount > 0 ? engageBadgeCount : undefined,
+          tabBarBadgeStyle: { backgroundColor: '#DC2626', color: '#fff' },
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='chatbubbles' color={color} size={size} />
           ),

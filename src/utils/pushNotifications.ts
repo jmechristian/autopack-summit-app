@@ -10,6 +10,10 @@ import { createApsPushToken, updateApsPushToken } from '../graphql/mutations';
 type NavigateHandlers = {
   onAnnouncementId: (announcementId: string) => void;
   onDeepLink?: (url: string) => void;
+  /** Called when an announcement notification is received while app is running. Returns new total badge count. */
+  onAnnouncementReceived?: () => number;
+  /** Called for any notification received while app is running (good place to refresh counts). */
+  onNotificationReceived?: (data: Record<string, any>) => void;
 };
 
 function nowIso(): string {
@@ -101,8 +105,29 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
     handleNotification: async () => ({
       shouldShowAlert: true,
       shouldPlaySound: false,
-      shouldSetBadge: false,
+      shouldSetBadge: true,
     }),
+  });
+
+  const subReceived = Notifications.addNotificationReceivedListener((notif) => {
+    const data: any = notif.request.content.data || {};
+    const announcementId =
+      data.announcementId ?? data.announcementID ?? data.announcement_id ?? data.id;
+
+    if (handlers.onNotificationReceived) {
+      try {
+        handlers.onNotificationReceived(data);
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!announcementId) return;
+    if (!handlers.onAnnouncementReceived) return;
+
+    const next = handlers.onAnnouncementReceived();
+    // Best-effort: set OS badge (iOS). Android support varies by launcher.
+    Notifications.setBadgeCountAsync(next).catch(() => {});
   });
 
   const subResponse = Notifications.addNotificationResponseReceivedListener((resp) => {
@@ -123,8 +148,31 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
   });
 
   return () => {
+    subReceived.remove();
     subResponse.remove();
   };
+}
+
+export async function handleLastNotificationResponse(handlers: NavigateHandlers) {
+  try {
+    const resp = await Notifications.getLastNotificationResponseAsync();
+    if (!resp) return;
+    const data: any = resp.notification.request.content.data || {};
+
+    const announcementId =
+      data.announcementId ?? data.announcementID ?? data.announcement_id ?? data.id;
+    const deepLink = data.deepLink ?? data.deeplink ?? data.url;
+
+    if (announcementId) {
+      handlers.onAnnouncementId(String(announcementId));
+      return;
+    }
+    if (deepLink && handlers.onDeepLink) {
+      handlers.onDeepLink(String(deepLink));
+    }
+  } catch {
+    // ignore
+  }
 }
 
 

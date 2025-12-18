@@ -254,7 +254,7 @@ export default function Profile() {
 
   if (!appUser || !profile) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.container}>
         <ActivityIndicator size="large" color={autopackColors.apBlue} />
         <Text style={styles.loadingText}>Loading profile...</Text>
       </View>
@@ -267,7 +267,9 @@ export default function Profile() {
 
   return (
     <ScrollView
-      style={[styles.container, { paddingTop: insets.top }]}
+      // Profile is shown under a navigation header, so adding safe-area top padding
+      // makes the screen look double-spaced.
+      style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
       {/* Profile Picture Section */}
@@ -401,7 +403,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   contentContainer: {
     padding: 16,
@@ -409,13 +411,15 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
-    color: '#666',
+    color: '#6B7280',
     textAlign: 'center',
   },
   profilePictureSection: {
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     padding: 24,
     marginBottom: 16,
   },
@@ -429,37 +433,39 @@ const styles = StyleSheet.create({
     backgroundColor: autopackColors.apBlue,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 999,
   },
   uploadButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   qrCodeSection: {
     marginBottom: 16,
   },
   qrCodeButton: {
     backgroundColor: autopackColors.apBlue,
-    borderRadius: 8,
+    borderRadius: 999,
   },
   linkedInSection: {
     marginBottom: 16,
   },
   linkedInButton: {
     backgroundColor: '#0077B5', // LinkedIn brand color
-    borderRadius: 8,
+    borderRadius: 999,
   },
   resumeSection: {
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     padding: 16,
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111',
+    fontWeight: '700',
+    color: '#111827',
     marginBottom: 16,
   },
   resumeActions: {
@@ -467,12 +473,12 @@ const styles = StyleSheet.create({
   },
   resumeButton: {
     backgroundColor: autopackColors.apBlue,
-    borderRadius: 8,
+    borderRadius: 999,
   },
   resumeButtonOutline: {
     borderColor: autopackColors.apBlue,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 999,
   },
   resumeButtonOutlineText: {
     color: autopackColors.apBlue,
@@ -480,7 +486,7 @@ const styles = StyleSheet.create({
   qrCodeOverlay: {
     width: '90%',
     maxWidth: 400,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 0,
   },
   qrCodeContainer: {
@@ -489,9 +495,9 @@ const styles = StyleSheet.create({
   },
   qrCodeTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginBottom: 20,
-    color: '#111',
+    color: '#111827',
   },
   qrCodeImage: {
     width: 250,
@@ -500,7 +506,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     backgroundColor: autopackColors.apBlue,
-    borderRadius: 8,
+    borderRadius: 999,
     paddingHorizontal: 32,
   },
 });

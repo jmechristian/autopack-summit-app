@@ -288,6 +288,48 @@ export const listApsAdminAnnouncements = /* GraphQL */ `query ListApsAdminAnnoun
   APITypes.ListApsAdminAnnouncementsQueryVariables,
   APITypes.ListApsAdminAnnouncementsQuery
 >;
+export const getApsUserEngageState = /* GraphQL */ `query GetApsUserEngageState($id: ID!) {
+  getApsUserEngageState(id: $id) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetApsUserEngageStateQueryVariables,
+  APITypes.GetApsUserEngageStateQuery
+>;
+export const listApsUserEngageStates = /* GraphQL */ `query ListApsUserEngageStates(
+  $filter: ModelApsUserEngageStateFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listApsUserEngageStates(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      eventId
+      userId
+      lastSeenAnnouncementAt
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListApsUserEngageStatesQueryVariables,
+  APITypes.ListApsUserEngageStatesQuery
+>;
 export const getApsPushToken = /* GraphQL */ `query GetApsPushToken($id: ID!) {
   getApsPushToken(id: $id) {
     id

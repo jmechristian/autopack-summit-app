@@ -446,6 +446,60 @@ export const onDeleteApsAdminAnnouncement = /* GraphQL */ `subscription OnDelete
   APITypes.OnDeleteApsAdminAnnouncementSubscriptionVariables,
   APITypes.OnDeleteApsAdminAnnouncementSubscription
 >;
+export const onCreateApsUserEngageState = /* GraphQL */ `subscription OnCreateApsUserEngageState(
+  $filter: ModelSubscriptionApsUserEngageStateFilterInput
+  $userId: String
+) {
+  onCreateApsUserEngageState(filter: $filter, userId: $userId) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsUserEngageStateSubscriptionVariables,
+  APITypes.OnCreateApsUserEngageStateSubscription
+>;
+export const onUpdateApsUserEngageState = /* GraphQL */ `subscription OnUpdateApsUserEngageState(
+  $filter: ModelSubscriptionApsUserEngageStateFilterInput
+  $userId: String
+) {
+  onUpdateApsUserEngageState(filter: $filter, userId: $userId) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsUserEngageStateSubscriptionVariables,
+  APITypes.OnUpdateApsUserEngageStateSubscription
+>;
+export const onDeleteApsUserEngageState = /* GraphQL */ `subscription OnDeleteApsUserEngageState(
+  $filter: ModelSubscriptionApsUserEngageStateFilterInput
+  $userId: String
+) {
+  onDeleteApsUserEngageState(filter: $filter, userId: $userId) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsUserEngageStateSubscriptionVariables,
+  APITypes.OnDeleteApsUserEngageStateSubscription
+>;
 export const onCreateApsPushToken = /* GraphQL */ `subscription OnCreateApsPushToken(
   $filter: ModelSubscriptionApsPushTokenFilterInput
   $userId: String

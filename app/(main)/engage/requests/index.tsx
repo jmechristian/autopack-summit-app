@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useEngageStore } from '../../../../src/store/engageStore';
-import { autopackColors } from '../../../../src/theme';
+import { AppButton } from '../../../../src/ui/AppButton';
+import { AppCard } from '../../../../src/ui/AppCard';
+import { AppScreen } from '../../../../src/ui/AppScreen';
+import { ui } from '../../../../src/ui/tokens';
 
 export default function RequestsScreen() {
   const incoming = useEngageStore((s) => s.incomingRequests);
@@ -16,7 +19,7 @@ export default function RequestsScreen() {
   }, [loadIncomingRequests]);
 
   return (
-    <View style={styles.container}>
+    <AppScreen>
       {loading ? <Text style={styles.muted}>Loading…</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -24,54 +27,36 @@ export default function RequestsScreen() {
         data={incoming}
         keyExtractor={(r) => r.id}
         renderItem={({ item }) => (
-          <View style={styles.row}>
+          <AppCard style={styles.row}>
             <Text style={styles.title}>{item.fromLabel}</Text>
             <Text style={styles.meta}>
               {new Date(item.createdAt).toLocaleString()}
             </Text>
             <View style={styles.actions}>
-              <Pressable
-                style={[styles.button, styles.accept]}
-                onPress={() => acceptRequest(item.id)}
-              >
-                <Text style={styles.buttonText}>Accept</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.button, styles.decline]}
+              <AppButton title='Accept' onPress={() => acceptRequest(item.id)} />
+              <AppButton
+                title='Decline'
                 onPress={() => declineRequest(item.id)}
-              >
-                <Text style={styles.buttonText}>Decline</Text>
-              </Pressable>
+                variant='muted'
+              />
             </View>
-          </View>
+          </AppCard>
         )}
         ListEmptyComponent={
           !loading ? <Text style={styles.muted}>No pending requests.</Text> : null
         }
       />
-    </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  row: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 14,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-  },
-  title: { fontSize: 16, fontWeight: '700', color: autopackColors.apBlue },
-  meta: { marginTop: 6, color: '#6B7280', fontSize: 12 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  button: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center' },
-  accept: { backgroundColor: autopackColors.apBlue },
-  decline: { backgroundColor: '#6B7280' },
-  buttonText: { color: '#fff', fontWeight: '700' },
-  muted: { color: '#6B7280' },
-  error: { color: '#DC2626', marginBottom: 8 },
+  row: { marginBottom: ui.space.sm },
+  title: { fontSize: 16, fontWeight: '700', color: ui.colors.primary },
+  meta: { marginTop: ui.space.xs, color: ui.colors.muted, fontSize: 12 },
+  actions: { flexDirection: 'row', gap: ui.space.sm, marginTop: ui.space.md },
+  muted: { color: ui.colors.muted },
+  error: { color: ui.colors.danger, marginBottom: ui.space.sm },
 });
 
 

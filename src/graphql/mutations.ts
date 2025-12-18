@@ -458,6 +458,60 @@ export const deleteApsAdminAnnouncement = /* GraphQL */ `mutation DeleteApsAdmin
   APITypes.DeleteApsAdminAnnouncementMutationVariables,
   APITypes.DeleteApsAdminAnnouncementMutation
 >;
+export const createApsUserEngageState = /* GraphQL */ `mutation CreateApsUserEngageState(
+  $input: CreateApsUserEngageStateInput!
+  $condition: ModelApsUserEngageStateConditionInput
+) {
+  createApsUserEngageState(input: $input, condition: $condition) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsUserEngageStateMutationVariables,
+  APITypes.CreateApsUserEngageStateMutation
+>;
+export const updateApsUserEngageState = /* GraphQL */ `mutation UpdateApsUserEngageState(
+  $input: UpdateApsUserEngageStateInput!
+  $condition: ModelApsUserEngageStateConditionInput
+) {
+  updateApsUserEngageState(input: $input, condition: $condition) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsUserEngageStateMutationVariables,
+  APITypes.UpdateApsUserEngageStateMutation
+>;
+export const deleteApsUserEngageState = /* GraphQL */ `mutation DeleteApsUserEngageState(
+  $input: DeleteApsUserEngageStateInput!
+  $condition: ModelApsUserEngageStateConditionInput
+) {
+  deleteApsUserEngageState(input: $input, condition: $condition) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsUserEngageStateMutationVariables,
+  APITypes.DeleteApsUserEngageStateMutation
+>;
 export const createApsPushToken = /* GraphQL */ `mutation CreateApsPushToken(
   $input: CreateApsPushTokenInput!
   $condition: ModelApsPushTokenConditionInput
