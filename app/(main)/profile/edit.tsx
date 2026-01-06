@@ -1,4 +1,4 @@
-// app/(main)/profile.tsx
+// app/(main)/profile/edit.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -16,34 +16,33 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCurrentAppUser, useCurrentUserProfile, useCurrentUserRegistrant } from '../../src/hooks/useApsStore';
-import { EditablePersonalInfo } from '../../src/components/profile/EditablePersonalInfo';
-import { AffiliationsSection } from '../../src/components/profile/AffiliationsSection';
-import { EducationSection } from '../../src/components/profile/EducationSection';
-import { InterestsSection } from '../../src/components/profile/InterestsSection';
-import { uploadProfilePicture, uploadResume } from '../../src/utils/storageUtils';
-import { updateProfile, createAffiliate, createEducation } from '../../src/utils/profileMutations';
-import { useApsStore } from '../../src/store/apsStore';
-import { autopackColors } from '../../src/theme';
-import * as APITypes from '../../src/API';
+import { router } from 'expo-router';
+import { useCurrentAppUser, useCurrentUserProfile } from '../../../src/hooks/useApsStore';
+import { EditablePersonalInfo } from '../../../src/components/profile/EditablePersonalInfo';
+import { AffiliationsSection } from '../../../src/components/profile/AffiliationsSection';
+import { EducationSection } from '../../../src/components/profile/EducationSection';
+import { InterestsSection } from '../../../src/components/profile/InterestsSection';
+import { uploadProfilePicture, uploadResume, getProfilePictureUrl as getProfilePictureUrlFromStorage } from '../../../src/utils/storageUtils';
+import { updateProfile, createAffiliate, createEducation } from '../../../src/utils/profileMutations';
+import { useApsStore } from '../../../src/store/apsStore';
+import { autopackColors } from '../../../src/theme';
 import {
   initiateLinkedInAuth,
   exchangeCodeForToken,
   fetchLinkedInProfile,
   mapLinkedInToProfile,
-} from '../../src/utils/linkedInAuth';
+} from '../../../src/utils/linkedInAuth';
 
-export default function Profile() {
+export default function ProfileEdit() {
   const insets = useSafeAreaInsets();
   const appUser = useCurrentAppUser();
   const profile = useCurrentUserProfile();
-  const registrant = useCurrentUserRegistrant();
   const refreshProfile = useApsStore((state) => state.refreshProfile);
   
-  const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [importingLinkedIn, setImportingLinkedIn] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
   const handleProfilePictureUpload = async () => {
     try {
@@ -226,23 +225,34 @@ export default function Profile() {
     }
   };
 
-  const getProfilePictureUrl = () => {
-    if (!profile?.profilePicture) return null;
-    // If it's already a full URL, return it
-    if (profile.profilePicture.startsWith('http')) {
-      return profile.profilePicture;
-    }
-    // Otherwise, construct S3 URL (adjust based on your S3 bucket configuration)
-    return profile.profilePicture;
-  };
+  // Generate fresh signed URL from S3 key
+  React.useEffect(() => {
+    const loadProfilePicture = async () => {
+      if (!profile?.profilePicture) {
+        setProfilePictureUrl(null);
+        return;
+      }
 
-  const getQrCodeUrl = () => {
-    if (!registrant?.qrCode) return null;
-    if (registrant.qrCode.startsWith('http')) {
-      return registrant.qrCode;
-    }
-    return registrant.qrCode;
-  };
+      const storedValue = profile.profilePicture;
+      
+      // If it's already a full URL (legacy data), use it directly
+      if (storedValue.startsWith('http://') || storedValue.startsWith('https://')) {
+        setProfilePictureUrl(storedValue);
+        return;
+      }
+
+      // Otherwise, it's an S3 key - generate a fresh signed URL
+      try {
+        const url = await getProfilePictureUrlFromStorage(storedValue);
+        setProfilePictureUrl(url);
+      } catch (error) {
+        console.error('Error loading profile picture URL:', error);
+        setProfilePictureUrl(null);
+      }
+    };
+
+    loadProfilePicture();
+  }, [profile?.profilePicture]);
 
   const getResumeUrl = () => {
     if (!profile?.resume) return null;
@@ -261,14 +271,10 @@ export default function Profile() {
     );
   }
 
-  const profilePictureUrl = getProfilePictureUrl();
-  const qrCodeUrl = getQrCodeUrl();
   const resumeUrl = getResumeUrl();
 
   return (
     <ScrollView
-      // Profile is shown under a navigation header, so adding safe-area top padding
-      // makes the screen look double-spaced.
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
@@ -305,18 +311,6 @@ export default function Profile() {
           )}
         </TouchableOpacity>
       </View>
-
-      {/* QR Code Button */}
-      {qrCodeUrl && (
-        <View style={styles.qrCodeSection}>
-          <Button
-            title="Show QR Code"
-            icon={<Ionicons name="qr-code" size={20} color="#fff" />}
-            onPress={() => setQrCodeVisible(true)}
-            buttonStyle={styles.qrCodeButton}
-          />
-        </View>
-      )}
 
       {/* LinkedIn Import Button */}
       <View style={styles.linkedInSection}>
@@ -373,29 +367,6 @@ export default function Profile() {
           />
         )}
       </View>
-
-      {/* QR Code Modal */}
-      <Overlay
-        isVisible={qrCodeVisible}
-        onBackdropPress={() => setQrCodeVisible(false)}
-        overlayStyle={styles.qrCodeOverlay}
-      >
-        <View style={styles.qrCodeContainer}>
-          <Text style={styles.qrCodeTitle}>Your QR Code</Text>
-          {qrCodeUrl && (
-            <Image
-              source={{ uri: qrCodeUrl }}
-              style={styles.qrCodeImage}
-              contentFit="contain"
-            />
-          )}
-          <Button
-            title="Close"
-            onPress={() => setQrCodeVisible(false)}
-            buttonStyle={styles.closeButton}
-          />
-        </View>
-      </Overlay>
     </ScrollView>
   );
 }
@@ -440,13 +411,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  qrCodeSection: {
-    marginBottom: 16,
-  },
-  qrCodeButton: {
-    backgroundColor: autopackColors.apBlue,
-    borderRadius: 999,
-  },
   linkedInSection: {
     marginBottom: 16,
   },
@@ -483,30 +447,5 @@ const styles = StyleSheet.create({
   resumeButtonOutlineText: {
     color: autopackColors.apBlue,
   },
-  qrCodeOverlay: {
-    width: '90%',
-    maxWidth: 400,
-    borderRadius: 14,
-    padding: 0,
-  },
-  qrCodeContainer: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  qrCodeTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 20,
-    color: '#111827',
-  },
-  qrCodeImage: {
-    width: 250,
-    height: 250,
-    marginBottom: 20,
-  },
-  closeButton: {
-    backgroundColor: autopackColors.apBlue,
-    borderRadius: 999,
-    paddingHorizontal: 32,
-  },
 });
+

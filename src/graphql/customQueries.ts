@@ -287,6 +287,116 @@ export const getAPSWithSpeakers = /* GraphQL */ `
   }
 `;
 
+// Agenda (live)
+// Notes:
+// - Some generated TS types/queries in src/API.ts + src/graphql/queries.ts may lag behind the
+//   backend schema. These queries are intentionally "best effort" and the app code normalizes
+//   fields defensively (title vs session, startTime vs time, etc).
+// - We prefer paging via the byAgenda index instead of nested agenda.items.
+export const apsAppSessionsByAgendaIdWithRelations = /* GraphQL */ `
+  query ApsAppSessionsByAgendaIdWithRelations($agendaId: ID!, $limit: Int, $nextToken: String) {
+    apsAppSessionsByAgendaId(agendaId: $agendaId, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        date
+        startTime
+        endTime
+        location
+        description
+        speakers {
+          items {
+            id
+            aPSSpeaker {
+              id
+              firstName
+              lastName
+              company
+              title
+              headshot
+              __typename
+            }
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        sponsors {
+          items {
+            id
+            apsSponsor {
+              id
+              company {
+                id
+                name
+                logo
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          nextToken
+          __typename
+        }
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const getApsAppSessionWithRelations = /* GraphQL */ `
+  query GetApsAppSessionWithRelations($id: ID!) {
+    getApsAppSession(id: $id) {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      speakers {
+        items {
+          id
+          aPSSpeaker {
+            id
+            firstName
+            lastName
+            company
+            title
+            headshot
+            __typename
+          }
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      sponsors {
+        items {
+          id
+          apsSponsor {
+            id
+            company {
+              id
+              name
+              logo
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        nextToken
+        __typename
+      }
+      __typename
+    }
+  }
+`;
+
 export const getAPSWithExhibitors = /* GraphQL */ `
   query GetAPSWithExhibitors($id: ID!, $eventId: ID!) {
     getAPS(id: $id) {

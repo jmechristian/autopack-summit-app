@@ -8,7 +8,7 @@ const STORAGE_BUCKET = 'apsapp';
 /**
  * Upload profile picture to S3
  * @param fileUri - URI of the image file (from expo-image-picker)
- * @returns Promise<string> - Public URL of uploaded image
+ * @returns Promise<string> - S3 key (path) of uploaded image (store this, not the URL)
  */
 export async function uploadProfilePicture(fileUri: string): Promise<string> {
   try {
@@ -34,21 +34,34 @@ export async function uploadProfilePicture(fileUri: string): Promise<string> {
       },
     }).result;
     
-    // Get the public URL - result.path is the key, we need to construct the URL
-    // For public access, the URL format is: https://{bucket}.s3.{region}.amazonaws.com/{key}
-    // Or we can use getUrl to get the public URL
-    const { getUrl } = await import('aws-amplify/storage');
-    const urlResult = await getUrl({
-      key: filename,
-      options: {
-        accessLevel: 'public',
-      },
-    });
-    
-    return urlResult.url.toString();
+    // Return just the key (path), not the signed URL
+    // This way we can generate fresh signed URLs when needed
+    return filename;
   } catch (error) {
     console.error('Error uploading profile picture:', error);
     throw new Error('Failed to upload profile picture. Please try again.');
+  }
+}
+
+/**
+ * Get a fresh signed URL for a profile picture from its S3 key
+ * @param key - S3 key (path) of the image
+ * @returns Promise<string> - Fresh signed URL
+ */
+export async function getProfilePictureUrl(key: string): Promise<string> {
+  try {
+    const { getUrl } = await import('aws-amplify/storage');
+    const urlResult = await getUrl({
+      key: key,
+      options: {
+        accessLevel: 'public',
+        expiresIn: 3600, // 1 hour expiration
+      },
+    });
+    return urlResult.url.toString();
+  } catch (error) {
+    console.error('Error getting profile picture URL:', error);
+    throw new Error('Failed to get profile picture URL.');
   }
 }
 

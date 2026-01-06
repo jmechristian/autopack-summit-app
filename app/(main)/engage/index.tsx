@@ -1,73 +1,105 @@
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEngageStore } from '../../../src/store/engageStore';
-import { AppBadge } from '../../../src/ui/AppBadge';
-import { AppCard } from '../../../src/ui/AppCard';
-import { AppScreen } from '../../../src/ui/AppScreen';
+import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 
-function Card(props: {
-  title: string;
-  subtitle: string;
+type EngageTile = {
+  id: string;
+  label: string;
+  icon: any;
   badge?: number;
   onPress: () => void;
-}) {
-  return (
-    <AppCard onPress={props.onPress} style={styles.card}>
-      <View style={styles.cardTitleRow}>
-        <Text style={styles.cardTitle}>{props.title}</Text>
-        <AppBadge value={props.badge} />
-      </View>
-      <Text style={styles.cardSubtitle}>{props.subtitle}</Text>
-    </AppCard>
-  );
-}
+};
 
 export default function EngageHome() {
+  const insets = useSafeAreaInsets();
   const unread = useEngageStore((s) => s.unread);
+
+  const tiles: EngageTile[] = [
+    {
+      id: 'announcements',
+      label: 'Announcements',
+      icon: 'megaphone-outline',
+      badge: unread.announcements,
+      onPress: () => router.push('/(main)/engage/announcements'),
+    },
+    {
+      id: 'messages',
+      label: 'Messages',
+      icon: 'chatbubbles-outline',
+      badge: unread.messages,
+      onPress: () => router.push('/(main)/engage/messages'),
+    },
+    {
+      id: 'requests',
+      label: 'Requests',
+      icon: 'mail-unread-outline',
+      badge: unread.requests,
+      onPress: () => router.push('/(main)/engage/requests'),
+    },
+    {
+      id: 'leads',
+      label: 'Leads',
+      icon: 'briefcase-outline',
+      onPress: () => router.push('/(main)/engage/leads'),
+    },
+  ];
+
   return (
-    <AppScreen style={{ gap: ui.space.md }}>
-      <Card
-        title='Announcements'
-        subtitle='Admin announcements and updates'
-        badge={unread.announcements}
-        onPress={() => router.push('/(main)/engage/announcements')}
-      />
-      <Card
-        title='Messages'
-        subtitle='Direct messages with approved contacts'
-        badge={unread.messages}
-        onPress={() => router.push('/(main)/engage/messages')}
-      />
-      <Card
-        title='Requests'
-        subtitle='Approve or decline incoming message requests'
-        badge={unread.requests}
-        onPress={() => router.push('/(main)/engage/requests')}
-      />
-    </AppScreen>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingTop: insets.top * 0.65 },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.body}>
+        <View style={styles.toolsGrid}>
+          {tiles.map((t) => (
+            <View key={t.id} style={styles.toolsCell}>
+              <IconCard
+                icon={t.icon}
+                label={t.label}
+                badge={t.badge}
+                iconBgColor='transparent'
+                iconColor={ui.colors.primary}
+                iconSize={50}
+                onPress={t.onPress}
+                style={styles.toolsCard}
+              />
+            </View>
+          ))}
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { padding: ui.space.lg },
-  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: ui.colors.primary,
-    marginBottom: 6,
+  container: {
+    flex: 1,
+    backgroundColor: '#E6F1F8',
   },
-  cardSubtitle: {
-    color: ui.colors.muted,
-    fontSize: 14,
-    lineHeight: 20,
+  scrollContent: {
+    paddingBottom: 24,
   },
-  // spacing between cards
-  // (AppScreen uses padding; we do gap on wrapper by using marginBottom per card)
-  // Keep it simple with a bottom margin on each card.
-  // eslint-disable-next-line react-native/no-unused-styles
-  _spacer: {},
+  body: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  toolsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  toolsCell: {
+    width: '48%',
+  },
+  toolsCard: {
+    alignItems: 'center',
+    minHeight: 132,
+  },
 });
-
-

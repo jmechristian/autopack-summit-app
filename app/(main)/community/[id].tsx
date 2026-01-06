@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -11,6 +11,8 @@ import {
   View,
   Alert,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { autopackColors } from '../../../src/theme';
 import { getCommunityProfileByProfileId } from '../../../src/graphql/customQueries';
 import { graphqlClient } from '../../../src/utils/graphqlClient';
@@ -52,9 +54,12 @@ function nameOf(p: Profile | null) {
 }
 
 export default function CommunityProfileScreen() {
+  const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string; returnTo?: string; returnLabel?: string }>();
   const profileId = params.id;
+  const returnTo = typeof params.returnTo === 'string' ? params.returnTo : null;
+  const returnLabel = typeof params.returnLabel === 'string' ? params.returnLabel : null;
 
   const getOrCreateContactRequest = useEngageStore((s) => s.getOrCreateContactRequest);
   const ensureDmThreadForAcceptedRequest = useEngageStore(
@@ -124,37 +129,60 @@ export default function CommunityProfileScreen() {
   const isInContacts = !!(contactId && contactRecordIdByContactId[contactId]);
   const isInLeads = !!leadRecordId;
 
-  useEffect(() => {
-    let mounted = true;
-    async function loadLeadStatus() {
-      if (!currentAppUser?.id || !contactId || isSelf) {
-        if (mounted) setLeadRecordId(null);
-        return;
-      }
-      try {
-        const resp = await graphqlClient.graphql({
-          query: apsAppUserLeadsByUserId,
-          variables: {
-            userId: currentAppUser.id,
-            limit: 1,
-            filter: { contactId: { eq: contactId } },
-          },
-        });
-        const data = resp.data as {
-          apsAppUserLeadsByUserId?: { items?: Array<{ id: string } | null> | null };
-        };
-        const id = (data.apsAppUserLeadsByUserId?.items || []).find(Boolean)?.id || null;
-        if (mounted) setLeadRecordId(id);
-      } catch (e) {
-        console.error('Load lead status failed:', e);
-        if (mounted) setLeadRecordId(null);
-      }
+  const refreshLeadStatus = useCallback(async () => {
+    if (!currentAppUser?.id || !contactId || isSelf) {
+      setLeadRecordId(null);
+      return;
     }
-    loadLeadStatus();
-    return () => {
-      mounted = false;
-    };
+    try {
+      const resp = await graphqlClient.graphql({
+        query: apsAppUserLeadsByUserId,
+        variables: {
+          userId: currentAppUser.id,
+          limit: 1000,
+          filter: { contactId: { eq: contactId } },
+        },
+      });
+      const data = resp.data as {
+        apsAppUserLeadsByUserId?: { items?: Array<{ id: string } | null> | null };
+      };
+      const ids = (data.apsAppUserLeadsByUserId?.items || [])
+        .filter(Boolean)
+        .map((i) => (i as { id: string }).id)
+        .filter(Boolean);
+      const id = ids[0] || null;
+      setLeadRecordId(id);
+
+      // Best-effort cleanup: if duplicates exist, delete extras.
+      if (ids.length > 1) {
+        for (const extraId of ids.slice(1)) {
+          try {
+            await graphqlClient.graphql({
+              query: deleteApsAppUserLead,
+              variables: { input: { id: extraId } },
+            });
+          } catch (e) {
+            console.warn('Failed to delete duplicate lead:', extraId, e);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Refresh lead status failed:', e);
+      setLeadRecordId(null);
+    }
   }, [currentAppUser?.id, contactId, isSelf]);
+
+  // Initial + dependency-driven refresh
+  useEffect(() => {
+    refreshLeadStatus();
+  }, [refreshLeadStatus]);
+
+  // Also refresh when coming back to this screen (e.g., after navigation)
+  useFocusEffect(
+    useCallback(() => {
+      refreshLeadStatus();
+    }, [refreshLeadStatus])
+  );
 
   if (loading) {
     return (
@@ -196,7 +224,28 @@ export default function CommunityProfileScreen() {
       .filter(Boolean) || [];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+    >
+      <Pressable
+        style={styles.backRow}
+        onPress={() => {
+          // Prefer popping the stack to avoid creating navigation loops / duplicate history.
+          // If we were deep-linked from a different area (e.g., Engage > Leads), go back there.
+          if (returnTo) {
+            router.navigate(returnTo);
+            return;
+          }
+          // Otherwise, if there is back history, pop. If not, fall back to Community index.
+          if (router.canGoBack()) router.back();
+          else router.navigate('/(main)/community');
+        }}
+      >
+        <Ionicons name="chevron-back" size={20} color={autopackColors.apBlue} />
+        <Text style={styles.backRowText}>{returnLabel || 'Back to Community'}</Text>
+      </Pressable>
+
       <View style={styles.headerRow}>
         <View style={styles.avatar}>
           {profile.profilePicture ? (
@@ -326,18 +375,27 @@ export default function CommunityProfileScreen() {
                     query: deleteApsAppUserLead,
                     variables: { input: { id: leadRecordId } },
                   });
-                  setLeadRecordId(null);
+                  await refreshLeadStatus();
                   Alert.alert('Removed', 'Removed from your leads.');
                   return;
                 }
 
                 const resp = await graphqlClient.graphql({
                   query: createApsAppUserLead,
-                  variables: { input: { userId: currentAppUser.id, contactId, favorite: false } },
+                  // Deterministic id prevents duplicates for a given (userId, contactId)
+                  variables: {
+                    input: { id: `${currentAppUser.id}:${contactId}`, userId: currentAppUser.id, contactId, favorite: false },
+                  },
                 });
                 const data = resp.data as { createApsAppUserLead?: { id?: string | null } | null };
                 const createdId = data.createApsAppUserLead?.id || null;
-                setLeadRecordId(createdId);
+                // If create response doesn't include an id (or eventual consistency),
+                // re-query so UI matches backend state.
+                if (createdId) {
+                  setLeadRecordId(createdId);
+                } else {
+                  await refreshLeadStatus();
+                }
                 Alert.alert('Added', 'Lead saved in app.');
               } catch (e: any) {
                 console.error('Add lead failed:', e);
@@ -456,6 +514,19 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 16 },
   title: { fontSize: 18, fontWeight: '800', color: '#111827' },
   muted: { color: '#6b7280' },
+
+  backRow: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  backRowText: {
+    color: autopackColors.apBlue,
+    fontWeight: '800',
+  },
 
   headerRow: {
     flexDirection: 'row',

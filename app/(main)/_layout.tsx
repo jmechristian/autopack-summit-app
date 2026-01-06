@@ -74,6 +74,7 @@ export default function MainTabs() {
         name='profile'
         options={{
           title: 'Profile',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='person' color={color} size={size} />
           ),

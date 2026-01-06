@@ -24,9 +24,26 @@ export const ui = {
     lg: 16,
     xl: 24,
   },
+  fonts: {
+    oswald: 'Oswald-Regular',
+    oswaldBold: 'Oswald-Bold',
+    oswaldLight: 'Oswald-Light',
+    oswaldMedium: 'Oswald-Medium',
+    oswaldSemiBold: 'Oswald-SemiBold',
+  },
   text: {
-    h1: { fontSize: 22, fontWeight: '700' as const, color: '#111827' },
-    h2: { fontSize: 18, fontWeight: '700' as const, color: '#111827' },
+    h1: {
+      fontSize: 22,
+      fontWeight: '700' as const,
+      color: '#111827',
+      fontFamily: 'Oswald-Bold',
+    },
+    h2: {
+      fontSize: 18,
+      fontWeight: '700' as const,
+      color: '#111827',
+      fontFamily: 'Oswald-Bold',
+    },
     body: { fontSize: 16, color: '#111827' },
     muted: { fontSize: 14, color: '#6B7280' },
     small: { fontSize: 12, color: '#6B7280' },

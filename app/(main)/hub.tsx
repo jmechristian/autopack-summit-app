@@ -1,8 +1,11 @@
 // app/(main)/hub.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Animated as RNAnimated,
+  Dimensions,
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,28 +14,85 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCurrentUserProfile } from '../../src/hooks/useApsStore';
+import { useEngageStore } from '../../src/store/engageStore';
 import { autopackColors } from '../../src/theme';
+import { apsAppSessionsByAgendaIdWithRelations } from '../../src/graphql/customQueries';
+import { AppBadge } from '../../src/ui/AppBadge';
+import { IconCard } from '../../src/ui/IconCard';
+import { ui } from '../../src/ui/tokens';
+import { graphqlClient } from '../../src/utils/graphqlClient';
+import { getProfilePictureUrl } from '../../src/utils/storageUtils';
 
-interface HubItem {
+type QuickTool = {
   id: string;
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  color: string;
+};
+
+const QUICK_TOOLS: QuickTool[] = [
+  { id: 't1', icon: 'trophy', label: 'Leaderboard' },
+  { id: 't2', icon: 'qr-code-outline', label: 'Lead Capture' },
+  { id: 't3', icon: 'people', label: 'Attendees' },
+  { id: 't4', icon: 'business', label: 'Exhibitors' },
+  { id: 't5', icon: 'calendar', label: 'Agenda' },
+  { id: 't6', icon: 'chatbubbles', label: 'Engage' },
+];
+
+type NextSession = {
+  id: string;
+  title: string;
+  subtitle: string;
+  speakerName: string;
+  speakerRole: string;
+};
+
+const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
+
+const MOCK_NEXT_SESSIONS: NextSession[] = [
+  {
+    id: 's1',
+    title:
+      'EV Battery Safety: Lithium Battery\nTransport & Storage Regulatory\nLandscape',
+    subtitle: 'Ballroom Main Stage - 09:30 AM - 10:00 AM',
+    speakerName: 'Mike Pagel',
+    speakerRole: 'Senior Consultant HazMat Safety, HazMat Safety Consulting',
+  },
+  {
+    id: 's2',
+    title: 'Packaging Trends in 2026\nWhat’s Changing and Why',
+    subtitle: 'Track B - 10:15 AM - 10:45 AM',
+    speakerName: 'Taylor Nguyen',
+    speakerRole: 'Director of Packaging Innovation',
+  },
+  {
+    id: 's3',
+    title: 'Materials & Sustainability\nPractical Steps for OEMs',
+    subtitle: 'Track A - 11:00 AM - 11:30 AM',
+    speakerName: 'Jordan Lee',
+    speakerRole: 'Sustainability Lead',
+  },
+];
+
+function normalizeText(v?: string | null) {
+  return (v || '').trim();
 }
 
-const hubItems: HubItem[] = [
-  { id: '1', icon: 'trophy', label: 'Leaderboard', color: '#ffffff' },
-  { id: '2', icon: 'image', label: 'Photos', color: '#ffffff' },
-  { id: '3', icon: 'chatbubbles', label: 'Session Q&A', color: '#ffffff' },
-  { id: '4', icon: 'map', label: 'Floormap', color: '#ffffff' },
-  { id: '5', icon: 'business', label: 'Exhibitors', color: '#ffffff' },
-  { id: '6', icon: 'camera', label: 'Speakers', color: '#ffffff' },
-  { id: '7', icon: 'bookmark', label: 'Attendees', color: '#ffffff' },
-  { id: '8', icon: 'settings', label: 'Settings', color: '#ffffff' },
-];
+function formatTimeRange(start?: string | null, end?: string | null) {
+  const s = normalizeText(start);
+  const e = normalizeText(end);
+  if (s && e) return `${s} - ${e}`;
+  return s || '';
+}
 
 export default function HubScreen() {
   const insets = useSafeAreaInsets();
+  const profile = useCurrentUserProfile();
+  const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
+  const [sessionIndex, setSessionIndex] = useState(0);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [nextSessions, setNextSessions] = useState<NextSession[]>(MOCK_NEXT_SESSIONS);
+  const scrollX = useRef(new RNAnimated.Value(0)).current;
 
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
@@ -80,100 +140,298 @@ export default function HubScreen() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleItemPress = (item: HubItem) => {
-    // TODO: wire up navigation or actions
-    console.log('Pressed:', item.label);
-  };
+  useEffect(() => {
+    let cancelled = false;
+    async function loadNextSessions() {
+      try {
+        const all: any[] = [];
+        let nextToken: string | null | undefined = null;
+        do {
+          const resp = await graphqlClient.graphql({
+            query: apsAppSessionsByAgendaIdWithRelations,
+            variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
+          });
+          const data = resp.data as any;
+          const conn = data?.apsAppSessionsByAgendaId;
+          const items: Array<any> = conn?.items || [];
+          for (const it of items) {
+            if (it?.id) all.push(it);
+          }
+          nextToken = conn?.nextToken;
+        } while (nextToken);
+
+        // Sort by date+startTime best-effort (same approach as agenda screen, but lightweight)
+        all.sort((a, b) => {
+          const aKey = new Date(`${normalizeText(a?.date)}T${normalizeText(a?.startTime)}`).getTime();
+          const bKey = new Date(`${normalizeText(b?.date)}T${normalizeText(b?.startTime)}`).getTime();
+          const aSafe = Number.isNaN(aKey) ? Number.POSITIVE_INFINITY : aKey;
+          const bSafe = Number.isNaN(bKey) ? Number.POSITIVE_INFINITY : bKey;
+          return aSafe - bSafe;
+        });
+
+        const mapped: NextSession[] = all.map((it) => {
+          const title = normalizeText(it?.title) || 'Session';
+          const location = normalizeText(it?.location);
+          const time = formatTimeRange(it?.startTime, it?.endTime);
+          const subtitle = [location, time].filter(Boolean).join(' - ');
+
+          const firstJoin = it?.speakers?.items?.find((x: any) => x?.aPSSpeaker)?.aPSSpeaker;
+          const speakerName = `${normalizeText(firstJoin?.firstName)} ${normalizeText(
+            firstJoin?.lastName,
+          )}`.trim();
+          const speakerRole = [
+            normalizeText(firstJoin?.title),
+            normalizeText(firstJoin?.company),
+          ]
+            .filter(Boolean)
+            .join(', ');
+
+          return {
+            id: it.id,
+            title,
+            subtitle: subtitle || ' ',
+            speakerName: speakerName || ' ',
+            speakerRole: speakerRole || ' ',
+          };
+        });
+
+        if (!cancelled && mapped.length) {
+          setNextSessions(mapped);
+          setSessionIndex(0);
+        }
+      } catch (e) {
+        // Keep hub resilient: fall back to mock if anything goes wrong
+        console.warn('Hub: failed to load next sessions, using fallback.');
+      }
+    }
+    loadNextSessions();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const screenW = Dimensions.get('window').width;
+  const progressTranslateX = useMemo(() => {
+    const trackW = 120;
+    const dotW = 16;
+    const maxTranslate = trackW - dotW;
+    const count = nextSessions.length;
+    const maxScroll = screenW * Math.max(1, count - 1);
+    return scrollX.interpolate({
+      inputRange: [0, maxScroll],
+      outputRange: [0, maxTranslate],
+      extrapolate: 'clamp',
+    });
+  }, [nextSessions.length, screenW, scrollX]);
+
+  const fullName = [profile?.firstName?.trim(), profile?.lastName?.trim()]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const initials = `${(profile?.firstName || '').trim().slice(0, 1)}${(
+    profile?.lastName || ''
+  )
+    .trim()
+    .slice(0, 1)}`.toUpperCase();
+  const countdownCompact = `${timeLeft.days}:${timeLeft.hours}:${timeLeft.minutes}:${timeLeft.seconds}`;
+
+  // Generate fresh signed URL from S3 key
+  React.useEffect(() => {
+    const loadAvatar = async () => {
+      if (!profile?.profilePicture) {
+        setAvatarUri(null);
+        return;
+      }
+
+      const storedValue = profile.profilePicture;
+
+      // If it's already a full URL (legacy data), use it directly
+      if (
+        storedValue.startsWith('http://') ||
+        storedValue.startsWith('https://')
+      ) {
+        setAvatarUri(storedValue);
+        return;
+      }
+
+      // Otherwise, it's an S3 key - generate a fresh signed URL
+      try {
+        const url = await getProfilePictureUrl(storedValue);
+        setAvatarUri(url);
+      } catch (error) {
+        console.error('Error loading avatar URL:', error);
+        setAvatarUri(null);
+      }
+    };
+
+    loadAvatar();
+  }, [profile?.profilePicture]);
+
+  const heroImage = require('../../assets/images/hub-back.png');
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top }]}
+      contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.inner}>
-        {/* Countdown Card */}
-        <Animated.View
-          entering={FadeInDown.duration(600).delay(150)}
-          style={styles.countdownWrapper}
-        >
-          <View style={styles.countdownCard}>
-            <View style={styles.countdownTextBlock}>
-              <Text style={styles.countdownTitle}>Countdown to conference</Text>
-              <Text style={styles.countdownSubtitle}>
-                <Text style={styles.countdownSubtitleBold}>
-                  Sept 30, 2026 — 8:00 AM ET
-                </Text>
-              </Text>
-            </View>
+      {/* Hero */}
+      <ImageBackground
+        source={heroImage}
+        style={styles.hero}
+        resizeMode='cover'
+      >
+        <View style={styles.heroOverlay} />
 
-            <View style={styles.timeRow}>
-              <View style={styles.timeBlock}>
-                <Text style={styles.timeNumber}>{timeLeft.days}</Text>
-                <Text style={styles.timeLabel}>Days</Text>
-              </View>
-              <View style={styles.timeBlock}>
-                <Text style={styles.timeNumber}>{timeLeft.hours}</Text>
-                <Text style={styles.timeLabel}>Hrs</Text>
-              </View>
-              <View style={styles.timeBlock}>
-                <Text style={styles.timeNumber}>{timeLeft.minutes}</Text>
-                <Text style={styles.timeLabel}>Min</Text>
-              </View>
-              <View style={styles.timeBlock}>
-                <Text style={styles.timeNumber}>{timeLeft.seconds}</Text>
-                <Text style={styles.timeLabel}>Sec</Text>
-              </View>
+        <View style={[styles.heroTopRow, { paddingTop: insets.top + 12 }]}>
+          <View style={styles.heroLeft}>
+            <View style={styles.avatar}>
+              {avatarUri ? (
+                <ImageBackground
+                  source={{ uri: avatarUri }}
+                  style={styles.avatarImg}
+                  imageStyle={styles.avatarImg}
+                />
+              ) : (
+                <Text style={styles.avatarText}>{initials || 'U'}</Text>
+              )}
             </View>
+            <Text style={styles.greeting}>
+              Hi, {fullName || 'First LastName'}
+            </Text>
           </View>
-        </Animated.View>
 
-        {/* Lead Capture Button */}
-        <Animated.View
-          entering={FadeInDown.duration(600).delay(200)}
-          style={styles.leadButtonWrapper}
-        >
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.leadButton}
-            onPress={() => {
-              router.push('/(main)/scan');
-            }}
+            onPress={() => router.push('/(main)/engage')}
+            style={styles.bellButton}
           >
-            <Ionicons
-              name='qr-code-outline'
-              size={24}
-              color='#FFFFFF'
-              style={styles.leadIcon}
-            />
-            <Text style={styles.leadText}>Lead Capture</Text>
+            <Ionicons name='notifications-outline' size={22} color='#fff' />
+            <View style={styles.bellBadge}>
+              <AppBadge value={engageBadge} />
+            </View>
           </TouchableOpacity>
-        </Animated.View>
+        </View>
 
-        {/* Quick Access */}
-        <Animated.View
-          entering={FadeInDown.duration(600).delay(250)}
-          style={styles.quickAccessWrapper}
-        >
-          <View style={styles.quickHeaderRow}>
-            <Text style={styles.quickHeaderText}>Quick Access</Text>
-            <Ionicons name='add' size={24} color='#000' />
+        <View style={styles.heroTextWrap}>
+          <Text style={styles.heroTitle}>Welcome to{'\n'}Greenville!</Text>
+        </View>
+      </ImageBackground>
+
+      {/* Countdown strip */}
+      <View style={styles.countdownStrip}>
+        <Text style={styles.countdownStripText}>{countdownCompact}</Text>
+        <View style={styles.livePill}>
+          <Text style={styles.liveText}>LIVE</Text>
+        </View>
+      </View>
+
+      {/* Body */}
+      <View style={styles.body}>
+        {/* Quick Tools */}
+        <Animated.View entering={FadeInDown.duration(600).delay(150)}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionHeader}>Quick Tools</Text>
+            <TouchableOpacity activeOpacity={0.85} onPress={() => {}}>
+              <Ionicons name='add' size={24} color={ui.colors.text} />
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.grid}>
-            {hubItems.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => handleItemPress(item)}
-                activeOpacity={0.85}
-                style={styles.gridItem}
-              >
-                <View style={styles.gridIconWrapper}>
-                  <Ionicons name={item.icon} size={30} color={item.color} />
-                </View>
-                <Text style={styles.gridLabel}>{item.label}</Text>
-              </TouchableOpacity>
+          <View style={styles.toolsGrid}>
+            {QUICK_TOOLS.map((t) => (
+              <View key={t.id} style={styles.toolsCell}>
+                <IconCard
+                  icon={t.icon}
+                  label={t.label}
+                  iconBgColor='transparent'
+                  iconColor={ui.colors.primary}
+                  iconSize={50}
+                  onPress={() => {
+                    // TODO: wire later
+                    if (t.id === 't2') router.push('/(main)/scan');
+                    if (t.id === 't5') router.push('/(main)/agenda');
+                    if (t.id === 't6') router.push('/(main)/engage');
+                  }}
+                  style={styles.toolsCard}
+                />
+              </View>
             ))}
+          </View>
+        </Animated.View>
+
+        {/* Next Session carousel (dummy) */}
+        <Animated.View entering={FadeInDown.duration(600).delay(220)}>
+          <Text style={styles.sectionHeader}>Next Session</Text>
+          <RNAnimated.ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={RNAnimated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true },
+            )}
+            scrollEventThrottle={16}
+            // This ScrollView lives inside a padded container (body).
+            // Use negative margin to avoid double-left padding so cards align with headers.
+            style={{ marginTop: ui.space.sm, marginHorizontal: -20 }}
+            onMomentumScrollEnd={(e) => {
+              const w = e.nativeEvent.layoutMeasurement.width;
+              const x = e.nativeEvent.contentOffset.x;
+              const i = Math.round(x / w);
+              setSessionIndex(i);
+            }}
+          >
+            {nextSessions.map((s) => (
+              <View
+                key={s.id}
+                style={{ width: Dimensions.get('window').width }}
+              >
+                <View
+                  style={[styles.sessionCardWrap, { paddingHorizontal: 20 }]}
+                >
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/(main)/agenda/[id]',
+                        params: { id: s.id },
+                      })
+                    }
+                    style={styles.sessionCard}
+                  >
+                    <Text style={styles.sessionTitle}>{s.title}</Text>
+                    <Text style={styles.sessionSubtitle}>{s.subtitle}</Text>
+
+                    <View style={styles.speakerRow}>
+                      <View style={styles.speakerAvatar} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.speakerName}>{s.speakerName}</Text>
+                        <Text style={styles.speakerRole}>{s.speakerRole}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </RNAnimated.ScrollView>
+
+          <View style={styles.progressWrap} pointerEvents="none">
+            <View style={styles.progressTrack}>
+              <View style={styles.progressDotsRow}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <View key={i} style={styles.progressDotBg} />
+                ))}
+              </View>
+              <RNAnimated.View
+                style={[
+                  styles.progressActiveDot,
+                  { transform: [{ translateX: progressTranslateX }] },
+                ]}
+              />
+            </View>
+            <Text style={styles.progressLabel}>
+              {Math.min(nextSessions.length, sessionIndex + 1)} / {nextSessions.length}
+            </Text>
           </View>
         </Animated.View>
       </View>
@@ -189,129 +447,150 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 24,
   },
-  inner: {
+
+  hero: { height: 260, width: '100%' },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: autopackColors.apDarkBlue,
+    opacity: 0.75,
+  },
+  heroTopRow: {
     paddingHorizontal: 20,
-    paddingVertical: 24,
-  },
-  countdownWrapper: {
-    marginBottom: 24,
-  },
-  countdownCard: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 20,
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-  },
-  countdownTextBlock: {
-    marginRight: 8,
-  },
-  countdownTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: autopackColors.apBlue,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  countdownSubtitle: {
-    fontSize: 14,
-    color: '#4B5563',
-  },
-  countdownSubtitleBold: {
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
     justifyContent: 'space-between',
-    paddingRight: 8,
   },
-  timeBlock: {
+  heroLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 999,
+    backgroundColor: ui.colors.subtle,
     alignItems: 'center',
-    marginHorizontal: 4,
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: ui.colors.secondary,
+    overflow: 'hidden',
   },
-  timeNumber: {
-    fontSize: 32,
+  avatarImg: { width: 34, height: 34, borderRadius: 999 },
+  avatarText: { fontWeight: '700', color: ui.colors.text },
+  greeting: { color: '#fff', fontWeight: '700' },
+  bellButton: { padding: 8 },
+  bellBadge: { position: 'absolute', top: 0, right: 0 },
+  heroTextWrap: { paddingHorizontal: 20, marginTop: 28 },
+  heroTitle: {
+    fontSize: 42,
     fontWeight: '700',
-    color: '#111827',
-  },
-  timeLabel: {
-    fontSize: 11,
+    color: '#fff',
+    lineHeight: 46,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    color: '#6B7280',
-    marginTop: 2,
+    fontFamily: 'Oswald-Bold',
+    textAlign: 'center',
+    maxWidth: '80%',
+    flexWrap: 'wrap',
+    marginHorizontal: 'auto',
+    paddingTop: 2,
   },
-  leadButtonWrapper: {
-    marginBottom: 24,
-  },
-  leadButton: {
-    width: '100%',
-    backgroundColor: autopackColors.apBlue,
-    borderRadius: 20,
+
+  countdownStrip: {
+    backgroundColor: '#000',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    gap: 12,
   },
-  leadIcon: {
-    marginRight: 8,
-  },
-  leadText: {
-    color: '#FFFFFF',
+  countdownStripText: {
+    color: ui.colors.secondary,
+    fontWeight: '800',
     fontSize: 20,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-  quickAccessWrapper: {},
-  quickHeaderRow: {
+  livePill: {
+    backgroundColor: autopackColors.apRed,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  liveText: { color: '#fff', fontWeight: '800', letterSpacing: 0.5 },
+
+  body: { paddingHorizontal: 20, paddingVertical: 16 },
+  sectionHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    justifyContent: 'space-between',
   },
-  quickHeaderText: {
+  sectionHeader: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    color: ui.colors.text,
   },
-  grid: {
+
+  toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 12,
   },
-  gridItem: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
+  toolsCell: { width: '48%' },
+  toolsCard: { alignItems: 'center', minHeight: 132 },
+
+  sessionCardWrap: { paddingVertical: 8 },
+  sessionCard: {
+    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: ui.colors.border,
   },
-  gridIconWrapper: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    backgroundColor: autopackColors.apBlue,
-  },
-  gridLabel: {
+  sessionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    fontWeight: '700',
+    color: ui.colors.primary,
+    lineHeight: 20,
   },
+  sessionSubtitle: { marginTop: 8, color: ui.colors.muted, fontSize: 12 },
+  speakerRow: {
+    marginTop: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  speakerAvatar: {
+    width: 22,
+    height: 22,
+    borderRadius: 999,
+    backgroundColor: ui.colors.border,
+  },
+  speakerName: { fontWeight: '700', color: ui.colors.text },
+  speakerRole: { color: ui.colors.muted, fontSize: 12 },
+  progressWrap: { alignItems: 'center', marginTop: 12, gap: 8 },
+  progressTrack: {
+    width: 120,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    justifyContent: 'center',
+  },
+  progressDotsRow: {
+    position: 'absolute',
+    left: 8,
+    right: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  progressDotBg: {
+    width: 4,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.20)',
+  },
+  progressActiveDot: {
+    width: 16,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: ui.colors.secondary,
+  },
+  progressLabel: { fontSize: 12, color: ui.colors.muted },
 });

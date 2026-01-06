@@ -4,13 +4,59 @@ import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../src/theme';
+import * as Linking from 'expo-linking';
 
 function extractProfileId(payload: string): string | null {
   const raw = (payload || '').trim();
   if (!raw) return null;
 
+  // Accept APS custom scheme path format:
+  // aps://profile/<profileId>
+  // aps://profile/<profileId>/...
+  // aps://profile?id=<profileId>
+  {
+    const m = raw.match(/^aps:\/\/profile\/([0-9a-fA-F-]{20,})(?:\/.*)?$/i);
+    if (m?.[1]) return m[1];
+  }
+
   // Accept raw UUID as a fallback
   if (/^[0-9a-fA-F-]{20,}$/.test(raw) && !raw.includes('://')) return raw;
+
+  // Accept JSON payloads
+  if (raw.startsWith('{') && raw.endsWith('}')) {
+    try {
+      const obj = JSON.parse(raw) as { profileId?: string };
+      if (obj?.profileId) return obj.profileId;
+    } catch {
+      // ignore
+    }
+  }
+
+  // Accept vCard payloads (optional custom field)
+  // Example line: X-APS-PROFILEID:<uuid>
+  if (/BEGIN:VCARD/i.test(raw)) {
+    const m = raw.match(/X-APS-PROFILEID\s*:\s*([0-9a-fA-F-]{20,})/i);
+    if (m?.[1]) return m[1];
+  }
+
+  // Prefer expo-linking parsing (handles custom schemes reliably)
+  try {
+    const parsed = Linking.parse(raw);
+    const q = parsed?.queryParams as Record<string, unknown> | undefined;
+    const profileId = typeof q?.profileId === 'string' ? q.profileId : null;
+    if (profileId) return profileId;
+
+    // If the QR is aps://profile/<id>, expo-linking will typically parse:
+    // { scheme: 'aps', hostname: 'profile', path: '<id>' }
+    const maybeHost = typeof (parsed as any)?.hostname === 'string' ? ((parsed as any).hostname as string) : '';
+    const maybePath = typeof (parsed as any)?.path === 'string' ? ((parsed as any).path as string) : '';
+    if (maybeHost.toLowerCase() === 'profile') {
+      const idFromPath = maybePath.split('/').filter(Boolean)[0];
+      if (idFromPath && /^[0-9a-fA-F-]{20,}$/.test(idFromPath)) return idFromPath;
+    }
+  } catch {
+    // ignore
+  }
 
   try {
     const url = new URL(raw);
@@ -25,6 +71,7 @@ export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [lastRaw, setLastRaw] = useState<string | null>(null);
 
   const canScan = useMemo(() => !!permission?.granted && !scanned, [permission?.granted, scanned]);
 
@@ -32,6 +79,7 @@ export default function ScanScreen() {
     (result: { data?: string }) => {
       if (!canScan) return;
       const data = result?.data || '';
+      setLastRaw(data);
       const profileId = extractProfileId(data);
       if (!profileId) {
         setLastError('Not a valid APS QR code.');
@@ -40,7 +88,11 @@ export default function ScanScreen() {
       }
       setLastError(null);
       setScanned(true);
-      router.replace({ pathname: '/(main)/community/[id]', params: { id: profileId } });
+      // Use navigate to switch tabs without building up weird history stacks.
+      router.navigate({
+        pathname: '/(main)/community/[id]',
+        params: { id: profileId, returnTo: '/(main)/scan', returnLabel: 'Back to Scan' },
+      });
     },
     [canScan]
   );
@@ -90,6 +142,11 @@ export default function ScanScreen() {
         <Text style={styles.hintText}>We’ll open their profile so you can add them as a contact or lead.</Text>
 
         {!!lastError && <Text style={styles.errorText}>{lastError}</Text>}
+        {!!lastError && __DEV__ && !!lastRaw && (
+          <Text style={styles.debugText} numberOfLines={4}>
+            Scanned: {lastRaw}
+          </Text>
+        )}
 
         {scanned && (
           <Pressable
@@ -97,6 +154,7 @@ export default function ScanScreen() {
             onPress={() => {
               setScanned(false);
               setLastError(null);
+              setLastRaw(null);
             }}
           >
             <Text style={styles.primaryBtnText}>Scan again</Text>
@@ -146,6 +204,7 @@ const styles = StyleSheet.create({
   hintTitle: { color: '#fff', fontWeight: '900', fontSize: 16 },
   hintText: { color: 'rgba(255,255,255,0.85)', lineHeight: 18 },
   errorText: { color: '#fecaca', fontWeight: '800' },
+  debugText: { color: 'rgba(255,255,255,0.75)', fontSize: 12, lineHeight: 16 },
 
   primaryBtn: {
     marginTop: 6,
