@@ -56,7 +56,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a28f9527-bfd5-49ae-b62c-a4ce791bc274"
+        "projectId": "a28f9527-bfd5-49ae-b62c-a4ce791bc274",
+        "owner": "the-packaging-school"
       }
     }
   }

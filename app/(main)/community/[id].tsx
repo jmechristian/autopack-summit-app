@@ -23,6 +23,11 @@ import { APS_ID } from '../../../src/config/apsConfig';
 import { createApsAppUserLead, deleteApsAppUserLead } from '../../../src/graphql/mutations';
 import { apsAppUserLeadsByUserId } from '../../../src/graphql/queries';
 import * as Contacts from 'expo-contacts';
+import { NotesSection } from '../../../src/components/notes/NotesSection';
+
+// IMPORTANT:
+// Generated `getApsAppUserProfile` can include fields that now depend on USER_POOLS-only models (notes),
+// which can break API_KEY callers. This screen uses a custom query, but keep it minimal/safe as well.
 
 type Profile = {
   id: string;
@@ -462,6 +467,8 @@ export default function CommunityProfileScreen() {
           </Pressable>
         </View>
       )}
+
+      <NotesSection profileId={profile.id} />
 
       {!!profile.bio && (
         <View style={styles.card}>

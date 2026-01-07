@@ -8,6 +8,516 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
+export const onCreateApsAppUserNote = /* GraphQL */ `subscription OnCreateApsAppUserNote(
+  $filter: ModelSubscriptionApsAppUserNoteFilterInput
+  $owner: String
+) {
+  onCreateApsAppUserNote(filter: $filter, owner: $owner) {
+    id
+    owner
+    userId
+    user {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    note
+    sessionId
+    session {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    registrantId
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      appUserId
+      qrCode
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      __typename
+    }
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAppUserNotesId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsAppUserNoteSubscriptionVariables,
+  APITypes.OnCreateApsAppUserNoteSubscription
+>;
+export const onUpdateApsAppUserNote = /* GraphQL */ `subscription OnUpdateApsAppUserNote(
+  $filter: ModelSubscriptionApsAppUserNoteFilterInput
+  $owner: String
+) {
+  onUpdateApsAppUserNote(filter: $filter, owner: $owner) {
+    id
+    owner
+    userId
+    user {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    note
+    sessionId
+    session {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    registrantId
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      appUserId
+      qrCode
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      __typename
+    }
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAppUserNotesId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsAppUserNoteSubscriptionVariables,
+  APITypes.OnUpdateApsAppUserNoteSubscription
+>;
+export const onDeleteApsAppUserNote = /* GraphQL */ `subscription OnDeleteApsAppUserNote(
+  $filter: ModelSubscriptionApsAppUserNoteFilterInput
+  $owner: String
+) {
+  onDeleteApsAppUserNote(filter: $filter, owner: $owner) {
+    id
+    owner
+    userId
+    user {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    note
+    sessionId
+    session {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      title
+      phone
+      eventId
+      video
+      videoCaption
+      boothNumber
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    registrantId
+    registrant {
+      id
+      apsID
+      firstName
+      lastName
+      email
+      phone
+      companyId
+      jobTitle
+      attendeeType
+      termsAccepted
+      interests
+      otherInterest
+      speedNetworking
+      speedNetworkingStatus
+      billingAddressFirstName
+      billingAddressLastName
+      billingAddressEmail
+      billingAddressPhone
+      billingAddressStreet
+      billingAddressCity
+      billingAddressState
+      billingAddressZip
+      sameAsAttendee
+      speakerTopic
+      learningObjectives
+      totalAmount
+      discountCode
+      status
+      morrisetteTransportation
+      morrisetteStatus
+      aristoTransportation
+      aristoStatus
+      magnaTransportation
+      magnaStatus
+      paymentConfirmation
+      registrationEmailSent
+      registrationEmailSentDate
+      registrationEmailReceived
+      registrationEmailReceivedDate
+      welcomeEmailSent
+      welcomeEmailSentDate
+      welcomeEmailReceived
+      welcomeEmailReceivedDate
+      paymentMethod
+      paymentLast4
+      approvedAt
+      headshot
+      presentation
+      presentationTitle
+      presentationSummary
+      bio
+      appUserId
+      qrCode
+      createdAt
+      updatedAt
+      aPSRegistrantsId
+      aPSCompanyRegistrantsId
+      apsRegistrantSeatingChartRegistrantId
+      __typename
+    }
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      createdAt
+      updatedAt
+      __typename
+    }
+    companyId
+    company {
+      id
+      name
+      email
+      type
+      description
+      website
+      phone
+      address
+      city
+      state
+      zip
+      country
+      logo
+      eventId
+      createdAt
+      updatedAt
+      aPSCompaniesId
+      __typename
+    }
+    createdAt
+    updatedAt
+    apsAppUserNotesId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsAppUserNoteSubscriptionVariables,
+  APITypes.OnDeleteApsAppUserNoteSubscription
+>;
 export const onCreateApsContactRequest = /* GraphQL */ `subscription OnCreateApsContactRequest(
   $filter: ModelSubscriptionApsContactRequestFilterInput
 ) {
@@ -1877,504 +2387,6 @@ export const onDeleteApsAppUserContact = /* GraphQL */ `subscription OnDeleteAps
   APITypes.OnDeleteApsAppUserContactSubscriptionVariables,
   APITypes.OnDeleteApsAppUserContactSubscription
 >;
-export const onCreateApsAppUserNote = /* GraphQL */ `subscription OnCreateApsAppUserNote(
-  $filter: ModelSubscriptionApsAppUserNoteFilterInput
-) {
-  onCreateApsAppUserNote(filter: $filter) {
-    id
-    userId
-    user {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    note
-    sessionId
-    session {
-      id
-      session
-      date
-      time
-      location
-      agendaId
-      createdAt
-      updatedAt
-      apsAgendaItemsId
-      __typename
-    }
-    exhibitorId
-    exhibitor {
-      id
-      companyId
-      sponsorId
-      title
-      phone
-      eventId
-      video
-      videoCaption
-      boothNumber
-      visits
-      views
-      likes
-      createdAt
-      updatedAt
-      aPSExhibitorsId
-      aPSCompanyExhibitorProfilesId
-      __typename
-    }
-    registrantId
-    registrant {
-      id
-      apsID
-      firstName
-      lastName
-      email
-      phone
-      companyId
-      jobTitle
-      attendeeType
-      termsAccepted
-      interests
-      otherInterest
-      speedNetworking
-      speedNetworkingStatus
-      billingAddressFirstName
-      billingAddressLastName
-      billingAddressEmail
-      billingAddressPhone
-      billingAddressStreet
-      billingAddressCity
-      billingAddressState
-      billingAddressZip
-      sameAsAttendee
-      speakerTopic
-      learningObjectives
-      totalAmount
-      discountCode
-      status
-      morrisetteTransportation
-      morrisetteStatus
-      aristoTransportation
-      aristoStatus
-      magnaTransportation
-      magnaStatus
-      paymentConfirmation
-      registrationEmailSent
-      registrationEmailSentDate
-      registrationEmailReceived
-      registrationEmailReceivedDate
-      welcomeEmailSent
-      welcomeEmailSentDate
-      welcomeEmailReceived
-      welcomeEmailReceivedDate
-      paymentMethod
-      paymentLast4
-      approvedAt
-      headshot
-      presentation
-      presentationTitle
-      presentationSummary
-      bio
-      appUserId
-      qrCode
-      createdAt
-      updatedAt
-      aPSRegistrantsId
-      aPSCompanyRegistrantsId
-      apsRegistrantSeatingChartRegistrantId
-      __typename
-    }
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      createdAt
-      updatedAt
-      __typename
-    }
-    companyId
-    company {
-      id
-      name
-      email
-      type
-      description
-      website
-      phone
-      address
-      city
-      state
-      zip
-      country
-      logo
-      eventId
-      createdAt
-      updatedAt
-      aPSCompaniesId
-      __typename
-    }
-    createdAt
-    updatedAt
-    apsAppUserNotesId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateApsAppUserNoteSubscriptionVariables,
-  APITypes.OnCreateApsAppUserNoteSubscription
->;
-export const onUpdateApsAppUserNote = /* GraphQL */ `subscription OnUpdateApsAppUserNote(
-  $filter: ModelSubscriptionApsAppUserNoteFilterInput
-) {
-  onUpdateApsAppUserNote(filter: $filter) {
-    id
-    userId
-    user {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    note
-    sessionId
-    session {
-      id
-      session
-      date
-      time
-      location
-      agendaId
-      createdAt
-      updatedAt
-      apsAgendaItemsId
-      __typename
-    }
-    exhibitorId
-    exhibitor {
-      id
-      companyId
-      sponsorId
-      title
-      phone
-      eventId
-      video
-      videoCaption
-      boothNumber
-      visits
-      views
-      likes
-      createdAt
-      updatedAt
-      aPSExhibitorsId
-      aPSCompanyExhibitorProfilesId
-      __typename
-    }
-    registrantId
-    registrant {
-      id
-      apsID
-      firstName
-      lastName
-      email
-      phone
-      companyId
-      jobTitle
-      attendeeType
-      termsAccepted
-      interests
-      otherInterest
-      speedNetworking
-      speedNetworkingStatus
-      billingAddressFirstName
-      billingAddressLastName
-      billingAddressEmail
-      billingAddressPhone
-      billingAddressStreet
-      billingAddressCity
-      billingAddressState
-      billingAddressZip
-      sameAsAttendee
-      speakerTopic
-      learningObjectives
-      totalAmount
-      discountCode
-      status
-      morrisetteTransportation
-      morrisetteStatus
-      aristoTransportation
-      aristoStatus
-      magnaTransportation
-      magnaStatus
-      paymentConfirmation
-      registrationEmailSent
-      registrationEmailSentDate
-      registrationEmailReceived
-      registrationEmailReceivedDate
-      welcomeEmailSent
-      welcomeEmailSentDate
-      welcomeEmailReceived
-      welcomeEmailReceivedDate
-      paymentMethod
-      paymentLast4
-      approvedAt
-      headshot
-      presentation
-      presentationTitle
-      presentationSummary
-      bio
-      appUserId
-      qrCode
-      createdAt
-      updatedAt
-      aPSRegistrantsId
-      aPSCompanyRegistrantsId
-      apsRegistrantSeatingChartRegistrantId
-      __typename
-    }
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      createdAt
-      updatedAt
-      __typename
-    }
-    companyId
-    company {
-      id
-      name
-      email
-      type
-      description
-      website
-      phone
-      address
-      city
-      state
-      zip
-      country
-      logo
-      eventId
-      createdAt
-      updatedAt
-      aPSCompaniesId
-      __typename
-    }
-    createdAt
-    updatedAt
-    apsAppUserNotesId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateApsAppUserNoteSubscriptionVariables,
-  APITypes.OnUpdateApsAppUserNoteSubscription
->;
-export const onDeleteApsAppUserNote = /* GraphQL */ `subscription OnDeleteApsAppUserNote(
-  $filter: ModelSubscriptionApsAppUserNoteFilterInput
-) {
-  onDeleteApsAppUserNote(filter: $filter) {
-    id
-    userId
-    user {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    note
-    sessionId
-    session {
-      id
-      session
-      date
-      time
-      location
-      agendaId
-      createdAt
-      updatedAt
-      apsAgendaItemsId
-      __typename
-    }
-    exhibitorId
-    exhibitor {
-      id
-      companyId
-      sponsorId
-      title
-      phone
-      eventId
-      video
-      videoCaption
-      boothNumber
-      visits
-      views
-      likes
-      createdAt
-      updatedAt
-      aPSExhibitorsId
-      aPSCompanyExhibitorProfilesId
-      __typename
-    }
-    registrantId
-    registrant {
-      id
-      apsID
-      firstName
-      lastName
-      email
-      phone
-      companyId
-      jobTitle
-      attendeeType
-      termsAccepted
-      interests
-      otherInterest
-      speedNetworking
-      speedNetworkingStatus
-      billingAddressFirstName
-      billingAddressLastName
-      billingAddressEmail
-      billingAddressPhone
-      billingAddressStreet
-      billingAddressCity
-      billingAddressState
-      billingAddressZip
-      sameAsAttendee
-      speakerTopic
-      learningObjectives
-      totalAmount
-      discountCode
-      status
-      morrisetteTransportation
-      morrisetteStatus
-      aristoTransportation
-      aristoStatus
-      magnaTransportation
-      magnaStatus
-      paymentConfirmation
-      registrationEmailSent
-      registrationEmailSentDate
-      registrationEmailReceived
-      registrationEmailReceivedDate
-      welcomeEmailSent
-      welcomeEmailSentDate
-      welcomeEmailReceived
-      welcomeEmailReceivedDate
-      paymentMethod
-      paymentLast4
-      approvedAt
-      headshot
-      presentation
-      presentationTitle
-      presentationSummary
-      bio
-      appUserId
-      qrCode
-      createdAt
-      updatedAt
-      aPSRegistrantsId
-      aPSCompanyRegistrantsId
-      apsRegistrantSeatingChartRegistrantId
-      __typename
-    }
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      createdAt
-      updatedAt
-      __typename
-    }
-    companyId
-    company {
-      id
-      name
-      email
-      type
-      description
-      website
-      phone
-      address
-      city
-      state
-      zip
-      country
-      logo
-      eventId
-      createdAt
-      updatedAt
-      aPSCompaniesId
-      __typename
-    }
-    createdAt
-    updatedAt
-    apsAppUserNotesId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteApsAppUserNoteSubscriptionVariables,
-  APITypes.OnDeleteApsAppUserNoteSubscription
->;
 export const onCreateApsAppUserLead = /* GraphQL */ `subscription OnCreateApsAppUserLead(
   $filter: ModelSubscriptionApsAppUserLeadFilterInput
 ) {
@@ -3244,10 +3256,12 @@ export const onCreateApsAppSession = /* GraphQL */ `subscription OnCreateApsAppS
 ) {
   onCreateApsAppSession(filter: $filter) {
     id
-    session
+    title
     date
-    time
+    startTime
+    endTime
     location
+    description
     agendaId
     agenda {
       id
@@ -3261,6 +3275,14 @@ export const onCreateApsAppSession = /* GraphQL */ `subscription OnCreateApsAppS
       __typename
     }
     notes {
+      nextToken
+      __typename
+    }
+    speakers {
+      nextToken
+      __typename
+    }
+    sponsors {
       nextToken
       __typename
     }
@@ -3279,10 +3301,12 @@ export const onUpdateApsAppSession = /* GraphQL */ `subscription OnUpdateApsAppS
 ) {
   onUpdateApsAppSession(filter: $filter) {
     id
-    session
+    title
     date
-    time
+    startTime
+    endTime
     location
+    description
     agendaId
     agenda {
       id
@@ -3296,6 +3320,14 @@ export const onUpdateApsAppSession = /* GraphQL */ `subscription OnUpdateApsAppS
       __typename
     }
     notes {
+      nextToken
+      __typename
+    }
+    speakers {
+      nextToken
+      __typename
+    }
+    sponsors {
       nextToken
       __typename
     }
@@ -3314,10 +3346,12 @@ export const onDeleteApsAppSession = /* GraphQL */ `subscription OnDeleteApsAppS
 ) {
   onDeleteApsAppSession(filter: $filter) {
     id
-    session
+    title
     date
-    time
+    startTime
+    endTime
     location
+    description
     agendaId
     agenda {
       id
@@ -3331,6 +3365,14 @@ export const onDeleteApsAppSession = /* GraphQL */ `subscription OnDeleteApsAppS
       __typename
     }
     notes {
+      nextToken
+      __typename
+    }
+    speakers {
+      nextToken
+      __typename
+    }
+    sponsors {
       nextToken
       __typename
     }
@@ -3352,10 +3394,12 @@ export const onCreateApsAppSessionQuestion = /* GraphQL */ `subscription OnCreat
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3375,7 +3419,6 @@ export const onCreateApsAppSessionQuestion = /* GraphQL */ `subscription OnCreat
     createdAt
     updatedAt
     apsAppUserSessionQuestionsId
-    apsAppSessionSessionQuestionsId
     __typename
   }
 }
@@ -3391,10 +3434,12 @@ export const onUpdateApsAppSessionQuestion = /* GraphQL */ `subscription OnUpdat
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3414,7 +3459,6 @@ export const onUpdateApsAppSessionQuestion = /* GraphQL */ `subscription OnUpdat
     createdAt
     updatedAt
     apsAppUserSessionQuestionsId
-    apsAppSessionSessionQuestionsId
     __typename
   }
 }
@@ -3430,10 +3474,12 @@ export const onDeleteApsAppSessionQuestion = /* GraphQL */ `subscription OnDelet
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3453,7 +3499,6 @@ export const onDeleteApsAppSessionQuestion = /* GraphQL */ `subscription OnDelet
     createdAt
     updatedAt
     apsAppUserSessionQuestionsId
-    apsAppSessionSessionQuestionsId
     __typename
   }
 }
@@ -3495,6 +3540,10 @@ export const onCreateAPSSpeaker = /* GraphQL */ `subscription OnCreateAPSSpeaker
       createdAt
       updatedAt
       aPSAgendaId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -3543,6 +3592,10 @@ export const onUpdateAPSSpeaker = /* GraphQL */ `subscription OnUpdateAPSSpeaker
       aPSAgendaId
       __typename
     }
+    sessions {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSSpeakersId
@@ -3587,6 +3640,10 @@ export const onDeleteAPSSpeaker = /* GraphQL */ `subscription OnDeleteAPSSpeaker
       createdAt
       updatedAt
       aPSAgendaId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -3660,6 +3717,10 @@ export const onCreateApsSponsor = /* GraphQL */ `subscription OnCreateApsSponsor
       updatedAt
       aPSExhibitorsId
       aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -3737,6 +3798,10 @@ export const onUpdateApsSponsor = /* GraphQL */ `subscription OnUpdateApsSponsor
       aPSCompanyExhibitorProfilesId
       __typename
     }
+    sessions {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSSponsorsId
@@ -3810,6 +3875,10 @@ export const onDeleteApsSponsor = /* GraphQL */ `subscription OnDeleteApsSponsor
       updatedAt
       aPSExhibitorsId
       aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -5446,4 +5515,280 @@ export const onDeleteApsSeatingChartRegistrant = /* GraphQL */ `subscription OnD
 ` as GeneratedSubscription<
   APITypes.OnDeleteApsSeatingChartRegistrantSubscriptionVariables,
   APITypes.OnDeleteApsSeatingChartRegistrantSubscription
+>;
+export const onCreateSessionSpeakers = /* GraphQL */ `subscription OnCreateSessionSpeakers(
+  $filter: ModelSubscriptionSessionSpeakersFilterInput
+) {
+  onCreateSessionSpeakers(filter: $filter) {
+    id
+    apsAppSessionId
+    aPSSpeakerId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    aPSSpeaker {
+      id
+      firstName
+      lastName
+      email
+      company
+      title
+      phone
+      linkedin
+      bio
+      presentationTitle
+      presentationSummary
+      headshot
+      mediaConsent
+      privacyConsent
+      eventId
+      createdAt
+      updatedAt
+      aPSSpeakersId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateSessionSpeakersSubscriptionVariables,
+  APITypes.OnCreateSessionSpeakersSubscription
+>;
+export const onUpdateSessionSpeakers = /* GraphQL */ `subscription OnUpdateSessionSpeakers(
+  $filter: ModelSubscriptionSessionSpeakersFilterInput
+) {
+  onUpdateSessionSpeakers(filter: $filter) {
+    id
+    apsAppSessionId
+    aPSSpeakerId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    aPSSpeaker {
+      id
+      firstName
+      lastName
+      email
+      company
+      title
+      phone
+      linkedin
+      bio
+      presentationTitle
+      presentationSummary
+      headshot
+      mediaConsent
+      privacyConsent
+      eventId
+      createdAt
+      updatedAt
+      aPSSpeakersId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateSessionSpeakersSubscriptionVariables,
+  APITypes.OnUpdateSessionSpeakersSubscription
+>;
+export const onDeleteSessionSpeakers = /* GraphQL */ `subscription OnDeleteSessionSpeakers(
+  $filter: ModelSubscriptionSessionSpeakersFilterInput
+) {
+  onDeleteSessionSpeakers(filter: $filter) {
+    id
+    apsAppSessionId
+    aPSSpeakerId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    aPSSpeaker {
+      id
+      firstName
+      lastName
+      email
+      company
+      title
+      phone
+      linkedin
+      bio
+      presentationTitle
+      presentationSummary
+      headshot
+      mediaConsent
+      privacyConsent
+      eventId
+      createdAt
+      updatedAt
+      aPSSpeakersId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteSessionSpeakersSubscriptionVariables,
+  APITypes.OnDeleteSessionSpeakersSubscription
+>;
+export const onCreateSessionSponsors = /* GraphQL */ `subscription OnCreateSessionSponsors(
+  $filter: ModelSubscriptionSessionSponsorsFilterInput
+) {
+  onCreateSessionSponsors(filter: $filter) {
+    id
+    apsAppSessionId
+    apsSponsorId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    apsSponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateSessionSponsorsSubscriptionVariables,
+  APITypes.OnCreateSessionSponsorsSubscription
+>;
+export const onUpdateSessionSponsors = /* GraphQL */ `subscription OnUpdateSessionSponsors(
+  $filter: ModelSubscriptionSessionSponsorsFilterInput
+) {
+  onUpdateSessionSponsors(filter: $filter) {
+    id
+    apsAppSessionId
+    apsSponsorId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    apsSponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateSessionSponsorsSubscriptionVariables,
+  APITypes.OnUpdateSessionSponsorsSubscription
+>;
+export const onDeleteSessionSponsors = /* GraphQL */ `subscription OnDeleteSessionSponsors(
+  $filter: ModelSubscriptionSessionSponsorsFilterInput
+) {
+  onDeleteSessionSponsors(filter: $filter) {
+    id
+    apsAppSessionId
+    apsSponsorId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    apsSponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteSessionSponsorsSubscriptionVariables,
+  APITypes.OnDeleteSessionSponsorsSubscription
 >;

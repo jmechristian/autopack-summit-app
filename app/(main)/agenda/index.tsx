@@ -16,6 +16,8 @@ import RenderHtml from 'react-native-render-html';
 import { autopackColors } from '../../../src/theme';
 import { graphqlClient } from '../../../src/utils/graphqlClient';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
+import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
+import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
 
@@ -89,6 +91,8 @@ function formatPeopleList(names: string[]) {
 }
 
 export default function AgendaList() {
+  const currentAppUser = useCurrentAppUser();
+  const { sessionIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
   const [sessions, setSessions] = useState<AgendaSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,6 +200,7 @@ export default function AgendaList() {
       `${normalizeText(s.firstName)} ${normalizeText(s.lastName)}`.trim(),
     );
     const sponsors = (item.sponsors || []).map((s) => normalizeText(s.company?.name || ''));
+    const hasNote = !!currentAppUser?.id && sessionIdsWithNotes.has(item.id);
 
     return (
       <Pressable
@@ -207,6 +212,11 @@ export default function AgendaList() {
         }
         style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       >
+        {hasNote && (
+          <View pointerEvents="none" style={styles.noteIcon}>
+            <Ionicons name="document-text-outline" size={18} color={autopackColors.apBlue} />
+          </View>
+        )}
         <Text style={styles.time}>{time}</Text>
         <Text style={styles.title}>{title}</Text>
 
@@ -247,7 +257,7 @@ export default function AgendaList() {
         )}
       </Pressable>
     );
-  }, [width]);
+  }, [width, sessionIdsWithNotes, currentAppUser?.id]);
 
   const keyExtractor = useCallback((item: AgendaSession) => item.id, []);
 
@@ -353,6 +363,19 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardPressed: { opacity: 0.92 },
+  noteIcon: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+  },
   time: { color: autopackColors.apBlue, fontWeight: '800', fontSize: 13, marginBottom: 6 },
   title: { fontSize: 17, fontWeight: '800', color: '#111827' },
   location: { marginTop: 6, color: '#4B5563', fontWeight: '600' },

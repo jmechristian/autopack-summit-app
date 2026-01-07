@@ -8,564 +8,6 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const createApsContactRequest = /* GraphQL */ `mutation CreateApsContactRequest(
-  $input: CreateApsContactRequestInput!
-  $condition: ModelApsContactRequestConditionInput
-) {
-  createApsContactRequest(input: $input, condition: $condition) {
-    id
-    eventId
-    requestKey
-    userAId
-    userBId
-    owners
-    requestedByUserId
-    status
-    acceptedAt
-    declinedAt
-    blockedAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsContactRequestMutationVariables,
-  APITypes.CreateApsContactRequestMutation
->;
-export const updateApsContactRequest = /* GraphQL */ `mutation UpdateApsContactRequest(
-  $input: UpdateApsContactRequestInput!
-  $condition: ModelApsContactRequestConditionInput
-) {
-  updateApsContactRequest(input: $input, condition: $condition) {
-    id
-    eventId
-    requestKey
-    userAId
-    userBId
-    owners
-    requestedByUserId
-    status
-    acceptedAt
-    declinedAt
-    blockedAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsContactRequestMutationVariables,
-  APITypes.UpdateApsContactRequestMutation
->;
-export const deleteApsContactRequest = /* GraphQL */ `mutation DeleteApsContactRequest(
-  $input: DeleteApsContactRequestInput!
-  $condition: ModelApsContactRequestConditionInput
-) {
-  deleteApsContactRequest(input: $input, condition: $condition) {
-    id
-    eventId
-    requestKey
-    userAId
-    userBId
-    owners
-    requestedByUserId
-    status
-    acceptedAt
-    declinedAt
-    blockedAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsContactRequestMutationVariables,
-  APITypes.DeleteApsContactRequestMutation
->;
-export const createApsDmThread = /* GraphQL */ `mutation CreateApsDmThread(
-  $input: CreateApsDmThreadInput!
-  $condition: ModelApsDmThreadConditionInput
-) {
-  createApsDmThread(input: $input, condition: $condition) {
-    id
-    eventId
-    dmKey
-    userAId
-    userBId
-    owners
-    participantStates {
-      nextToken
-      __typename
-    }
-    messages {
-      nextToken
-      __typename
-    }
-    lastMessageAt
-    lastMessagePreview
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsDmThreadMutationVariables,
-  APITypes.CreateApsDmThreadMutation
->;
-export const updateApsDmThread = /* GraphQL */ `mutation UpdateApsDmThread(
-  $input: UpdateApsDmThreadInput!
-  $condition: ModelApsDmThreadConditionInput
-) {
-  updateApsDmThread(input: $input, condition: $condition) {
-    id
-    eventId
-    dmKey
-    userAId
-    userBId
-    owners
-    participantStates {
-      nextToken
-      __typename
-    }
-    messages {
-      nextToken
-      __typename
-    }
-    lastMessageAt
-    lastMessagePreview
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsDmThreadMutationVariables,
-  APITypes.UpdateApsDmThreadMutation
->;
-export const deleteApsDmThread = /* GraphQL */ `mutation DeleteApsDmThread(
-  $input: DeleteApsDmThreadInput!
-  $condition: ModelApsDmThreadConditionInput
-) {
-  deleteApsDmThread(input: $input, condition: $condition) {
-    id
-    eventId
-    dmKey
-    userAId
-    userBId
-    owners
-    participantStates {
-      nextToken
-      __typename
-    }
-    messages {
-      nextToken
-      __typename
-    }
-    lastMessageAt
-    lastMessagePreview
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsDmThreadMutationVariables,
-  APITypes.DeleteApsDmThreadMutation
->;
-export const createApsDmParticipantState = /* GraphQL */ `mutation CreateApsDmParticipantState(
-  $input: CreateApsDmParticipantStateInput!
-  $condition: ModelApsDmParticipantStateConditionInput
-) {
-  createApsDmParticipantState(input: $input, condition: $condition) {
-    id
-    eventId
-    threadId
-    thread {
-      id
-      eventId
-      dmKey
-      userAId
-      userBId
-      owners
-      lastMessageAt
-      lastMessagePreview
-      createdAt
-      updatedAt
-      __typename
-    }
-    userId
-    lastReadAt
-    unreadCount
-    lastMessageAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsDmParticipantStateMutationVariables,
-  APITypes.CreateApsDmParticipantStateMutation
->;
-export const updateApsDmParticipantState = /* GraphQL */ `mutation UpdateApsDmParticipantState(
-  $input: UpdateApsDmParticipantStateInput!
-  $condition: ModelApsDmParticipantStateConditionInput
-) {
-  updateApsDmParticipantState(input: $input, condition: $condition) {
-    id
-    eventId
-    threadId
-    thread {
-      id
-      eventId
-      dmKey
-      userAId
-      userBId
-      owners
-      lastMessageAt
-      lastMessagePreview
-      createdAt
-      updatedAt
-      __typename
-    }
-    userId
-    lastReadAt
-    unreadCount
-    lastMessageAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsDmParticipantStateMutationVariables,
-  APITypes.UpdateApsDmParticipantStateMutation
->;
-export const deleteApsDmParticipantState = /* GraphQL */ `mutation DeleteApsDmParticipantState(
-  $input: DeleteApsDmParticipantStateInput!
-  $condition: ModelApsDmParticipantStateConditionInput
-) {
-  deleteApsDmParticipantState(input: $input, condition: $condition) {
-    id
-    eventId
-    threadId
-    thread {
-      id
-      eventId
-      dmKey
-      userAId
-      userBId
-      owners
-      lastMessageAt
-      lastMessagePreview
-      createdAt
-      updatedAt
-      __typename
-    }
-    userId
-    lastReadAt
-    unreadCount
-    lastMessageAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsDmParticipantStateMutationVariables,
-  APITypes.DeleteApsDmParticipantStateMutation
->;
-export const createApsDmMessage = /* GraphQL */ `mutation CreateApsDmMessage(
-  $input: CreateApsDmMessageInput!
-  $condition: ModelApsDmMessageConditionInput
-) {
-  createApsDmMessage(input: $input, condition: $condition) {
-    id
-    eventId
-    threadId
-    thread {
-      id
-      eventId
-      dmKey
-      userAId
-      userBId
-      owners
-      lastMessageAt
-      lastMessagePreview
-      createdAt
-      updatedAt
-      __typename
-    }
-    senderUserId
-    sender {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    owners
-    type
-    body
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsDmMessageMutationVariables,
-  APITypes.CreateApsDmMessageMutation
->;
-export const updateApsDmMessage = /* GraphQL */ `mutation UpdateApsDmMessage(
-  $input: UpdateApsDmMessageInput!
-  $condition: ModelApsDmMessageConditionInput
-) {
-  updateApsDmMessage(input: $input, condition: $condition) {
-    id
-    eventId
-    threadId
-    thread {
-      id
-      eventId
-      dmKey
-      userAId
-      userBId
-      owners
-      lastMessageAt
-      lastMessagePreview
-      createdAt
-      updatedAt
-      __typename
-    }
-    senderUserId
-    sender {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    owners
-    type
-    body
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsDmMessageMutationVariables,
-  APITypes.UpdateApsDmMessageMutation
->;
-export const deleteApsDmMessage = /* GraphQL */ `mutation DeleteApsDmMessage(
-  $input: DeleteApsDmMessageInput!
-  $condition: ModelApsDmMessageConditionInput
-) {
-  deleteApsDmMessage(input: $input, condition: $condition) {
-    id
-    eventId
-    threadId
-    thread {
-      id
-      eventId
-      dmKey
-      userAId
-      userBId
-      owners
-      lastMessageAt
-      lastMessagePreview
-      createdAt
-      updatedAt
-      __typename
-    }
-    senderUserId
-    sender {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    owners
-    type
-    body
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsDmMessageMutationVariables,
-  APITypes.DeleteApsDmMessageMutation
->;
-export const createApsAdminAnnouncement = /* GraphQL */ `mutation CreateApsAdminAnnouncement(
-  $input: CreateApsAdminAnnouncementInput!
-  $condition: ModelApsAdminAnnouncementConditionInput
-) {
-  createApsAdminAnnouncement(input: $input, condition: $condition) {
-    id
-    eventId
-    title
-    body
-    deepLink
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsAdminAnnouncementMutationVariables,
-  APITypes.CreateApsAdminAnnouncementMutation
->;
-export const updateApsAdminAnnouncement = /* GraphQL */ `mutation UpdateApsAdminAnnouncement(
-  $input: UpdateApsAdminAnnouncementInput!
-  $condition: ModelApsAdminAnnouncementConditionInput
-) {
-  updateApsAdminAnnouncement(input: $input, condition: $condition) {
-    id
-    eventId
-    title
-    body
-    deepLink
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsAdminAnnouncementMutationVariables,
-  APITypes.UpdateApsAdminAnnouncementMutation
->;
-export const deleteApsAdminAnnouncement = /* GraphQL */ `mutation DeleteApsAdminAnnouncement(
-  $input: DeleteApsAdminAnnouncementInput!
-  $condition: ModelApsAdminAnnouncementConditionInput
-) {
-  deleteApsAdminAnnouncement(input: $input, condition: $condition) {
-    id
-    eventId
-    title
-    body
-    deepLink
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsAdminAnnouncementMutationVariables,
-  APITypes.DeleteApsAdminAnnouncementMutation
->;
-export const createApsUserEngageState = /* GraphQL */ `mutation CreateApsUserEngageState(
-  $input: CreateApsUserEngageStateInput!
-  $condition: ModelApsUserEngageStateConditionInput
-) {
-  createApsUserEngageState(input: $input, condition: $condition) {
-    id
-    eventId
-    userId
-    lastSeenAnnouncementAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsUserEngageStateMutationVariables,
-  APITypes.CreateApsUserEngageStateMutation
->;
-export const updateApsUserEngageState = /* GraphQL */ `mutation UpdateApsUserEngageState(
-  $input: UpdateApsUserEngageStateInput!
-  $condition: ModelApsUserEngageStateConditionInput
-) {
-  updateApsUserEngageState(input: $input, condition: $condition) {
-    id
-    eventId
-    userId
-    lastSeenAnnouncementAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsUserEngageStateMutationVariables,
-  APITypes.UpdateApsUserEngageStateMutation
->;
-export const deleteApsUserEngageState = /* GraphQL */ `mutation DeleteApsUserEngageState(
-  $input: DeleteApsUserEngageStateInput!
-  $condition: ModelApsUserEngageStateConditionInput
-) {
-  deleteApsUserEngageState(input: $input, condition: $condition) {
-    id
-    eventId
-    userId
-    lastSeenAnnouncementAt
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsUserEngageStateMutationVariables,
-  APITypes.DeleteApsUserEngageStateMutation
->;
-export const createApsPushToken = /* GraphQL */ `mutation CreateApsPushToken(
-  $input: CreateApsPushTokenInput!
-  $condition: ModelApsPushTokenConditionInput
-) {
-  createApsPushToken(input: $input, condition: $condition) {
-    id
-    userId
-    token
-    platform
-    updatedAt
-    createdAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateApsPushTokenMutationVariables,
-  APITypes.CreateApsPushTokenMutation
->;
-export const updateApsPushToken = /* GraphQL */ `mutation UpdateApsPushToken(
-  $input: UpdateApsPushTokenInput!
-  $condition: ModelApsPushTokenConditionInput
-) {
-  updateApsPushToken(input: $input, condition: $condition) {
-    id
-    userId
-    token
-    platform
-    updatedAt
-    createdAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsPushTokenMutationVariables,
-  APITypes.UpdateApsPushTokenMutation
->;
-export const deleteApsPushToken = /* GraphQL */ `mutation DeleteApsPushToken(
-  $input: DeleteApsPushTokenInput!
-  $condition: ModelApsPushTokenConditionInput
-) {
-  deleteApsPushToken(input: $input, condition: $condition) {
-    id
-    userId
-    token
-    platform
-    updatedAt
-    createdAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteApsPushTokenMutationVariables,
-  APITypes.DeleteApsPushTokenMutation
->;
 export const createAPS = /* GraphQL */ `mutation CreateAPS(
   $input: CreateAPSInput!
   $condition: ModelAPSConditionInput
@@ -1931,6 +1373,7 @@ export const createApsAppUserNote = /* GraphQL */ `mutation CreateApsAppUserNote
 ) {
   createApsAppUserNote(input: $input, condition: $condition) {
     id
+    owner
     userId
     user {
       id
@@ -1944,10 +1387,12 @@ export const createApsAppUserNote = /* GraphQL */ `mutation CreateApsAppUserNote
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -2098,6 +1543,7 @@ export const updateApsAppUserNote = /* GraphQL */ `mutation UpdateApsAppUserNote
 ) {
   updateApsAppUserNote(input: $input, condition: $condition) {
     id
+    owner
     userId
     user {
       id
@@ -2111,10 +1557,12 @@ export const updateApsAppUserNote = /* GraphQL */ `mutation UpdateApsAppUserNote
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -2265,6 +1713,7 @@ export const deleteApsAppUserNote = /* GraphQL */ `mutation DeleteApsAppUserNote
 ) {
   deleteApsAppUserNote(input: $input, condition: $condition) {
     id
+    owner
     userId
     user {
       id
@@ -2278,10 +1727,12 @@ export const deleteApsAppUserNote = /* GraphQL */ `mutation DeleteApsAppUserNote
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3314,10 +2765,12 @@ export const createApsAppSession = /* GraphQL */ `mutation CreateApsAppSession(
 ) {
   createApsAppSession(input: $input, condition: $condition) {
     id
-    session
+    title
     date
-    time
+    startTime
+    endTime
     location
+    description
     agendaId
     agenda {
       id
@@ -3331,6 +2784,14 @@ export const createApsAppSession = /* GraphQL */ `mutation CreateApsAppSession(
       __typename
     }
     notes {
+      nextToken
+      __typename
+    }
+    speakers {
+      nextToken
+      __typename
+    }
+    sponsors {
       nextToken
       __typename
     }
@@ -3350,10 +2811,12 @@ export const updateApsAppSession = /* GraphQL */ `mutation UpdateApsAppSession(
 ) {
   updateApsAppSession(input: $input, condition: $condition) {
     id
-    session
+    title
     date
-    time
+    startTime
+    endTime
     location
+    description
     agendaId
     agenda {
       id
@@ -3367,6 +2830,14 @@ export const updateApsAppSession = /* GraphQL */ `mutation UpdateApsAppSession(
       __typename
     }
     notes {
+      nextToken
+      __typename
+    }
+    speakers {
+      nextToken
+      __typename
+    }
+    sponsors {
       nextToken
       __typename
     }
@@ -3386,10 +2857,12 @@ export const deleteApsAppSession = /* GraphQL */ `mutation DeleteApsAppSession(
 ) {
   deleteApsAppSession(input: $input, condition: $condition) {
     id
-    session
+    title
     date
-    time
+    startTime
+    endTime
     location
+    description
     agendaId
     agenda {
       id
@@ -3403,6 +2876,14 @@ export const deleteApsAppSession = /* GraphQL */ `mutation DeleteApsAppSession(
       __typename
     }
     notes {
+      nextToken
+      __typename
+    }
+    speakers {
+      nextToken
+      __typename
+    }
+    sponsors {
       nextToken
       __typename
     }
@@ -3425,10 +2906,12 @@ export const createApsAppSessionQuestion = /* GraphQL */ `mutation CreateApsAppS
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3448,7 +2931,6 @@ export const createApsAppSessionQuestion = /* GraphQL */ `mutation CreateApsAppS
     createdAt
     updatedAt
     apsAppUserSessionQuestionsId
-    apsAppSessionSessionQuestionsId
     __typename
   }
 }
@@ -3465,10 +2947,12 @@ export const updateApsAppSessionQuestion = /* GraphQL */ `mutation UpdateApsAppS
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3488,7 +2972,6 @@ export const updateApsAppSessionQuestion = /* GraphQL */ `mutation UpdateApsAppS
     createdAt
     updatedAt
     apsAppUserSessionQuestionsId
-    apsAppSessionSessionQuestionsId
     __typename
   }
 }
@@ -3505,10 +2988,12 @@ export const deleteApsAppSessionQuestion = /* GraphQL */ `mutation DeleteApsAppS
     sessionId
     session {
       id
-      session
+      title
       date
-      time
+      startTime
+      endTime
       location
+      description
       agendaId
       createdAt
       updatedAt
@@ -3528,7 +3013,6 @@ export const deleteApsAppSessionQuestion = /* GraphQL */ `mutation DeleteApsAppS
     createdAt
     updatedAt
     apsAppUserSessionQuestionsId
-    apsAppSessionSessionQuestionsId
     __typename
   }
 }
@@ -3571,6 +3055,10 @@ export const createAPSSpeaker = /* GraphQL */ `mutation CreateAPSSpeaker(
       createdAt
       updatedAt
       aPSAgendaId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -3620,6 +3108,10 @@ export const updateAPSSpeaker = /* GraphQL */ `mutation UpdateAPSSpeaker(
       aPSAgendaId
       __typename
     }
+    sessions {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSSpeakersId
@@ -3665,6 +3157,10 @@ export const deleteAPSSpeaker = /* GraphQL */ `mutation DeleteAPSSpeaker(
       createdAt
       updatedAt
       aPSAgendaId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -3739,6 +3235,10 @@ export const createApsSponsor = /* GraphQL */ `mutation CreateApsSponsor(
       updatedAt
       aPSExhibitorsId
       aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -3817,6 +3317,10 @@ export const updateApsSponsor = /* GraphQL */ `mutation UpdateApsSponsor(
       aPSCompanyExhibitorProfilesId
       __typename
     }
+    sessions {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSSponsorsId
@@ -3891,6 +3395,10 @@ export const deleteApsSponsor = /* GraphQL */ `mutation DeleteApsSponsor(
       updatedAt
       aPSExhibitorsId
       aPSCompanyExhibitorProfilesId
+      __typename
+    }
+    sessions {
+      nextToken
       __typename
     }
     createdAt
@@ -5560,4 +5068,844 @@ export const deleteApsSeatingChartRegistrant = /* GraphQL */ `mutation DeleteAps
 ` as GeneratedMutation<
   APITypes.DeleteApsSeatingChartRegistrantMutationVariables,
   APITypes.DeleteApsSeatingChartRegistrantMutation
+>;
+export const createApsContactRequest = /* GraphQL */ `mutation CreateApsContactRequest(
+  $input: CreateApsContactRequestInput!
+  $condition: ModelApsContactRequestConditionInput
+) {
+  createApsContactRequest(input: $input, condition: $condition) {
+    id
+    eventId
+    requestKey
+    userAId
+    userBId
+    owners
+    requestedByUserId
+    status
+    acceptedAt
+    declinedAt
+    blockedAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsContactRequestMutationVariables,
+  APITypes.CreateApsContactRequestMutation
+>;
+export const updateApsContactRequest = /* GraphQL */ `mutation UpdateApsContactRequest(
+  $input: UpdateApsContactRequestInput!
+  $condition: ModelApsContactRequestConditionInput
+) {
+  updateApsContactRequest(input: $input, condition: $condition) {
+    id
+    eventId
+    requestKey
+    userAId
+    userBId
+    owners
+    requestedByUserId
+    status
+    acceptedAt
+    declinedAt
+    blockedAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsContactRequestMutationVariables,
+  APITypes.UpdateApsContactRequestMutation
+>;
+export const deleteApsContactRequest = /* GraphQL */ `mutation DeleteApsContactRequest(
+  $input: DeleteApsContactRequestInput!
+  $condition: ModelApsContactRequestConditionInput
+) {
+  deleteApsContactRequest(input: $input, condition: $condition) {
+    id
+    eventId
+    requestKey
+    userAId
+    userBId
+    owners
+    requestedByUserId
+    status
+    acceptedAt
+    declinedAt
+    blockedAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsContactRequestMutationVariables,
+  APITypes.DeleteApsContactRequestMutation
+>;
+export const createApsDmThread = /* GraphQL */ `mutation CreateApsDmThread(
+  $input: CreateApsDmThreadInput!
+  $condition: ModelApsDmThreadConditionInput
+) {
+  createApsDmThread(input: $input, condition: $condition) {
+    id
+    eventId
+    dmKey
+    userAId
+    userBId
+    owners
+    participantStates {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    lastMessageAt
+    lastMessagePreview
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsDmThreadMutationVariables,
+  APITypes.CreateApsDmThreadMutation
+>;
+export const updateApsDmThread = /* GraphQL */ `mutation UpdateApsDmThread(
+  $input: UpdateApsDmThreadInput!
+  $condition: ModelApsDmThreadConditionInput
+) {
+  updateApsDmThread(input: $input, condition: $condition) {
+    id
+    eventId
+    dmKey
+    userAId
+    userBId
+    owners
+    participantStates {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    lastMessageAt
+    lastMessagePreview
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsDmThreadMutationVariables,
+  APITypes.UpdateApsDmThreadMutation
+>;
+export const deleteApsDmThread = /* GraphQL */ `mutation DeleteApsDmThread(
+  $input: DeleteApsDmThreadInput!
+  $condition: ModelApsDmThreadConditionInput
+) {
+  deleteApsDmThread(input: $input, condition: $condition) {
+    id
+    eventId
+    dmKey
+    userAId
+    userBId
+    owners
+    participantStates {
+      nextToken
+      __typename
+    }
+    messages {
+      nextToken
+      __typename
+    }
+    lastMessageAt
+    lastMessagePreview
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsDmThreadMutationVariables,
+  APITypes.DeleteApsDmThreadMutation
+>;
+export const createApsDmParticipantState = /* GraphQL */ `mutation CreateApsDmParticipantState(
+  $input: CreateApsDmParticipantStateInput!
+  $condition: ModelApsDmParticipantStateConditionInput
+) {
+  createApsDmParticipantState(input: $input, condition: $condition) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    userId
+    lastReadAt
+    unreadCount
+    lastMessageAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsDmParticipantStateMutationVariables,
+  APITypes.CreateApsDmParticipantStateMutation
+>;
+export const updateApsDmParticipantState = /* GraphQL */ `mutation UpdateApsDmParticipantState(
+  $input: UpdateApsDmParticipantStateInput!
+  $condition: ModelApsDmParticipantStateConditionInput
+) {
+  updateApsDmParticipantState(input: $input, condition: $condition) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    userId
+    lastReadAt
+    unreadCount
+    lastMessageAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsDmParticipantStateMutationVariables,
+  APITypes.UpdateApsDmParticipantStateMutation
+>;
+export const deleteApsDmParticipantState = /* GraphQL */ `mutation DeleteApsDmParticipantState(
+  $input: DeleteApsDmParticipantStateInput!
+  $condition: ModelApsDmParticipantStateConditionInput
+) {
+  deleteApsDmParticipantState(input: $input, condition: $condition) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    userId
+    lastReadAt
+    unreadCount
+    lastMessageAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsDmParticipantStateMutationVariables,
+  APITypes.DeleteApsDmParticipantStateMutation
+>;
+export const createApsDmMessage = /* GraphQL */ `mutation CreateApsDmMessage(
+  $input: CreateApsDmMessageInput!
+  $condition: ModelApsDmMessageConditionInput
+) {
+  createApsDmMessage(input: $input, condition: $condition) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    senderUserId
+    sender {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    owners
+    type
+    body
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsDmMessageMutationVariables,
+  APITypes.CreateApsDmMessageMutation
+>;
+export const updateApsDmMessage = /* GraphQL */ `mutation UpdateApsDmMessage(
+  $input: UpdateApsDmMessageInput!
+  $condition: ModelApsDmMessageConditionInput
+) {
+  updateApsDmMessage(input: $input, condition: $condition) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    senderUserId
+    sender {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    owners
+    type
+    body
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsDmMessageMutationVariables,
+  APITypes.UpdateApsDmMessageMutation
+>;
+export const deleteApsDmMessage = /* GraphQL */ `mutation DeleteApsDmMessage(
+  $input: DeleteApsDmMessageInput!
+  $condition: ModelApsDmMessageConditionInput
+) {
+  deleteApsDmMessage(input: $input, condition: $condition) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    senderUserId
+    sender {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    owners
+    type
+    body
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsDmMessageMutationVariables,
+  APITypes.DeleteApsDmMessageMutation
+>;
+export const createApsAdminAnnouncement = /* GraphQL */ `mutation CreateApsAdminAnnouncement(
+  $input: CreateApsAdminAnnouncementInput!
+  $condition: ModelApsAdminAnnouncementConditionInput
+) {
+  createApsAdminAnnouncement(input: $input, condition: $condition) {
+    id
+    eventId
+    title
+    body
+    deepLink
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsAdminAnnouncementMutationVariables,
+  APITypes.CreateApsAdminAnnouncementMutation
+>;
+export const updateApsAdminAnnouncement = /* GraphQL */ `mutation UpdateApsAdminAnnouncement(
+  $input: UpdateApsAdminAnnouncementInput!
+  $condition: ModelApsAdminAnnouncementConditionInput
+) {
+  updateApsAdminAnnouncement(input: $input, condition: $condition) {
+    id
+    eventId
+    title
+    body
+    deepLink
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAdminAnnouncementMutationVariables,
+  APITypes.UpdateApsAdminAnnouncementMutation
+>;
+export const deleteApsAdminAnnouncement = /* GraphQL */ `mutation DeleteApsAdminAnnouncement(
+  $input: DeleteApsAdminAnnouncementInput!
+  $condition: ModelApsAdminAnnouncementConditionInput
+) {
+  deleteApsAdminAnnouncement(input: $input, condition: $condition) {
+    id
+    eventId
+    title
+    body
+    deepLink
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsAdminAnnouncementMutationVariables,
+  APITypes.DeleteApsAdminAnnouncementMutation
+>;
+export const createApsUserEngageState = /* GraphQL */ `mutation CreateApsUserEngageState(
+  $input: CreateApsUserEngageStateInput!
+  $condition: ModelApsUserEngageStateConditionInput
+) {
+  createApsUserEngageState(input: $input, condition: $condition) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsUserEngageStateMutationVariables,
+  APITypes.CreateApsUserEngageStateMutation
+>;
+export const updateApsUserEngageState = /* GraphQL */ `mutation UpdateApsUserEngageState(
+  $input: UpdateApsUserEngageStateInput!
+  $condition: ModelApsUserEngageStateConditionInput
+) {
+  updateApsUserEngageState(input: $input, condition: $condition) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsUserEngageStateMutationVariables,
+  APITypes.UpdateApsUserEngageStateMutation
+>;
+export const deleteApsUserEngageState = /* GraphQL */ `mutation DeleteApsUserEngageState(
+  $input: DeleteApsUserEngageStateInput!
+  $condition: ModelApsUserEngageStateConditionInput
+) {
+  deleteApsUserEngageState(input: $input, condition: $condition) {
+    id
+    eventId
+    userId
+    lastSeenAnnouncementAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsUserEngageStateMutationVariables,
+  APITypes.DeleteApsUserEngageStateMutation
+>;
+export const createApsPushToken = /* GraphQL */ `mutation CreateApsPushToken(
+  $input: CreateApsPushTokenInput!
+  $condition: ModelApsPushTokenConditionInput
+) {
+  createApsPushToken(input: $input, condition: $condition) {
+    id
+    userId
+    token
+    platform
+    updatedAt
+    createdAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsPushTokenMutationVariables,
+  APITypes.CreateApsPushTokenMutation
+>;
+export const updateApsPushToken = /* GraphQL */ `mutation UpdateApsPushToken(
+  $input: UpdateApsPushTokenInput!
+  $condition: ModelApsPushTokenConditionInput
+) {
+  updateApsPushToken(input: $input, condition: $condition) {
+    id
+    userId
+    token
+    platform
+    updatedAt
+    createdAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsPushTokenMutationVariables,
+  APITypes.UpdateApsPushTokenMutation
+>;
+export const deleteApsPushToken = /* GraphQL */ `mutation DeleteApsPushToken(
+  $input: DeleteApsPushTokenInput!
+  $condition: ModelApsPushTokenConditionInput
+) {
+  deleteApsPushToken(input: $input, condition: $condition) {
+    id
+    userId
+    token
+    platform
+    updatedAt
+    createdAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsPushTokenMutationVariables,
+  APITypes.DeleteApsPushTokenMutation
+>;
+export const createSessionSpeakers = /* GraphQL */ `mutation CreateSessionSpeakers(
+  $input: CreateSessionSpeakersInput!
+  $condition: ModelSessionSpeakersConditionInput
+) {
+  createSessionSpeakers(input: $input, condition: $condition) {
+    id
+    apsAppSessionId
+    aPSSpeakerId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    aPSSpeaker {
+      id
+      firstName
+      lastName
+      email
+      company
+      title
+      phone
+      linkedin
+      bio
+      presentationTitle
+      presentationSummary
+      headshot
+      mediaConsent
+      privacyConsent
+      eventId
+      createdAt
+      updatedAt
+      aPSSpeakersId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSessionSpeakersMutationVariables,
+  APITypes.CreateSessionSpeakersMutation
+>;
+export const updateSessionSpeakers = /* GraphQL */ `mutation UpdateSessionSpeakers(
+  $input: UpdateSessionSpeakersInput!
+  $condition: ModelSessionSpeakersConditionInput
+) {
+  updateSessionSpeakers(input: $input, condition: $condition) {
+    id
+    apsAppSessionId
+    aPSSpeakerId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    aPSSpeaker {
+      id
+      firstName
+      lastName
+      email
+      company
+      title
+      phone
+      linkedin
+      bio
+      presentationTitle
+      presentationSummary
+      headshot
+      mediaConsent
+      privacyConsent
+      eventId
+      createdAt
+      updatedAt
+      aPSSpeakersId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSessionSpeakersMutationVariables,
+  APITypes.UpdateSessionSpeakersMutation
+>;
+export const deleteSessionSpeakers = /* GraphQL */ `mutation DeleteSessionSpeakers(
+  $input: DeleteSessionSpeakersInput!
+  $condition: ModelSessionSpeakersConditionInput
+) {
+  deleteSessionSpeakers(input: $input, condition: $condition) {
+    id
+    apsAppSessionId
+    aPSSpeakerId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    aPSSpeaker {
+      id
+      firstName
+      lastName
+      email
+      company
+      title
+      phone
+      linkedin
+      bio
+      presentationTitle
+      presentationSummary
+      headshot
+      mediaConsent
+      privacyConsent
+      eventId
+      createdAt
+      updatedAt
+      aPSSpeakersId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSessionSpeakersMutationVariables,
+  APITypes.DeleteSessionSpeakersMutation
+>;
+export const createSessionSponsors = /* GraphQL */ `mutation CreateSessionSponsors(
+  $input: CreateSessionSponsorsInput!
+  $condition: ModelSessionSponsorsConditionInput
+) {
+  createSessionSponsors(input: $input, condition: $condition) {
+    id
+    apsAppSessionId
+    apsSponsorId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    apsSponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSessionSponsorsMutationVariables,
+  APITypes.CreateSessionSponsorsMutation
+>;
+export const updateSessionSponsors = /* GraphQL */ `mutation UpdateSessionSponsors(
+  $input: UpdateSessionSponsorsInput!
+  $condition: ModelSessionSponsorsConditionInput
+) {
+  updateSessionSponsors(input: $input, condition: $condition) {
+    id
+    apsAppSessionId
+    apsSponsorId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    apsSponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSessionSponsorsMutationVariables,
+  APITypes.UpdateSessionSponsorsMutation
+>;
+export const deleteSessionSponsors = /* GraphQL */ `mutation DeleteSessionSponsors(
+  $input: DeleteSessionSponsorsInput!
+  $condition: ModelSessionSponsorsConditionInput
+) {
+  deleteSessionSponsors(input: $input, condition: $condition) {
+    id
+    apsAppSessionId
+    apsSponsorId
+    apsAppSession {
+      id
+      title
+      date
+      startTime
+      endTime
+      location
+      description
+      agendaId
+      createdAt
+      updatedAt
+      apsAgendaItemsId
+      __typename
+    }
+    apsSponsor {
+      id
+      companyId
+      eventId
+      createdAt
+      updatedAt
+      aPSSponsorsId
+      aPSCompanySponsorsId
+      apsSponsorProfileId
+      __typename
+    }
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSessionSponsorsMutationVariables,
+  APITypes.DeleteSessionSponsorsMutation
 >;

@@ -189,7 +189,7 @@ export default function Profile() {
                 iconSize={50}
                 style={styles.iconCard}
                 onPress={() => {
-                  // Placeholder - no action yet
+                  router.push('/(main)/profile/notes');
                 }}
               />
             </View>

@@ -12,6 +12,8 @@ import RenderHtml from 'react-native-render-html';
 import { autopackColors } from '../../../src/theme';
 import { graphqlClient } from '../../../src/utils/graphqlClient';
 import { getApsAppSessionWithRelations } from '../../../src/graphql/customQueries';
+import { NotesSection } from '../../../src/components/notes/NotesSection';
+import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 
 type Speaker = {
   id: string;
@@ -44,6 +46,7 @@ function normalizeText(v?: string | null) {
 
 export default function AgendaDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const currentAppUser = useCurrentAppUser();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -183,6 +186,13 @@ export default function AgendaDetails() {
               </View>
             );
           })}
+        </>
+      )}
+
+      {!!session?.id && !!currentAppUser?.id && (
+        <>
+          <View style={styles.divider} />
+          <NotesSection sessionId={session.id} />
         </>
       )}
     </ScrollView>

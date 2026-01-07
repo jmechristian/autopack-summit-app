@@ -17,6 +17,7 @@ import { autopackColors } from '../../../src/theme';
 import { listApsAppUserProfiles } from '../../../src/graphql/queries';
 import { useCommunityStore } from '../../../src/store/communityStore';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
+import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
 
 type CommunityProfile = {
   profileId: string; // ApsAppUserProfile.id
@@ -50,6 +51,7 @@ function getSectionKey(p: CommunityProfile) {
 
 export default function CommunityIndex() {
   const currentAppUser = useCurrentAppUser();
+  const { profileIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,6 +235,7 @@ export default function CommunityIndex() {
             const fav = !!favoriteContactIds[item.profileId];
             const pending = !!pendingContactIds[item.profileId];
             const isSelf = !!currentAppUser?.profileId && currentAppUser.profileId === item.profileId;
+            const hasNote = profileIdsWithNotes.has(item.profileId);
 
             return (
               <View style={styles.row}>
@@ -323,7 +326,11 @@ export default function CommunityIndex() {
                     }
                     style={styles.iconBtn}
                   >
-                    <Ionicons name='eye-outline' size={20} color={autopackColors.apBlue} />
+                    <Ionicons
+                      name={hasNote ? 'document-text-outline' : 'eye-outline'}
+                      size={20}
+                      color={autopackColors.apBlue}
+                    />
                   </Pressable>
                 </View>
               </View>

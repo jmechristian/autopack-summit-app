@@ -19,10 +19,29 @@ import { autopackColors } from '../../../src/theme';
 import {
   apsAppUserContactsByUserId,
   apsAppUserLeadsByUserId,
-  getApsAppUserProfile,
 } from '../../../src/graphql/queries';
 import { useCommunityStore } from '../../../src/store/communityStore';
 import { getProfilePictureUrl } from '../../../src/utils/storageUtils';
+import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
+
+// IMPORTANT:
+// Generated `getApsAppUserProfile` includes `notes { ... }`, but notes are now USER_POOLS-only.
+// When called via API_KEY, AppSync may return errors and profiles won't load -> empty contacts/leads UI.
+const getApsAppUserProfileMinimal = /* GraphQL */ `
+  query GetApsAppUserProfileMinimal($id: ID!) {
+    getApsAppUserProfile(id: $id) {
+      id
+      firstName
+      lastName
+      email
+      company
+      jobTitle
+      location
+      profilePicture
+      __typename
+    }
+  }
+`;
 
 type ContactItem = {
   id: string;
@@ -83,6 +102,7 @@ function getSectionKey(p: ContactProfile) {
 export default function ContactsScreen() {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
+  const { profileIdsWithNotes } = useNotesPresence();
   const [mode, setMode] = useState<'contacts' | 'leads'>('contacts');
   const [search, setSearch] = useState('');
   const [contacts, setContacts] = useState<ContactItem[]>([]);
@@ -152,7 +172,7 @@ export default function ContactsScreen() {
           missing.map(async (id) => {
             try {
               const resp = await graphqlClient.graphql({
-                query: getApsAppUserProfile,
+                query: getApsAppUserProfileMinimal,
                 variables: { id },
               });
               const data = resp.data as { getApsAppUserProfile?: Profile | null };
@@ -249,7 +269,7 @@ export default function ContactsScreen() {
           missing.map(async (id) => {
             try {
               const resp = await graphqlClient.graphql({
-                query: getApsAppUserProfile,
+                query: getApsAppUserProfileMinimal,
                 variables: { id },
               });
               const data = resp.data as { getApsAppUserProfile?: Profile | null };
@@ -466,6 +486,7 @@ export default function ContactsScreen() {
             const subtitle = [item.jobTitle, item.company].filter(Boolean).join(' • ');
             const fav = !!favoriteContactIds[item.profileId];
             const pending = !!pendingContactIds[item.profileId];
+            const hasNote = profileIdsWithNotes.has(item.profileId);
             const isSelf =
               !!item.profileId &&
               !!currentAppUser?.profileId &&
@@ -568,7 +589,11 @@ export default function ContactsScreen() {
                     }
                     style={styles.iconBtn}
                   >
-                    <Ionicons name="eye-outline" size={20} color={autopackColors.apBlue} />
+                    <Ionicons
+                      name={hasNote ? 'document-text-outline' : 'eye-outline'}
+                      size={20}
+                      color={autopackColors.apBlue}
+                    />
                   </Pressable>
                 </View>
               </View>

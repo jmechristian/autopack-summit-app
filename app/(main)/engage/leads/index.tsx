@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'rea
 import { useFocusEffect } from '@react-navigation/native';
 import { useCurrentAppUser } from '../../../../src/hooks/useApsStore';
 import { graphqlClient } from '../../../../src/utils/graphqlClient';
-import { apsAppUserLeadsByUserId, getApsAppUserProfile } from '../../../../src/graphql/queries';
+import { apsAppUserLeadsByUserId } from '../../../../src/graphql/queries';
 import { deleteApsAppUserLead } from '../../../../src/graphql/mutations';
 import { AppScreen } from '../../../../src/ui/AppScreen';
 import { ui } from '../../../../src/ui/tokens';
@@ -20,6 +20,25 @@ type Profile = {
   location?: string | null;
   profilePicture?: string | null;
 };
+
+// IMPORTANT:
+// Generated `getApsAppUserProfile` includes `notes { ... }`, but notes are now USER_POOLS-only.
+// When called via API_KEY, AppSync may return errors and the client treats the request as failed.
+// Use a minimal query that avoids the notes relationship.
+const getApsAppUserProfileMinimal = /* GraphQL */ `
+  query GetApsAppUserProfileMinimal($id: ID!) {
+    getApsAppUserProfile(id: $id) {
+      id
+      firstName
+      lastName
+      company
+      jobTitle
+      location
+      profilePicture
+      __typename
+    }
+  }
+`;
 
 function nameOf(p: Profile | null | undefined) {
   if (!p) return '';
@@ -80,7 +99,7 @@ export default function LeadsScreen() {
           missing.map(async (id) => {
             try {
               const resp = await graphqlClient.graphql({
-                query: getApsAppUserProfile,
+                query: getApsAppUserProfileMinimal,
                 variables: { id },
               });
               const data = resp.data as { getApsAppUserProfile?: Profile | null };
