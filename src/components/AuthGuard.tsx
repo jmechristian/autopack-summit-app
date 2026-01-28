@@ -31,6 +31,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const markAnnouncementsSeen = useEngageStore((s) => s.markAnnouncementsSeen);
   const startEngageRealtime = useEngageStore((s) => s.startRealtime);
   const stopEngageRealtime = useEngageStore((s) => s.stopRealtime);
+  const setEngageActiveUser = useEngageStore((s) => s.setActiveUser);
+  const resetEngageStore = useEngageStore((s) => s.resetAll);
   
   useEffect(() => {
     const validate = async () => {
@@ -50,7 +52,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // Push notifications: once the user is validated, register token + set up tap handling.
   useEffect(() => {
-    if (!currentAppUser?.id) return;
+    setEngageActiveUser(currentAppUser?.id || null);
+    if (!currentAppUser?.id) {
+      resetEngageStore();
+      return;
+    }
     if (pushInitRef.current) return;
     pushInitRef.current = true;
 
@@ -92,7 +98,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }).catch(() => {});
 
     return cleanup;
-  }, [currentAppUser?.id]);
+  }, [currentAppUser?.id, setEngageActiveUser, resetEngageStore, refreshUnreadCounts, markAnnouncementsSeen]);
 
   // On every successful validation, refresh unread counts once.
   useEffect(() => {
@@ -134,6 +140,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     setIsSigningOut(true);
     // Reset local store and navigate immediately to avoid being stuck
     reset();
+    resetEngageStore();
     router.dismissAll();
     router.replace('/(auth)/login');
     try {

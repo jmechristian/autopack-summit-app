@@ -19,7 +19,7 @@ type GraphQLAuthMode = 'apiKey' | 'userPool';
 let _apiKeyClient: ReturnType<typeof generateClient> | null = null;
 let _userPoolClient: ReturnType<typeof generateClient> | null = null;
 
-export function getGraphQLClient(authMode: GraphQLAuthMode = 'apiKey') {
+export function getGraphQLClient(authMode: GraphQLAuthMode = 'userPool') {
   if (authMode === 'userPool') {
     if (!_userPoolClient) {
       _userPoolClient = generateClient({ authMode: 'userPool' });
@@ -34,17 +34,25 @@ export function getGraphQLClient(authMode: GraphQLAuthMode = 'apiKey') {
 }
 
 // Export for convenience (but prefer getGraphQLClient() for lazy loading)
-// Default: API key (legacy/public models).
+// Default: USER POOLS (Cognito).
 export const graphqlClient = new Proxy({} as ReturnType<typeof generateClient>, {
   get(_target, prop) {
-    return getGraphQLClient('apiKey')[prop as keyof ReturnType<typeof generateClient>];
+    return getGraphQLClient('userPool')[prop as keyof ReturnType<typeof generateClient>];
   },
 });
 
-// Secondary client for Cognito User Pools protected models (DM, announcements, push tokens).
+// Explicit alias for Cognito User Pools (kept for readability/legacy call sites).
 export const graphqlAuthClient = new Proxy({} as ReturnType<typeof generateClient>, {
   get(_target, prop) {
     return getGraphQLClient('userPool')[prop as keyof ReturnType<typeof generateClient>];
+  },
+});
+
+// Optional: explicit API Key client for any remaining legacy/public-only operations.
+// Prefer USER POOLS everywhere unless you intentionally need API key auth.
+export const graphqlApiKeyClient = new Proxy({} as ReturnType<typeof generateClient>, {
+  get(_target, prop) {
+    return getGraphQLClient('apiKey')[prop as keyof ReturnType<typeof generateClient>];
   },
 });
 

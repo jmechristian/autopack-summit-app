@@ -8,6 +8,7 @@ export default function ProfileLayout() {
         name='notes'
         options={{
           title: 'My Notes',
+          headerShown: true,
           headerBackTitle: 'Profile',
         }}
       />
@@ -21,8 +22,14 @@ export default function ProfileLayout() {
       <Stack.Screen 
         name='contacts' 
         options={{ 
-          headerShown: false,
+          title: 'Contacts',
+          headerShown: true,
+          headerBackTitle: 'Profile',
         }} 
+      />
+      <Stack.Screen
+        name='community/[id]'
+        options={{ title: 'Profile', headerBackTitle: 'Profile' }}
       />
     </Stack>
   );

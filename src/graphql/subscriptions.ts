@@ -133,6 +133,7 @@ export const onCreateApsAppUserNote = /* GraphQL */ `subscription OnCreateApsApp
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -303,6 +304,7 @@ export const onUpdateApsAppUserNote = /* GraphQL */ `subscription OnUpdateApsApp
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -473,6 +475,7 @@ export const onDeleteApsAppUserNote = /* GraphQL */ `subscription OnDeleteApsApp
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1956,6 +1959,7 @@ export const onCreateApsAppUser = /* GraphQL */ `subscription OnCreateApsAppUser
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2085,6 +2089,7 @@ export const onUpdateApsAppUser = /* GraphQL */ `subscription OnUpdateApsAppUser
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2214,6 +2219,7 @@ export const onDeleteApsAppUser = /* GraphQL */ `subscription OnDeleteApsAppUser
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2262,6 +2268,7 @@ export const onCreateApsAppUserContact = /* GraphQL */ `subscription OnCreateAps
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2312,6 +2319,7 @@ export const onUpdateApsAppUserContact = /* GraphQL */ `subscription OnUpdateAps
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2362,6 +2370,7 @@ export const onDeleteApsAppUserContact = /* GraphQL */ `subscription OnDeleteAps
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2412,6 +2421,7 @@ export const onCreateApsAppUserLead = /* GraphQL */ `subscription OnCreateApsApp
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2462,6 +2472,7 @@ export const onUpdateApsAppUserLead = /* GraphQL */ `subscription OnUpdateApsApp
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2512,6 +2523,7 @@ export const onDeleteApsAppUserLead = /* GraphQL */ `subscription OnDeleteApsApp
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2558,6 +2570,7 @@ export const onCreateApsAppUserProfile = /* GraphQL */ `subscription OnCreateAps
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2622,6 +2635,7 @@ export const onUpdateApsAppUserProfile = /* GraphQL */ `subscription OnUpdateAps
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2686,6 +2700,7 @@ export const onDeleteApsAppUserProfile = /* GraphQL */ `subscription OnDeleteAps
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2745,6 +2760,7 @@ export const onCreateProfileAffiliate = /* GraphQL */ `subscription OnCreateProf
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2789,6 +2805,7 @@ export const onUpdateProfileAffiliate = /* GraphQL */ `subscription OnUpdateProf
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2833,6 +2850,7 @@ export const onDeleteProfileAffiliate = /* GraphQL */ `subscription OnDeleteProf
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2877,6 +2895,7 @@ export const onCreateProfileEducation = /* GraphQL */ `subscription OnCreateProf
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2920,6 +2939,7 @@ export const onUpdateProfileEducation = /* GraphQL */ `subscription OnUpdateProf
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2963,6 +2983,7 @@ export const onDeleteProfileEducation = /* GraphQL */ `subscription OnDeleteProf
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -3006,6 +3027,7 @@ export const onCreateProfileInterest = /* GraphQL */ `subscription OnCreateProfi
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -3047,6 +3069,7 @@ export const onUpdateProfileInterest = /* GraphQL */ `subscription OnUpdateProfi
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -3088,6 +3111,7 @@ export const onDeleteProfileInterest = /* GraphQL */ `subscription OnDeleteProfi
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin

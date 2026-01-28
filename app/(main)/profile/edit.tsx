@@ -44,40 +44,73 @@ export default function ProfileEdit() {
   const [importingLinkedIn, setImportingLinkedIn] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
-  const handleProfilePictureUpload = async () => {
+  const saveProfilePhoto = async (uri: string) => {
+    setUploadingPicture(true);
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant camera roll permissions to upload a profile picture.');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
+      const imageUrl = await uploadProfilePicture(uri);
+      await updateProfile({
+        id: profile!.id,
+        profilePicture: imageUrl,
       });
-
-      if (!result.canceled && result.assets[0]) {
-        setUploadingPicture(true);
-        try {
-          const imageUrl = await uploadProfilePicture(result.assets[0].uri);
-          await updateProfile({
-            id: profile!.id,
-            profilePicture: imageUrl,
-          });
-          await refreshProfile();
-          Alert.alert('Success', 'Profile picture updated successfully');
-        } catch (error) {
-          Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload profile picture');
-        } finally {
-          setUploadingPicture(false);
-        }
-      }
+      await refreshProfile();
+      Alert.alert('Success', 'Profile picture updated successfully');
     } catch (error) {
-      Alert.alert('Error', 'Failed to open image picker');
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to upload profile picture'
+      );
+    } finally {
+      setUploadingPicture(false);
     }
+  };
+
+  const pickFromLibrary = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission Required',
+        'Please grant camera roll permissions to upload a profile picture.'
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await saveProfilePhoto(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Please allow camera access to take a photo.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await saveProfilePhoto(result.assets[0].uri);
+    }
+  };
+
+  const handleProfilePictureUpload = () => {
+    Alert.alert('Update Photo', 'Choose an option', [
+      { text: 'Take Photo', onPress: () => void takePhoto() },
+      { text: 'Choose from Library', onPress: () => void pickFromLibrary() },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const handleResumeUpload = async () => {
@@ -92,7 +125,7 @@ export default function ProfileEdit() {
         const maxSize = 10 * 1024 * 1024; // 10MB
 
         if (fileSize > maxSize) {
-          Alert.alert('File Too Large', 'Resume must be less than 10MB');
+        Alert.alert('File Too Large', 'Document must be less than 10MB');
           return;
         }
 
@@ -104,9 +137,9 @@ export default function ProfileEdit() {
             resume: resumeUrl,
           });
           await refreshProfile();
-          Alert.alert('Success', 'Resume uploaded successfully');
+          Alert.alert('Success', 'Document uploaded successfully');
         } catch (error) {
-          Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload resume');
+          Alert.alert('Error', error instanceof Error ? error.message : 'Failed to upload document');
         } finally {
           setUploadingResume(false);
         }
@@ -294,40 +327,47 @@ export default function ProfileEdit() {
             !profilePictureUrl && { backgroundColor: autopackColors.apBlue },
           ]}
         />
-        <TouchableOpacity
-          style={styles.uploadButton}
-          onPress={handleProfilePictureUpload}
-          disabled={uploadingPicture}
-        >
-          {uploadingPicture ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <>
-              <Ionicons name="camera" size={20} color="#fff" />
-              <Text style={styles.uploadButtonText}>
-                {profilePictureUrl ? 'Change Photo' : 'Upload Photo'}
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[
+              styles.actionBtn,
+              styles.actionBtnAlt,
+              uploadingPicture && styles.actionBtnDisabled,
+            ]}
+            onPress={handleProfilePictureUpload}
+            disabled={uploadingPicture}
+          >
+            {uploadingPicture ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="camera" size={20} color="#fff" />
+                <Text style={styles.actionBtnText}>Add Photo</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
-      {/* LinkedIn Import Button */}
-      <View style={styles.linkedInSection}>
-        <Button
-          title="Import from LinkedIn"
-          icon={<Ionicons name="logo-linkedin" size={20} color="#fff" />}
-          onPress={handleLinkedInImport}
-          buttonStyle={styles.linkedInButton}
-          loading={importingLinkedIn}
-          disabled={importingLinkedIn}
-        />
+          <TouchableOpacity
+            style={[styles.actionBtn, importingLinkedIn && styles.actionBtnDisabled]}
+            onPress={handleLinkedInImport}
+            disabled={importingLinkedIn}
+          >
+            {importingLinkedIn ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="logo-linkedin" size={20} color="#fff" />
+                <Text style={styles.actionBtnText}>Import</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Personal Info Section */}
       <EditablePersonalInfo profile={profile} onUpdate={refreshProfile} />
 
-      {/* Affiliations Section */}
+      {/* Experience Section */}
       <AffiliationsSection profile={profile} onUpdate={refreshProfile} />
 
       {/* Education Section */}
@@ -336,35 +376,48 @@ export default function ProfileEdit() {
       {/* Interests Section */}
       <InterestsSection profile={profile} onUpdate={refreshProfile} />
 
-      {/* Resume Section */}
+      {/* Document Section */}
       <View style={styles.resumeSection}>
-        <Text style={styles.sectionTitle}>Resume</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.sectionTitle}>Career Document</Text>
+        </View>
+        <View style={styles.headerDivider} />
         {resumeUrl ? (
           <View style={styles.resumeActions}>
-            <Button
-              title="View Resume"
-              icon={<Ionicons name="document-text" size={20} color="#fff" />}
-              onPress={handleResumeView}
-              buttonStyle={styles.resumeButton}
-            />
-            <Button
-              title="Upload New"
-              type="outline"
-              icon={<Ionicons name="cloud-upload" size={20} color={autopackColors.apBlue} />}
+            <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAlt]} onPress={handleResumeView}>
+              <Ionicons name="document-text" size={18} color="#fff" />
+              <Text style={styles.actionBtnText}>View Document</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionBtn, uploadingResume && styles.actionBtnDisabled]}
               onPress={handleResumeUpload}
-              buttonStyle={styles.resumeButtonOutline}
-              titleStyle={styles.resumeButtonOutlineText}
-              loading={uploadingResume}
-            />
+              disabled={uploadingResume}
+            >
+              {uploadingResume ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="cloud-upload" size={18} color="#fff" />
+                  <Text style={styles.actionBtnText}>Upload New</Text>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
         ) : (
-          <Button
-            title="Upload Resume (PDF, max 10MB)"
-            icon={<Ionicons name="cloud-upload" size={20} color="#fff" />}
+          <TouchableOpacity
+            style={[styles.actionBtn, uploadingResume && styles.actionBtnDisabled]}
             onPress={handleResumeUpload}
-            buttonStyle={styles.resumeButton}
-            loading={uploadingResume}
-          />
+            disabled={uploadingResume}
+          >
+            {uploadingResume ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="cloud-upload" size={18} color="#fff" />
+                <Text style={styles.actionBtnText}>Upload Document (PDF, max 10MB)</Text>
+              </>
+            )}
+          </TouchableOpacity>
         )}
       </View>
     </ScrollView>
@@ -374,7 +427,7 @@ export default function ProfileEdit() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9fafb',
   },
   contentContainer: {
     padding: 16,
@@ -389,63 +442,68 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 24,
-    marginBottom: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    padding: 16,
+    marginBottom: 12,
   },
   avatar: {
     marginBottom: 16,
   },
-  uploadButton: {
+  actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     backgroundColor: autopackColors.apBlue,
-    paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 999,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    flex: 1,
   },
-  uploadButtonText: {
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+    marginTop: 12,
+  },
+  actionBtnAlt: {
+    backgroundColor: '#111827',
+  },
+  actionBtnDisabled: {
+    opacity: 0.6,
+  },
+  actionBtnText: {
     color: '#fff',
+    fontWeight: '800',
     fontSize: 16,
-    fontWeight: '700',
-  },
-  linkedInSection: {
-    marginBottom: 16,
-  },
-  linkedInButton: {
-    backgroundColor: '#0077B5', // LinkedIn brand color
-    borderRadius: 999,
   },
   resumeSection: {
     backgroundColor: '#fff',
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 16,
-    marginBottom: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    padding: 12,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#111827',
-    marginBottom: 16,
+    marginBottom: 12,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  headerDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#d1d5db',
+    marginBottom: 10,
   },
   resumeActions: {
-    gap: 12,
-  },
-  resumeButton: {
-    backgroundColor: autopackColors.apBlue,
-    borderRadius: 999,
-  },
-  resumeButtonOutline: {
-    borderColor: autopackColors.apBlue,
-    borderWidth: 1,
-    borderRadius: 999,
-  },
-  resumeButtonOutlineText: {
-    color: autopackColors.apBlue,
+    gap: 10,
   },
 });
 

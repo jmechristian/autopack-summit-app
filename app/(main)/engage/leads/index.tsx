@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCurrentAppUser } from '../../../../src/hooks/useApsStore';
-import { graphqlClient } from '../../../../src/utils/graphqlClient';
+import { graphqlAuthClient, graphqlClient } from '../../../../src/utils/graphqlClient';
 import { apsAppUserLeadsByUserId } from '../../../../src/graphql/queries';
 import { deleteApsAppUserLead } from '../../../../src/graphql/mutations';
 import { AppScreen } from '../../../../src/ui/AppScreen';
@@ -157,7 +157,7 @@ export default function LeadsScreen() {
   }
 
   return (
-    <AppScreen>
+    <AppScreen padded={false}>
       {error ? (
         <View style={styles.errorBox}>
           <Text style={styles.title}>Couldn’t load leads</Text>
@@ -219,7 +219,7 @@ export default function LeadsScreen() {
                         style: 'destructive',
                         onPress: async () => {
                           try {
-                            await graphqlClient.graphql({
+                            await graphqlAuthClient.graphql({
                               query: deleteApsAppUserLead,
                               variables: { input: { id: lead.id } },
                             });

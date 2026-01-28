@@ -1,5 +1,5 @@
 // src/utils/profileMutations.ts
-import { graphqlClient } from './graphqlClient';
+import { graphqlAuthClient } from './graphqlClient';
 import * as APITypes from '../API';
 import {
   updateApsAppUserProfile,
@@ -21,7 +21,7 @@ export async function updateProfile(
   input: APITypes.UpdateApsAppUserProfileInput
 ): Promise<APITypes.ApsAppUserProfile> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: updateApsAppUserProfile,
       variables: { input },
     });
@@ -48,7 +48,7 @@ export async function createAffiliate(
   input: APITypes.CreateProfileAffiliateInput
 ): Promise<APITypes.ProfileAffiliate> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: createProfileAffiliate,
       variables: { input },
     });
@@ -75,7 +75,7 @@ export async function updateAffiliate(
   input: APITypes.UpdateProfileAffiliateInput
 ): Promise<APITypes.ProfileAffiliate> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: updateProfileAffiliate,
       variables: { input },
     });
@@ -100,7 +100,7 @@ export async function updateAffiliate(
  */
 export async function deleteAffiliate(id: string): Promise<void> {
   try {
-    await graphqlClient.graphql({
+    await graphqlAuthClient.graphql({
       query: deleteProfileAffiliate,
       variables: {
         input: { id },
@@ -119,7 +119,7 @@ export async function createEducation(
   input: APITypes.CreateProfileEducationInput
 ): Promise<APITypes.ProfileEducation> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: createProfileEducation,
       variables: { input },
     });
@@ -146,7 +146,7 @@ export async function updateEducation(
   input: APITypes.UpdateProfileEducationInput
 ): Promise<APITypes.ProfileEducation> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: updateProfileEducation,
       variables: { input },
     });
@@ -171,7 +171,7 @@ export async function updateEducation(
  */
 export async function deleteEducation(id: string): Promise<void> {
   try {
-    await graphqlClient.graphql({
+    await graphqlAuthClient.graphql({
       query: deleteProfileEducation,
       variables: {
         input: { id },
@@ -190,7 +190,7 @@ export async function createInterest(
   input: APITypes.CreateProfileInterestInput
 ): Promise<APITypes.ProfileInterest> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: createProfileInterest,
       variables: { input },
     });
@@ -217,7 +217,7 @@ export async function updateInterest(
   input: APITypes.UpdateProfileInterestInput
 ): Promise<APITypes.ProfileInterest> {
   try {
-    const response = await graphqlClient.graphql({
+    const response = await graphqlAuthClient.graphql({
       query: updateProfileInterest,
       variables: { input },
     });
@@ -242,7 +242,7 @@ export async function updateInterest(
  */
 export async function deleteInterest(id: string): Promise<void> {
   try {
-    await graphqlClient.graphql({
+    await graphqlAuthClient.graphql({
       query: deleteProfileInterest,
       variables: {
         input: { id },

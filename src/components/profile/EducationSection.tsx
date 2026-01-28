@@ -1,7 +1,6 @@
 // src/components/profile/EducationSection.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { Button } from '@rneui/themed';
 import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../theme';
 import { createEducation, updateEducation, deleteEducation } from '../../utils/profileMutations';
@@ -74,14 +73,12 @@ export function EducationSection({ profile, onUpdate }: EducationSectionProps) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>Education</Text>
-        <Button
-          type="clear"
-          icon={<Ionicons name="add-circle" size={24} color={autopackColors.apBlue} />}
-          onPress={handleAdd}
-          title="Add"
-          titleStyle={styles.addButtonText}
-        />
+        <TouchableOpacity onPress={handleAdd} style={styles.addButton}>
+          <Ionicons name="add" size={20} color={autopackColors.apBlue} />
+        </TouchableOpacity>
       </View>
+
+      <View style={styles.headerDivider} />
 
       {education.length === 0 ? (
         <Text style={styles.emptyText}>No education entries added yet</Text>
@@ -121,59 +118,74 @@ export function EducationSection({ profile, onUpdate }: EducationSectionProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
+    width: '100%',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    flex: 1,
   },
-  addButtonText: {
-    color: autopackColors.apBlue,
-    fontSize: 16,
+  headerDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#d1d5db',
+    marginBottom: 10,
   },
   emptyText: {
-    color: '#666',
-    fontStyle: 'italic',
+    color: '#6b7280',
     textAlign: 'center',
-    padding: 20,
+    padding: 12,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e5e7eb',
   },
   itemContent: {
     flex: 1,
   },
   itemTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
+    fontWeight: '700',
+    color: '#111827',
     marginBottom: 4,
   },
   itemSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#6b7280',
     marginBottom: 2,
   },
   itemActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 6,
+  },
+  addButton: {
+    padding: 6,
+    borderRadius: 10,
+    backgroundColor: '#f3f4f6',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
   actionButton: {
-    padding: 8,
+    padding: 6,
+    borderRadius: 10,
+    backgroundColor: '#f3f4f6',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
 });
 

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { graphqlClient } from '../utils/graphqlClient';
+import { graphqlAuthClient, graphqlClient } from '../utils/graphqlClient';
 import { apsAppUserContactsByUserId } from '../graphql/queries';
 import { createApsAppUserContact, deleteApsAppUserContact } from '../graphql/mutations';
 
@@ -89,7 +89,7 @@ export const useCommunityStore = create<CommunityStore>()(
             const { [contactId]: _removedId, ...restIds } = get().contactRecordIdByContactId;
             set({ favoriteContactIds: restFavs, contactRecordIdByContactId: restIds });
 
-            await graphqlClient.graphql({
+            await graphqlAuthClient.graphql({
               query: deleteApsAppUserContact,
               variables: { input: { id: existingRecordId } },
             });
@@ -97,7 +97,7 @@ export const useCommunityStore = create<CommunityStore>()(
             // Optimistic UI: add immediately
             set({ favoriteContactIds: { ...get().favoriteContactIds, [contactId]: true } });
 
-            const resp = await graphqlClient.graphql({
+            const resp = await graphqlAuthClient.graphql({
               query: createApsAppUserContact,
               variables: { input: { userId: currentUserId, contactId, favorite: true } },
             });

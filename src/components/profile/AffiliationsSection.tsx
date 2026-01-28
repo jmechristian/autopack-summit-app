@@ -1,7 +1,6 @@
 // src/components/profile/AffiliationsSection.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { Button, Icon } from '@rneui/themed';
 import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../theme';
 import { createAffiliate, updateAffiliate, deleteAffiliate } from '../../utils/profileMutations';
@@ -31,7 +30,7 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
 
   const handleDelete = (affiliate: APITypes.ProfileAffiliate) => {
     Alert.alert(
-      'Delete Affiliate',
+      'Delete Experience',
       `Are you sure you want to delete "${affiliate.affiliate}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -43,7 +42,7 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
               await deleteAffiliate(affiliate.id);
               await onUpdate();
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete affiliate');
+              Alert.alert('Error', 'Failed to delete experience');
             }
           },
         },
@@ -73,18 +72,16 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Affiliations</Text>
-        <Button
-          type="clear"
-          icon={<Ionicons name="add-circle" size={24} color={autopackColors.apBlue} />}
-          onPress={handleAdd}
-          title="Add"
-          titleStyle={styles.addButtonText}
-        />
+        <Text style={styles.sectionTitle}>Experience</Text>
+        <TouchableOpacity onPress={handleAdd} style={styles.addButton}>
+          <Ionicons name="add" size={20} color={autopackColors.apBlue} />
+        </TouchableOpacity>
       </View>
 
+      <View style={styles.headerDivider} />
+
       {affiliates.length === 0 ? (
-        <Text style={styles.emptyText}>No affiliations added yet</Text>
+        <Text style={styles.emptyText}>No experience added yet</Text>
       ) : (
         affiliates.map((affiliate) => (
           <View key={affiliate.id} style={styles.item}>
@@ -125,63 +122,78 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
+    width: '100%',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    flex: 1,
   },
-  addButtonText: {
-    color: autopackColors.apBlue,
-    fontSize: 16,
+  headerDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#d1d5db',
+    marginBottom: 10,
   },
   emptyText: {
-    color: '#666',
-    fontStyle: 'italic',
+    color: '#6b7280',
     textAlign: 'center',
-    padding: 20,
+    padding: 12,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e5e7eb',
   },
   itemContent: {
     flex: 1,
   },
   itemTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
+    fontWeight: '700',
+    color: '#111827',
     marginBottom: 4,
   },
   itemSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#6b7280',
     marginBottom: 2,
   },
   itemDate: {
     fontSize: 12,
-    color: '#999',
+    color: '#9ca3af',
   },
   itemActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 6,
+  },
+  addButton: {
+    padding: 6,
+    borderRadius: 10,
+    backgroundColor: '#f3f4f6',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
   actionButton: {
-    padding: 8,
+    padding: 6,
+    borderRadius: 10,
+    backgroundColor: '#f3f4f6',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
 });
 

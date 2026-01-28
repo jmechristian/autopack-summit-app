@@ -931,6 +931,7 @@ export const createApsAppUser = /* GraphQL */ `mutation CreateApsAppUser(
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1061,6 +1062,7 @@ export const updateApsAppUser = /* GraphQL */ `mutation UpdateApsAppUser(
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1191,6 +1193,7 @@ export const deleteApsAppUser = /* GraphQL */ `mutation DeleteApsAppUser(
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1240,6 +1243,7 @@ export const createApsAppUserContact = /* GraphQL */ `mutation CreateApsAppUserC
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1291,6 +1295,7 @@ export const updateApsAppUserContact = /* GraphQL */ `mutation UpdateApsAppUserC
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1342,6 +1347,7 @@ export const deleteApsAppUserContact = /* GraphQL */ `mutation DeleteApsAppUserC
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1492,6 +1498,7 @@ export const createApsAppUserNote = /* GraphQL */ `mutation CreateApsAppUserNote
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1662,6 +1669,7 @@ export const updateApsAppUserNote = /* GraphQL */ `mutation UpdateApsAppUserNote
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1832,6 +1840,7 @@ export const deleteApsAppUserNote = /* GraphQL */ `mutation DeleteApsAppUserNote
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1903,6 +1912,7 @@ export const createApsAppUserLead = /* GraphQL */ `mutation CreateApsAppUserLead
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1954,6 +1964,7 @@ export const updateApsAppUserLead = /* GraphQL */ `mutation UpdateApsAppUserLead
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2005,6 +2016,7 @@ export const deleteApsAppUserLead = /* GraphQL */ `mutation DeleteApsAppUserLead
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2052,6 +2064,7 @@ export const createApsAppUserProfile = /* GraphQL */ `mutation CreateApsAppUserP
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2117,6 +2130,7 @@ export const updateApsAppUserProfile = /* GraphQL */ `mutation UpdateApsAppUserP
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2182,6 +2196,7 @@ export const deleteApsAppUserProfile = /* GraphQL */ `mutation DeleteApsAppUserP
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2242,6 +2257,7 @@ export const createProfileAffiliate = /* GraphQL */ `mutation CreateProfileAffil
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2287,6 +2303,7 @@ export const updateProfileAffiliate = /* GraphQL */ `mutation UpdateProfileAffil
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2332,6 +2349,7 @@ export const deleteProfileAffiliate = /* GraphQL */ `mutation DeleteProfileAffil
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2377,6 +2395,7 @@ export const createProfileEducation = /* GraphQL */ `mutation CreateProfileEduca
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2421,6 +2440,7 @@ export const updateProfileEducation = /* GraphQL */ `mutation UpdateProfileEduca
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2465,6 +2485,7 @@ export const deleteProfileEducation = /* GraphQL */ `mutation DeleteProfileEduca
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2509,6 +2530,7 @@ export const createProfileInterest = /* GraphQL */ `mutation CreateProfileIntere
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2551,6 +2573,7 @@ export const updateProfileInterest = /* GraphQL */ `mutation UpdateProfileIntere
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2593,6 +2616,7 @@ export const deleteProfileInterest = /* GraphQL */ `mutation DeleteProfileIntere
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin

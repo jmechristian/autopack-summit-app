@@ -85,7 +85,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 12 },
+  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 12, paddingTop: 8 },
   error: { color: '#DC2626', marginTop: 8 },
   bubble: {
     maxWidth: '80%',

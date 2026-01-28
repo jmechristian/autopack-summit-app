@@ -106,8 +106,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
             type="clear"
             icon={<Ionicons name="pencil" size={20} color={autopackColors.apBlue} />}
             onPress={() => setIsEditing(true)}
-            title="Edit"
-            titleStyle={styles.editButtonText}
+            title=""
           />
         ) : (
           <View style={styles.editActions}>
@@ -127,6 +126,8 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
         )}
       </View>
 
+      <View style={styles.headerDivider} />
+
       <View style={styles.content}>
         {renderField('First Name', formData.firstName, 'firstName')}
         {renderField('Last Name', formData.lastName, 'lastName')}
@@ -143,20 +144,27 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  headerDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#d1d5db',
+    marginBottom: 10,
   },
   editButtonText: {
     color: autopackColors.apBlue,
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cancelButtonText: {
-    color: '#666',
+    color: '#6b7280',
   },
   saveButton: {
     backgroundColor: autopackColors.apBlue,
@@ -177,17 +185,17 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   fieldRow: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6b7280',
     marginBottom: 4,
   },
   value: {
     fontSize: 16,
-    color: '#111',
+    color: '#111827',
   },
   inputContainer: {
     paddingHorizontal: 0,

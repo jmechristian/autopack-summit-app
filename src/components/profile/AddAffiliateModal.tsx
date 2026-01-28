@@ -41,7 +41,7 @@ export function AddAffiliateModal({
 
   const handleSave = async () => {
     if (!affiliate.trim()) {
-      Alert.alert('Validation Error', 'Affiliate name is required');
+      Alert.alert('Validation Error', 'Company or organization is required');
       return;
     }
 
@@ -55,7 +55,7 @@ export function AddAffiliateModal({
       });
       onClose();
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save affiliate');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save experience');
     } finally {
       setLoading(false);
     }
@@ -65,22 +65,22 @@ export function AddAffiliateModal({
     <Overlay isVisible={visible} onBackdropPress={onClose} overlayStyle={styles.overlay}>
       <View style={styles.container}>
         <Text style={styles.title}>
-          {editingAffiliate ? 'Edit Affiliate' : 'Add Affiliate'}
+          {editingAffiliate ? 'Edit Experience' : 'Add Experience'}
         </Text>
 
         <Input
-          label="Affiliate Name *"
+          label="Company / Organization *"
           value={affiliate}
           onChangeText={setAffiliate}
-          placeholder="e.g., Company Name"
+          placeholder="e.g., Acme Corp"
           autoCapitalize="words"
         />
 
         <Input
-          label="Role"
+          label="Role / Title"
           value={role}
           onChangeText={setRole}
-          placeholder="e.g., Board Member"
+          placeholder="e.g., Director of Engineering"
           autoCapitalize="words"
         />
 

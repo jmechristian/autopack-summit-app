@@ -1,5 +1,5 @@
+import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
 import { AuthGuard } from '../../src/components/AuthGuard';
 import { autopackColors } from '../../src/theme';
 import { useEngageStore } from '../../src/store/engageStore';
@@ -9,12 +9,12 @@ export default function MainTabs() {
   return (
     <AuthGuard>
       <Tabs
-      screenOptions={{
-        headerShown: true, // still fine as a default
-        tabBarActiveTintColor: autopackColors.apBlue,
-        tabBarInactiveTintColor: '#999999',
-      }}
-    >
+        screenOptions={{
+          headerShown: false, // use stack headers per-section
+          tabBarActiveTintColor: autopackColors.apBlue,
+          tabBarInactiveTintColor: '#999999',
+        }}
+      >
       <Tabs.Screen
         name='hub'
         options={{
@@ -30,7 +30,7 @@ export default function MainTabs() {
         name='agenda'
         options={{
           title: 'Agenda',
-          headerShown: false, // 👈 turn OFF header from the tab
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name='calendar' color={color} size={size} />
           ),
@@ -66,7 +66,8 @@ export default function MainTabs() {
         name='scan'
         options={{
           href: null,
-          headerShown: false,
+          headerShown: true,
+          title: 'Scan',
         }}
       />
 

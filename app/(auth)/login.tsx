@@ -1,6 +1,10 @@
 // app/(auth)/login.tsx
 import { Ionicons } from '@expo/vector-icons';
-import { signIn, signOut as amplifySignOut, getCurrentUser } from 'aws-amplify/auth';
+import {
+  signOut as amplifySignOut,
+  getCurrentUser,
+  signIn,
+} from 'aws-amplify/auth';
 
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -79,7 +83,7 @@ export default function LoginScreen() {
         // If SRP fails due to missing native module (common when running in Expo Go),
         // retry with USER_PASSWORD_AUTH if enabled on the Cognito app client.
         if (
-          combined.includes("@aws-amplify/react-native") ||
+          combined.includes('@aws-amplify/react-native') ||
           combined.includes("doesn't seem to be linked") ||
           combined.includes('computemodpow') ||
           combined.includes('native module')

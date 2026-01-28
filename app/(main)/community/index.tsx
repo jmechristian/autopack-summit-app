@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Pressable,
   SectionList,
   StyleSheet,
@@ -18,6 +17,8 @@ import { listApsAppUserProfiles } from '../../../src/graphql/queries';
 import { useCommunityStore } from '../../../src/store/communityStore';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
+import { AppUserRow } from '../../../src/components/AppUserRow';
+import { useEngageStore } from '../../../src/store/engageStore';
 
 type CommunityProfile = {
   profileId: string; // ApsAppUserProfile.id
@@ -63,11 +64,17 @@ export default function CommunityIndex() {
   const pendingContactIds = useCommunityStore((s) => s.pendingContactIds);
   const loadFavorites = useCommunityStore((s) => s.loadFavorites);
 
+  const loadIncomingRequests = useEngageStore((s) => s.loadIncomingRequests);
+  const loadSentRequests = useEngageStore((s) => s.loadSentRequests);
+
   useEffect(() => {
     if (currentAppUser?.id) {
       loadFavorites(currentAppUser.id);
+      // Keep request/hourglass state fresh for row UI.
+      loadIncomingRequests().catch(() => {});
+      loadSentRequests().catch(() => {});
     }
-  }, [currentAppUser?.id, loadFavorites]);
+  }, [currentAppUser?.id, loadFavorites, loadIncomingRequests, loadSentRequests]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -151,14 +158,21 @@ export default function CommunityIndex() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return profiles;
-    return profiles.filter((p) => {
+    const base = profiles.filter((p) => {
+      // Never show the current user in Community list
+      if (currentAppUser?.profileId && p.profileId === currentAppUser.profileId) return false;
+      if (currentAppUser?.id && p.userId === currentAppUser.id) return false;
+      return true;
+    });
+
+    if (!q) return base;
+    return base.filter((p) => {
       const fullName = getFullName(p).toLowerCase();
       const company = (p.company || '').toLowerCase();
       const title = (p.jobTitle || '').toLowerCase();
       return fullName.includes(q) || company.includes(q) || title.includes(q);
     });
-  }, [profiles, search]);
+  }, [profiles, search, currentAppUser?.profileId, currentAppUser?.id]);
 
   const sections: CommunitySection[] = useMemo(() => {
     const map = new Map<string, CommunityProfile[]>();
@@ -238,102 +252,25 @@ export default function CommunityIndex() {
             const hasNote = profileIdsWithNotes.has(item.profileId);
 
             return (
-              <View style={styles.row}>
-                <Pressable
-                  style={styles.rowLeft}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/(main)/community/[id]',
-                      params: { id: item.profileId },
-                    })
-                  }
-                >
-                  <View style={styles.avatar}>
-                    {item.profilePicture ? (
-                      <Image
-                        source={{ uri: item.profilePicture }}
-                        style={styles.avatarImg}
-                        resizeMode='cover'
-                      />
-                    ) : (
-                      <Text style={styles.avatarText}>
-                        {normalizeNamePart(item.firstName).slice(0, 1).toUpperCase()}
-                        {normalizeNamePart(item.lastName).slice(0, 1).toUpperCase()}
-                      </Text>
-                    )}
-                  </View>
-
-                  <View style={styles.textWrap}>
-                    <Text style={styles.name} numberOfLines={1}>
-                      {name}
-                    </Text>
-                    {!!subtitle && (
-                      <Text style={styles.subtitle} numberOfLines={1}>
-                        {subtitle}
-                      </Text>
-                    )}
-                  </View>
-                </Pressable>
-
-                <View style={styles.actions}>
-                  <Pressable
-                    hitSlop={10}
-                    disabled={pending || isSelf || !currentAppUser?.id}
-                    onPress={async () => {
-                      if (!currentAppUser?.id) return;
-                      if (isSelf) return;
-                      try {
-                        await toggleFavorite({
-                          currentUserId: currentAppUser.id,
-                          contactId: item.profileId,
-                        });
-                      } catch {
-                        Alert.alert('Favorite failed', 'Could not update favorite. Please try again.');
-                      }
-                    }}
-                    style={styles.iconBtn}
-                  >
-                    <Ionicons
-                      name={fav ? 'star' : 'star-outline'}
-                      size={20}
-                      color={
-                        isSelf
-                          ? '#d1d5db'
-                          : fav
-                            ? autopackColors.apYellow
-                            : pending
-                              ? '#9ca3af'
-                              : '#6b7280'
-                      }
-                    />
-                  </Pressable>
-
-                  <Pressable
-                    hitSlop={10}
-                    onPress={() => Alert.alert('Chat', 'Chat is coming soon.')}
-                    style={styles.iconBtn}
-                  >
-                    <Ionicons name='chatbubble-outline' size={20} color='#6b7280' />
-                  </Pressable>
-
-                  <Pressable
-                    hitSlop={10}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/(main)/community/[id]',
-                        params: { id: item.profileId },
-                      })
-                    }
-                    style={styles.iconBtn}
-                  >
-                    <Ionicons
-                      name={hasNote ? 'document-text-outline' : 'eye-outline'}
-                      size={20}
-                      color={autopackColors.apBlue}
-                    />
-                  </Pressable>
-                </View>
-              </View>
+              <AppUserRow
+                profileId={item.profileId}
+                userId={item.userId}
+                name={name}
+                subtitle={subtitle}
+                avatarUri={item.profilePicture || null}
+                initials={`${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(item.lastName).slice(0, 1)}`.toUpperCase()}
+                isSelf={isSelf}
+                hasNote={hasNote}
+                currentAppUserId={currentAppUser?.id || null}
+                favorite={fav}
+                pendingFavorite={pending}
+                onPressProfile={() =>
+                  router.push({
+                    pathname: '/(main)/community/[id]',
+                    params: { id: item.profileId },
+                  })
+                }
+              />
             );
           }}
           ItemSeparatorComponent={() => <View style={styles.sep} />}
@@ -368,32 +305,6 @@ const styles = StyleSheet.create({
     borderTopColor: '#e5e7eb',
   },
   sectionHeaderText: { fontWeight: '800', color: '#111827' },
-
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  rowLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 999,
-    backgroundColor: '#e5e7eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarImg: { width: 44, height: 44, borderRadius: 999 },
-  avatarText: { fontWeight: '800', color: '#111827' },
-
-  textWrap: { flex: 1 },
-  name: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  subtitle: { marginTop: 2, fontSize: 13, color: '#6b7280' },
-
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 8 },
-  iconBtn: { padding: 6, borderRadius: 10 },
 
   sep: { height: StyleSheet.hairlineWidth, backgroundColor: '#e5e7eb', marginLeft: 12 },
 

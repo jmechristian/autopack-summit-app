@@ -130,6 +130,7 @@ export const getApsAppUserNote = /* GraphQL */ `query GetApsAppUserNote($id: ID!
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1853,6 +1854,7 @@ export const getApsAppUser = /* GraphQL */ `query GetApsAppUser($id: ID!) {
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -1951,6 +1953,7 @@ export const getApsAppUserContact = /* GraphQL */ `query GetApsAppUserContact($i
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2091,6 +2094,7 @@ export const getApsAppUserLead = /* GraphQL */ `query GetApsAppUserLead($id: ID!
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2223,6 +2227,7 @@ export const getApsAppUserProfile = /* GraphQL */ `query GetApsAppUserProfile($i
     company
     jobTitle
     attendeeType
+    quickTools
     affiliates {
       nextToken
       __typename
@@ -2286,6 +2291,7 @@ export const listApsAppUserProfiles = /* GraphQL */ `query ListApsAppUserProfile
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2332,6 +2338,7 @@ export const apsAppUserProfilesByUserId = /* GraphQL */ `query ApsAppUserProfile
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2368,6 +2375,7 @@ export const getProfileAffiliate = /* GraphQL */ `query GetProfileAffiliate($id:
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2470,6 +2478,7 @@ export const getProfileEducation = /* GraphQL */ `query GetProfileEducation($id:
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
@@ -2569,6 +2578,7 @@ export const getProfileInterest = /* GraphQL */ `query GetProfileInterest($id: I
       company
       jobTitle
       attendeeType
+      quickTools
       profilePicture
       bio
       linkedin
