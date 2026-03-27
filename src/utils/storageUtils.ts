@@ -50,9 +50,13 @@ export async function uploadProfilePicture(fileUri: string): Promise<string> {
  */
 export async function getProfilePictureUrl(key: string): Promise<string> {
   try {
+    const normalizedKey = normalizeProfilePictureKey(key);
+    if (!normalizedKey) {
+      throw new Error('Missing profile picture key');
+    }
     const { getUrl } = await import('aws-amplify/storage');
     const urlResult = await getUrl({
-      key: key,
+      key: normalizedKey,
       options: {
         accessLevel: 'public',
         expiresIn: 3600, // 1 hour expiration
@@ -62,6 +66,67 @@ export async function getProfilePictureUrl(key: string): Promise<string> {
   } catch (error) {
     console.error('Error getting profile picture URL:', error);
     throw new Error('Failed to get profile picture URL.');
+  }
+}
+
+function normalizeProfilePictureKey(input: string): string {
+  let value = (input || '').trim();
+  if (!value) return '';
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      const path = parsed.pathname || '';
+      // Amplify public assets are exposed under /public/<key>.
+      const publicIndex = path.indexOf('/public/');
+      if (publicIndex >= 0) {
+        value = path.slice(publicIndex + '/public/'.length);
+      } else {
+        value = path.replace(/^\/+/, '');
+      }
+    } catch {
+      return '';
+    }
+  }
+
+  if (value.startsWith('s3://')) {
+    const withoutScheme = value.slice('s3://'.length);
+    const slashIndex = withoutScheme.indexOf('/');
+    value = slashIndex >= 0 ? withoutScheme.slice(slashIndex + 1) : '';
+  }
+
+  value = value.replace(/^\/+/, '');
+  if (value.startsWith('public/')) {
+    value = value.slice('public/'.length);
+  }
+
+  return value;
+}
+
+/**
+ * Resolve profile picture reference from DB to a loadable image URI.
+ * Handles full URLs, signed URLs, and S3 object keys.
+ */
+export async function resolveProfilePictureUri(
+  storedValue?: string | null
+): Promise<string | null> {
+  const value = (storedValue || '').trim();
+  if (!value) return null;
+
+  if (
+    value.startsWith('http://') ||
+    value.startsWith('https://') ||
+    value.startsWith('file://') ||
+    value.startsWith('content://')
+  ) {
+    return value;
+  }
+
+  try {
+    return await getProfilePictureUrl(value);
+  } catch (error) {
+    console.warn('Unable to resolve profile picture URI from value:', value, error);
+    return null;
   }
 }
 

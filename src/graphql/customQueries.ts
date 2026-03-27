@@ -6,7 +6,6 @@ export const getAPSBasic = /* GraphQL */ `
     getAPS(id: $id) {
       id
       year
-      codes
       createdAt
       updatedAt
       __typename
@@ -171,16 +170,15 @@ export const getAPSWithAgenda = /* GraphQL */ `
     getAPS(id: $id) {
       id
       year
-      codes
       agenda {
         id
         eventId
         items {
           items {
             id
-            session
+            session: title
             date
-            time
+            time: startTime
             location
             sessionQuestions {
               items {
@@ -215,7 +213,6 @@ export const getAPSWithRegistrants = /* GraphQL */ `
     getAPS(id: $id) {
       id
       year
-      codes
       Registrants(limit: $limit, nextToken: $nextToken) {
         items {
           id
@@ -257,25 +254,26 @@ export const getAPSWithSpeakers = /* GraphQL */ `
     getAPS(id: $id) {
       id
       year
-      codes
       __typename
     }
     aPSSpeakersByEventId(eventId: $eventId) {
       items {
         id
-        firstName
-        lastName
-        email
-        company
-        title
-        phone
-        linkedin
-        bio
         presentationTitle
         presentationSummary
-        headshot
-        mediaConsent
-        privacyConsent
+        profileId
+        profile {
+          id
+          firstName
+          lastName
+          email
+          company
+          jobTitle
+          profilePicture
+          bio
+          linkedin
+          __typename
+        }
         eventId
         createdAt
         updatedAt
@@ -309,11 +307,18 @@ export const apsAppSessionsByAgendaIdWithRelations = /* GraphQL */ `
             id
             aPSSpeaker {
               id
-              firstName
-              lastName
-              company
-              title
-              headshot
+              presentationTitle
+              presentationSummary
+              profileId
+              profile {
+                id
+                firstName
+                lastName
+                company
+                jobTitle
+                profilePicture
+                __typename
+              }
               __typename
             }
             __typename
@@ -362,11 +367,18 @@ export const getApsAppSessionWithRelations = /* GraphQL */ `
           id
           aPSSpeaker {
             id
-            firstName
-            lastName
-            company
-            title
-            headshot
+            presentationTitle
+            presentationSummary
+            profileId
+            profile {
+              id
+              firstName
+              lastName
+              company
+              jobTitle
+              profilePicture
+              __typename
+            }
             __typename
           }
           __typename
@@ -402,7 +414,6 @@ export const getAPSWithExhibitors = /* GraphQL */ `
     getAPS(id: $id) {
       id
       year
-      codes
       __typename
     }
     apsAppExhibitorProfilesByEventId(eventId: $eventId) {
@@ -421,8 +432,6 @@ export const getAPSWithExhibitors = /* GraphQL */ `
           __typename
         }
         sponsorId
-        title
-        phone
         eventId
         deals {
           items {
@@ -481,7 +490,6 @@ export const getAPSWithAddOns = /* GraphQL */ `
     getAPS(id: $id) {
       id
       year
-      codes
       __typename
     }
     apsAddOnsByEventId(eventId: $eventId) {
@@ -493,7 +501,6 @@ export const getAPSWithAddOns = /* GraphQL */ `
         location
         date
         time
-        company
         altLink
         type
         limit
@@ -514,6 +521,10 @@ export const listApsAppUsersWithProfiles = /* GraphQL */ `
     listApsAppUsers(limit: $limit, nextToken: $nextToken) {
       items {
         id
+        registrant {
+          id
+          status
+        }
         profile {
           firstName
           id

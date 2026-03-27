@@ -139,7 +139,7 @@ export default function ScanScreen() {
 
       <View style={styles.hintWrap}>
         <Text style={styles.hintTitle}>Point your camera at an attendee QR code</Text>
-        <Text style={styles.hintText}>We’ll open their profile so you can add them as a contact or lead.</Text>
+        <Text style={styles.hintText}>We’ll open their profile so you can add them as a contact.</Text>
 
         {!!lastError && <Text style={styles.errorText}>{lastError}</Text>}
         {!!lastError && __DEV__ && !!lastRaw && (

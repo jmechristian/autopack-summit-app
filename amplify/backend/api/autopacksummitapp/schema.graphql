@@ -23,18 +23,24 @@ enum RegistrantStatus {
   REJECTED
 }
 
+enum SponsorType {
+  BOOTH
+  TABLE
+  NONE
+}
+
 # Main Event Type
 type APS
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read, create] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
   id: ID!
   year: String!
-  codes: [String]
+  codes: [APSCode] @hasMany(indexName: "byEvent")
   agenda: ApsAgenda @hasOne
   startDate: String
   endDate: String
@@ -47,14 +53,36 @@ type APS
   Registrants: [ApsRegistrant] @hasMany(indexName: "byAPS")
   Sponsors: [ApsSponsor] @hasMany(indexName: "byEvent")
   Speakers: [APSSpeaker] @hasMany(indexName: "byEvent")
-  Companies: [APSCompany] @hasMany(indexName: "byEvent")
+  companies: [APSCompany] @manyToMany(relationName: "APSCompanyEvents")
   photos: [ApsAppUserPhoto] @hasMany(indexName: "byEvent")
   exhibitors: [ApsAppExhibitorProfile] @hasMany(indexName: "byEvent")
   exhibitorPromotions: [ApsAppExhibitorPromotion] @hasMany(indexName: "byEvent")
   exhibitorDeals: [ApsAppExhibitorDeal] @hasMany(indexName: "byEvent")
   exhibitorPhotos: [ApsAppExhibitorPhoto] @hasMany(indexName: "byEvent")
   exhibitorHandouts: [ApsAppExhibitorHandout] @hasMany(indexName: "byEvent")
+  favoriteExhibitors: [ApsAppUserFavoriteExhibitor]
+    @hasMany(indexName: "byEvent")
+  favoriteSpeakers: [ApsAppUserFavoriteSpeaker] @hasMany(indexName: "byEvent")
+  favoriteSponsors: [ApsAppUserFavoriteSponsor] @hasMany(indexName: "byEvent")
+  favoriteSessions: [ApsAppUserFavoriteSession] @hasMany(indexName: "byEvent")
+  favoriteContacts: [ApsAppUserFavoriteContact] @hasMany(indexName: "byEvent")
   addOns: [ApsAddOn] @hasMany(indexName: "byEvent")
+}
+
+type APSCode
+  @model
+  @auth(
+    rules: [
+      { allow: public, operations: [read] }
+      { allow: groups, groups: ["Admin"] }
+    ]
+  ) {
+  id: ID!
+  code: String!
+  eventId: ID! @index(name: "byEvent")
+  event: APS! @belongsTo(fields: ["eventId"])
+  limit: Int
+  used: Int!
 }
 
 # Board Members
@@ -62,7 +90,7 @@ type APSBoard
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, operations: [read, create, update, delete] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -81,7 +109,7 @@ type ApsAgenda
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -96,7 +124,7 @@ type ApsRegistrant
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read, create, update] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -105,7 +133,7 @@ type ApsRegistrant
   aps: APS! @belongsTo(fields: ["apsID"])
   firstName: String
   lastName: String
-  email: String!
+  email: String! @index(name: "byEmail")
   phone: String
   companyId: ID @index(name: "byCompany")
   company: APSCompany @belongsTo(fields: ["companyId"])
@@ -114,8 +142,9 @@ type ApsRegistrant
   termsAccepted: Boolean
   interests: [String]
   otherInterest: String
-  speedNetworking: Boolean
-  speedNetworkingStatus: String
+  buyerQuestion: String
+  packagingChallenge: String
+  certification: String
   billingAddressFirstName: String
   billingAddressLastName: String
   billingAddressEmail: String
@@ -130,12 +159,6 @@ type ApsRegistrant
   totalAmount: Int
   discountCode: String
   status: RegistrantStatus!
-  morrisetteTransportation: String
-  morrisetteStatus: String
-  aristoTransportation: String
-  aristoStatus: String
-  magnaTransportation: String
-  magnaStatus: String
   paymentConfirmation: String
   registrationEmailSent: Boolean
   registrationEmailSentDate: String
@@ -153,7 +176,10 @@ type ApsRegistrant
   presentationTitle: String
   presentationSummary: String
   bio: String
+  invoice: String
   seatingChartRegistrant: ApsSeatingChartRegistrant @hasOne
+  addOnRequests: [RegistrantAddOnRequest]
+    @hasMany(indexName: "byRegistrant", fields: ["id"])
 
   # ✅ FIX: make the hasOne key explicit so resolvers can traverse registrant -> appUser
   appUserId: ID
@@ -163,12 +189,28 @@ type ApsRegistrant
   qrCode: String
 }
 
+# Temporary credentials for bulk welcome emails
+type ApsTempCredential
+  @model
+  @auth(rules: [{ allow: groups, groups: ["Admin"] }]) {
+  id: ID!
+  apsID: ID! @index(name: "byAPS", sortKeyFields: ["createdAt"])
+  registrantId: ID! @index(name: "byRegistrant", sortKeyFields: ["createdAt"])
+  email: String!
+  tempPasswordCiphertext: String!
+  tempPasswordIv: String!
+  tempPasswordTag: String!
+  expiresAt: AWSTimestamp
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
 # App User (for mobile app)
 type ApsAppUser
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read, update] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -194,7 +236,7 @@ type ApsAppUserContact
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -242,7 +284,7 @@ type ApsAppUserLead
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -259,7 +301,7 @@ type ApsAppUserProfile
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read, update] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -288,20 +330,36 @@ type ApsAppUserProfile
   education: [ProfileEducation] @hasMany(indexName: "byUser")
   interests: [ProfileInterest] @hasMany(indexName: "byUser")
   resume: String
+  thinkificId: Int
+  apcProgress: Float
 
   # Reverse relationships required for @belongsTo in Contact/Lead
   contacts: [ApsAppUserContact] @hasMany(indexName: "byContact", fields: ["id"])
   leads: [ApsAppUserLead] @hasMany(indexName: "byContact", fields: ["id"])
+  favoriteExhibitors: [ApsAppUserFavoriteExhibitor]
+    @hasMany(indexName: "byUserProfile", fields: ["id"])
+  favoriteSpeakers: [ApsAppUserFavoriteSpeaker]
+    @hasMany(indexName: "byUserProfile", fields: ["id"])
+  favoriteSponsors: [ApsAppUserFavoriteSponsor]
+    @hasMany(indexName: "byUserProfile", fields: ["id"])
+  favoriteSessions: [ApsAppUserFavoriteSession]
+    @hasMany(indexName: "byUserProfile", fields: ["id"])
+  favoriteContacts: [ApsAppUserFavoriteContact]
+    @hasMany(indexName: "byUserProfile", fields: ["id"])
+  favoritedByProfiles: [ApsAppUserFavoriteContact]
+    @hasMany(indexName: "byContactProfile", fields: ["id"])
 
   # Notes about this profile (contact notes)
   notes: [ApsAppUserNote] @hasMany(indexName: "byProfile", fields: ["id"])
+  speakerId: ID @index(name: "bySpeaker")
+  speaker: APSSpeaker @hasOne(fields: ["speakerId"])
 }
 
 type ProfileAffiliate
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -318,7 +376,7 @@ type ProfileEducation
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -334,7 +392,7 @@ type ProfileInterest
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -349,7 +407,7 @@ type ApsAppUserPhoto
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -368,7 +426,7 @@ type ApsAppSession
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -386,6 +444,8 @@ type ApsAppSession
   notes: [ApsAppUserNote] @hasMany(indexName: "bySession", fields: ["id"])
   speakers: [APSSpeaker] @manyToMany(relationName: "SessionSpeakers")
   sponsors: [ApsSponsor] @manyToMany(relationName: "SessionSponsors")
+  favoriteByUsers: [ApsAppUserFavoriteSession]
+    @hasMany(indexName: "bySession", fields: ["id"])
 }
 
 # Session Questions
@@ -393,7 +453,7 @@ type ApsAppSessionQuestion
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -410,27 +470,20 @@ type APSSpeaker
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
   id: ID!
-  firstName: String!
-  lastName: String!
-  email: String!
-  company: String!
-  title: String!
-  phone: String
-  linkedin: String
-  bio: String!
   presentationTitle: String
   presentationSummary: String
-  headshot: String!
-  mediaConsent: Boolean
-  privacyConsent: Boolean
+  profileId: ID! @index(name: "bySpeakerProfile", sortKeyFields: ["eventId"])
+  profile: ApsAppUserProfile! @belongsTo(fields: ["profileId"])
   eventId: ID! @index(name: "byEvent")
   event: APS! @belongsTo(fields: ["eventId"])
   sessions: [ApsAppSession] @manyToMany(relationName: "SessionSpeakers")
+  favoriteByUsers: [ApsAppUserFavoriteSpeaker]
+    @hasMany(indexName: "bySpeaker", fields: ["id"])
 }
 
 # Sponsors
@@ -438,7 +491,7 @@ type ApsSponsor
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -449,6 +502,9 @@ type ApsSponsor
   event: APS! @belongsTo(fields: ["eventId"])
   profile: ApsAppExhibitorProfile @hasOne
   sessions: [ApsAppSession] @manyToMany(relationName: "SessionSponsors")
+  favoriteByUsers: [ApsAppUserFavoriteSponsor]
+    @hasMany(indexName: "bySponsor", fields: ["id"])
+  type: SponsorType
 }
 
 # Companies
@@ -456,13 +512,13 @@ type APSCompany
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read, create, update] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
   id: ID!
   name: String!
-  email: String!
+  email: String
   type: CompanyType
   description: String
   website: String
@@ -473,12 +529,35 @@ type APSCompany
   zip: String
   country: String
   logo: String
-  eventId: ID! @index(name: "byEvent")
-  event: APS! @belongsTo(fields: ["eventId"])
+  events: [APS] @manyToMany(relationName: "APSCompanyEvents")
   registrants: [ApsRegistrant] @hasMany(indexName: "byCompany")
-  sponsors: [ApsSponsor] @hasMany(indexName: "byCompany")
-  exhibitorProfiles: [ApsAppExhibitorProfile] @hasMany(indexName: "byCompany")
+  sponsorId: ID
+  sponsor: ApsSponsor @hasOne(fields: ["sponsorId"])
+  exhibitorProfileId: ID
+  exhibitorProfile: ApsAppExhibitorProfile
+    @hasOne(fields: ["exhibitorProfileId"])
   notes: [ApsAppUserNote] @hasMany(indexName: "byCompany", fields: ["id"])
+  contacts: [APSCompanyContact] @hasMany(indexName: "byCompany", fields: ["id"])
+}
+
+# Company contacts (multiple contacts per company)
+type APSCompanyContact
+  @model
+  @auth(
+    rules: [
+      { allow: public, provider: apiKey, operations: [read] }
+      { allow: groups, groups: ["Admin"] }
+    ]
+  ) {
+  id: ID!
+  companyId: ID! @index(name: "byCompany", sortKeyFields: ["createdAt"])
+  company: APSCompany! @belongsTo(fields: ["companyId"])
+  name: String
+  email: String!
+  phone: String
+  title: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 # Exhibitor Profiles
@@ -486,7 +565,7 @@ type ApsAppExhibitorProfile
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read, update] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -495,8 +574,6 @@ type ApsAppExhibitorProfile
   company: APSCompany! @belongsTo(fields: ["companyId"])
   sponsorId: ID @index(name: "bySponsor")
   sponsor: ApsSponsor @belongsTo(fields: ["sponsorId"])
-  title: String
-  phone: String
   eventId: ID! @index(name: "byEvent")
   event: APS! @belongsTo(fields: ["eventId"])
   deals: [ApsAppExhibitorDeal] @hasMany(indexName: "byExhibitor")
@@ -510,6 +587,124 @@ type ApsAppExhibitorProfile
   views: Int
   likes: Int
   notes: [ApsAppUserNote] @hasMany(indexName: "byExhibitor", fields: ["id"])
+  favoriteByUsers: [ApsAppUserFavoriteExhibitor]
+    @hasMany(indexName: "byExhibitor", fields: ["id"])
+}
+
+# Favorites: Exhibitors
+type ApsAppUserFavoriteExhibitor
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: owner, provider: userPools }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  owner: String
+  userProfileId: ID! @index(name: "byUserProfile", sortKeyFields: ["createdAt"])
+  userProfile: ApsAppUserProfile! @belongsTo(fields: ["userProfileId"])
+  exhibitorId: ID! @index(name: "byExhibitor", sortKeyFields: ["createdAt"])
+  exhibitor: ApsAppExhibitorProfile! @belongsTo(fields: ["exhibitorId"])
+  eventId: ID! @index(name: "byEvent", sortKeyFields: ["createdAt"])
+  event: APS! @belongsTo(fields: ["eventId"])
+  favoriteKey: String! @index(name: "byFavoriteKey")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Favorites: Speakers
+type ApsAppUserFavoriteSpeaker
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: owner, provider: userPools }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  owner: String
+  userProfileId: ID! @index(name: "byUserProfile", sortKeyFields: ["createdAt"])
+  userProfile: ApsAppUserProfile! @belongsTo(fields: ["userProfileId"])
+  speakerId: ID! @index(name: "bySpeaker", sortKeyFields: ["createdAt"])
+  speaker: APSSpeaker! @belongsTo(fields: ["speakerId"])
+  eventId: ID! @index(name: "byEvent", sortKeyFields: ["createdAt"])
+  event: APS! @belongsTo(fields: ["eventId"])
+  favoriteKey: String! @index(name: "byFavoriteKey")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Favorites: Sponsors
+type ApsAppUserFavoriteSponsor
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: owner, provider: userPools }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  owner: String
+  userProfileId: ID! @index(name: "byUserProfile", sortKeyFields: ["createdAt"])
+  userProfile: ApsAppUserProfile! @belongsTo(fields: ["userProfileId"])
+  sponsorId: ID! @index(name: "bySponsor", sortKeyFields: ["createdAt"])
+  sponsor: ApsSponsor! @belongsTo(fields: ["sponsorId"])
+  eventId: ID! @index(name: "byEvent", sortKeyFields: ["createdAt"])
+  event: APS! @belongsTo(fields: ["eventId"])
+  favoriteKey: String! @index(name: "byFavoriteKey")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Favorites: Sessions
+type ApsAppUserFavoriteSession
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: owner, provider: userPools }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  owner: String
+  userProfileId: ID! @index(name: "byUserProfile", sortKeyFields: ["createdAt"])
+  userProfile: ApsAppUserProfile! @belongsTo(fields: ["userProfileId"])
+  sessionId: ID! @index(name: "bySession", sortKeyFields: ["createdAt"])
+  session: ApsAppSession! @belongsTo(fields: ["sessionId"])
+  eventId: ID! @index(name: "byEvent", sortKeyFields: ["createdAt"])
+  event: APS! @belongsTo(fields: ["eventId"])
+  favoriteKey: String! @index(name: "byFavoriteKey")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Favorites: Contacts
+type ApsAppUserFavoriteContact
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: owner, provider: userPools }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  owner: String
+  userProfileId: ID! @index(name: "byUserProfile", sortKeyFields: ["createdAt"])
+  userProfile: ApsAppUserProfile! @belongsTo(fields: ["userProfileId"])
+  contactProfileId: ID!
+    @index(name: "byContactProfile", sortKeyFields: ["createdAt"])
+  contactProfile: ApsAppUserProfile! @belongsTo(fields: ["contactProfileId"])
+  eventId: ID! @index(name: "byEvent", sortKeyFields: ["createdAt"])
+  event: APS! @belongsTo(fields: ["eventId"])
+  favoriteKey: String! @index(name: "byFavoriteKey")
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 # Exhibitor Promotions
@@ -517,7 +712,7 @@ type ApsAppExhibitorPromotion
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -535,7 +730,7 @@ type ApsAppExhibitorDeal
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -555,7 +750,7 @@ type ApsAppExhibitorPhoto
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -574,7 +769,7 @@ type ApsAppExhibitorHandout
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -591,7 +786,7 @@ type ApsAddOn
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -602,12 +797,33 @@ type ApsAddOn
   location: String!
   date: String!
   time: String!
-  company: String!
   altLink: String
   type: String
   limit: Int
   eventId: ID! @index(name: "byEvent")
   event: APS! @belongsTo(fields: ["eventId"])
+  price: Int
+  preferenceSchema: AWSJSON
+  registrantRequests: [RegistrantAddOnRequest]
+    @hasMany(indexName: "byAddOn", fields: ["id"])
+}
+
+# Join table: registrant + add-on request/approval with optional preferences
+type RegistrantAddOnRequest
+  @model
+  @auth(
+    rules: [
+      { allow: public, provider: apiKey, operations: [read, create] }
+      { allow: groups, groups: ["Admin"] }
+    ]
+  ) {
+  id: ID!
+  registrantId: ID! @index(name: "byRegistrant")
+  registrant: ApsRegistrant! @belongsTo(fields: ["registrantId"])
+  addOnId: ID! @index(name: "byAddOn")
+  addOn: ApsAddOn! @belongsTo(fields: ["addOnId"])
+  status: String! # PENDING (requested) or APPROVED
+  preferences: AWSJSON
 }
 
 # Seating Charts
@@ -615,7 +831,7 @@ type ApsSeatingChart
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {
@@ -627,7 +843,7 @@ type ApsSeatingChartRegistrant
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
+      { allow: public, provider: apiKey, operations: [read] }
       { allow: groups, groups: ["Admin"] }
     ]
   ) {

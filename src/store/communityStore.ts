@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { graphqlAuthClient, graphqlClient } from '../utils/graphqlClient';
+import { graphqlApiKeyClient, graphqlAuthClient } from '../utils/graphqlClient';
 import { apsAppUserContactsByUserId } from '../graphql/queries';
 import { createApsAppUserContact, deleteApsAppUserContact } from '../graphql/mutations';
 
@@ -38,7 +38,7 @@ export const useCommunityStore = create<CommunityStore>()(
         let nextToken: string | null | undefined = null;
 
         do {
-          const resp = await graphqlClient.graphql({
+          const resp = await graphqlApiKeyClient.graphql({
             query: apsAppUserContactsByUserId,
             variables: { userId: currentUserId, limit: 1000, nextToken },
           });

@@ -40,10 +40,22 @@ export default function EngageHome() {
       onPress: () => router.push('/(main)/engage/requests'),
     },
     {
-      id: 'leads',
-      label: 'Leads',
-      icon: 'briefcase-outline',
-      onPress: () => router.push('/(main)/engage/leads'),
+      id: 'exhibitors',
+      label: 'Exhibitors',
+      icon: 'business-outline',
+      onPress: () => router.push('/(main)/engage/exhibitors'),
+    },
+    {
+      id: 'speakers',
+      label: 'Speakers',
+      icon: 'mic-outline',
+      onPress: () => router.push('/(main)/engage/speakers'),
+    },
+    {
+      id: 'sponsors',
+      label: 'Sponsors',
+      icon: 'ribbon-outline',
+      onPress: () => router.push('/(main)/engage/sponsors'),
     },
   ];
 

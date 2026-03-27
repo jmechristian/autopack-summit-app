@@ -14,18 +14,18 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
-import { graphqlClient } from '../../utils/graphqlClient';
+import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { autopackColors } from '../../theme';
 import { useEngageStore } from '../../store/engageStore';
 import { AppUserRow } from '../AppUserRow';
 import { apsAppUserContactsByUserId } from '../../graphql/queries';
 import { useCommunityStore } from '../../store/communityStore';
-import { getProfilePictureUrl } from '../../utils/storageUtils';
+import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { useNotesPresence } from '../../hooks/useNotesPresence';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` includes `notes { ... }`, but notes are now USER_POOLS-only.
-// When called via API_KEY, AppSync may return errors and profiles won't load -> empty contacts/leads UI.
+// When called via API_KEY, AppSync may return errors and profiles won't load -> empty contacts UI.
 const getApsAppUserProfileMinimal = /* GraphQL */ `
   query GetApsAppUserProfileMinimal($id: ID!) {
     getApsAppUserProfile(id: $id) {
@@ -132,7 +132,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
       const all: ContactItem[] = [];
       let nextToken: string | null | undefined = null;
       do {
-        const resp = await graphqlClient.graphql({
+        const resp = await graphqlApiKeyClient.graphql({
           query: apsAppUserContactsByUserId,
           variables: { userId: currentAppUser.id, limit: 1000, nextToken },
         });
@@ -172,7 +172,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
         const entries = await Promise.all(
           missing.map(async (id) => {
             try {
-              const resp = await graphqlClient.graphql({
+              const resp = await graphqlApiKeyClient.graphql({
                 query: getApsAppUserProfileMinimal,
                 variables: { id },
               });
@@ -270,18 +270,14 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
 
   useEffect(() => {
     const loadUrls = async () => {
-      const missing = Object.values(profilesById).filter((p) => p.profilePicture);
+      const missing = Object.values(profilesById).filter(
+        (p) => p.profilePicture && profilePictureUrls[p.id] === undefined
+      );
       if (!missing.length) return;
       const updates: Record<string, string | null> = {};
       await Promise.all(
         missing.map(async (p) => {
-          if (!p.profilePicture) return;
-          try {
-            const url = await getProfilePictureUrl(p.profilePicture);
-            updates[p.id] = url;
-          } catch {
-            updates[p.id] = null;
-          }
+          updates[p.id] = await resolveProfilePictureUri(p.profilePicture);
         })
       );
       if (Object.keys(updates).length) {
@@ -289,7 +285,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
       }
     };
     loadUrls();
-  }, [profilesById]);
+  }, [profilesById, profilePictureUrls]);
 
   if (!currentAppUser?.id) {
     return (
@@ -327,7 +323,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
 
       {error ? (
         <View style={styles.errorBox}>
-          <Text style={styles.errorTitle}>Couldn't load {mode}</Text>
+          <Text style={styles.errorTitle}>Could not load contacts</Text>
           <Text style={styles.errorText}>{error}</Text>
           <Pressable style={styles.retryBtn} onPress={load}>
             <Text style={styles.retryText}>Retry</Text>
@@ -346,7 +342,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
             </View>
           )}
           renderItem={({ item }) => {
-            const avatarUrl = profilePictureUrls[item.profileId] || item.profilePicture || null;
+            const avatarUrl = profilePictureUrls[item.profileId] ?? null;
             const isFavorite = !!favoriteContactIds[item.profileId];
             const isPending = !!pendingContactIds[item.profileId];
             const hasNotes = profileIdsWithNotes.has(item.profileId);

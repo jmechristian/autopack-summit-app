@@ -18,15 +18,17 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
+import { useCurrentAppUser, useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
+import { APS_ID } from '../../../src/config/apsConfig';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
+import { apsAppExhibitorProfilesByCompanyId } from '../../../src/graphql/queries';
 import { AppBadge } from '../../../src/ui/AppBadge';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
-import { graphqlClient } from '../../../src/utils/graphqlClient';
-import { getProfilePictureUrl } from '../../../src/utils/storageUtils';
+import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
+import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 
 type QuickTool = {
   id: string;
@@ -38,21 +40,25 @@ type QuickTool = {
 
 const MAX_QUICK_TOOLS = 6;
 const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v1';
+const WINDOW_HEIGHT = Dimensions.get('window').height;
+// Default pinned quick tools (max 6)
+const DEFAULT_TOOL_IDS = ['contacts', 'notes', 'requests', 'messages', 'announcements', 'favorites'];
+const EXHIBITOR_DEFAULT_TOOL_IDS = ['exhibitor-profile', 'contacts', 'notes', 'requests', 'messages', 'favorites'];
 
 const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'contacts', icon: 'person', label: 'Contacts', route: '/(main)/hub/contacts' },
   { id: 'notes', icon: 'document-text', label: 'Notes', route: '/(main)/hub/notes' },
-  { id: 'leads', icon: 'briefcase', label: 'Leads', route: '/(main)/hub/leads' },
   { id: 'requests', icon: 'git-pull-request', label: 'Requests', route: '/(main)/hub/requests' },
   { id: 'messages', icon: 'chatbubbles', label: 'Messages', route: '/(main)/hub/messages' },
   { id: 'announcements', icon: 'megaphone', label: 'Announcements', route: '/(main)/hub/announcements' },
   { id: 'qr', icon: 'qr-code', label: 'My QR Code', route: '/(main)/hub/qr' },
+  { id: 'exhibitor-profile', icon: 'construct', label: 'Exhibitor Profile', route: '/(main)/hub/exhibitor-profile' },
   { id: 'lead-capture', icon: 'scan', label: 'Capture Contact', route: '/(main)/hub/capture' },
   { id: 'leaderboard', icon: 'trophy', label: 'Leaderboard', comingSoon: true },
-  { id: 'favorites', icon: 'star', label: 'Favorites', route: '/(main)/community' },
-  { id: 'exhibitors', icon: 'business', label: 'Exhibitors', route: '/(main)/community' },
-  { id: 'sponsors', icon: 'ribbon', label: 'Sponsors', comingSoon: true },
-  { id: 'speakers', icon: 'mic', label: 'Speakers', route: '/(main)/community' },
+  { id: 'favorites', icon: 'star', label: 'Favorites', route: '/(main)/hub/favorites' },
+  { id: 'exhibitors', icon: 'business', label: 'Exhibitors', route: '/(main)/hub/exhibitors' },
+  { id: 'sponsors', icon: 'ribbon', label: 'Sponsors', route: '/(main)/hub/sponsors' },
+  { id: 'speakers', icon: 'mic', label: 'Speakers', route: '/(main)/hub/speakers' },
   { id: 'passport', icon: 'book', label: 'Passport', comingSoon: true },
 ];
 
@@ -105,22 +111,18 @@ function formatTimeRange(start?: string | null, end?: string | null) {
 export default function HubScreen() {
   const insets = useSafeAreaInsets();
   const profile = useCurrentUserProfile();
+  const currentAppUser = useCurrentAppUser();
+  const companyId = currentAppUser?.registrant?.companyId || null;
   const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
   const [sessionIndex, setSessionIndex] = useState(0);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [nextSessions, setNextSessions] = useState<NextSession[]>(MOCK_NEXT_SESSIONS);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
-  const [selectedToolIds, setSelectedToolIds] = useState<string[]>([
-    'contacts',
-    'notes',
-    'leads',
-    'requests',
-    'messages',
-    'announcements',
-  ]);
+  const [selectedToolIds, setSelectedToolIds] = useState<string[]>(DEFAULT_TOOL_IDS);
   const [editingToolIds, setEditingToolIds] = useState<string[]>([]);
   const [toolsModalVisible, setToolsModalVisible] = useState(false);
   const [toolsLoaded, setToolsLoaded] = useState(false);
+  const [hasExhibitorProfile, setHasExhibitorProfile] = useState<boolean | null>(null);
 
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
@@ -145,9 +147,7 @@ export default function HubScreen() {
               deduped.push(id);
               if (deduped.length >= MAX_QUICK_TOOLS) break;
             }
-            if (deduped.length) {
-              setSelectedToolIds(deduped);
-            }
+            if (deduped.length) setSelectedToolIds(deduped);
           }
         }
       } catch (e) {
@@ -158,6 +158,55 @@ export default function HubScreen() {
     };
     loadTools();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkExhibitorAccess() {
+      if (!companyId) {
+        if (!cancelled) setHasExhibitorProfile(false);
+        return;
+      }
+      try {
+        const resp = await graphqlApiKeyClient.graphql({
+          query: apsAppExhibitorProfilesByCompanyId,
+          variables: {
+            companyId,
+            filter: { eventId: { eq: APS_ID } },
+            limit: 1,
+          },
+        });
+        const data = resp.data as {
+          apsAppExhibitorProfilesByCompanyId?: {
+            items?: Array<{ id?: string | null } | null> | null;
+          } | null;
+        };
+        const found = !!(data.apsAppExhibitorProfilesByCompanyId?.items || []).find((x) => !!x?.id);
+        if (!cancelled) setHasExhibitorProfile(found);
+      } catch {
+        if (!cancelled) setHasExhibitorProfile(false);
+      }
+    }
+
+    checkExhibitorAccess();
+    return () => {
+      cancelled = true;
+    };
+  }, [companyId]);
+
+  useEffect(() => {
+    if (!toolsLoaded || hasExhibitorProfile !== true) return;
+    if (selectedToolIds.includes('exhibitor-profile')) return;
+    const next = ['exhibitor-profile', ...selectedToolIds.filter((id) => id !== 'exhibitor-profile')].slice(
+      0,
+      MAX_QUICK_TOOLS,
+    );
+    setSelectedToolIds(next);
+    setEditingToolIds(next);
+    AsyncStorage.setItem(QUICK_TOOLS_STORAGE_KEY, JSON.stringify(next)).catch((e) => {
+      console.warn('Hub: unable to save quick tools selection', e);
+    });
+  }, [hasExhibitorProfile, selectedToolIds, toolsLoaded]);
 
   useEffect(() => {
     // Target: 8:00 AM Eastern (New York) on Sept 30, 2026
@@ -205,7 +254,7 @@ export default function HubScreen() {
         const all: any[] = [];
         let nextToken: string | null | undefined = null;
         do {
-          const resp = await graphqlClient.graphql({
+          const resp = await graphqlApiKeyClient.graphql({
             query: apsAppSessionsByAgendaIdWithRelations,
             variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
           });
@@ -234,12 +283,12 @@ export default function HubScreen() {
           const subtitle = [location, time].filter(Boolean).join(' - ');
 
           const firstJoin = it?.speakers?.items?.find((x: any) => x?.aPSSpeaker)?.aPSSpeaker;
-          const speakerName = `${normalizeText(firstJoin?.firstName)} ${normalizeText(
-            firstJoin?.lastName,
+          const speakerName = `${normalizeText(firstJoin?.firstName || firstJoin?.profile?.firstName)} ${normalizeText(
+            firstJoin?.lastName || firstJoin?.profile?.lastName,
           )}`.trim();
           const speakerRole = [
-            normalizeText(firstJoin?.title),
-            normalizeText(firstJoin?.company),
+            normalizeText(firstJoin?.title || firstJoin?.profile?.jobTitle),
+            normalizeText(firstJoin?.company || firstJoin?.profile?.company),
           ]
             .filter(Boolean)
             .join(', ');
@@ -293,36 +342,25 @@ export default function HubScreen() {
     .slice(0, 1)}`.toUpperCase();
   const countdownCompact = `${timeLeft.days}:${timeLeft.hours}:${timeLeft.minutes}:${timeLeft.seconds}`;
 
-  // Generate fresh signed URL from S3 key
+  // Resolve profile picture from either URL or S3 key.
   React.useEffect(() => {
+    let cancelled = false;
     const loadAvatar = async () => {
       if (!profile?.profilePicture) {
         setAvatarUri(null);
         return;
       }
 
-      const storedValue = profile.profilePicture;
-
-      // If it's already a full URL (legacy data), use it directly
-      if (
-        storedValue.startsWith('http://') ||
-        storedValue.startsWith('https://')
-      ) {
-        setAvatarUri(storedValue);
-        return;
-      }
-
-      // Otherwise, it's an S3 key - generate a fresh signed URL
-      try {
-        const url = await getProfilePictureUrl(storedValue);
+      const url = await resolveProfilePictureUri(profile.profilePicture);
+      if (!cancelled) {
         setAvatarUri(url);
-      } catch (error) {
-        console.error('Error loading avatar URL:', error);
-        setAvatarUri(null);
       }
     };
 
     loadAvatar();
+    return () => {
+      cancelled = true;
+    };
   }, [profile?.profilePicture]);
 
   const heroImage = require('../../../assets/images/hub-back.png');
@@ -340,6 +378,21 @@ export default function HubScreen() {
   );
 
   const maxReached = editingToolIds.length >= MAX_QUICK_TOOLS;
+  const toolIndexById = useMemo(
+    () => new Map(ALL_QUICK_TOOLS.map((t, index) => [t.id, index])),
+    [],
+  );
+  const orderedAvailableTools = useMemo(() => {
+    // Make currently selected tools appear first in the "Available tools" list,
+    // so they are visible and tappable even when max is reached.
+    const selectedSet = new Set(editingToolIds);
+    return [...ALL_QUICK_TOOLS].sort((a, b) => {
+      const aSel = selectedSet.has(a.id);
+      const bSel = selectedSet.has(b.id);
+      if (aSel !== bSel) return aSel ? -1 : 1;
+      return (toolIndexById.get(a.id) ?? 0) - (toolIndexById.get(b.id) ?? 0);
+    });
+  }, [editingToolIds, toolIndexById]);
 
   const handleToolPress = (tool: QuickTool) => {
     if (tool.route) {
@@ -350,7 +403,9 @@ export default function HubScreen() {
   };
 
   const openToolsModal = () => {
-    setEditingToolIds(selectedToolIds);
+    const next = [...selectedToolIds].filter((id, idx, arr) => arr.indexOf(id) === idx).slice(0, MAX_QUICK_TOOLS);
+    setSelectedToolIds(next);
+    setEditingToolIds(next);
     setToolsModalVisible(true);
   };
 
@@ -398,7 +453,7 @@ export default function HubScreen() {
   };
 
   const resetTools = () => {
-    const defaults = ['contacts', 'notes', 'leads', 'requests', 'messages', 'announcements'];
+    const defaults = hasExhibitorProfile ? EXHIBITOR_DEFAULT_TOOL_IDS : DEFAULT_TOOL_IDS;
     persistTools(defaults);
   };
 
@@ -647,7 +702,7 @@ export default function HubScreen() {
 
               <Text style={styles.modalSubheader}>Available tools</Text>
               <View style={styles.addChipsWrap}>
-                {ALL_QUICK_TOOLS.map((tool) => {
+                {orderedAvailableTools.map((tool) => {
                   const isSelected = editingToolIds.includes(tool.id);
                   const disabled = !isSelected && maxReached;
                   return (
@@ -665,12 +720,13 @@ export default function HubScreen() {
                       <Ionicons
                         name={tool.icon}
                         size={16}
-                        color={isSelected ? '#fff' : ui.colors.primary}
+                        color={isSelected ? '#fff' : disabled ? ui.colors.muted : ui.colors.primary}
                       />
                       <Text
                         style={[
                           styles.addChipLabel,
                           isSelected && styles.addChipLabelSelected,
+                          disabled && styles.addChipLabelDisabled,
                         ]}
                       >
                         {tool.label}
@@ -870,9 +926,9 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '90%',
+    maxHeight: WINDOW_HEIGHT * 0.9,
   },
-  modalScroll: { maxHeight: '80%' },
+  modalScroll: { maxHeight: WINDOW_HEIGHT * 0.75 },
   modalScrollContent: { paddingBottom: 32 },
   modalHeaderRow: {
     flexDirection: 'row',
@@ -965,9 +1021,14 @@ const styles = StyleSheet.create({
     backgroundColor: ui.colors.primary,
     borderColor: ui.colors.primary,
   },
-  addChipDisabled: { opacity: 0.4 },
+  addChipDisabled: {
+    // Keep chips clearly visible when user can't add more.
+    opacity: 1,
+    backgroundColor: '#F1F5F9',
+  },
   addChipLabel: { color: ui.colors.text, fontWeight: '600' },
   addChipLabelSelected: { color: '#fff' },
+  addChipLabelDisabled: { color: ui.colors.muted },
   chipSoon: { color: ui.colors.muted, fontSize: 11 },
   limitText: { marginTop: 8, color: ui.colors.muted, fontSize: 12 },
   modalFooterInline: {

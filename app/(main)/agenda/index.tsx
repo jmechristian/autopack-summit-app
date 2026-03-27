@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,12 +10,12 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from 'react-native';
-import RenderHtml from 'react-native-render-html';
 import { autopackColors } from '../../../src/theme';
-import { graphqlClient } from '../../../src/utils/graphqlClient';
+import { APS_ID } from '../../../src/config/apsConfig';
+import { apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt } from '../../../src/graphql/queries';
+import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
@@ -28,6 +29,13 @@ type Speaker = {
   company?: string | null;
   title?: string | null;
   headshot?: string | null;
+  profile?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    company?: string | null;
+    jobTitle?: string | null;
+    profilePicture?: string | null;
+  } | null;
 };
 
 type Sponsor = {
@@ -55,11 +63,65 @@ function getSessionTitle(s: AgendaSession) {
   return normalizeText(s.title) || 'Untitled session';
 }
 
+function normalizeDateKey(value?: string | null) {
+  const raw = normalizeText(value);
+  if (!raw) return '';
+  return raw.includes('T') ? raw.slice(0, 10) : raw;
+}
+
+function formatDayLabel(dateKey: string) {
+  if (!dateKey) return 'Day';
+  const asDate = new Date(`${dateKey}T00:00:00`);
+  if (Number.isNaN(asDate.getTime())) return dateKey;
+  return asDate.toLocaleDateString('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function formatTime12HourEST(value?: string | null) {
+  const raw = normalizeText(value);
+  if (!raw) return '';
+
+  // Already 12-hour text
+  if (/am|pm/i.test(raw)) {
+    return raw.toUpperCase();
+  }
+
+  // HH:mm[:ss] style
+  const hhmm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (hhmm) {
+    const hour24 = Number(hhmm[1]);
+    const minute = hhmm[2];
+    if (!Number.isNaN(hour24)) {
+      const suffix = hour24 >= 12 ? 'PM' : 'AM';
+      const hour12 = hour24 % 12 || 12;
+      return `${hour12}:${minute} ${suffix}`;
+    }
+  }
+
+  // ISO-ish fallback
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  return raw;
+}
+
 function getSessionTimeLabel(s: AgendaSession) {
-  const start = normalizeText(s.startTime);
-  const end = normalizeText(s.endTime);
-  if (start && end) return `${start} – ${end}`;
-  return start || 'TBD';
+  const start = formatTime12HourEST(s.startTime);
+  const end = formatTime12HourEST(s.endTime);
+  if (start && end) return `${start} – ${end} EST`;
+  if (start) return `${start} EST`;
+  return 'TBD';
 }
 
 function tryParseSortableDate(dateStr?: string | null, timeStr?: string | null) {
@@ -90,15 +152,59 @@ function formatPeopleList(names: string[]) {
   return compact.join(', ');
 }
 
+function getSpeakerName(s: Speaker) {
+  const first = normalizeText(s.firstName || s.profile?.firstName);
+  const last = normalizeText(s.lastName || s.profile?.lastName);
+  return `${first} ${last}`.trim();
+}
+
+function htmlToPlainText(input: string) {
+  return input
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
+const createFavoriteSession = /* GraphQL */ `
+  mutation CreateFavoriteSession($input: CreateApsAppUserFavoriteSessionInput!) {
+    createApsAppUserFavoriteSession(input: $input) {
+      id
+      sessionId
+      __typename
+    }
+  }
+`;
+
+const deleteFavoriteSession = /* GraphQL */ `
+  mutation DeleteFavoriteSession($input: DeleteApsAppUserFavoriteSessionInput!) {
+    deleteApsAppUserFavoriteSession(input: $input) {
+      id
+      __typename
+    }
+  }
+`;
+
 export default function AgendaList() {
   const currentAppUser = useCurrentAppUser();
+  const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { sessionIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
   const [sessions, setSessions] = useState<AgendaSession[]>([]);
+  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [expandedById, setExpandedById] = useState<Record<string, boolean>>({});
+  const [favoriteRecordIdBySessionId, setFavoriteRecordIdBySessionId] = useState<Record<string, string>>({});
+  const [favoritePendingBySessionId, setFavoritePendingBySessionId] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { width } = useWindowDimensions();
 
   const load = useCallback(async () => {
     setError(null);
@@ -107,7 +213,7 @@ export default function AgendaList() {
       const all: AgendaSession[] = [];
       let nextToken: string | null | undefined = null;
       do {
-        const resp = await graphqlClient.graphql({
+        const resp = await graphqlApiKeyClient.graphql({
           query: apsAppSessionsByAgendaIdWithRelations,
           variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
         });
@@ -157,6 +263,107 @@ export default function AgendaList() {
     load();
   }, [load]);
 
+  const loadFavoriteSessions = useCallback(async () => {
+    if (!currentProfileId) {
+      setFavoriteRecordIdBySessionId({});
+      return;
+    }
+    try {
+      const resp = await graphqlAuthClient.graphql({
+        query: apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt,
+        variables: { userProfileId: currentProfileId, limit: 1000 },
+      });
+      const data = resp.data as {
+        apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?: {
+          items?: Array<{ id?: string | null; sessionId?: string | null } | null> | null;
+        } | null;
+      };
+      const next: Record<string, string> = {};
+      for (const item of data.apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?.items || []) {
+        if (!item?.id || !item.sessionId) continue;
+        if (!next[item.sessionId]) next[item.sessionId] = item.id;
+      }
+      setFavoriteRecordIdBySessionId(next);
+    } catch {
+      setFavoriteRecordIdBySessionId({});
+    }
+  }, [currentProfileId]);
+
+  useEffect(() => {
+    loadFavoriteSessions();
+  }, [loadFavoriteSessions]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavoriteSessions();
+      return () => {};
+    }, [loadFavoriteSessions])
+  );
+
+  const toggleFavoriteSession = useCallback(
+    async (sessionId: string) => {
+      if (!sessionId || !currentProfileId || favoritePendingBySessionId[sessionId]) return;
+      const existingId = favoriteRecordIdBySessionId[sessionId];
+      setFavoritePendingBySessionId((prev) => ({ ...prev, [sessionId]: true }));
+      if (existingId) {
+        setFavoriteRecordIdBySessionId((prev) => {
+          const copy = { ...prev };
+          delete copy[sessionId];
+          return copy;
+        });
+      } else {
+        setFavoriteRecordIdBySessionId((prev) => ({ ...prev, [sessionId]: '__pending__' }));
+      }
+      try {
+        if (existingId) {
+          await graphqlAuthClient.graphql({
+            query: deleteFavoriteSession,
+            variables: { input: { id: existingId } },
+          });
+        } else {
+          const favoriteKey = `s:${APS_ID}|u:${currentProfileId}|ss:${sessionId}`;
+          const resp = await graphqlAuthClient.graphql({
+            query: createFavoriteSession,
+            variables: {
+              input: {
+                userProfileId: currentProfileId,
+                sessionId,
+                eventId: APS_ID,
+                favoriteKey,
+              },
+            },
+          });
+          const data = resp.data as {
+            createApsAppUserFavoriteSession?: { id?: string | null } | null;
+          };
+          const createdId = data.createApsAppUserFavoriteSession?.id || '';
+          setFavoriteRecordIdBySessionId((prev) => {
+            if (!createdId) {
+              const copy = { ...prev };
+              delete copy[sessionId];
+              return copy;
+            }
+            return { ...prev, [sessionId]: createdId };
+          });
+        }
+      } catch {
+        setFavoriteRecordIdBySessionId((prev) => {
+          const copy = { ...prev };
+          if (existingId) copy[sessionId] = existingId;
+          else delete copy[sessionId];
+          return copy;
+        });
+      } finally {
+        setFavoritePendingBySessionId((prev) => {
+          const copy = { ...prev };
+          delete copy[sessionId];
+          return copy;
+        });
+      }
+    },
+    [currentProfileId, favoritePendingBySessionId, favoriteRecordIdBySessionId]
+  );
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -166,15 +373,46 @@ export default function AgendaList() {
     }
   }, [load]);
 
+  const dayOptions = useMemo(() => {
+    const unique = Array.from(
+      new Set(
+        sessions
+          .map((s) => normalizeDateKey(s.date))
+          .filter(Boolean),
+      ),
+    );
+    unique.sort((a, b) => {
+      const aTs = new Date(`${a}T00:00:00`).getTime();
+      const bTs = new Date(`${b}T00:00:00`).getTime();
+      if (!Number.isNaN(aTs) && !Number.isNaN(bTs)) return aTs - bTs;
+      return a.localeCompare(b);
+    });
+    return unique;
+  }, [sessions]);
+
+  useEffect(() => {
+    if (!dayOptions.length) {
+      setSelectedDay('');
+      return;
+    }
+    if (!selectedDay || !dayOptions.includes(selectedDay)) {
+      setSelectedDay(dayOptions[0]);
+    }
+  }, [dayOptions, selectedDay]);
+
   const filtered = useMemo(() => {
+    const byDay = selectedDay
+      ? sessions.filter((s) => normalizeDateKey(s.date) === selectedDay)
+      : sessions;
+
     const q = search.trim().toLowerCase();
-    if (!q) return sessions;
-    return sessions.filter((s) => {
+    if (!q) return byDay;
+    return byDay.filter((s) => {
       const title = getSessionTitle(s).toLowerCase();
       const location = normalizeText(s.location).toLowerCase();
       const desc = normalizeText(s.description).toLowerCase();
       const speakerNames = (s.speakers || [])
-        .map((sp) => `${normalizeText(sp.firstName)} ${normalizeText(sp.lastName)}`.trim())
+        .map((sp) => getSpeakerName(sp))
         .join(' ')
         .toLowerCase();
       const sponsorNames = (s.sponsors || [])
@@ -189,75 +427,107 @@ export default function AgendaList() {
         sponsorNames.includes(q)
       );
     });
-  }, [search, sessions]);
+  }, [search, selectedDay, sessions]);
 
   const renderItem = useCallback(({ item }: { item: AgendaSession }) => {
     const time = getSessionTimeLabel(item);
     const title = getSessionTitle(item);
     const location = normalizeText(item.location);
-    const descriptionHtml = normalizeText(item.description);
-    const speakers = (item.speakers || []).map((s) =>
-      `${normalizeText(s.firstName)} ${normalizeText(s.lastName)}`.trim(),
-    );
+    const descriptionText = htmlToPlainText(normalizeText(item.description));
+    const speakers = (item.speakers || []).map((s) => getSpeakerName(s));
     const sponsors = (item.sponsors || []).map((s) => normalizeText(s.company?.name || ''));
     const hasNote = !!currentAppUser?.id && sessionIdsWithNotes.has(item.id);
+    const isFavorite = !!favoriteRecordIdBySessionId[item.id];
+    const isFavoritePending = !!favoritePendingBySessionId[item.id];
+    const isExpanded = !!expandedById[item.id];
+    const shouldShowToggle = descriptionText.length > 260;
 
     return (
-      <Pressable
-        onPress={() =>
-          router.push({
-            pathname: '/(main)/agenda/[id]',
-            params: { id: item.id },
-          })
-        }
-        style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      >
-        {hasNote && (
-          <View pointerEvents="none" style={styles.noteIcon}>
-            <Ionicons name="document-text-outline" size={18} color={autopackColors.apBlue} />
-          </View>
-        )}
-        <Text style={styles.time}>{time}</Text>
-        <Text style={styles.title}>{title}</Text>
+      <View style={styles.card}>
+        <View style={styles.topRightActions}>
+          {hasNote && (
+            <View pointerEvents="none" style={styles.noteIcon}>
+              <Ionicons name="document-text-outline" size={18} color={autopackColors.apBlue} />
+            </View>
+          )}
+          {!!currentProfileId && (
+            <Pressable
+              style={styles.favoriteIconBtn}
+              hitSlop={8}
+              onPress={() => {
+                toggleFavoriteSession(item.id);
+              }}
+            >
+              <Ionicons
+                name={isFavorite ? 'star' : 'star-outline'}
+                size={18}
+                color={isFavorite ? '#f59e0b' : isFavoritePending ? '#9ca3af' : '#6b7280'}
+              />
+            </Pressable>
+          )}
+        </View>
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: '/(main)/agenda/[id]',
+              params: { id: item.id },
+            })
+          }
+          style={({ pressed }) => [styles.cardBodyPressable, pressed && styles.cardPressed]}
+        >
+          <Text style={styles.time}>{time}</Text>
+          <Text style={styles.title}>{title}</Text>
 
-        {!!location && <Text style={styles.location}>{location}</Text>}
+          {!!location && <Text style={styles.location}>{location}</Text>}
 
-        <View style={styles.divider} />
+          <View style={styles.divider} />
 
-        {!!descriptionHtml && (
-          <RenderHtml
-            contentWidth={Math.max(1, width - 32 - 28)}
-            source={{ html: descriptionHtml }}
-            baseStyle={styles.description}
-            tagsStyles={{
-              p: { marginTop: 0, marginBottom: 10 },
-              ul: { marginTop: 0, marginBottom: 10, paddingLeft: 18 },
-              ol: { marginTop: 0, marginBottom: 10, paddingLeft: 18 },
-              li: { marginBottom: 6 },
-              a: { color: autopackColors.apBlue, textDecorationLine: 'underline' },
-              strong: { fontWeight: 'bold' },
-              b: { fontWeight: 'bold' },
-              em: { fontStyle: 'italic' },
-            }}
-          />
-        )}
+          {!!descriptionText && (
+            <>
+              <Text style={styles.description} numberOfLines={isExpanded ? undefined : 6}>
+                {descriptionText}
+              </Text>
+              {shouldShowToggle && (
+                <Pressable
+                  onPress={() =>
+                    setExpandedById((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
+                  }
+                  hitSlop={8}
+                  style={styles.readMoreBtn}
+                >
+                  <Text style={styles.readMoreText}>
+                    {isExpanded ? 'Show less' : 'Read more'}
+                  </Text>
+                </Pressable>
+              )}
+            </>
+          )}
 
-        {!!speakers.length && (
-          <Text style={styles.metaLine}>
-            <Text style={styles.metaLabel}>Speakers: </Text>
-            {formatPeopleList(speakers)}
-          </Text>
-        )}
+          {!!speakers.length && (
+            <Text style={styles.metaLine}>
+              <Text style={styles.metaLabel}>Speakers: </Text>
+              {formatPeopleList(speakers)}
+            </Text>
+          )}
 
-        {!!sponsors.length && (
-          <Text style={styles.metaLine}>
-            <Text style={styles.metaLabel}>Sponsors: </Text>
-            {formatPeopleList(sponsors)}
-          </Text>
-        )}
-      </Pressable>
+          {!!sponsors.length && (
+            <Text style={styles.metaLine}>
+              <Text style={styles.metaLabel}>Sponsors: </Text>
+              {formatPeopleList(sponsors)}
+            </Text>
+          )}
+        </Pressable>
+      </View>
     );
-  }, [width, sessionIdsWithNotes, currentAppUser?.id]);
+  }, [
+    expandedById,
+    sessionIdsWithNotes,
+    currentAppUser?.id,
+    currentProfileId,
+    favoriteRecordIdBySessionId,
+    favoritePendingBySessionId,
+    toggleFavoriteSession,
+  ]);
 
   const keyExtractor = useCallback((item: AgendaSession) => item.id, []);
 
@@ -302,6 +572,28 @@ export default function AgendaList() {
         )}
       </View>
 
+      {!!dayOptions.length && (
+        <View style={styles.dayToggleWrap}>
+          {dayOptions.map((day, idx) => {
+            const active = day === selectedDay;
+            return (
+              <Pressable
+                key={day}
+                onPress={() => setSelectedDay(day)}
+                style={[styles.dayChip, active && styles.dayChipActive]}
+              >
+                <Text style={[styles.dayChipText, active && styles.dayChipTextActive]}>
+                  {`Day ${idx + 1}`}
+                </Text>
+                <Text style={[styles.dayChipSubText, active && styles.dayChipSubTextActive]}>
+                  {formatDayLabel(day)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
+
       <FlatList
         data={filtered}
         keyExtractor={keyExtractor}
@@ -311,7 +603,9 @@ export default function AgendaList() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No sessions found</Text>
-            <Text style={styles.emptyBody}>Try a different search.</Text>
+            <Text style={styles.emptyBody}>
+              {search.trim() ? 'Try a different search.' : 'Try another day.'}
+            </Text>
           </View>
         }
       />
@@ -349,10 +643,46 @@ const styles = StyleSheet.create({
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, paddingVertical: 10, color: '#111827' },
   clearBtn: { marginLeft: 8 },
+  dayToggleWrap: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  dayChip: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#F9FAFB',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  dayChipActive: {
+    backgroundColor: autopackColors.apBlue,
+    borderColor: autopackColors.apBlue,
+  },
+  dayChipText: {
+    color: '#111827',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  dayChipTextActive: {
+    color: '#FFFFFF',
+  },
+  dayChipSubText: {
+    marginTop: 2,
+    color: '#4B5563',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  dayChipSubTextActive: {
+    color: '#DBEAFE',
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     marginBottom: 12,
@@ -362,11 +692,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
+  cardBodyPressable: {
+    padding: 14,
+    paddingRight: 52,
+  },
   cardPressed: { opacity: 0.92 },
   noteIcon: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
     width: 26,
     height: 26,
     borderRadius: 13,
@@ -376,11 +707,35 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
   },
+  topRightActions: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+    zIndex: 20,
+    elevation: 20,
+  },
+  favoriteIconBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    zIndex: 25,
+    elevation: 25,
+  },
   time: { color: autopackColors.apBlue, fontWeight: '800', fontSize: 13, marginBottom: 6 },
   title: { fontSize: 17, fontWeight: '800', color: '#111827' },
   location: { marginTop: 6, color: '#4B5563', fontWeight: '600' },
   divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 12 },
   description: { color: '#374151', lineHeight: 20 },
+  readMoreBtn: { alignSelf: 'flex-start', marginTop: 8 },
+  readMoreText: { color: autopackColors.apBlue, fontWeight: '700' },
   metaLine: { marginTop: 10, color: '#374151', lineHeight: 20 },
   metaLabel: { fontWeight: '800', color: '#111827' },
   empty: { paddingTop: 40, alignItems: 'center' },

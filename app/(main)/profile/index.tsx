@@ -25,7 +25,7 @@ import { AppButton } from '../../../src/ui/AppButton';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 import { signOut } from '../../../src/utils/authUtils';
-import { getProfilePictureUrl as getProfilePictureUrlFromStorage } from '../../../src/utils/storageUtils';
+import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
@@ -40,36 +40,25 @@ export default function Profile() {
   );
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  // Generate fresh signed URL from S3 key
+  // Resolve profile picture from either URL or S3 key.
   React.useEffect(() => {
+    let cancelled = false;
     const loadProfilePicture = async () => {
       if (!profile?.profilePicture) {
         setProfilePictureUrl(null);
         return;
       }
 
-      const storedValue = profile.profilePicture;
-
-      // If it's already a full URL (legacy data), use it directly
-      if (
-        storedValue.startsWith('http://') ||
-        storedValue.startsWith('https://')
-      ) {
-        setProfilePictureUrl(storedValue);
-        return;
-      }
-
-      // Otherwise, it's an S3 key - generate a fresh signed URL
-      try {
-        const url = await getProfilePictureUrlFromStorage(storedValue);
-        setProfilePictureUrl(url);
-      } catch (error) {
-        console.error('Error loading profile picture URL:', error);
-        setProfilePictureUrl(null);
+      const uri = await resolveProfilePictureUri(profile.profilePicture);
+      if (!cancelled) {
+        setProfilePictureUrl(uri);
       }
     };
 
     loadProfilePicture();
+    return () => {
+      cancelled = true;
+    };
   }, [profile?.profilePicture]);
 
   const getQrCodeUrl = () => {
@@ -161,8 +150,8 @@ export default function Profile() {
             style={[styles.actionBtn, styles.actionBtnAlt]}
             onPress={() => router.push('/(main)/scan')}
           >
-            <Ionicons name='briefcase-outline' size={18} color='#fff' />
-            <Text style={styles.actionBtnText}>Collect Lead</Text>
+            <Ionicons name='scan-outline' size={18} color='#fff' />
+            <Text style={styles.actionBtnText}>Scan Contact</Text>
           </TouchableOpacity>
         </View>
 

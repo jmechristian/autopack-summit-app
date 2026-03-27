@@ -22,7 +22,7 @@ import { EditablePersonalInfo } from '../../../src/components/profile/EditablePe
 import { AffiliationsSection } from '../../../src/components/profile/AffiliationsSection';
 import { EducationSection } from '../../../src/components/profile/EducationSection';
 import { InterestsSection } from '../../../src/components/profile/InterestsSection';
-import { uploadProfilePicture, uploadResume, getProfilePictureUrl as getProfilePictureUrlFromStorage } from '../../../src/utils/storageUtils';
+import { uploadProfilePicture, uploadResume, resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 import { updateProfile, createAffiliate, createEducation } from '../../../src/utils/profileMutations';
 import { useApsStore } from '../../../src/store/apsStore';
 import { autopackColors } from '../../../src/theme';
@@ -258,33 +258,25 @@ export default function ProfileEdit() {
     }
   };
 
-  // Generate fresh signed URL from S3 key
+  // Resolve profile picture from either URL or S3 key.
   React.useEffect(() => {
+    let cancelled = false;
     const loadProfilePicture = async () => {
       if (!profile?.profilePicture) {
         setProfilePictureUrl(null);
         return;
       }
 
-      const storedValue = profile.profilePicture;
-      
-      // If it's already a full URL (legacy data), use it directly
-      if (storedValue.startsWith('http://') || storedValue.startsWith('https://')) {
-        setProfilePictureUrl(storedValue);
-        return;
-      }
-
-      // Otherwise, it's an S3 key - generate a fresh signed URL
-      try {
-        const url = await getProfilePictureUrlFromStorage(storedValue);
-        setProfilePictureUrl(url);
-      } catch (error) {
-        console.error('Error loading profile picture URL:', error);
-        setProfilePictureUrl(null);
+      const uri = await resolveProfilePictureUri(profile.profilePicture);
+      if (!cancelled) {
+        setProfilePictureUrl(uri);
       }
     };
 
     loadProfilePicture();
+    return () => {
+      cancelled = true;
+    };
   }, [profile?.profilePicture]);
 
   const getResumeUrl = () => {

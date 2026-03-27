@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   SectionList,
   StyleSheet,
@@ -11,14 +10,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { graphqlClient } from '../../../src/utils/graphqlClient';
-import { autopackColors } from '../../../src/theme';
+import { AppUserRow } from '../../../src/components/AppUserRow';
 import { listApsAppUserProfiles } from '../../../src/graphql/queries';
-import { useCommunityStore } from '../../../src/store/communityStore';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
-import { AppUserRow } from '../../../src/components/AppUserRow';
+import { useCommunityStore } from '../../../src/store/communityStore';
 import { useEngageStore } from '../../../src/store/engageStore';
+import { autopackColors } from '../../../src/theme';
+import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
+import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 
 type CommunityProfile = {
   profileId: string; // ApsAppUserProfile.id
@@ -55,11 +55,11 @@ export default function CommunityIndex() {
   const { profileIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
+  const [profilePictureUris, setProfilePictureUris] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleFavorite = useCommunityStore((s) => s.toggleFavorite);
   const favoriteContactIds = useCommunityStore((s) => s.favoriteContactIds);
   const pendingContactIds = useCommunityStore((s) => s.pendingContactIds);
   const loadFavorites = useCommunityStore((s) => s.loadFavorites);
@@ -74,7 +74,12 @@ export default function CommunityIndex() {
       loadIncomingRequests().catch(() => {});
       loadSentRequests().catch(() => {});
     }
-  }, [currentAppUser?.id, loadFavorites, loadIncomingRequests, loadSentRequests]);
+  }, [
+    currentAppUser?.id,
+    loadFavorites,
+    loadIncomingRequests,
+    loadSentRequests,
+  ]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -83,7 +88,7 @@ export default function CommunityIndex() {
       const all: CommunityProfile[] = [];
       let nextToken: string | null | undefined = null;
       do {
-        const resp = await graphqlClient.graphql({
+        const resp = await graphqlApiKeyClient.graphql({
           query: listApsAppUserProfiles,
           variables: { limit: 1000, nextToken },
         });
@@ -91,8 +96,8 @@ export default function CommunityIndex() {
         const data = resp.data as {
           listApsAppUserProfiles?: {
             items?: Array<{
-              id: string;
-              userId: string;
+              id?: string | null;
+              userId?: string | null;
               firstName?: string | null;
               lastName?: string | null;
               company?: string | null;
@@ -107,7 +112,7 @@ export default function CommunityIndex() {
 
         const items = data.listApsAppUserProfiles?.items || [];
         for (const item of items) {
-          if (!item?.id || !item.userId) continue;
+          if (!item?.id || !item?.userId) continue;
           all.push({
             userId: item.userId,
             profileId: item.id,
@@ -160,7 +165,8 @@ export default function CommunityIndex() {
     const q = search.trim().toLowerCase();
     const base = profiles.filter((p) => {
       // Never show the current user in Community list
-      if (currentAppUser?.profileId && p.profileId === currentAppUser.profileId) return false;
+      if (currentAppUser?.profileId && p.profileId === currentAppUser.profileId)
+        return false;
       if (currentAppUser?.id && p.userId === currentAppUser.id) return false;
       return true;
     });
@@ -190,6 +196,31 @@ export default function CommunityIndex() {
 
     return titles.map((title) => ({ title, data: map.get(title)! }));
   }, [filtered]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const unresolved = profiles.filter(
+      (p) => p.profilePicture && profilePictureUris[p.profileId] === undefined
+    );
+    if (!unresolved.length) return;
+
+    async function loadAvatarUris() {
+      const updates: Record<string, string | null> = {};
+      await Promise.all(
+        unresolved.map(async (p) => {
+          updates[p.profileId] = await resolveProfilePictureUri(p.profilePicture);
+        })
+      );
+      if (!cancelled && Object.keys(updates).length) {
+        setProfilePictureUris((prev) => ({ ...prev, ...updates }));
+      }
+    }
+
+    loadAvatarUris();
+    return () => {
+      cancelled = true;
+    };
+  }, [profiles, profilePictureUris]);
 
   if (loading) {
     return (
@@ -245,10 +276,14 @@ export default function CommunityIndex() {
           )}
           renderItem={({ item }) => {
             const name = getFullName(item) || '(No name)';
-            const subtitle = [item.jobTitle, item.company].filter(Boolean).join(' • ');
+            const subtitle = [item.jobTitle, item.company]
+              .filter(Boolean)
+              .join(' • ');
             const fav = !!favoriteContactIds[item.profileId];
             const pending = !!pendingContactIds[item.profileId];
-            const isSelf = !!currentAppUser?.profileId && currentAppUser.profileId === item.profileId;
+            const isSelf =
+              !!currentAppUser?.profileId &&
+              currentAppUser.profileId === item.profileId;
             const hasNote = profileIdsWithNotes.has(item.profileId);
 
             return (
@@ -257,7 +292,7 @@ export default function CommunityIndex() {
                 userId={item.userId}
                 name={name}
                 subtitle={subtitle}
-                avatarUri={item.profilePicture || null}
+                avatarUri={profilePictureUris[item.profileId] ?? null}
                 initials={`${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(item.lastName).slice(0, 1)}`.toUpperCase()}
                 isSelf={isSelf}
                 hasNote={hasNote}
@@ -306,12 +341,21 @@ const styles = StyleSheet.create({
   },
   sectionHeaderText: { fontWeight: '800', color: '#111827' },
 
-  sep: { height: StyleSheet.hairlineWidth, backgroundColor: '#e5e7eb', marginLeft: 12 },
+  sep: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e5e7eb',
+    marginLeft: 12,
+  },
 
   empty: { padding: 18 },
 
   errorBox: { padding: 16 },
-  errorTitle: { fontSize: 16, fontWeight: '800', color: '#111827', marginBottom: 6 },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 6,
+  },
   errorText: { color: '#6b7280', marginBottom: 12 },
   retryBtn: {
     alignSelf: 'flex-start',
@@ -322,5 +366,3 @@ const styles = StyleSheet.create({
   },
   retryText: { color: '#fff', fontWeight: '700' },
 });
-
-

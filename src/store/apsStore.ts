@@ -14,12 +14,13 @@ import {
 } from '../graphql/customQueries';
 import {
   apsAppUserProfilesByUserId,
+  apsRegistrantsByApsID,
   profileAffiliatesByProfileId,
   profileEducationsByProfileId,
   profileInterestsByProfileId,
 } from '../graphql/queries';
 import { getCurrentUserEmail } from '../utils/authUtils';
-import { graphqlClient } from '../utils/graphqlClient';
+import { graphqlApiKeyClient } from '../utils/graphqlClient';
 
 // Types
 type APSBasic = {
@@ -153,15 +154,15 @@ export const useApsStore = create<ApsStore>((set, get) => ({
 
     try {
       const [affRespRaw, eduRespRaw, intRespRaw] = await Promise.all([
-        graphqlClient.graphql({
+        graphqlApiKeyClient.graphql({
           query: profileAffiliatesByProfileId,
           variables: { profileId, limit: 100 },
         }),
-        graphqlClient.graphql({
+        graphqlApiKeyClient.graphql({
           query: profileEducationsByProfileId,
           variables: { profileId, limit: 100 },
         }),
-        graphqlClient.graphql({
+        graphqlApiKeyClient.graphql({
           query: profileInterestsByProfileId,
           variables: { profileId, limit: 100 },
         }),
@@ -279,13 +280,16 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
+      const isApproved = (r: ApsRegistrant | null | undefined) =>
+        String(r?.status || '').toUpperCase() === 'APPROVED';
+
       // Step 1: Get registrant by email
       console.log('📤 Step 1: Getting registrant by email:', {
         apsID: apsId,
         email: normalizedEmail,
       });
 
-      const registrantResponse = (await graphqlClient.graphql({
+      const registrantResponse = (await graphqlApiKeyClient.graphql({
         query: getRegistrantByEmail,
         variables: {
           apsID: apsId,
@@ -312,35 +316,39 @@ export const useApsStore = create<ApsStore>((set, get) => ({
       };
 
       const registrants = registrantData.apsRegistrantsByApsID?.items || [];
+      const approvedRegistrant = registrants.find(isApproved);
 
       console.log('📋 Found registrants:', registrants.length);
 
-      if (registrants.length === 0) {
+      if (!approvedRegistrant) {
         // Try case-insensitive search by fetching all registrants and filtering
         console.log(
           '⚠️ No exact match found, trying case-insensitive search...'
         );
 
         // Fetch all registrants for this APS and filter client-side
-        const allRegistrantsResponse = (await graphqlClient.graphql({
-          query: getAPSWithRegistrants,
-          variables: { id: apsId, limit: 1000 },
+        const allRegistrantsResponse = (await graphqlApiKeyClient.graphql({
+          query: apsRegistrantsByApsID,
+          variables: { apsID: apsId, limit: 1000 },
         })) as any;
 
         const allData = allRegistrantsResponse.data as {
-          getAPS?: {
-            Registrants?: {
-              items: ApsRegistrant[];
-            };
+          apsRegistrantsByApsID?: {
+            items: ApsRegistrant[];
           };
         };
 
-        const allRegistrants = allData.getAPS?.Registrants?.items || [];
+        const allRegistrants = allData.apsRegistrantsByApsID?.items || [];
         console.log('📋 Total registrants in APS:', allRegistrants.length);
 
         // Case-insensitive email match
-        const matchedRegistrant = allRegistrants.find(
+        const matchedByEmail = allRegistrants.find(
           (r) => r.email?.trim().toLowerCase() === normalizedEmail
+        );
+        const matchedRegistrant = allRegistrants.find(
+          (r) =>
+            r.email?.trim().toLowerCase() === normalizedEmail &&
+            isApproved(r)
         );
 
         if (matchedRegistrant) {
@@ -349,7 +357,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
             matchedRegistrant.email
           );
           // Step 2: Get app user by registrant ID
-          const appUserResponse = (await graphqlClient.graphql({
+          const appUserResponse = (await graphqlApiKeyClient.graphql({
             query: getAppUserByRegistrantId,
             variables: {
               registrantId: matchedRegistrant.id,
@@ -373,7 +381,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
                 '⚠️ Profile is null in response, fetching profile separately by userId...'
               );
               try {
-                const profileResponse = (await graphqlClient.graphql({
+                const profileResponse = (await graphqlApiKeyClient.graphql({
                   query: apsAppUserProfilesByUserId,
                   variables: { userId: appUser.id, limit: 1 },
                 })) as any;
@@ -435,6 +443,21 @@ export const useApsStore = create<ApsStore>((set, get) => ({
           }
         }
 
+        if (matchedByEmail && !isApproved(matchedByEmail)) {
+          console.log('❌ Registrant found but status is not APPROVED');
+          set({
+            currentAppUser: null,
+            loading: { ...get().loading, currentAppUser: false },
+            error: {
+              ...get().error,
+              currentAppUser: 'Registration found but is not approved',
+            },
+            authError:
+              'Your registration exists but is not approved yet. Please contact support.',
+          });
+          return false;
+        }
+
         console.log('❌ No registrant found after case-insensitive search');
         set({
           currentAppUser: null,
@@ -450,13 +473,13 @@ export const useApsStore = create<ApsStore>((set, get) => ({
       }
 
       // Step 2: Get app user by registrant ID
-      const registrant = registrants[0];
+      const registrant = approvedRegistrant as ApsRegistrant;
       console.log(
         '📤 Step 2: Getting app user by registrant ID:',
         registrant.id
       );
 
-      const appUserResponse = (await graphqlClient.graphql({
+      const appUserResponse = (await graphqlApiKeyClient.graphql({
         query: getAppUserByRegistrantId,
         variables: {
           registrantId: registrant.id,
@@ -514,7 +537,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
           '⚠️ Profile is null in response, fetching profile separately by userId...'
         );
         try {
-          const profileResponse = (await graphqlClient.graphql({
+          const profileResponse = (await graphqlApiKeyClient.graphql({
             query: apsAppUserProfilesByUserId,
             variables: { userId: appUser.id, limit: 1 },
           })) as any;
@@ -579,7 +602,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlClient.graphql({
+      const response = (await graphqlApiKeyClient.graphql({
         query: getAPSBasic,
         variables: { id: get().apsId },
       })) as any;
@@ -616,7 +639,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlClient.graphql({
+      const response = (await graphqlApiKeyClient.graphql({
         query: getAPSWithAgenda,
         variables: { id: get().apsId },
       })) as any;
@@ -653,7 +676,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlClient.graphql({
+      const response = (await graphqlApiKeyClient.graphql({
         query: getAPSWithRegistrants,
         variables: { id: get().apsId, limit: 1000 },
       })) as any;
@@ -700,7 +723,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlClient.graphql({
+      const response = (await graphqlApiKeyClient.graphql({
         query: getAPSWithSpeakers,
         variables: { id: get().apsId, eventId: get().apsId },
       })) as any;
@@ -747,7 +770,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlClient.graphql({
+      const response = (await graphqlApiKeyClient.graphql({
         query: getAPSWithExhibitors,
         variables: { id: get().apsId, eventId: get().apsId },
       })) as any;
@@ -794,7 +817,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlClient.graphql({
+      const response = (await graphqlApiKeyClient.graphql({
         query: getAPSWithAddOns,
         variables: { id: get().apsId, eventId: get().apsId },
       })) as any;
@@ -842,7 +865,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     }
 
     try {
-      const appUserResponse = (await graphqlClient.graphql({
+      const appUserResponse = (await graphqlApiKeyClient.graphql({
         query: getAppUserByRegistrantId,
         variables: {
           registrantId: current.registrantId,
@@ -862,7 +885,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
           '⚠️ Refresh: profile missing, fetching separately by userId...'
         );
         try {
-          const profileResponse = (await graphqlClient.graphql({
+          const profileResponse = (await graphqlApiKeyClient.graphql({
             query: apsAppUserProfilesByUserId,
             variables: { userId: refreshed.id, limit: 1 },
           })) as any;

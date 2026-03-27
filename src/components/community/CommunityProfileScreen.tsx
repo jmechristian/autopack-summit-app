@@ -15,19 +15,47 @@ import {
 import * as Contacts from 'expo-contacts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { APS_ID } from '../../config/apsConfig';
-import { createApsAppUserLead, deleteApsAppUserLead } from '../../graphql/mutations';
-import { apsAppUserLeadsByUserId } from '../../graphql/queries';
-import { getCommunityProfileByProfileId } from '../../graphql/customQueries';
+import {
+  profileAffiliatesByProfileId,
+  profileEducationsByProfileId,
+  profileInterestsByProfileId,
+} from '../../graphql/queries';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { useCommunityStore } from '../../store/communityStore';
 import { useEngageStore } from '../../store/engageStore';
 import { autopackColors } from '../../theme';
-import { graphqlAuthClient, graphqlClient } from '../../utils/graphqlClient';
+import { graphqlApiKeyClient } from '../../utils/graphqlClient';
+import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { NotesSection } from '../notes/NotesSection';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` can include fields that now depend on USER_POOLS-only models (notes),
 // which can break API_KEY callers. This screen uses a custom query, but keep it minimal/safe as well.
+const getApsAppUserProfileMinimal = /* GraphQL */ `
+  query GetApsAppUserProfileMinimal($id: ID!) {
+    getApsAppUserProfile(id: $id) {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      __typename
+    }
+  }
+`;
 
 type Profile = {
   id: string;
@@ -61,8 +89,17 @@ function nameOf(p: Profile | null) {
 export default function CommunityProfileScreen() {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
-  const params = useLocalSearchParams<{ id?: string }>();
-  const profileId = params.id;
+  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const profileIdRaw = params.id;
+  const profileId = useMemo(() => {
+    const first = Array.isArray(profileIdRaw) ? profileIdRaw[0] : profileIdRaw;
+    if (!first) return '';
+    try {
+      return decodeURIComponent(first).trim();
+    } catch {
+      return first.trim();
+    }
+  }, [profileIdRaw]);
 
   const getOrCreateContactRequest = useEngageStore((s) => s.getOrCreateContactRequest);
   const ensureDmThreadForAcceptedRequest = useEngageStore(
@@ -75,12 +112,11 @@ export default function CommunityProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [pendingRequestStateRemote, setPendingRequestStateRemote] = useState<
     'incoming' | 'sent' | null
   >(null);
-  const [addingLead, setAddingLead] = useState(false);
   const [addingPhoneContact, setAddingPhoneContact] = useState(false);
-  const [leadRecordId, setLeadRecordId] = useState<string | null>(null);
 
   const otherUserId = profile?.userId || null;
   const pendingRequestState = useEngageStore((s) =>
@@ -124,6 +160,18 @@ export default function CommunityProfileScreen() {
   );
 
   useEffect(() => {
+    let cancelled = false;
+    async function loadAvatarUri() {
+      const uri = await resolveProfilePictureUri(profile?.profilePicture || null);
+      if (!cancelled) setAvatarUri(uri);
+    }
+    loadAvatarUri();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.profilePicture]);
+
+  useEffect(() => {
     let mounted = true;
     async function run() {
       if (!profileId) {
@@ -135,17 +183,55 @@ export default function CommunityProfileScreen() {
       setError(null);
       setLoading(true);
       try {
-        const resp = await graphqlClient.graphql({
-          query: getCommunityProfileByProfileId,
+        // Use API key flow with minimal-safe profile query.
+        const resp = await graphqlApiKeyClient.graphql({
+          query: getApsAppUserProfileMinimal,
           variables: { id: profileId },
         });
-
         const data = resp.data as {
           getApsAppUserProfile?: Profile | null;
         };
 
         const p = data.getApsAppUserProfile || null;
-        if (mounted) setProfile(p as Profile | null);
+        if (!p?.id) {
+          if (mounted) setProfile(null);
+          return;
+        }
+
+        // Hydrate related collections by profileId to preserve current UI sections.
+        const [affResp, eduResp, intResp] = await Promise.all([
+          graphqlApiKeyClient.graphql({
+            query: profileAffiliatesByProfileId,
+            variables: { profileId: p.id, limit: 100 },
+          }),
+          graphqlApiKeyClient.graphql({
+            query: profileEducationsByProfileId,
+            variables: { profileId: p.id, limit: 100 },
+          }),
+          graphqlApiKeyClient.graphql({
+            query: profileInterestsByProfileId,
+            variables: { profileId: p.id, limit: 100 },
+          }),
+        ]);
+
+        const affData = affResp.data as {
+          profileAffiliatesByProfileId?: { items?: Array<any | null> | null };
+        };
+        const eduData = eduResp.data as {
+          profileEducationsByProfileId?: { items?: Array<any | null> | null };
+        };
+        const intData = intResp.data as {
+          profileInterestsByProfileId?: { items?: Array<any | null> | null };
+        };
+
+        const hydrated: Profile = {
+          ...p,
+          affiliates: { items: (affData.profileAffiliatesByProfileId?.items || []).filter(Boolean) },
+          education: { items: (eduData.profileEducationsByProfileId?.items || []).filter(Boolean) },
+          interests: { items: (intData.profileInterestsByProfileId?.items || []).filter(Boolean) },
+        };
+
+        if (mounted) setProfile(hydrated);
       } catch (e: any) {
         console.error('Error loading community profile:', e);
         if (mounted) setError(e?.message || 'Failed to load profile');
@@ -165,62 +251,6 @@ export default function CommunityProfileScreen() {
   const pending = !!(contactId && pendingContactIds[contactId]);
   const isSelf = !!contactId && !!currentAppUser?.profileId && currentAppUser.profileId === contactId;
   const isInContacts = !!(contactId && contactRecordIdByContactId[contactId]);
-  const isInLeads = !!leadRecordId;
-
-  const refreshLeadStatus = useCallback(async () => {
-    if (!currentAppUser?.id || !contactId || isSelf) {
-      setLeadRecordId(null);
-      return;
-    }
-    try {
-      const resp = await graphqlClient.graphql({
-        query: apsAppUserLeadsByUserId,
-        variables: {
-          userId: currentAppUser.id,
-          limit: 1000,
-          filter: { contactId: { eq: contactId } },
-        },
-      });
-      const data = resp.data as {
-        apsAppUserLeadsByUserId?: { items?: Array<{ id: string } | null> | null };
-      };
-      const ids = (data.apsAppUserLeadsByUserId?.items || [])
-        .filter(Boolean)
-        .map((i) => (i as { id: string }).id)
-        .filter(Boolean);
-      const id = ids[0] || null;
-      setLeadRecordId(id);
-
-      // Best-effort cleanup: if duplicates exist, delete extras.
-      if (ids.length > 1) {
-        for (const extraId of ids.slice(1)) {
-          try {
-            await graphqlClient.graphql({
-              query: deleteApsAppUserLead,
-              variables: { input: { id: extraId } },
-            });
-          } catch (e) {
-            console.warn('Failed to delete duplicate lead:', extraId, e);
-          }
-        }
-      }
-    } catch (e) {
-      console.error('Refresh lead status failed:', e);
-      setLeadRecordId(null);
-    }
-  }, [currentAppUser?.id, contactId, isSelf]);
-
-  // Initial + dependency-driven refresh
-  useEffect(() => {
-    refreshLeadStatus();
-  }, [refreshLeadStatus]);
-
-  // Also refresh when coming back to this screen (e.g., after navigation)
-  useFocusEffect(
-    useCallback(() => {
-      refreshLeadStatus();
-    }, [refreshLeadStatus])
-  );
 
   if (loading) {
     return (
@@ -265,8 +295,8 @@ export default function CommunityProfileScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
         <View style={styles.avatar}>
-          {profile.profilePicture ? (
-            <Image source={{ uri: profile.profilePicture }} style={styles.avatarImg} />
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
           ) : (
             <Text style={styles.avatarText}>
               {(profile.firstName || '').trim().slice(0, 1).toUpperCase()}
@@ -388,59 +418,6 @@ export default function CommunityProfileScreen() {
             />
             <Text style={styles.actionBtnText}>
               {pending ? 'Updating…' : isInContacts ? 'Remove from contacts' : 'Add to contacts'}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            disabled={!currentAppUser?.id || !contactId || addingLead}
-            onPress={async () => {
-              if (!currentAppUser?.id || !contactId) return;
-              setAddingLead(true);
-              try {
-                if (leadRecordId) {
-                  await graphqlAuthClient.graphql({
-                    query: deleteApsAppUserLead,
-                    variables: { input: { id: leadRecordId } },
-                  });
-                  await refreshLeadStatus();
-                  Alert.alert('Removed', 'Removed from your leads.');
-                  return;
-                }
-
-                const resp = await graphqlAuthClient.graphql({
-                  query: createApsAppUserLead,
-                  // Deterministic id prevents duplicates for a given (userId, contactId)
-                  variables: {
-                    input: {
-                      id: `${currentAppUser.id}:${contactId}`,
-                      userId: currentAppUser.id,
-                      contactId,
-                      favorite: false,
-                    },
-                  },
-                });
-                const data = resp.data as { createApsAppUserLead?: { id?: string | null } | null };
-                const createdId = data.createApsAppUserLead?.id || null;
-                // If create response doesn't include an id (or eventual consistency),
-                // re-query so UI matches backend state.
-                if (createdId) {
-                  setLeadRecordId(createdId);
-                } else {
-                  await refreshLeadStatus();
-                }
-                Alert.alert('Added', 'Lead saved in app.');
-              } catch (e: any) {
-                console.error('Add lead failed:', e);
-                Alert.alert('Add lead failed', 'Please try again.');
-              } finally {
-                setAddingLead(false);
-              }
-            }}
-            style={[styles.actionBtn, styles.actionBtnAlt, addingLead && styles.actionBtnDisabled]}
-          >
-            <Ionicons name={isInLeads ? 'trash-outline' : 'briefcase-outline'} size={18} color="#fff" />
-            <Text style={styles.actionBtnText}>
-              {addingLead ? 'Updating…' : isInLeads ? 'Remove lead' : 'Add lead'}
             </Text>
           </Pressable>
 
