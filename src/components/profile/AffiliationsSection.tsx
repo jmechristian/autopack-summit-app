@@ -71,17 +71,20 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Experience</Text>
-        <TouchableOpacity onPress={handleAdd} style={styles.addButton}>
-          <Ionicons name="add" size={20} color={autopackColors.apBlue} />
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionHeaderLeft}>
+          <View style={styles.sectionIconWrap}>
+            <Ionicons name="briefcase-outline" size={14} color="#1d4ed8" />
+          </View>
+          <Text style={styles.sectionHeaderText}>Experience</Text>
+        </View>
+        <TouchableOpacity onPress={handleAdd}>
+          <Text style={styles.editLink}>Edit</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.headerDivider} />
-
       {affiliates.length === 0 ? (
-        <Text style={styles.emptyText}>No experience added yet</Text>
+        <Text style={styles.emptyText}>No experience, edit to add</Text>
       ) : (
         affiliates.map((affiliate) => (
           <View key={affiliate.id} style={styles.item}>
@@ -115,47 +118,67 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
         onSave={handleSave}
         editingAffiliate={editingAffiliate}
       />
+      <View style={styles.sectionDivider} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 12,
+    backgroundColor: 'transparent',
+    padding: 0,
+    marginBottom: 2,
+    borderWidth: 0,
+  },
+  sectionHeader: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     marginBottom: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-  },
-  header: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
-    width: '100%',
+    justifyContent: 'space-between',
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionHeaderText: {
     color: '#111827',
-    flex: 1,
+    fontWeight: '800',
+    fontSize: 16,
   },
-  headerDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#d1d5db',
-    marginBottom: 10,
+  editLink: {
+    color: autopackColors.apBlue,
+    fontSize: 13,
+    fontWeight: '700',
   },
   emptyText: {
     color: '#6b7280',
     textAlign: 'center',
-    padding: 12,
+    paddingVertical: 18,
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '400',
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
+    paddingHorizontal: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#e5e7eb',
   },
@@ -163,13 +186,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
     color: '#111827',
     marginBottom: 4,
   },
   itemSubtitle: {
     fontSize: 14,
+    lineHeight: 19,
     color: '#6b7280',
     marginBottom: 2,
   },
@@ -181,19 +206,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 6,
   },
-  addButton: {
-    padding: 6,
-    borderRadius: 10,
-    backgroundColor: '#f3f4f6',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-  },
   actionButton: {
     padding: 6,
     borderRadius: 10,
     backgroundColor: '#f3f4f6',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#e5e7eb',
+  },
+  sectionDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#d1d5db',
+    marginTop: 14,
   },
 });
 

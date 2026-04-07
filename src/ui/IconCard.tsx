@@ -5,6 +5,7 @@ import {
   StyleProp,
   StyleSheet,
   Text,
+  TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
@@ -19,6 +20,8 @@ export function IconCard(props: {
   iconBgColor?: string;
   iconSize?: number;
   style?: StyleProp<ViewStyle>;
+  iconWrapStyle?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
   badge?: number | null;
 }) {
   const Wrapper: any = props.onPress ? Pressable : View;
@@ -32,6 +35,7 @@ export function IconCard(props: {
         style={[
           styles.iconWrap,
           { backgroundColor: props.iconBgColor || ui.colors.primary },
+          props.iconWrapStyle,
         ]}
       >
         <Ionicons
@@ -40,7 +44,11 @@ export function IconCard(props: {
           color={props.iconColor || '#FFFFFF'}
         />
       </View>
-      <Text style={styles.label} numberOfLines={2} ellipsizeMode='tail'>
+      <Text
+        style={[styles.label, props.labelStyle]}
+        numberOfLines={2}
+        ellipsizeMode='tail'
+      >
         {props.label}
       </Text>
     </Wrapper>

@@ -11,6 +11,9 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,6 +27,8 @@ import { autopackColors } from '../../src/theme';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
+  const emailInputRef = React.useRef<TextInput>(null);
+  const passwordInputRef = React.useRef<TextInput>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -266,13 +271,18 @@ export default function LoginScreen() {
       style={styles.background}
       resizeMode='cover'
     >
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <KeyboardAvoidingView
+        style={[styles.container, { paddingTop: insets.top }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
             { paddingBottom: insets.bottom + 20 },
           ]}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps='always'
+          keyboardDismissMode='on-drag'
         >
           <View style={styles.contentView}>
             {/* Hero text */}
@@ -289,44 +299,57 @@ export default function LoginScreen() {
             <Animated.View entering={FadeInDown.duration(600).delay(400)}>
               <View style={styles.card}>
                 {/* Email */}
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder='Email'
-                    placeholderTextColor='#9CA3AF'
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize='none'
-                    keyboardType='email-address'
-                    autoComplete='email'
-                  />
-                </View>
-
-                {/* Password */}
-                <View style={styles.inputContainer}>
-                  <View style={styles.passwordContainer}>
+                  <Pressable
+                    style={styles.inputContainer}
+                    onPress={() => emailInputRef.current?.focus()}
+                  >
                     <TextInput
-                      style={styles.passwordInput}
-                      placeholder='Password'
+                      ref={emailInputRef}
+                      style={styles.input}
+                      placeholder='Email'
                       placeholderTextColor='#9CA3AF'
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={!showPassword}
+                      value={email}
+                      onChangeText={setEmail}
                       autoCapitalize='none'
-                      autoComplete='password'
+                      keyboardType='email-address'
+                      autoComplete='email'
+                      contextMenuHidden={false}
+                      returnKeyType='next'
+                      onSubmitEditing={() => passwordInputRef.current?.focus()}
                     />
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}
-                      style={styles.eyeButton}
-                    >
-                      <Ionicons
-                        name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                        size={22}
-                        color='#6B7280'
+                  </Pressable>
+
+                  {/* Password */}
+                  <Pressable
+                    style={styles.inputContainer}
+                    onPress={() => passwordInputRef.current?.focus()}
+                  >
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        ref={passwordInputRef}
+                        style={styles.passwordInput}
+                        placeholder='Password'
+                        placeholderTextColor='#9CA3AF'
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                        autoCapitalize='none'
+                        autoComplete='password'
+                        contextMenuHidden={false}
+                        returnKeyType='done'
                       />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={styles.eyeButton}
+                      >
+                        <Ionicons
+                          name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                          size={22}
+                          color='#6B7280'
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </Pressable>
 
                 {/* Error */}
                 {localError ? (
@@ -371,7 +394,7 @@ export default function LoginScreen() {
             </Animated.View>
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }

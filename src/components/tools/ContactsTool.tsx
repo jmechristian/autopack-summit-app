@@ -18,7 +18,10 @@ import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { autopackColors } from '../../theme';
 import { useEngageStore } from '../../store/engageStore';
 import { AppUserRow } from '../AppUserRow';
-import { apsAppUserContactsByUserId } from '../../graphql/queries';
+import {
+  apsAppUserContactsByUserId,
+  apsAppUserProfilesByUserId,
+} from '../../graphql/queries';
 import { useCommunityStore } from '../../store/communityStore';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { useNotesPresence } from '../../hooks/useNotesPresence';
@@ -101,9 +104,12 @@ function getSectionKey(p: ContactProfile) {
 export default function ContactsTool({ profileBasePath = '/(main)/community' }: ContactsToolProps) {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
+  const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { profileIdsWithNotes } = useNotesPresence();
   const loadIncomingRequests = useEngageStore((s) => s.loadIncomingRequests);
   const loadSentRequests = useEngageStore((s) => s.loadSentRequests);
+  const incomingRequests = useEngageStore((s) => s.incomingRequests);
+  const sentRequests = useEngageStore((s) => s.sentRequests);
   const [search, setSearch] = useState('');
   const [contacts, setContacts] = useState<ContactItem[]>([]);
   const [profilesById, setProfilesById] = useState<Record<string, Profile>>({});
@@ -117,13 +123,13 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
   const loadFavorites = useCommunityStore((s) => s.loadFavorites);
 
   useEffect(() => {
-    if (currentAppUser?.id) {
-      loadFavorites(currentAppUser.id);
+    if (currentProfileId) {
+      loadFavorites(currentProfileId);
       // Keep request/hourglass state fresh for row UI.
       loadIncomingRequests().catch(() => {});
       loadSentRequests().catch(() => {});
     }
-  }, [currentAppUser?.id, loadFavorites, loadIncomingRequests, loadSentRequests]);
+  }, [currentProfileId, loadFavorites, loadIncomingRequests, loadSentRequests]);
 
   const loadContacts = useCallback(async () => {
     if (!currentAppUser?.id) return;
@@ -251,6 +257,60 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
     });
   }, [contacts, profilesById, search]);
 
+  const pendingProfiles = useMemo(() => {
+    const pendingByUserId = new Map<string, true>();
+    for (const req of incomingRequests) {
+      if (req.fromUserId) pendingByUserId.set(req.fromUserId, true);
+    }
+    for (const req of sentRequests) {
+      if (req.toUserId) pendingByUserId.set(req.toUserId, true);
+    }
+
+    const byUserId = new Map<string, Profile>();
+    for (const p of Object.values(profilesById)) {
+      if (p.userId) byUserId.set(p.userId, p);
+    }
+
+    const contactUserIds = new Set(
+      contacts
+        .map((c) => profilesById[c.contactId]?.userId)
+        .filter((x): x is string => !!x)
+    );
+
+    const rows: ContactProfile[] = [];
+    for (const userId of pendingByUserId.keys()) {
+      if (currentAppUser?.id && userId === currentAppUser.id) continue;
+      if (contactUserIds.has(userId)) continue;
+      const p = byUserId.get(userId);
+      if (!p?.id) continue;
+      rows.push({
+        profileId: p.id,
+        userId: p.userId,
+        contactItemId: `pending:${userId}`,
+        favorite: false,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        company: p.company,
+        jobTitle: p.jobTitle,
+        profilePicture: p.profilePicture,
+        location: p.location,
+        email: p.email,
+      });
+    }
+
+    const q = search.trim().toLowerCase();
+    const sorted = rows.sort((a, b) =>
+      getFullName(a).toLowerCase().localeCompare(getFullName(b).toLowerCase())
+    );
+    if (!q) return sorted;
+    return sorted.filter((p) => {
+      const fullName = getFullName(p).toLowerCase();
+      const company = (p.company || '').toLowerCase();
+      const title = (p.jobTitle || '').toLowerCase();
+      return fullName.includes(q) || company.includes(q) || title.includes(q);
+    });
+  }, [incomingRequests, sentRequests, profilesById, contacts, currentAppUser?.id, search]);
+
   const sections: ContactSection[] = useMemo(() => {
     const map = new Map<string, ContactProfile[]>();
     for (const p of filteredProfiles) {
@@ -265,8 +325,64 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
       return a.localeCompare(b);
     });
 
-    return titles.map((title) => ({ title, data: map.get(title)! }));
-  }, [filteredProfiles]);
+    const alphaSections = titles.map((title) => ({ title, data: map.get(title)! }));
+    if (!pendingProfiles.length) return alphaSections;
+    return [{ title: 'Pending Requests', data: pendingProfiles }, ...alphaSections];
+  }, [filteredProfiles, pendingProfiles]);
+
+  useEffect(() => {
+    const pendingUserIds = Array.from(
+      new Set([
+        ...incomingRequests.map((r) => r.fromUserId).filter(Boolean),
+        ...sentRequests.map((r) => r.toUserId).filter(Boolean),
+      ])
+    ) as string[];
+    const knownUserIds = new Set(
+      Object.values(profilesById)
+        .map((p) => p.userId)
+        .filter(Boolean)
+    );
+    const missingUserIds = pendingUserIds.filter((uid) => !knownUserIds.has(uid));
+    if (!missingUserIds.length) return;
+
+    let cancelled = false;
+    async function loadPendingProfiles() {
+      const entries = await Promise.all(
+        missingUserIds.map(async (userId) => {
+          try {
+            const resp = await graphqlApiKeyClient.graphql({
+              query: apsAppUserProfilesByUserId,
+              variables: { userId, limit: 1 },
+            });
+            const data = resp.data as {
+              apsAppUserProfilesByUserId?: { items?: Array<Profile | null> | null };
+            };
+            const p = (data.apsAppUserProfilesByUserId?.items || []).find(
+              (x) => !!x?.id && !!x?.userId
+            );
+            return p?.id ? ([p.id, p] as const) : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (cancelled) return;
+      const patch: Record<string, Profile> = {};
+      for (const entry of entries) {
+        if (!entry) continue;
+        patch[entry[0]] = entry[1];
+      }
+      if (Object.keys(patch).length) {
+        setProfilesById((prev) => ({ ...prev, ...patch }));
+      }
+    }
+
+    loadPendingProfiles();
+    return () => {
+      cancelled = true;
+    };
+  }, [incomingRequests, sentRequests, profilesById]);
 
   useEffect(() => {
     const loadUrls = async () => {
@@ -337,8 +453,20 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
           onRefresh={refresh}
           refreshing={refreshing}
           renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>{section.title}</Text>
+            <View
+              style={[
+                styles.sectionHeader,
+                section.title === 'Pending Requests' && styles.pendingSectionHeader,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.sectionHeaderText,
+                  section.title === 'Pending Requests' && styles.pendingSectionHeaderText,
+                ]}
+              >
+                {section.title}
+              </Text>
             </View>
           )}
           renderItem={({ item }) => {
@@ -348,7 +476,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
             const hasNotes = profileIdsWithNotes.has(item.profileId);
             const name = getFullName(item) || '(No name)';
             const subtitle = [item.jobTitle, item.company].filter(Boolean).join(' • ');
-            const isSelf = !!currentAppUser?.profileId && currentAppUser.profileId === item.profileId;
+            const isSelf = !!currentProfileId && currentProfileId === item.profileId;
             const initials = `${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(
               item.lastName,
             ).slice(0, 1)}`.toUpperCase();
@@ -362,7 +490,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
                 initials={initials}
                 isSelf={isSelf}
                 hasNote={hasNotes}
-                currentAppUserId={currentAppUser?.id || null}
+                currentAppUserProfileId={currentProfileId}
                 favorite={isFavorite}
                 pendingFavorite={isPending}
                 onPressProfile={() =>
@@ -411,6 +539,12 @@ const styles = StyleSheet.create({
     borderTopColor: '#e5e7eb',
   },
   sectionHeaderText: { fontWeight: '800', color: '#111827' },
+  pendingSectionHeader: {
+    paddingVertical: 10,
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  pendingSectionHeaderText: { color: '#b45309' },
 
   sep: { height: StyleSheet.hairlineWidth, backgroundColor: '#e5e7eb', marginLeft: 16 },
 

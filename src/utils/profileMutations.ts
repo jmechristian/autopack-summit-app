@@ -1,8 +1,7 @@
 // src/utils/profileMutations.ts
-import { graphqlAuthClient } from './graphqlClient';
+import { graphqlApiKeyClient, graphqlAuthClient } from './graphqlClient';
 import * as APITypes from '../API';
 import {
-  updateApsAppUserProfile,
   createProfileAffiliate,
   updateProfileAffiliate,
   deleteProfileAffiliate,
@@ -14,6 +13,82 @@ import {
   deleteProfileInterest,
 } from '../graphql/mutations';
 
+// Use a minimal selection set to avoid auth errors on unrelated nested fields
+// included by Amplify-generated mutation documents.
+const updateApsAppUserProfileSafe = /* GraphQL */ `
+  mutation UpdateApsAppUserProfileSafe(
+    $input: UpdateApsAppUserProfileInput!
+  ) {
+    updateApsAppUserProfile(input: $input) {
+      id
+      updatedAt
+    }
+  }
+`;
+
+function isUnauthorizedError(error: any): boolean {
+  const message = String(error?.message || '');
+  if (message.toLowerCase().includes('not authorized')) return true;
+
+  const firstError = error?.errors?.[0] || error?.cause?.errors?.[0];
+  const errorType = String(firstError?.errorType || '');
+  const gqlMessage = String(firstError?.message || '');
+  return (
+    errorType.toLowerCase() === 'unauthorized' ||
+    gqlMessage.toLowerCase().includes('not authorized')
+  );
+}
+
+function responseHasUnauthorizedErrors(response: any): boolean {
+  const errors = response?.errors;
+  if (!Array.isArray(errors) || errors.length === 0) return false;
+  return errors.some((err: any) => {
+    const errorType = String(err?.errorType || '').toLowerCase();
+    const message = String(err?.message || '').toLowerCase();
+    return errorType === 'unauthorized' || message.includes('not authorized');
+  });
+}
+
+function responseHasAnyErrors(response: any): boolean {
+  return Array.isArray(response?.errors) && response.errors.length > 0;
+}
+
+async function runMutationWithAuthFallback(
+  query: string,
+  variables: Record<string, any>,
+  options?: { preferApiKey?: boolean }
+) {
+  const clients = options?.preferApiKey
+    ? [graphqlApiKeyClient, graphqlAuthClient]
+    : [graphqlAuthClient, graphqlApiKeyClient];
+
+  let lastUnauthorizedError: any = null;
+
+  for (const client of clients) {
+    try {
+      const response = await client.graphql({ query, variables });
+      if (responseHasUnauthorizedErrors(response)) {
+        lastUnauthorizedError = response;
+        continue;
+      }
+      if (responseHasAnyErrors(response)) {
+        throw response;
+      }
+      return response;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        lastUnauthorizedError = error;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw (
+    lastUnauthorizedError || new Error('Mutation failed due to authorization')
+  );
+}
+
 /**
  * Update user profile
  */
@@ -21,10 +96,11 @@ export async function updateProfile(
   input: APITypes.UpdateApsAppUserProfileInput
 ): Promise<APITypes.ApsAppUserProfile> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: updateApsAppUserProfile,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(
+      updateApsAppUserProfileSafe,
+      { input },
+      { preferApiKey: true }
+    );
 
     const data = response.data as {
       updateApsAppUserProfile?: APITypes.ApsAppUserProfile;
@@ -48,10 +124,10 @@ export async function createAffiliate(
   input: APITypes.CreateProfileAffiliateInput
 ): Promise<APITypes.ProfileAffiliate> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: createProfileAffiliate,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(createProfileAffiliate, {
+      input,
+    }, { preferApiKey: true });
+ 
 
     const data = response.data as {
       createProfileAffiliate?: APITypes.ProfileAffiliate;
@@ -75,10 +151,9 @@ export async function updateAffiliate(
   input: APITypes.UpdateProfileAffiliateInput
 ): Promise<APITypes.ProfileAffiliate> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: updateProfileAffiliate,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(updateProfileAffiliate, {
+      input,
+    }, { preferApiKey: true });
 
     const data = response.data as {
       updateProfileAffiliate?: APITypes.ProfileAffiliate;
@@ -100,12 +175,9 @@ export async function updateAffiliate(
  */
 export async function deleteAffiliate(id: string): Promise<void> {
   try {
-    await graphqlAuthClient.graphql({
-      query: deleteProfileAffiliate,
-      variables: {
-        input: { id },
-      },
-    });
+    await runMutationWithAuthFallback(deleteProfileAffiliate, {
+      input: { id },
+    }, { preferApiKey: true });
   } catch (error) {
     console.error('Error deleting affiliate:', error);
     throw error;
@@ -119,10 +191,9 @@ export async function createEducation(
   input: APITypes.CreateProfileEducationInput
 ): Promise<APITypes.ProfileEducation> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: createProfileEducation,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(createProfileEducation, {
+      input,
+    }, { preferApiKey: true });
 
     const data = response.data as {
       createProfileEducation?: APITypes.ProfileEducation;
@@ -146,10 +217,9 @@ export async function updateEducation(
   input: APITypes.UpdateProfileEducationInput
 ): Promise<APITypes.ProfileEducation> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: updateProfileEducation,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(updateProfileEducation, {
+      input,
+    }, { preferApiKey: true });
 
     const data = response.data as {
       updateProfileEducation?: APITypes.ProfileEducation;
@@ -171,12 +241,9 @@ export async function updateEducation(
  */
 export async function deleteEducation(id: string): Promise<void> {
   try {
-    await graphqlAuthClient.graphql({
-      query: deleteProfileEducation,
-      variables: {
-        input: { id },
-      },
-    });
+    await runMutationWithAuthFallback(deleteProfileEducation, {
+      input: { id },
+    }, { preferApiKey: true });
   } catch (error) {
     console.error('Error deleting education:', error);
     throw error;
@@ -190,10 +257,9 @@ export async function createInterest(
   input: APITypes.CreateProfileInterestInput
 ): Promise<APITypes.ProfileInterest> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: createProfileInterest,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(createProfileInterest, {
+      input,
+    }, { preferApiKey: true });
 
     const data = response.data as {
       createProfileInterest?: APITypes.ProfileInterest;
@@ -217,10 +283,9 @@ export async function updateInterest(
   input: APITypes.UpdateProfileInterestInput
 ): Promise<APITypes.ProfileInterest> {
   try {
-    const response = await graphqlAuthClient.graphql({
-      query: updateProfileInterest,
-      variables: { input },
-    });
+    const response = await runMutationWithAuthFallback(updateProfileInterest, {
+      input,
+    }, { preferApiKey: true });
 
     const data = response.data as {
       updateProfileInterest?: APITypes.ProfileInterest;
@@ -242,12 +307,9 @@ export async function updateInterest(
  */
 export async function deleteInterest(id: string): Promise<void> {
   try {
-    await graphqlAuthClient.graphql({
-      query: deleteProfileInterest,
-      variables: {
-        input: { id },
-      },
-    });
+    await runMutationWithAuthFallback(deleteProfileInterest, {
+      input: { id },
+    }, { preferApiKey: true });
   } catch (error) {
     console.error('Error deleting interest:', error);
     throw error;

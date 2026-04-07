@@ -10,7 +10,7 @@ import {
   updateApsUserEngageState,
 } from '../graphql/engageState';
 import { onCreateApsContactRequest, onUpdateApsContactRequest } from '../graphql/subscriptions';
-import { createApsDmMessageMinimal, onCreateApsDmMessageMinimal } from '../graphql/dmOps';
+import { onCreateApsDmMessageMinimal, sendModeratedDmMessage } from '../graphql/dmOps';
 import {
   apsAdminAnnouncementsByEventIdAndCreatedAt,
   getApsAdminAnnouncement,
@@ -27,6 +27,7 @@ import {
 } from '../graphql/queries';
 import {
   createApsContactRequest,
+  deleteApsContactRequest,
   updateApsContactRequest,
   createApsDmThread,
   createApsDmParticipantState,
@@ -144,6 +145,11 @@ type EngageStore = {
     eventId: string;
     otherUserId: string;
   }) => Promise<'incoming' | 'sent' | null>;
+  // Read-only pair status lookup (does not create).
+  fetchContactRequestStatus: (params: {
+    eventId: string;
+    otherUserId: string;
+  }) => Promise<string | null>;
 
   // DM
   loadInbox: () => Promise<void>;
@@ -156,6 +162,10 @@ type EngageStore = {
     eventId: string;
     otherUserId: string; // Cognito sub
   }) => Promise<{ status: string; requestId: string; requestKey: string }>;
+  cancelSentContactRequest: (params: {
+    eventId: string;
+    otherUserId: string;
+  }) => Promise<void>;
   ensureDmThreadForAcceptedRequest: (params: {
     eventId: string;
     otherUserId: string;
@@ -191,6 +201,103 @@ function dmParticipantStateKey(eventId: string, threadId: string, userId: string
 async function getMySub(): Promise<string> {
   const user = await getCurrentUser();
   return user.userId;
+}
+
+type ContactRequestSnapshot = {
+  id?: string | null;
+  status?: string | null;
+  requestedByUserId?: string | null;
+};
+
+async function getContactRequestForPair(eventId: string, a: string, b: string): Promise<ContactRequestSnapshot | null> {
+  const requestKey = requestKeyFor(eventId, a, b);
+
+  // Deterministic id path (current behavior).
+  try {
+    const byId = await graphqlAuthClient.graphql({
+      query: getApsContactRequest,
+      variables: { id: requestKey },
+    });
+    const request = (byId.data as any)?.getApsContactRequest as ContactRequestSnapshot | null;
+    if (request?.id) return request;
+  } catch {
+    // fall through to GSI path for backward compatibility
+  }
+
+  // Backward compatibility for older records not using id=requestKey.
+  const byKey = await graphqlAuthClient.graphql({
+    query: apsContactRequestsByRequestKey,
+    variables: { requestKey, limit: 1 },
+  });
+  const found = (byKey.data as any)?.apsContactRequestsByRequestKey?.items?.find((x: any) => x?.id) as
+    | ContactRequestSnapshot
+    | undefined;
+  return found || null;
+}
+
+type ValidatedThread = {
+  id: string;
+  eventId: string;
+  userAId: string;
+  userBId: string;
+  owners: string[];
+  otherUserId: string;
+  lastMessageAt?: string | null;
+  lastMessagePreview?: string | null;
+};
+
+async function validateThreadForUser(threadId: string, mySub: string): Promise<ValidatedThread> {
+  const threadResp = await graphqlAuthClient.graphql({
+    query: getApsDmThread,
+    variables: { id: threadId },
+  });
+  const thread = (threadResp.data as any)?.getApsDmThread as
+    | {
+        id?: string | null;
+        eventId?: string | null;
+        userAId?: string | null;
+        userBId?: string | null;
+        owners?: string[] | null;
+        lastMessageAt?: string | null;
+        lastMessagePreview?: string | null;
+      }
+    | null;
+
+  if (!thread?.id || !thread?.eventId || !thread.userAId || !thread.userBId) {
+    throw new Error('Conversation not found');
+  }
+
+  const owners = Array.isArray(thread.owners)
+    ? Array.from(new Set(thread.owners.filter((owner): owner is string => !!owner)))
+    : [];
+  if (owners.length !== 2 || !owners.includes(thread.userAId) || !owners.includes(thread.userBId)) {
+    throw new Error('Invalid conversation participants');
+  }
+  if (!owners.includes(mySub)) {
+    throw new Error('You are not allowed in this conversation');
+  }
+
+  const otherUserId = thread.userAId === mySub ? thread.userBId : thread.userAId;
+  if (!otherUserId || otherUserId === mySub) {
+    throw new Error('Invalid conversation pairing');
+  }
+
+  const [a, b] = sortPair(mySub, otherUserId);
+  const request = await getContactRequestForPair(thread.eventId, a, b);
+  if (!request?.id || request.status !== 'ACCEPTED') {
+    throw new Error('Contact request must be accepted before messaging');
+  }
+
+  return {
+    id: String(thread.id),
+    eventId: String(thread.eventId),
+    userAId: String(thread.userAId),
+    userBId: String(thread.userBId),
+    owners,
+    otherUserId: String(otherUserId),
+    lastMessageAt: thread.lastMessageAt || null,
+    lastMessagePreview: thread.lastMessagePreview || null,
+  };
 }
 
 async function profileLabel(userId: string): Promise<string> {
@@ -296,6 +403,11 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       next: (evt: any) => {
         const msg = evt?.data?.onCreateApsDmMessage;
         if (!msg?.id || !msg?.threadId) return;
+        const msgOwners = Array.isArray(msg.owners)
+          ? Array.from(new Set(msg.owners.filter((owner: any) => typeof owner === 'string')))
+          : [];
+        if (msgOwners.length !== 2 || !msgOwners.includes(mySub)) return;
+        if (msg.senderUserId && !msgOwners.includes(String(msg.senderUserId))) return;
 
         const isMine = msg.senderUserId === mySub;
         const threadId = String(msg.threadId);
@@ -307,6 +419,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         // Without this, `loadInbox()` won't show the conversation even if messages exist.
         void (async () => {
           try {
+            await validateThreadForUser(threadId, mySub);
             const stateResp = await graphqlAuthClient.graphql({
               query: apsDmParticipantStatesByThreadIdAndUserId,
               variables: { threadId, userId: { eq: mySub }, limit: 1 },
@@ -571,6 +684,36 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     }
   },
 
+  async fetchContactRequestStatus({ eventId, otherUserId }) {
+    if (!eventId || !otherUserId) return null;
+    const mySub = await getMySub();
+    const [a, b] = sortPair(mySub, otherUserId);
+    const requestKey = requestKeyFor(eventId, a, b);
+
+    try {
+      const byId = await graphqlAuthClient.graphql({
+        query: getApsContactRequest,
+        variables: { id: requestKey },
+      });
+      const r = (byId.data as any)?.getApsContactRequest as { status?: string | null } | null;
+      if (r?.status) return r.status;
+    } catch {
+      // fall through to backward compatibility query
+    }
+
+    try {
+      const resp = await graphqlAuthClient.graphql({
+        query: apsContactRequestsByRequestKey,
+        variables: { requestKey, limit: 1 },
+      });
+      const data = resp.data as any;
+      const found = (data?.apsContactRequestsByRequestKey?.items || []).find((x: any) => x?.id);
+      return found?.status || null;
+    } catch {
+      return null;
+    }
+  },
+
   inbox: [],
   messagesByThreadId: {},
 
@@ -764,9 +907,39 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
   },
 
   async acceptRequest(id: string) {
+    const mySub = await getMySub();
+    const existingResp = await graphqlAuthClient.graphql({
+      query: getApsContactRequest,
+      variables: { id },
+    });
+    const request = (existingResp.data as any)?.getApsContactRequest as
+      | {
+          id?: string | null;
+          status?: string | null;
+          owners?: string[] | null;
+          requestedByUserId?: string | null;
+        }
+      | null;
+    if (!request?.id) throw new Error('Request not found');
+    if (!Array.isArray(request.owners) || !request.owners.includes(mySub)) {
+      throw new Error('You are not allowed to accept this request');
+    }
+    if (request.requestedByUserId === mySub) {
+      throw new Error('You cannot accept your own request');
+    }
+    if (request.status !== 'PENDING') {
+      throw new Error('Request is no longer pending');
+    }
+
     await graphqlAuthClient.graphql({
       query: updateApsContactRequest,
-      variables: { input: { id, status: 'ACCEPTED', acceptedAt: nowIso() } },
+      variables: {
+        input: { id, status: 'ACCEPTED', acceptedAt: nowIso() },
+        condition: {
+          status: { eq: 'PENDING' },
+          requestedByUserId: { ne: mySub },
+        },
+      },
     });
     await get().loadIncomingRequests();
     Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
@@ -838,6 +1011,30 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       if (!found?.id) throw new Error('Failed to create request');
       return { status: found.status || 'PENDING', requestId: found.id, requestKey };
     }
+  },
+
+  async cancelSentContactRequest({ eventId, otherUserId }) {
+    const mySub = await getMySub();
+    const [a, b] = sortPair(mySub, otherUserId);
+    const request = await getContactRequestForPair(eventId, a, b);
+
+    if (!request?.id) {
+      throw new Error('Request not found');
+    }
+    if (request.status !== 'PENDING') {
+      throw new Error('Request is no longer pending');
+    }
+    if (request.requestedByUserId !== mySub) {
+      throw new Error('Only sender can cancel request');
+    }
+
+    await graphqlAuthClient.graphql({
+      query: deleteApsContactRequest,
+      variables: { input: { id: request.id } },
+    });
+
+    await Promise.allSettled([get().loadIncomingRequests(), get().loadSentRequests()]);
+    Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
   },
 
   async ensureDmThreadForAcceptedRequest({ eventId, otherUserId }) {
@@ -985,25 +1182,20 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           } => !!x?.threadId
         ) || [];
 
-      const items: InboxItem[] = await Promise.all(
+      const items = await Promise.all(
         states.map(async (s) => {
           let title = 'Conversation';
           let preview = '';
           let lastMessageAt = s.lastMessageAt || null;
           try {
-            const threadResp = await graphqlAuthClient.graphql({
-              query: getApsDmThread,
-              variables: { id: s.threadId },
-            });
-            const thread = (threadResp.data as any)?.getApsDmThread as
-              | { userAId?: string; userBId?: string; lastMessageAt?: string | null; lastMessagePreview?: string | null }
-              | null;
+            const thread = await validateThreadForUser(s.threadId, mySub);
             if (thread?.lastMessagePreview) preview = thread.lastMessagePreview;
             if (thread?.lastMessageAt) lastMessageAt = thread.lastMessageAt;
             const otherId = thread?.userAId === mySub ? thread?.userBId : thread?.userAId;
             if (otherId) title = await profileLabel(otherId);
           } catch {
-            // ignore enrichment failures
+            // Invalid or unauthorized thread: hide from inbox.
+            return null;
           }
           return {
             threadId: s.threadId,
@@ -1014,14 +1206,19 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           };
         })
       );
+      const filteredItems = items.filter((item): item is InboxItem => !!item?.threadId);
 
       set({
-        inbox: items,
+        inbox: filteredItems,
         loading: { ...get().loading, inbox: false },
       });
 
-      // unread messages badge is the sum of participantState.unreadCount
-      const unreadMessages = states.reduce((acc, s) => acc + (s.unreadCount || 0), 0);
+      // unread messages badge only counts validated one-to-one threads.
+      const allowedThreadIds = new Set(filteredItems.map((item) => item.threadId));
+      const unreadMessages = states.reduce(
+        (acc, s) => (allowedThreadIds.has(s.threadId) ? acc + (s.unreadCount || 0) : acc),
+        0
+      );
       get().setUnread({ messages: unreadMessages });
       Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
     } catch (e: any) {
@@ -1039,6 +1236,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     });
     try {
       const mySub = await getMySub();
+      await validateThreadForUser(threadId, mySub);
       const resp = await graphqlAuthClient.graphql({
         query: apsDmMessagesByThreadIdAndCreatedAt,
         variables: {
@@ -1082,28 +1280,16 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
 
   async sendMessage({ threadId, body }) {
     const mySub = await getMySub();
-
-    // Fetch thread so we can set owners correctly.
-    const threadResp = await graphqlAuthClient.graphql({
-      query: getApsDmThread,
-      variables: { id: threadId },
-    });
-    const thread = (threadResp.data as any)?.getApsDmThread as
-      | { userAId?: string; userBId?: string; owners?: string[] }
-      | null;
-    const userAId = thread?.userAId;
-    const userBId = thread?.userBId;
-    const owners = thread?.owners || (userAId && userBId ? [userAId, userBId] : null);
+    const thread = await validateThreadForUser(threadId, mySub);
+    const userAId = thread.userAId;
+    const userBId = thread.userBId;
+    const owners = thread.owners;
     if (!owners?.length) throw new Error('Unable to send message (missing owners)');
     await graphqlAuthClient.graphql({
-      query: createApsDmMessageMinimal,
+      query: sendModeratedDmMessage,
       variables: {
         input: {
-          eventId: APS_ID,
           threadId,
-          senderUserId: mySub,
-          owners,
-          type: 'text',
           body,
         },
       },
@@ -1150,8 +1336,8 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             query: createApsDmParticipantState,
             variables: {
               input: {
-                id: dmParticipantStateKey(APS_ID, threadId, mySub),
-                eventId: APS_ID,
+                id: dmParticipantStateKey(thread.eventId, threadId, mySub),
+                eventId: thread.eventId,
                 threadId,
                 userId: mySub,
                 lastReadAt: ts,
@@ -1194,6 +1380,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
   async markRead(threadId: string) {
     try {
       const mySub = await getMySub();
+      await validateThreadForUser(threadId, mySub);
       const resp = await graphqlAuthClient.graphql({
         query: apsDmParticipantStatesByThreadIdAndUserId,
         variables: { threadId, userId: { eq: mySub }, limit: 1 },

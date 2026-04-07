@@ -70,17 +70,22 @@ export default function EngageHome() {
     >
       <View style={styles.body}>
         <View style={styles.toolsGrid}>
-          {tiles.map((t) => (
+          {tiles.map((t, index) => (
             <View key={t.id} style={styles.toolsCell}>
               <IconCard
                 icon={t.icon}
                 label={t.label}
                 badge={t.badge}
                 iconBgColor='transparent'
-                iconColor={ui.colors.primary}
-                iconSize={50}
+                iconColor='#FFFFFF'
+                iconSize={20}
                 onPress={t.onPress}
-                style={styles.toolsCard}
+                style={[
+                  styles.toolsCard,
+                  index % 2 === 0 ? styles.toolsCardPrimary : styles.toolsCardAlt,
+                ]}
+                iconWrapStyle={styles.toolsIconWrap}
+                labelStyle={styles.toolsCardLabel}
               />
             </View>
           ))}
@@ -111,7 +116,38 @@ const styles = StyleSheet.create({
     width: '48%',
   },
   toolsCard: {
+    minHeight: 88,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  toolsCardPrimary: {
+    backgroundColor: ui.colors.primary,
+  },
+  toolsCardAlt: {
+    backgroundColor: '#4b5563',
+  },
+  toolsIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#fff',
+    flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 132,
+    justifyContent: 'center',
+    marginBottom: 0,
+  },
+  toolsCardLabel: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 14,
+    lineHeight: 18,
+    minHeight: 0,
+    textAlign: 'left',
   },
 });

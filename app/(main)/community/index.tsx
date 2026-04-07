@@ -52,6 +52,7 @@ function getSectionKey(p: CommunityProfile) {
 
 export default function CommunityIndex() {
   const currentAppUser = useCurrentAppUser();
+  const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { profileIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
@@ -68,14 +69,14 @@ export default function CommunityIndex() {
   const loadSentRequests = useEngageStore((s) => s.loadSentRequests);
 
   useEffect(() => {
-    if (currentAppUser?.id) {
-      loadFavorites(currentAppUser.id);
+    if (currentProfileId) {
+      loadFavorites(currentProfileId);
       // Keep request/hourglass state fresh for row UI.
       loadIncomingRequests().catch(() => {});
       loadSentRequests().catch(() => {});
     }
   }, [
-    currentAppUser?.id,
+    currentProfileId,
     loadFavorites,
     loadIncomingRequests,
     loadSentRequests,
@@ -165,7 +166,7 @@ export default function CommunityIndex() {
     const q = search.trim().toLowerCase();
     const base = profiles.filter((p) => {
       // Never show the current user in Community list
-      if (currentAppUser?.profileId && p.profileId === currentAppUser.profileId)
+      if (currentProfileId && p.profileId === currentProfileId)
         return false;
       if (currentAppUser?.id && p.userId === currentAppUser.id) return false;
       return true;
@@ -178,7 +179,7 @@ export default function CommunityIndex() {
       const title = (p.jobTitle || '').toLowerCase();
       return fullName.includes(q) || company.includes(q) || title.includes(q);
     });
-  }, [profiles, search, currentAppUser?.profileId, currentAppUser?.id]);
+  }, [profiles, search, currentProfileId, currentAppUser?.id]);
 
   const sections: CommunitySection[] = useMemo(() => {
     const map = new Map<string, CommunityProfile[]>();
@@ -282,8 +283,8 @@ export default function CommunityIndex() {
             const fav = !!favoriteContactIds[item.profileId];
             const pending = !!pendingContactIds[item.profileId];
             const isSelf =
-              !!currentAppUser?.profileId &&
-              currentAppUser.profileId === item.profileId;
+              !!currentProfileId &&
+              currentProfileId === item.profileId;
             const hasNote = profileIdsWithNotes.has(item.profileId);
 
             return (
@@ -296,7 +297,7 @@ export default function CommunityIndex() {
                 initials={`${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(item.lastName).slice(0, 1)}`.toUpperCase()}
                 isSelf={isSelf}
                 hasNote={hasNote}
-                currentAppUserId={currentAppUser?.id || null}
+                currentAppUserProfileId={currentProfileId}
                 favorite={fav}
                 pendingFavorite={pending}
                 onPressProfile={() =>

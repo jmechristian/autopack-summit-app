@@ -1,9 +1,8 @@
 // Minimal GraphQL operations for ApsUserEngageState.
-// This is intentionally hand-written so the mobile app can compile immediately;
-// after `amplify push` + `amplify codegen`, you can switch to generated ops if desired.
+// This is intentionally hand-written so the mobile app can compile immediately.
 
-export const getApsUserEngageState = /* GraphQL */ `
-  query GetApsUserEngageState($id: ID!) {
+export const getApsUserEngageState = `
+  query GetApsUserEngageStateManual($id: ID!) {
     getApsUserEngageState(id: $id) {
       id
       eventId
@@ -16,8 +15,8 @@ export const getApsUserEngageState = /* GraphQL */ `
   }
 `;
 
-export const createApsUserEngageState = /* GraphQL */ `
-  mutation CreateApsUserEngageState($input: CreateApsUserEngageStateInput!) {
+export const createApsUserEngageState = `
+  mutation CreateApsUserEngageStateManual($input: CreateApsUserEngageStateInput!) {
     createApsUserEngageState(input: $input) {
       id
       eventId
@@ -30,8 +29,8 @@ export const createApsUserEngageState = /* GraphQL */ `
   }
 `;
 
-export const updateApsUserEngageState = /* GraphQL */ `
-  mutation UpdateApsUserEngageState($input: UpdateApsUserEngageStateInput!) {
+export const updateApsUserEngageState = `
+  mutation UpdateApsUserEngageStateManual($input: UpdateApsUserEngageStateInput!) {
     updateApsUserEngageState(input: $input) {
       id
       eventId

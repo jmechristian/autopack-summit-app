@@ -16,7 +16,7 @@ type Props = {
   isSelf: boolean;
   hasNote: boolean;
   // Contact (favorite/contact-list) state
-  currentAppUserId?: string | null;
+  currentAppUserProfileId?: string | null;
   favorite: boolean;
   pendingFavorite: boolean;
   // Navigation
@@ -42,7 +42,7 @@ export function AppUserRow({
   initials,
   isSelf,
   hasNote,
-  currentAppUserId,
+  currentAppUserProfileId,
   favorite,
   pendingFavorite,
   onPressProfile,
@@ -56,6 +56,7 @@ export function AppUserRow({
     return null;
   });
   const getOrCreateContactRequest = useEngageStore((s) => s.getOrCreateContactRequest);
+  const cancelSentContactRequest = useEngageStore((s) => s.cancelSentContactRequest);
   const ensureDmThreadForAcceptedRequest = useEngageStore((s) => s.ensureDmThreadForAcceptedRequest);
 
   const showHourglass = !!pendingRequestState;
@@ -86,12 +87,15 @@ export function AppUserRow({
       <View style={styles.actions}>
         <Pressable
           hitSlop={10}
-          disabled={pendingFavorite || isSelf || !currentAppUserId || !profileId}
+          disabled={pendingFavorite || isSelf || !currentAppUserProfileId || !profileId}
           onPress={async () => {
-            if (!currentAppUserId || !profileId) return;
+            if (!currentAppUserProfileId || !profileId) return;
             if (isSelf) return;
             try {
-              await toggleFavorite({ currentUserId: currentAppUserId, contactId: profileId });
+              await toggleFavorite({
+                currentUserProfileId: currentAppUserProfileId,
+                contactId: profileId,
+              });
             } catch {
               Alert.alert('Favorite failed', 'Could not update favorite. Please try again.');
             }
@@ -120,6 +124,34 @@ export function AppUserRow({
             if (isSelf || !userId) return;
 
             if (pendingRequestState) {
+              if (pendingRequestState === 'sent') {
+                Alert.alert(
+                  'Cancel request?',
+                  'Are you sure you want to cancel this request?',
+                  [
+                    { text: 'No', style: 'cancel' },
+                    {
+                      text: 'Yes, cancel',
+                      style: 'destructive',
+                      onPress: async () => {
+                        try {
+                          await cancelSentContactRequest({
+                            eventId: APS_ID,
+                            otherUserId: userId,
+                          });
+                          Alert.alert('Request canceled', 'Your request has been canceled.');
+                        } catch (e: any) {
+                          Alert.alert(
+                            'Cancel failed',
+                            e?.message || 'Unable to cancel request. Please try again.'
+                          );
+                        }
+                      },
+                    },
+                  ]
+                );
+                return;
+              }
               router.push('/(main)/engage/requests');
               return;
             }

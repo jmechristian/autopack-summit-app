@@ -1,7 +1,5 @@
 // Minimal DM ops for User Pools auth.
-// We intentionally DO NOT select nested `sender { ... }` because `sender` resolves to ApsAppUser,
-// which is currently API-key/public in this backend. Selecting it under userPools causes:
-// "Not Authorized to access sender on type ApsDmMessage".
+// Keep selections flat to avoid nested auth issues on related user objects.
 
 export const createApsDmMessageMinimal = /* GraphQL */ `
   mutation CreateApsDmMessageMinimal(
@@ -9,6 +7,23 @@ export const createApsDmMessageMinimal = /* GraphQL */ `
     $condition: ModelApsDmMessageConditionInput
   ) {
     createApsDmMessage(input: $input, condition: $condition) {
+      id
+      eventId
+      threadId
+      senderUserId
+      owners
+      type
+      body
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const sendModeratedDmMessage = `
+  mutation SendModeratedDmMessageManual($input: SendModeratedDmMessageInput!) {
+    sendModeratedDmMessage(input: $input) {
       id
       eventId
       threadId

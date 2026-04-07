@@ -26,12 +26,6 @@ import { uploadProfilePicture, uploadResume, resolveProfilePictureUri } from '..
 import { updateProfile, createAffiliate, createEducation } from '../../../src/utils/profileMutations';
 import { useApsStore } from '../../../src/store/apsStore';
 import { autopackColors } from '../../../src/theme';
-import {
-  initiateLinkedInAuth,
-  exchangeCodeForToken,
-  fetchLinkedInProfile,
-  mapLinkedInToProfile,
-} from '../../../src/utils/linkedInAuth';
 
 export default function ProfileEdit() {
   const insets = useSafeAreaInsets();
@@ -41,7 +35,6 @@ export default function ProfileEdit() {
   
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
-  const [importingLinkedIn, setImportingLinkedIn] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
   const saveProfilePhoto = async (uri: string) => {
@@ -155,109 +148,6 @@ export default function ProfileEdit() {
     }
   };
 
-  const handleLinkedInImport = async () => {
-    try {
-      setImportingLinkedIn(true);
-
-      // Step 1: Initiate OAuth flow
-      const authResult = await initiateLinkedInAuth();
-      if (!authResult) {
-        Alert.alert('Cancelled', 'LinkedIn import was cancelled');
-        return;
-      }
-
-      // Step 2: Exchange code for token (standard OAuth, no PKCE)
-      const accessToken = await exchangeCodeForToken(authResult.code);
-
-      // Step 3: Fetch LinkedIn profile data
-      const linkedInData = await fetchLinkedInProfile(accessToken);
-
-      // Step 4: Map to our profile format
-      const profileData = mapLinkedInToProfile(linkedInData);
-      
-      console.log('\n📋 ========== MAPPED PROFILE DATA ==========');
-      console.log(JSON.stringify(profileData, null, 2));
-      console.log('📋 =========================================\n');
-
-      // Step 5: Update profile
-      const updateData: any = {
-        id: profile!.id,
-      };
-
-      if (profileData.firstName) updateData.firstName = profileData.firstName;
-      if (profileData.lastName) updateData.lastName = profileData.lastName;
-      if (profileData.email) updateData.email = profileData.email;
-      if (profileData.bio) updateData.bio = profileData.bio;
-
-      await updateProfile(updateData);
-
-      // Step 6: If profile picture URL exists, download and upload it
-      if (profileData.profilePicture) {
-        try {
-          // For now, just save the LinkedIn profile picture URL directly
-          // In production, you might want to download and re-upload to S3 for consistency
-          await updateProfile({
-            id: profile!.id,
-            profilePicture: profileData.profilePicture,
-          });
-        } catch (imageError) {
-          console.warn('Failed to import profile picture:', imageError);
-          // Continue without profile picture
-        }
-      }
-
-      // Step 7: Import positions as affiliations
-      if (profileData.positions && profileData.positions.length > 0) {
-        try {
-          for (const position of profileData.positions) {
-            await createAffiliate({
-              profileId: profile!.id,
-              affiliate: position.company,
-              role: position.title,
-              startDate: position.startDate || undefined,
-              endDate: position.endDate || undefined,
-            });
-          }
-          console.log(`✅ Imported ${profileData.positions.length} positions as affiliations`);
-        } catch (affiliateError) {
-          console.warn('Failed to import some affiliations:', affiliateError);
-          // Continue - some may have been created
-        }
-      }
-
-      // Step 8: Import education
-      if (profileData.education && profileData.education.length > 0) {
-        try {
-          for (const edu of profileData.education) {
-            await createEducation({
-              profileId: profile!.id,
-              school: edu.school,
-              degree: edu.degree || undefined,
-              fieldOfStudy: edu.fieldOfStudy || undefined,
-            });
-          }
-          console.log(`✅ Imported ${profileData.education.length} education entries`);
-        } catch (educationError) {
-          console.warn('Failed to import some education entries:', educationError);
-          // Continue - some may have been created
-        }
-      }
-
-      // Step 9: Refresh profile
-      await refreshProfile();
-
-      Alert.alert('Success', 'Profile imported from LinkedIn successfully');
-    } catch (error) {
-      console.error('LinkedIn import error:', error);
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'Failed to import from LinkedIn'
-      );
-    } finally {
-      setImportingLinkedIn(false);
-    }
-  };
-
   // Resolve profile picture from either URL or S3 key.
   React.useEffect(() => {
     let cancelled = false;
@@ -339,20 +229,6 @@ export default function ProfileEdit() {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.actionBtn, importingLinkedIn && styles.actionBtnDisabled]}
-            onPress={handleLinkedInImport}
-            disabled={importingLinkedIn}
-          >
-            {importingLinkedIn ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="logo-linkedin" size={20} color="#fff" />
-                <Text style={styles.actionBtnText}>Import</Text>
-              </>
-            )}
-          </TouchableOpacity>
         </View>
       </View>
 

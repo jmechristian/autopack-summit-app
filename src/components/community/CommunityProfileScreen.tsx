@@ -89,6 +89,7 @@ function nameOf(p: Profile | null) {
 export default function CommunityProfileScreen() {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
+  const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const profileIdRaw = params.id;
   const profileId = useMemo(() => {
@@ -108,6 +109,7 @@ export default function CommunityProfileScreen() {
   const loadIncomingRequests = useEngageStore((s) => s.loadIncomingRequests);
   const loadSentRequests = useEngageStore((s) => s.loadSentRequests);
   const fetchPendingRequestState = useEngageStore((s) => s.fetchPendingRequestState);
+  const fetchContactRequestStatus = useEngageStore((s) => s.fetchContactRequestStatus);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +118,9 @@ export default function CommunityProfileScreen() {
   const [pendingRequestStateRemote, setPendingRequestStateRemote] = useState<
     'incoming' | 'sent' | null
   >(null);
+  const [contactRequestStatusRemote, setContactRequestStatusRemote] = useState<string | null>(null);
   const [addingPhoneContact, setAddingPhoneContact] = useState(false);
+  const [requestActionBusy, setRequestActionBusy] = useState(false);
 
   const otherUserId = profile?.userId || null;
   const pendingRequestState = useEngageStore((s) =>
@@ -128,35 +132,39 @@ export default function CommunityProfileScreen() {
   const favoriteContactIds = useCommunityStore((s) => s.favoriteContactIds);
   const pendingContactIds = useCommunityStore((s) => s.pendingContactIds);
   const loadFavorites = useCommunityStore((s) => s.loadFavorites);
-  const contactRecordIdByContactId = useCommunityStore((s) => s.contactRecordIdByContactId);
 
   useEffect(() => {
-    if (currentAppUser?.id) {
-      loadFavorites(currentAppUser.id);
+    if (currentProfileId) {
+      loadFavorites(currentProfileId);
       loadIncomingRequests().catch(() => {});
       loadSentRequests().catch(() => {});
     }
-  }, [currentAppUser?.id, loadFavorites, loadIncomingRequests, loadSentRequests]);
+  }, [currentProfileId, loadFavorites, loadIncomingRequests, loadSentRequests]);
 
-  // Robust: check backend for pending state for this pair when profile loads / screen focuses.
-  const refreshPendingState = useCallback(async () => {
+  // Robust: check backend status for this pair when profile loads / screen focuses.
+  const refreshRequestState = useCallback(async () => {
     if (!otherUserId) {
       setPendingRequestStateRemote(null);
+      setContactRequestStatusRemote(null);
       return;
     }
-    const state = await fetchPendingRequestState({ eventId: APS_ID, otherUserId }).catch(() => null);
+    const [state, status] = await Promise.all([
+      fetchPendingRequestState({ eventId: APS_ID, otherUserId }).catch(() => null),
+      fetchContactRequestStatus({ eventId: APS_ID, otherUserId }).catch(() => null),
+    ]);
     setPendingRequestStateRemote(state);
-  }, [fetchPendingRequestState, otherUserId]);
+    setContactRequestStatusRemote(status);
+  }, [fetchContactRequestStatus, fetchPendingRequestState, otherUserId]);
 
   useEffect(() => {
-    void refreshPendingState();
-  }, [refreshPendingState]);
+    void refreshRequestState();
+  }, [refreshRequestState]);
 
   useFocusEffect(
     useCallback(() => {
-      void refreshPendingState();
+      void refreshRequestState();
       return () => {};
-    }, [refreshPendingState])
+    }, [refreshRequestState])
   );
 
   useEffect(() => {
@@ -250,7 +258,101 @@ export default function CommunityProfileScreen() {
   const fav = !!(contactId && favoriteContactIds[contactId]);
   const pending = !!(contactId && pendingContactIds[contactId]);
   const isSelf = !!contactId && !!currentAppUser?.profileId && currentAppUser.profileId === contactId;
-  const isInContacts = !!(contactId && contactRecordIdByContactId[contactId]);
+  const isRequestAccepted = contactRequestStatusRemote === 'ACCEPTED';
+  const isRequestPending =
+    contactRequestStatusRemote === 'PENDING' || !!effectivePendingRequestState;
+  const requestTileLabel = isRequestAccepted
+    ? 'Accepted'
+    : isRequestPending
+      ? 'Pending'
+      : 'Send Request';
+  const requestTileIcon = isRequestAccepted
+    ? 'checkmark-done-outline'
+    : isRequestPending
+      ? 'hourglass-outline'
+      : 'person-add-outline';
+
+  const handleRequestFlow = useCallback(
+    async (openChatWhenAccepted: boolean) => {
+      if (isSelf || !profile?.userId) return;
+
+      if (isRequestAccepted) {
+        if (!openChatWhenAccepted) return;
+        try {
+          const { threadId } = await ensureDmThreadForAcceptedRequest({
+            eventId: APS_ID,
+            otherUserId: profile.userId,
+          });
+          router.push(`/(main)/engage/messages/${threadId}`);
+        } catch (e: any) {
+          console.error('Message thread start failed:', e);
+          Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+        }
+        return;
+      }
+
+      if (isRequestPending) {
+        router.push('/(main)/engage/requests');
+        return;
+      }
+
+      setRequestActionBusy(true);
+      try {
+        const { status } = await getOrCreateContactRequest({
+          eventId: APS_ID,
+          otherUserId: profile.userId,
+        });
+        setContactRequestStatusRemote(status || null);
+
+        await Promise.allSettled([loadIncomingRequests(), loadSentRequests()]);
+        const latestPending = await fetchPendingRequestState({
+          eventId: APS_ID,
+          otherUserId: profile.userId,
+        }).catch(() => null);
+        setPendingRequestStateRemote(latestPending);
+
+        if (status === 'ACCEPTED' && openChatWhenAccepted) {
+          const { threadId } = await ensureDmThreadForAcceptedRequest({
+            eventId: APS_ID,
+            otherUserId: profile.userId,
+          });
+          router.push(`/(main)/engage/messages/${threadId}`);
+          return;
+        }
+
+        if (status === 'ACCEPTED') {
+          Alert.alert('Accepted', 'Your contact request is accepted.');
+          return;
+        }
+
+        Alert.alert('Request sent', 'You can message once they accept your request.');
+      } catch (e: any) {
+        const msg = (e?.message || '').toLowerCase();
+        if (msg.includes('not accepted')) {
+          Alert.alert(
+            'Waiting for acceptance',
+            'You can message once they accept your request.'
+          );
+          return;
+        }
+        console.error('Contact request flow failed:', e);
+        Alert.alert('Unable to continue', e?.message || 'Please try again.');
+      } finally {
+        setRequestActionBusy(false);
+      }
+    },
+    [
+      ensureDmThreadForAcceptedRequest,
+      fetchPendingRequestState,
+      getOrCreateContactRequest,
+      isRequestAccepted,
+      isRequestPending,
+      isSelf,
+      loadIncomingRequests,
+      loadSentRequests,
+      profile?.userId,
+    ]
+  );
 
   if (loading) {
     return (
@@ -309,18 +411,20 @@ export default function CommunityProfileScreen() {
           <Text style={styles.name}>{displayName}</Text>
           {!!profile.jobTitle && <Text style={styles.muted}>{profile.jobTitle}</Text>}
           {!!profile.company && <Text style={styles.muted}>{profile.company}</Text>}
-          {!!profile.location && <Text style={styles.muted}>{profile.location}</Text>}
         </View>
 
         <View style={styles.headerActions}>
           <Pressable
             hitSlop={10}
-            disabled={!currentAppUser?.id || !contactId || pending || isSelf}
+            disabled={!currentProfileId || !contactId || pending || isSelf}
             onPress={async () => {
-              if (!currentAppUser?.id || !contactId) return;
+              if (!currentProfileId || !contactId) return;
               if (isSelf) return;
               try {
-                await toggleFavorite({ currentUserId: currentAppUser.id, contactId });
+                await toggleFavorite({
+                  currentUserProfileId: currentProfileId,
+                  contactId,
+                });
               } catch {
                 // keep it lightweight; store will re-sync on failure
               }
@@ -337,53 +441,21 @@ export default function CommunityProfileScreen() {
           </Pressable>
           <Pressable
             hitSlop={10}
-            disabled={isSelf || !profile?.userId}
+            disabled={isSelf || !profile?.userId || requestActionBusy}
             onPress={async () => {
-              if (isSelf || !profile?.userId) return;
-              if (effectivePendingRequestState) {
-                router.push('/(main)/engage/requests');
-                return;
-              }
-              try {
-                const { status } = await getOrCreateContactRequest({
-                  eventId: APS_ID,
-                  otherUserId: profile.userId,
-                });
-
-                if (status !== 'ACCEPTED') {
-                  Alert.alert(
-                    'Request sent',
-                    'You can message once they accept your request.'
-                  );
-                  return;
-                }
-
-                const { threadId } = await ensureDmThreadForAcceptedRequest({
-                  eventId: APS_ID,
-                  otherUserId: profile.userId,
-                });
-
-                router.push(`/(main)/engage/messages/${threadId}`);
-              } catch (e: any) {
-                const msg = (e?.message || '').toLowerCase();
-                if (msg.includes('not accepted')) {
-                  Alert.alert(
-                    'Waiting for acceptance',
-                    'You can message once they accept your request.'
-                  );
-                  return;
-                }
-                console.error('Message request flow failed:', e);
-                Alert.alert('Unable to start chat', e?.message || 'Please try again.');
-              }
+              await handleRequestFlow(true);
             }}
             style={styles.iconBtn}
           >
             <Ionicons
-              name={effectivePendingRequestState ? 'hourglass-outline' : 'chatbubble-outline'}
+              name={isRequestPending ? 'hourglass-outline' : 'chatbubble-outline'}
               size={22}
               color={
-                isSelf ? '#d1d5db' : effectivePendingRequestState ? '#9ca3af' : '#6b7280'
+                isSelf || requestActionBusy
+                  ? '#d1d5db'
+                  : isRequestPending
+                    ? '#9ca3af'
+                    : '#6b7280'
               }
             />
           </Pressable>
@@ -391,38 +463,28 @@ export default function CommunityProfileScreen() {
       </View>
 
       {!isSelf && (
-        <View style={styles.actionsCard}>
+        <View style={styles.actionGrid}>
           <Pressable
-            disabled={!currentAppUser?.id || !contactId || pending}
+            disabled={!profile?.userId || requestActionBusy}
             onPress={async () => {
-              if (!currentAppUser?.id || !contactId) return;
-              try {
-                // Single source of truth: toggles “in contacts” by creating/deleting ApsAppUserContact
-                await toggleFavorite({ currentUserId: currentAppUser.id, contactId });
-                await loadFavorites(currentAppUser.id);
-                Alert.alert(
-                  isInContacts ? 'Removed' : 'Added',
-                  isInContacts ? 'Removed from your contacts.' : 'Added to your contacts.'
-                );
-              } catch (e) {
-                console.error('Toggle contact failed:', e);
-                Alert.alert('Update failed', 'Please try again.');
-              }
+              await handleRequestFlow(false);
             }}
-            style={[styles.actionBtn, pending && styles.actionBtnDisabled]}
+            style={[styles.actionTile, requestActionBusy && styles.actionTileDisabled]}
           >
-            <Ionicons
-              name={isInContacts ? 'person-remove-outline' : 'person-add-outline'}
-              size={18}
-              color="#fff"
-            />
-            <Text style={styles.actionBtnText}>
-              {pending ? 'Updating…' : isInContacts ? 'Remove from contacts' : 'Add to contacts'}
+            <View style={styles.actionIconWrap}>
+              <Ionicons
+                name={requestTileIcon as any}
+                size={20}
+                color="#fff"
+              />
+            </View>
+            <Text style={styles.actionTileText}>
+              {requestActionBusy ? 'Updating…' : requestTileLabel}
             </Text>
           </Pressable>
 
           <Pressable
-            disabled={!contactId || addingPhoneContact}
+            disabled={!contactId || addingPhoneContact || !isRequestAccepted}
             onPress={async () => {
               if (!profile) return;
               setAddingPhoneContact(true);
@@ -464,59 +526,105 @@ export default function CommunityProfileScreen() {
                 setAddingPhoneContact(false);
               }
             }}
-            style={[styles.actionBtn, styles.actionBtnMuted, addingPhoneContact && styles.actionBtnDisabled]}
+            style={[
+              styles.actionTile,
+              styles.actionTileAlt,
+              (addingPhoneContact || !isRequestAccepted) && styles.actionTileDisabled,
+            ]}
           >
-            <Ionicons name="call-outline" size={18} color="#fff" />
-            <Text style={styles.actionBtnText}>
-              {addingPhoneContact ? 'Saving…' : 'Add to phone contacts'}
+            <View style={styles.actionIconWrap}>
+              <Ionicons name="call-outline" size={20} color="#fff" />
+            </View>
+            <Text style={styles.actionTileText}>
+              {addingPhoneContact
+                ? 'Saving…'
+                : isRequestAccepted
+                  ? 'Add to phone contacts'
+                  : 'Accepted to unlock'}
             </Text>
           </Pressable>
         </View>
       )}
 
-      <NotesSection profileId={profile.id} />
-
-      {!!profile.bio && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Bio</Text>
-          <Text style={styles.body}>{profile.bio}</Text>
-        </View>
-      )}
-
-      {interests.length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Interests</Text>
-          <View style={styles.chips}>
-            {interests.map((t: string) => (
-              <View key={t} style={styles.chip}>
-                <Text style={styles.chipText}>{t}</Text>
-              </View>
-            ))}
+      <View style={[styles.sectionCard, styles.firstSectionCard]}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
+              <Ionicons name="reader-outline" size={14} color="#1d4ed8" />
+            </View>
+            <Text style={styles.sectionHeaderText}>Bio</Text>
           </View>
         </View>
-      )}
+        <Text style={styles.sectionBodyText}>
+          {profile.bio?.trim() || 'No bio provided.'}
+        </Text>
+        <View style={styles.sectionDivider} />
+      </View>
 
-      {affiliates.length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Affiliates</Text>
-          {affiliates.map((t: string) => (
-            <Text key={t} style={styles.body}>
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
+              <Ionicons name="briefcase-outline" size={14} color="#1d4ed8" />
+            </View>
+            <Text style={styles.sectionHeaderText}>Experience</Text>
+          </View>
+        </View>
+        {affiliates.length ? (
+          affiliates.map((t: string) => (
+            <Text key={t} style={styles.sectionListItem}>
               • {t}
             </Text>
-          ))}
-        </View>
-      )}
+          ))
+        ) : (
+          <Text style={styles.sectionBodyText}>No experience provided.</Text>
+        )}
+        <View style={styles.sectionDivider} />
+      </View>
 
-      {education.length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Education</Text>
-          {education.map((t: string) => (
-            <Text key={t} style={styles.body}>
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
+              <Ionicons name="school-outline" size={14} color="#1d4ed8" />
+            </View>
+            <Text style={styles.sectionHeaderText}>Education</Text>
+          </View>
+        </View>
+        {education.length ? (
+          education.map((t: string) => (
+            <Text key={t} style={styles.sectionListItem}>
               • {t}
             </Text>
-          ))}
+          ))
+        ) : (
+          <Text style={styles.sectionBodyText}>No education provided.</Text>
+        )}
+        <View style={styles.sectionDivider} />
+      </View>
+
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
+              <Ionicons name="heart-outline" size={14} color="#1d4ed8" />
+            </View>
+            <Text style={styles.sectionHeaderText}>Interests</Text>
+          </View>
         </View>
-      )}
+        {interests.length ? (
+          interests.map((t: string) => (
+            <Text key={t} style={styles.sectionListItem}>
+              • {t}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.sectionBodyText}>No interests provided.</Text>
+        )}
+        <View style={styles.sectionDivider} />
+      </View>
+
+      <NotesSection profileId={profile.id} />
     </ScrollView>
   );
 }
@@ -553,51 +661,102 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', gap: 6 },
   iconBtn: { padding: 6, borderRadius: 10 },
 
-  card: {
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#fff',
+  actionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  cardTitle: { fontWeight: '900', color: '#111827', marginBottom: 6 },
-  body: { color: '#111827', lineHeight: 20 },
-
-  actionsCard: {
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#fff',
-    gap: 10,
+  actionTile: {
+    width: '48%',
+    minHeight: 84,
+    borderRadius: 12,
+    backgroundColor: autopackColors.apBlue,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
   },
-  actionBtn: {
+  actionTileAlt: {
+    backgroundColor: '#4b5563',
+  },
+  actionTileDisabled: {
+    opacity: 0.6,
+  },
+  actionIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: autopackColors.apBlue,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 12,
   },
-  actionBtnAlt: {
-    backgroundColor: '#111827',
-  },
-  actionBtnMuted: {
-    backgroundColor: '#6b7280',
-  },
-  actionBtnDisabled: {
-    opacity: 0.6,
-  },
-  actionBtnText: {
+  actionTileText: {
     color: '#fff',
     fontWeight: '800',
+    fontSize: 14,
   },
-
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: '#f3f4f6', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
-  chipText: { color: '#111827', fontWeight: '600' },
+  sectionCard: {
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+    borderWidth: 0,
+    padding: 0,
+  },
+  firstSectionCard: {
+    marginTop: 4,
+  },
+  sectionHeader: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionHeaderText: {
+    color: '#111827',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  sectionBodyText: {
+    color: '#6b7280',
+    fontSize: 15,
+    lineHeight: 21,
+    paddingHorizontal: 4,
+    paddingVertical: 8,
+  },
+  sectionListItem: {
+    color: '#111827',
+    fontSize: 15,
+    lineHeight: 21,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  sectionDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#d1d5db',
+    marginTop: 14,
+  },
 
   backBtn: {
     marginTop: 10,

@@ -8,6 +8,45 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
+export const sendModeratedDmMessage = /* GraphQL */ `mutation SendModeratedDmMessage($input: SendModeratedDmMessageInput!) {
+  sendModeratedDmMessage(input: $input) {
+    id
+    eventId
+    threadId
+    thread {
+      id
+      eventId
+      dmKey
+      userAId
+      userBId
+      owners
+      lastMessageAt
+      lastMessagePreview
+      createdAt
+      updatedAt
+      __typename
+    }
+    senderUserId
+    sender {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    owners
+    type
+    body
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.SendModeratedDmMessageMutationVariables,
+  APITypes.SendModeratedDmMessageMutation
+>;
 export const updateAPS = /* GraphQL */ `mutation UpdateAPS(
   $input: UpdateAPSInput!
   $condition: ModelAPSConditionInput
@@ -1924,435 +1963,6 @@ export const deleteApsAppUserProfile = /* GraphQL */ `mutation DeleteApsAppUserP
   APITypes.DeleteApsAppUserProfileMutationVariables,
   APITypes.DeleteApsAppUserProfileMutation
 >;
-export const createProfileAffiliate = /* GraphQL */ `mutation CreateProfileAffiliate(
-  $input: CreateProfileAffiliateInput!
-  $condition: ModelProfileAffiliateConditionInput
-) {
-  createProfileAffiliate(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    affiliate
-    role
-    startDate
-    endDate
-    createdAt
-    updatedAt
-    apsAppUserProfileAffiliatesId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateProfileAffiliateMutationVariables,
-  APITypes.CreateProfileAffiliateMutation
->;
-export const updateProfileAffiliate = /* GraphQL */ `mutation UpdateProfileAffiliate(
-  $input: UpdateProfileAffiliateInput!
-  $condition: ModelProfileAffiliateConditionInput
-) {
-  updateProfileAffiliate(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    affiliate
-    role
-    startDate
-    endDate
-    createdAt
-    updatedAt
-    apsAppUserProfileAffiliatesId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateProfileAffiliateMutationVariables,
-  APITypes.UpdateProfileAffiliateMutation
->;
-export const deleteProfileAffiliate = /* GraphQL */ `mutation DeleteProfileAffiliate(
-  $input: DeleteProfileAffiliateInput!
-  $condition: ModelProfileAffiliateConditionInput
-) {
-  deleteProfileAffiliate(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    affiliate
-    role
-    startDate
-    endDate
-    createdAt
-    updatedAt
-    apsAppUserProfileAffiliatesId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteProfileAffiliateMutationVariables,
-  APITypes.DeleteProfileAffiliateMutation
->;
-export const createProfileEducation = /* GraphQL */ `mutation CreateProfileEducation(
-  $input: CreateProfileEducationInput!
-  $condition: ModelProfileEducationConditionInput
-) {
-  createProfileEducation(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    school
-    degree
-    fieldOfStudy
-    createdAt
-    updatedAt
-    apsAppUserProfileEducationId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateProfileEducationMutationVariables,
-  APITypes.CreateProfileEducationMutation
->;
-export const updateProfileEducation = /* GraphQL */ `mutation UpdateProfileEducation(
-  $input: UpdateProfileEducationInput!
-  $condition: ModelProfileEducationConditionInput
-) {
-  updateProfileEducation(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    school
-    degree
-    fieldOfStudy
-    createdAt
-    updatedAt
-    apsAppUserProfileEducationId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateProfileEducationMutationVariables,
-  APITypes.UpdateProfileEducationMutation
->;
-export const deleteProfileEducation = /* GraphQL */ `mutation DeleteProfileEducation(
-  $input: DeleteProfileEducationInput!
-  $condition: ModelProfileEducationConditionInput
-) {
-  deleteProfileEducation(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    school
-    degree
-    fieldOfStudy
-    createdAt
-    updatedAt
-    apsAppUserProfileEducationId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteProfileEducationMutationVariables,
-  APITypes.DeleteProfileEducationMutation
->;
-export const createProfileInterest = /* GraphQL */ `mutation CreateProfileInterest(
-  $input: CreateProfileInterestInput!
-  $condition: ModelProfileInterestConditionInput
-) {
-  createProfileInterest(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    interest
-    createdAt
-    updatedAt
-    apsAppUserProfileInterestsId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateProfileInterestMutationVariables,
-  APITypes.CreateProfileInterestMutation
->;
-export const updateProfileInterest = /* GraphQL */ `mutation UpdateProfileInterest(
-  $input: UpdateProfileInterestInput!
-  $condition: ModelProfileInterestConditionInput
-) {
-  updateProfileInterest(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    interest
-    createdAt
-    updatedAt
-    apsAppUserProfileInterestsId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateProfileInterestMutationVariables,
-  APITypes.UpdateProfileInterestMutation
->;
-export const deleteProfileInterest = /* GraphQL */ `mutation DeleteProfileInterest(
-  $input: DeleteProfileInterestInput!
-  $condition: ModelProfileInterestConditionInput
-) {
-  deleteProfileInterest(input: $input, condition: $condition) {
-    id
-    profileId
-    profile {
-      id
-      userId
-      firstName
-      lastName
-      email
-      phone
-      company
-      jobTitle
-      attendeeType
-      quickTools
-      profilePicture
-      bio
-      linkedin
-      twitter
-      facebook
-      instagram
-      youtube
-      website
-      location
-      resume
-      thinkificId
-      apcProgress
-      speakerId
-      createdAt
-      updatedAt
-      __typename
-    }
-    interest
-    createdAt
-    updatedAt
-    apsAppUserProfileInterestsId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteProfileInterestMutationVariables,
-  APITypes.DeleteProfileInterestMutation
->;
 export const createApsAppUserPhoto = /* GraphQL */ `mutation CreateApsAppUserPhoto(
   $input: CreateApsAppUserPhotoInput!
   $condition: ModelApsAppUserPhotoConditionInput
@@ -2398,52 +2008,6 @@ export const createApsAppUserPhoto = /* GraphQL */ `mutation CreateApsAppUserPho
 ` as GeneratedMutation<
   APITypes.CreateApsAppUserPhotoMutationVariables,
   APITypes.CreateApsAppUserPhotoMutation
->;
-export const updateApsAppUserPhoto = /* GraphQL */ `mutation UpdateApsAppUserPhoto(
-  $input: UpdateApsAppUserPhotoInput!
-  $condition: ModelApsAppUserPhotoConditionInput
-) {
-  updateApsAppUserPhoto(input: $input, condition: $condition) {
-    id
-    userId
-    user {
-      id
-      registrantId
-      profileId
-      createdAt
-      updatedAt
-      __typename
-    }
-    photo
-    caption
-    approved
-    eventId
-    event {
-      id
-      year
-      startDate
-      endDate
-      location
-      address
-      city
-      state
-      zip
-      website
-      createdAt
-      updatedAt
-      aPSAgendaId
-      __typename
-    }
-    createdAt
-    updatedAt
-    aPSPhotosId
-    apsAppUserPhotosId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateApsAppUserPhotoMutationVariables,
-  APITypes.UpdateApsAppUserPhotoMutation
 >;
 export const deleteApsAppUserPhoto = /* GraphQL */ `mutation DeleteApsAppUserPhoto(
   $input: DeleteApsAppUserPhotoInput!
@@ -7675,6 +7239,481 @@ export const updateApsAppUserProfile = /* GraphQL */ `mutation UpdateApsAppUserP
 ` as GeneratedMutation<
   APITypes.UpdateApsAppUserProfileMutationVariables,
   APITypes.UpdateApsAppUserProfileMutation
+>;
+export const createProfileAffiliate = /* GraphQL */ `mutation CreateProfileAffiliate(
+  $input: CreateProfileAffiliateInput!
+  $condition: ModelProfileAffiliateConditionInput
+) {
+  createProfileAffiliate(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    affiliate
+    role
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    apsAppUserProfileAffiliatesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProfileAffiliateMutationVariables,
+  APITypes.CreateProfileAffiliateMutation
+>;
+export const updateProfileAffiliate = /* GraphQL */ `mutation UpdateProfileAffiliate(
+  $input: UpdateProfileAffiliateInput!
+  $condition: ModelProfileAffiliateConditionInput
+) {
+  updateProfileAffiliate(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    affiliate
+    role
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    apsAppUserProfileAffiliatesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProfileAffiliateMutationVariables,
+  APITypes.UpdateProfileAffiliateMutation
+>;
+export const deleteProfileAffiliate = /* GraphQL */ `mutation DeleteProfileAffiliate(
+  $input: DeleteProfileAffiliateInput!
+  $condition: ModelProfileAffiliateConditionInput
+) {
+  deleteProfileAffiliate(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    affiliate
+    role
+    startDate
+    endDate
+    createdAt
+    updatedAt
+    apsAppUserProfileAffiliatesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProfileAffiliateMutationVariables,
+  APITypes.DeleteProfileAffiliateMutation
+>;
+export const createProfileEducation = /* GraphQL */ `mutation CreateProfileEducation(
+  $input: CreateProfileEducationInput!
+  $condition: ModelProfileEducationConditionInput
+) {
+  createProfileEducation(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    school
+    degree
+    fieldOfStudy
+    createdAt
+    updatedAt
+    apsAppUserProfileEducationId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProfileEducationMutationVariables,
+  APITypes.CreateProfileEducationMutation
+>;
+export const updateProfileEducation = /* GraphQL */ `mutation UpdateProfileEducation(
+  $input: UpdateProfileEducationInput!
+  $condition: ModelProfileEducationConditionInput
+) {
+  updateProfileEducation(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    school
+    degree
+    fieldOfStudy
+    createdAt
+    updatedAt
+    apsAppUserProfileEducationId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProfileEducationMutationVariables,
+  APITypes.UpdateProfileEducationMutation
+>;
+export const deleteProfileEducation = /* GraphQL */ `mutation DeleteProfileEducation(
+  $input: DeleteProfileEducationInput!
+  $condition: ModelProfileEducationConditionInput
+) {
+  deleteProfileEducation(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    school
+    degree
+    fieldOfStudy
+    createdAt
+    updatedAt
+    apsAppUserProfileEducationId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProfileEducationMutationVariables,
+  APITypes.DeleteProfileEducationMutation
+>;
+export const createProfileInterest = /* GraphQL */ `mutation CreateProfileInterest(
+  $input: CreateProfileInterestInput!
+  $condition: ModelProfileInterestConditionInput
+) {
+  createProfileInterest(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    interest
+    createdAt
+    updatedAt
+    apsAppUserProfileInterestsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProfileInterestMutationVariables,
+  APITypes.CreateProfileInterestMutation
+>;
+export const updateProfileInterest = /* GraphQL */ `mutation UpdateProfileInterest(
+  $input: UpdateProfileInterestInput!
+  $condition: ModelProfileInterestConditionInput
+) {
+  updateProfileInterest(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    interest
+    createdAt
+    updatedAt
+    apsAppUserProfileInterestsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProfileInterestMutationVariables,
+  APITypes.UpdateProfileInterestMutation
+>;
+export const deleteProfileInterest = /* GraphQL */ `mutation DeleteProfileInterest(
+  $input: DeleteProfileInterestInput!
+  $condition: ModelProfileInterestConditionInput
+) {
+  deleteProfileInterest(input: $input, condition: $condition) {
+    id
+    profileId
+    profile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    interest
+    createdAt
+    updatedAt
+    apsAppUserProfileInterestsId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProfileInterestMutationVariables,
+  APITypes.DeleteProfileInterestMutation
+>;
+export const updateApsAppUserPhoto = /* GraphQL */ `mutation UpdateApsAppUserPhoto(
+  $input: UpdateApsAppUserPhotoInput!
+  $condition: ModelApsAppUserPhotoConditionInput
+) {
+  updateApsAppUserPhoto(input: $input, condition: $condition) {
+    id
+    userId
+    user {
+      id
+      registrantId
+      profileId
+      createdAt
+      updatedAt
+      __typename
+    }
+    photo
+    caption
+    approved
+    eventId
+    event {
+      id
+      year
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    createdAt
+    updatedAt
+    aPSPhotosId
+    apsAppUserPhotosId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsAppUserPhotoMutationVariables,
+  APITypes.UpdateApsAppUserPhotoMutation
 >;
 export const createAPSCompany = /* GraphQL */ `mutation CreateAPSCompany(
   $input: CreateAPSCompanyInput!

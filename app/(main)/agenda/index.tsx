@@ -19,6 +19,7 @@ import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graph
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
+import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
 
@@ -144,12 +145,6 @@ function tryParseSortableDate(dateStr?: string | null, timeStr?: string | null) 
 function getSortKey(s: AgendaSession) {
   const ts = tryParseSortableDate(s.date, s.startTime) ?? null;
   return ts ?? Number.POSITIVE_INFINITY;
-}
-
-function formatPeopleList(names: string[]) {
-  const compact = names.map((n) => n.trim()).filter(Boolean);
-  if (!compact.length) return '';
-  return compact.join(', ');
 }
 
 function getSpeakerName(s: Speaker) {
@@ -443,81 +438,32 @@ export default function AgendaList() {
     const shouldShowToggle = descriptionText.length > 260;
 
     return (
-      <View style={styles.card}>
-        <View style={styles.topRightActions}>
-          {hasNote && (
-            <View pointerEvents="none" style={styles.noteIcon}>
-              <Ionicons name="document-text-outline" size={18} color={autopackColors.apBlue} />
-            </View>
-          )}
-          {!!currentProfileId && (
-            <Pressable
-              style={styles.favoriteIconBtn}
-              hitSlop={8}
-              onPress={() => {
-                toggleFavoriteSession(item.id);
-              }}
-            >
-              <Ionicons
-                name={isFavorite ? 'star' : 'star-outline'}
-                size={18}
-                color={isFavorite ? '#f59e0b' : isFavoritePending ? '#9ca3af' : '#6b7280'}
-              />
-            </Pressable>
-          )}
-        </View>
-        <Pressable
-          onPress={() =>
-            router.push({
-              pathname: '/(main)/agenda/[id]',
-              params: { id: item.id },
-            })
-          }
-          style={({ pressed }) => [styles.cardBodyPressable, pressed && styles.cardPressed]}
-        >
-          <Text style={styles.time}>{time}</Text>
-          <Text style={styles.title}>{title}</Text>
-
-          {!!location && <Text style={styles.location}>{location}</Text>}
-
-          <View style={styles.divider} />
-
-          {!!descriptionText && (
-            <>
-              <Text style={styles.description} numberOfLines={isExpanded ? undefined : 6}>
-                {descriptionText}
-              </Text>
-              {shouldShowToggle && (
-                <Pressable
-                  onPress={() =>
-                    setExpandedById((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
-                  }
-                  hitSlop={8}
-                  style={styles.readMoreBtn}
-                >
-                  <Text style={styles.readMoreText}>
-                    {isExpanded ? 'Show less' : 'Read more'}
-                  </Text>
-                </Pressable>
-              )}
-            </>
-          )}
-
-          {!!speakers.length && (
-            <Text style={styles.metaLine}>
-              <Text style={styles.metaLabel}>Speakers: </Text>
-              {formatPeopleList(speakers)}
-            </Text>
-          )}
-
-          {!!sponsors.length && (
-            <Text style={styles.metaLine}>
-              <Text style={styles.metaLabel}>Sponsors: </Text>
-              {formatPeopleList(sponsors)}
-            </Text>
-          )}
-        </Pressable>
-      </View>
+      <AgendaSessionCard
+        timeLabel={time}
+        title={title}
+        location={location}
+        descriptionText={descriptionText}
+        speakerNames={speakers}
+        sponsorNames={sponsors}
+        onPress={() =>
+          router.push({
+            pathname: '/(main)/agenda/[id]',
+            params: { id: item.id },
+          })
+        }
+        isExpanded={isExpanded}
+        showExpandToggle={shouldShowToggle}
+        onToggleExpand={() =>
+          setExpandedById((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
+        }
+        showNoteIcon={hasNote}
+        showFavorite={!!currentProfileId}
+        isFavorite={isFavorite}
+        isFavoritePending={isFavoritePending}
+        onToggleFavorite={() => {
+          toggleFavoriteSession(item.id);
+        }}
+      />
     );
   }, [
     expandedById,

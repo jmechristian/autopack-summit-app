@@ -29,6 +29,7 @@ import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
+import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 
 type QuickTool = {
   id: string;
@@ -65,9 +66,11 @@ const ALL_QUICK_TOOLS: QuickTool[] = [
 type NextSession = {
   id: string;
   title: string;
-  subtitle: string;
-  speakerName: string;
-  speakerRole: string;
+  timeLabel: string;
+  location: string;
+  descriptionText: string;
+  speakerNames: string[];
+  sponsorNames: string[];
 };
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
@@ -77,23 +80,29 @@ const MOCK_NEXT_SESSIONS: NextSession[] = [
     id: 's1',
     title:
       'EV Battery Safety: Lithium Battery\nTransport & Storage Regulatory\nLandscape',
-    subtitle: 'Ballroom Main Stage - 09:30 AM - 10:00 AM',
-    speakerName: 'Mike Pagel',
-    speakerRole: 'Senior Consultant HazMat Safety, HazMat Safety Consulting',
+    timeLabel: '9:30 AM - 10:00 AM',
+    location: 'Ballroom Main Stage',
+    descriptionText: '',
+    speakerNames: ['Mike Pagel'],
+    sponsorNames: [],
   },
   {
     id: 's2',
     title: 'Packaging Trends in 2026\nWhat’s Changing and Why',
-    subtitle: 'Track B - 10:15 AM - 10:45 AM',
-    speakerName: 'Taylor Nguyen',
-    speakerRole: 'Director of Packaging Innovation',
+    timeLabel: '10:15 AM - 10:45 AM',
+    location: 'Track B',
+    descriptionText: '',
+    speakerNames: ['Taylor Nguyen'],
+    sponsorNames: [],
   },
   {
     id: 's3',
     title: 'Materials & Sustainability\nPractical Steps for OEMs',
-    subtitle: 'Track A - 11:00 AM - 11:30 AM',
-    speakerName: 'Jordan Lee',
-    speakerRole: 'Sustainability Lead',
+    timeLabel: '11:00 AM - 11:30 AM',
+    location: 'Track A',
+    descriptionText: '',
+    speakerNames: ['Jordan Lee'],
+    sponsorNames: [],
   },
 ];
 
@@ -106,6 +115,21 @@ function formatTimeRange(start?: string | null, end?: string | null) {
   const e = normalizeText(end);
   if (s && e) return `${s} - ${e}`;
   return s || '';
+}
+
+function htmlToPlainText(input: string) {
+  return input
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
 }
 
 export default function HubScreen() {
@@ -280,25 +304,29 @@ export default function HubScreen() {
           const title = normalizeText(it?.title) || 'Session';
           const location = normalizeText(it?.location);
           const time = formatTimeRange(it?.startTime, it?.endTime);
-          const subtitle = [location, time].filter(Boolean).join(' - ');
-
-          const firstJoin = it?.speakers?.items?.find((x: any) => x?.aPSSpeaker)?.aPSSpeaker;
-          const speakerName = `${normalizeText(firstJoin?.firstName || firstJoin?.profile?.firstName)} ${normalizeText(
-            firstJoin?.lastName || firstJoin?.profile?.lastName,
-          )}`.trim();
-          const speakerRole = [
-            normalizeText(firstJoin?.title || firstJoin?.profile?.jobTitle),
-            normalizeText(firstJoin?.company || firstJoin?.profile?.company),
-          ]
+          const speakerNames = (it?.speakers?.items || [])
+            .map((x: any) => x?.aPSSpeaker)
             .filter(Boolean)
-            .join(', ');
+            .map((sp: any) =>
+              `${normalizeText(sp?.firstName || sp?.profile?.firstName)} ${normalizeText(
+                sp?.lastName || sp?.profile?.lastName,
+              )}`.trim(),
+            )
+            .filter(Boolean);
+          const sponsorNames = (it?.sponsors?.items || [])
+            .map((x: any) => x?.apsSponsor?.company?.name)
+            .map((name: any) => normalizeText(name))
+            .filter(Boolean);
+          const descriptionText = htmlToPlainText(normalizeText(it?.description));
 
           return {
             id: it.id,
             title,
-            subtitle: subtitle || ' ',
-            speakerName: speakerName || ' ',
-            speakerRole: speakerRole || ' ',
+            timeLabel: time || 'TBD',
+            location: location || '',
+            descriptionText,
+            speakerNames,
+            sponsorNames,
           };
         });
 
@@ -363,7 +391,7 @@ export default function HubScreen() {
     };
   }, [profile?.profilePicture]);
 
-  const heroImage = require('../../../assets/images/hub-back.png');
+  const heroImage = require('../../../assets/images/mobile-bg.png');
   const bottomInset = Math.max(insets.bottom, 16);
 
   const toolMap = useMemo(() => new Map(ALL_QUICK_TOOLS.map((t) => [t.id, t])), []);
@@ -502,7 +530,7 @@ export default function HubScreen() {
         </View>
 
         <View style={styles.heroTextWrap}>
-          <Text style={styles.heroTitle}>Welcome to{'\n'}Greenville!</Text>
+          <Text style={styles.heroTitle}>Countdown to Greenville!</Text>
         </View>
       </ImageBackground>
 
@@ -521,24 +549,34 @@ export default function HubScreen() {
           style={styles.quickToolsWrap}
           entering={FadeInDown.duration(600).delay(150)}
         >
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeader}>Quick Tools</Text>
+          <View style={styles.sectionHeaderBanner}>
+            <View style={styles.sectionHeaderLeft}>
+              <View style={styles.sectionIconWrap}>
+                <Ionicons name='grid-outline' size={14} color='#1d4ed8' />
+              </View>
+              <Text style={styles.sectionHeaderText}>Quick Tools</Text>
+            </View>
             <TouchableOpacity activeOpacity={0.85} onPress={openToolsModal}>
-              <Ionicons name='settings-outline' size={22} color={ui.colors.text} />
+              <Text style={styles.editLink}>Edit</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.toolsGrid}>
-            {selectedTools.map((t) => (
+            {selectedTools.map((t, index) => (
               <View key={t.id} style={styles.toolsCell}>
                 <IconCard
                   icon={t.icon}
                   label={t.label}
                   iconBgColor='transparent'
-                  iconColor={ui.colors.primary}
-                  iconSize={50}
+                  iconColor='#FFFFFF'
+                  iconSize={20}
                   onPress={() => handleToolPress(t)}
-                  style={styles.toolsCard}
+                  style={[
+                    styles.toolsCard,
+                    index % 2 === 0 ? styles.toolsCardPrimary : styles.toolsCardAlt,
+                  ]}
+                  iconWrapStyle={styles.toolsIconWrap}
+                  labelStyle={styles.toolsCardLabel}
                 />
               </View>
             ))}
@@ -547,7 +585,14 @@ export default function HubScreen() {
 
         {/* Next Session carousel (dummy) */}
         <Animated.View entering={FadeInDown.duration(600).delay(220)}>
-          <Text style={styles.sectionHeader}>Next Session</Text>
+          <View style={[styles.sectionHeaderBanner, styles.nextSessionHeaderBanner]}>
+            <View style={styles.sectionHeaderLeft}>
+              <View style={[styles.sectionIconWrap, styles.nextSessionIconWrap]}>
+                <Ionicons name='calendar-outline' size={14} color='#c2410c' />
+              </View>
+              <Text style={styles.sectionHeaderText}>Next Session</Text>
+            </View>
+          </View>
           <RNAnimated.ScrollView
             horizontal
             pagingEnabled
@@ -559,7 +604,7 @@ export default function HubScreen() {
             scrollEventThrottle={16}
             // This ScrollView lives inside a padded container (body).
             // Use negative margin to avoid double-left padding so cards align with headers.
-            style={{ marginTop: ui.space.sm, marginHorizontal: -20 }}
+            style={{ marginTop: 0, marginHorizontal: -20 }}
             onMomentumScrollEnd={(e) => {
               const w = e.nativeEvent.layoutMeasurement.width;
               const x = e.nativeEvent.contentOffset.x;
@@ -575,27 +620,23 @@ export default function HubScreen() {
                 <View
                   style={[styles.sessionCardWrap, { paddingHorizontal: 20 }]}
                 >
-                  <TouchableOpacity
-                    activeOpacity={0.9}
+                  <AgendaSessionCard
+                    timeLabel={s.timeLabel}
+                    title={s.title}
+                    location={s.location}
+                    descriptionText={s.descriptionText}
+                    speakerNames={s.speakerNames}
+                    sponsorNames={s.sponsorNames}
+                    descriptionNumberOfLines={3}
+                    metaNumberOfLines={1}
+                    cardStyle={styles.nextSessionCard}
                     onPress={() =>
                       router.push({
                         pathname: '/(main)/agenda/[id]',
                         params: { id: s.id },
                       })
                     }
-                    style={styles.sessionCard}
-                  >
-                    <Text style={styles.sessionTitle}>{s.title}</Text>
-                    <Text style={styles.sessionSubtitle}>{s.subtitle}</Text>
-
-                    <View style={styles.speakerRow}>
-                      <View style={styles.speakerAvatar} />
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.speakerName}>{s.speakerName}</Text>
-                        <Text style={styles.speakerRole}>{s.speakerRole}</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
+                  />
                 </View>
               </View>
             ))}
@@ -758,17 +799,17 @@ export default function HubScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E6F1F8',
+    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
     paddingBottom: 24,
   },
 
-  hero: { height: 260, width: '100%' },
+  hero: { height: 266, width: '100%' },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: autopackColors.apDarkBlue,
-    opacity: 0.75,
+    opacity: 0.6,
   },
   heroTopRow: {
     paddingHorizontal: 20,
@@ -831,17 +872,49 @@ const styles = StyleSheet.create({
   liveText: { color: '#fff', fontWeight: '800', letterSpacing: 0.5 },
 
   body: { paddingHorizontal: 20, paddingVertical: 16 },
-  sectionHeaderRow: {
+  sectionHeaderBanner: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: ui.colors.text,
+  nextSessionHeaderBanner: {
+    borderColor: '#fed7aa',
+    backgroundColor: '#fff7ed',
   },
-  quickToolsWrap: { marginTop: 8 },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextSessionIconWrap: {
+    backgroundColor: '#ffedd5',
+  },
+  sectionHeaderText: {
+    color: '#111827',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  editLink: {
+    color: autopackColors.apBlue,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  quickToolsWrap: { marginTop: 8, marginBottom: 32 },
   quickToolsHint: {
     marginTop: 4,
     color: ui.colors.muted,
@@ -852,12 +925,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 12,
+    gap: 12,
+    marginTop: 8,
   },
   toolsCell: { width: '48%' },
-  toolsCard: { alignItems: 'center', minHeight: 132 },
+  toolsCard: {
+    minHeight: 84,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    marginBottom: 0,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  toolsCardPrimary: {
+    backgroundColor: ui.colors.primary,
+  },
+  toolsCardAlt: {
+    backgroundColor: '#4b5563',
+  },
+  toolsIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 0,
+  },
+  toolsCardLabel: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 14,
+    lineHeight: 18,
+    minHeight: 0,
+    textAlign: 'left',
+  },
 
   sessionCardWrap: { paddingVertical: 8 },
+  nextSessionCard: {
+    height: 244,
+    marginBottom: 0,
+    overflow: 'hidden',
+  },
   sessionCard: {
     backgroundColor: '#fff',
     borderRadius: 20,

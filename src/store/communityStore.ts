@@ -1,25 +1,43 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { graphqlApiKeyClient, graphqlAuthClient } from '../utils/graphqlClient';
-import { apsAppUserContactsByUserId } from '../graphql/queries';
-import { createApsAppUserContact, deleteApsAppUserContact } from '../graphql/mutations';
+import { APS_ID } from '../config/apsConfig';
+import { graphqlAuthClient } from '../utils/graphqlClient';
+import { apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt } from '../graphql/queries';
+
+const createFavoriteContactMinimal = /* GraphQL */ `
+  mutation CreateFavoriteContactMinimal($input: CreateApsAppUserFavoriteContactInput!) {
+    createApsAppUserFavoriteContact(input: $input) {
+      id
+      __typename
+    }
+  }
+`;
+
+const deleteFavoriteContactMinimal = /* GraphQL */ `
+  mutation DeleteFavoriteContactMinimal($input: DeleteApsAppUserFavoriteContactInput!) {
+    deleteApsAppUserFavoriteContact(input: $input) {
+      id
+      __typename
+    }
+  }
+`;
 
 type CommunityStore = {
   /**
-   * Contacts are stored by CONTACT profile id (ApsAppUserProfile.id).
-   * In the Community UI, the “star” indicates whether this profile is in your contacts.
+   * Favorites are stored by CONTACT profile id (ApsAppUserProfile.id).
+   * In Community UI, star reflects favorite status only.
    */
   favoriteContactIds: Record<string, true>;
 
-  /** Map contact profile id -> ApsAppUserContact record id (used for deletes). */
-  contactRecordIdByContactId: Record<string, string>;
+  /** Map contact profile id -> ApsAppUserFavoriteContact record id (used for deletes). */
+  favoriteRecordIdByContactId: Record<string, string>;
 
   /** Tracks in-flight toggle operations per contactId to prevent double-taps. */
   pendingContactIds: Record<string, true>;
 
-  loadFavorites: (currentUserId: string) => Promise<void>;
-  toggleFavorite: (params: { currentUserId: string; contactId: string }) => Promise<void>;
+  loadFavorites: (currentUserProfileId: string) => Promise<void>;
+  toggleFavorite: (params: { currentUserProfileId: string; contactId: string }) => Promise<void>;
   isFavorite: (contactId: string) => boolean;
   clearFavorites: () => void;
 };
@@ -28,101 +46,110 @@ export const useCommunityStore = create<CommunityStore>()(
   persist(
     (set, get) => ({
       favoriteContactIds: {},
-      contactRecordIdByContactId: {},
+      favoriteRecordIdByContactId: {},
       pendingContactIds: {},
 
-      loadFavorites: async (currentUserId: string) => {
-        if (!currentUserId) return;
+      loadFavorites: async (currentUserProfileId: string) => {
+        if (!currentUserProfileId) return;
 
-        const all: Array<{ id: string; contactId: string; favorite?: boolean | null }> = [];
+        const all: Array<{ id: string; contactProfileId: string }> = [];
         let nextToken: string | null | undefined = null;
 
         do {
-          const resp = await graphqlApiKeyClient.graphql({
-            query: apsAppUserContactsByUserId,
-            variables: { userId: currentUserId, limit: 1000, nextToken },
+          const resp = await graphqlAuthClient.graphql({
+            query: apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt,
+            variables: { userProfileId: currentUserProfileId, limit: 1000, nextToken },
           });
 
           const data = resp.data as {
-            apsAppUserContactsByUserId?: {
-              items?: Array<{ id: string; contactId: string; favorite?: boolean | null } | null>;
+            apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt?: {
+              items?: Array<{ id: string; contactProfileId: string } | null>;
               nextToken?: string | null;
             };
           };
 
-          const items = data.apsAppUserContactsByUserId?.items || [];
+          const items =
+            data.apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt?.items || [];
           for (const item of items) {
-            if (!item?.id || !item.contactId) continue;
-            all.push({ id: item.id, contactId: item.contactId, favorite: item.favorite });
+            if (!item?.id || !item.contactProfileId) continue;
+            all.push({ id: item.id, contactProfileId: item.contactProfileId });
           }
-          nextToken = data.apsAppUserContactsByUserId?.nextToken;
+          nextToken =
+            data.apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt?.nextToken;
         } while (nextToken);
 
         const favs: Record<string, true> = {};
         const ids: Record<string, string> = {};
         for (const item of all) {
-          ids[item.contactId] = item.id;
-          // Treat any existing ApsAppUserContact record as “in contacts” for UI.
-          favs[item.contactId] = true;
+          ids[item.contactProfileId] = item.id;
+          favs[item.contactProfileId] = true;
         }
 
         set({
           favoriteContactIds: favs,
-          contactRecordIdByContactId: ids,
+          favoriteRecordIdByContactId: ids,
         });
       },
 
-      toggleFavorite: async ({ currentUserId, contactId }) => {
-        if (!currentUserId || !contactId) return;
+      toggleFavorite: async ({ currentUserProfileId, contactId }) => {
+        if (!currentUserProfileId || !contactId) return;
 
         // prevent double-taps
         if (get().pendingContactIds[contactId]) return;
         set({ pendingContactIds: { ...get().pendingContactIds, [contactId]: true } });
 
-        const existingRecordId = get().contactRecordIdByContactId[contactId];
-        const inContacts = !!existingRecordId;
+        const existingRecordId = get().favoriteRecordIdByContactId[contactId];
+        const isFavorite = !!existingRecordId;
 
         try {
-          if (inContacts) {
+          if (isFavorite) {
             // Optimistic UI: remove immediately
             const { [contactId]: _removed, ...restFavs } = get().favoriteContactIds;
-            const { [contactId]: _removedId, ...restIds } = get().contactRecordIdByContactId;
-            set({ favoriteContactIds: restFavs, contactRecordIdByContactId: restIds });
+            const { [contactId]: _removedId, ...restIds } = get().favoriteRecordIdByContactId;
+            set({ favoriteContactIds: restFavs, favoriteRecordIdByContactId: restIds });
 
             await graphqlAuthClient.graphql({
-              query: deleteApsAppUserContact,
+              query: deleteFavoriteContactMinimal,
               variables: { input: { id: existingRecordId } },
             });
           } else {
             // Optimistic UI: add immediately
             set({ favoriteContactIds: { ...get().favoriteContactIds, [contactId]: true } });
+            const favoriteKey = `e:${APS_ID}|u:${currentUserProfileId}|c:${contactId}`;
 
             const resp = await graphqlAuthClient.graphql({
-              query: createApsAppUserContact,
-              variables: { input: { userId: currentUserId, contactId, favorite: true } },
+              query: createFavoriteContactMinimal,
+              variables: {
+                input: {
+                  userProfileId: currentUserProfileId,
+                  contactProfileId: contactId,
+                  eventId: APS_ID,
+                  favoriteKey,
+                },
+              },
             });
 
             const data = resp.data as {
-              createApsAppUserContact?: { id?: string | null } | null;
+              createApsAppUserFavoriteContact?: { id?: string | null } | null;
             };
 
-            const createdId = data.createApsAppUserContact?.id;
+            const createdId = data.createApsAppUserFavoriteContact?.id;
             if (createdId) {
               set({
-                contactRecordIdByContactId: {
-                  ...get().contactRecordIdByContactId,
+                favoriteRecordIdByContactId: {
+                  ...get().favoriteRecordIdByContactId,
                   [contactId]: createdId,
                 },
               });
             } else {
               // If the create succeeded but we didn't get an id back, re-sync.
-              await get().loadFavorites(currentUserId);
+              await get().loadFavorites(currentUserProfileId);
             }
           }
         } catch (e) {
           // Roll back by re-syncing from server for this user
           console.error('toggleFavorite failed, resyncing:', e);
-          await get().loadFavorites(currentUserId);
+          await get().loadFavorites(currentUserProfileId);
           throw e;
         } finally {
           const { [contactId]: _done, ...restPending } = get().pendingContactIds;
@@ -135,7 +162,7 @@ export const useCommunityStore = create<CommunityStore>()(
       clearFavorites: () =>
         set({
           favoriteContactIds: {},
-          contactRecordIdByContactId: {},
+          favoriteRecordIdByContactId: {},
           pendingContactIds: {},
         }),
     }),
