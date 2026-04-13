@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { getCurrentUser } from 'aws-amplify/auth';
 import * as Notifications from 'expo-notifications';
+import { AppState } from 'react-native';
 import type * as APITypes from '../API';
 import { APS_ID } from '../config/apsConfig';
-import { graphqlAuthClient, graphqlClient } from '../utils/graphqlClient';
+import { graphqlApiKeyClient, graphqlAuthClient } from '../utils/graphqlClient';
 import {
   createApsUserEngageState,
   getApsUserEngageState,
@@ -14,6 +15,7 @@ import { onCreateApsDmMessageMinimal, sendModeratedDmMessage } from '../graphql/
 import {
   apsAdminAnnouncementsByEventIdAndCreatedAt,
   getApsAdminAnnouncement,
+  getApsAppUser,
   apsContactRequestsByRequestKey,
   apsContactRequestsByRequestedByUserIdAndCreatedAt,
   apsContactRequestsByStatusAndUpdatedAt,
@@ -49,6 +51,7 @@ type InboxItem = {
   threadId: string;
   title: string;
   preview: string;
+  avatarKey?: string | null;
   unreadCount?: number | null;
   lastMessageAt?: string | null;
 };
@@ -117,7 +120,9 @@ type EngageStore = {
   stopRealtime: () => void;
 
   activeUserId: string | null;
+  activeThreadId: string | null;
   setActiveUser: (id: string | null) => void;
+  setActiveThread: (threadId: string | null) => void;
   resetAll: () => void;
 
   announcements: Announcement[];
@@ -300,9 +305,25 @@ async function validateThreadForUser(threadId: string, mySub: string): Promise<V
   };
 }
 
-async function profileLabel(userId: string): Promise<string> {
+type ProfileSummary = {
+  label: string;
+  avatarKey?: string | null;
+};
+
+async function profileSummary(userId: string): Promise<ProfileSummary> {
+  const toDisplayLabel = (raw: string | null | undefined): string | null => {
+    if (!raw) return null;
+    const value = raw.trim();
+    if (!value) return null;
+    // Avoid exposing raw UUIDs in the UI when profile fields are missing.
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) {
+      return null;
+    }
+    return value;
+  };
+
   try {
-    const resp = await graphqlClient.graphql({
+    const resp = await graphqlApiKeyClient.graphql({
       query: apsAppUserProfilesByUserId,
       variables: { userId, limit: 1 },
     });
@@ -310,11 +331,42 @@ async function profileLabel(userId: string): Promise<string> {
       apsAppUserProfilesByUserId?: { items?: Array<APITypes.ApsAppUserProfile | null> };
     };
     const p = data.apsAppUserProfilesByUserId?.items?.find((x) => x?.id);
-    if (p?.firstName || p?.lastName) return `${p?.firstName || ''} ${p?.lastName || ''}`.trim();
-    return p?.email || userId;
+    const profileName = `${p?.firstName || ''} ${p?.lastName || ''}`.trim();
+    const profileEmail = toDisplayLabel(p?.email);
+    if (profileName) return { label: profileName, avatarKey: p?.profilePicture || null };
+    if (profileEmail) return { label: profileEmail, avatarKey: p?.profilePicture || null };
   } catch {
-    return userId;
+    // continue to fallback lookups below
   }
+
+  try {
+    const resp = await graphqlApiKeyClient.graphql({
+      query: getApsAppUser,
+      variables: { id: userId },
+    });
+    const appUser = (resp.data as any)?.getApsAppUser as
+      | {
+          registrant?: {
+            firstName?: string | null;
+            lastName?: string | null;
+            email?: string | null;
+          } | null;
+        }
+      | null;
+    const registrantName = `${appUser?.registrant?.firstName || ''} ${appUser?.registrant?.lastName || ''}`.trim();
+    const registrantEmail = toDisplayLabel(appUser?.registrant?.email);
+    if (registrantName) return { label: registrantName };
+    if (registrantEmail) return { label: registrantEmail };
+  } catch {
+    // continue to safe fallback below
+  }
+
+  return { label: 'Community Member' };
+}
+
+async function profileLabel(userId: string): Promise<string> {
+  const summary = await profileSummary(userId);
+  return summary.label;
 }
 
 // Module-level subscription cleanup (avoid storing non-serializable objects in Zustand state)
@@ -351,6 +403,7 @@ const blankDataSlices = () => ({
 
 export const useEngageStore = create<EngageStore>((set, get) => ({
   activeUserId: null,
+  activeThreadId: null,
   loading: { ...defaultLoading },
   error: { ...defaultError },
 
@@ -368,6 +421,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     set({
       loading: { ...defaultLoading },
       error: { ...defaultError },
+      activeThreadId: null,
       ...blankDataSlices(),
     });
   },
@@ -378,6 +432,10 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     // User changed: reset store and stop realtime
     get().resetAll();
     set({ activeUserId: id });
+  },
+
+  setActiveThread: (threadId) => {
+    set({ activeThreadId: threadId || null });
   },
 
   lastSeenAnnouncementAt: null,
@@ -486,6 +544,19 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         if (!isMine) {
           get().setUnread({ messages: get().unread.messages + 1 });
           Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+
+          // Foreground fallback alert for DMs when push delivery is unavailable
+          // (e.g. simulator) or delayed. Suppress while actively viewing thread.
+          if (AppState.currentState === 'active' && get().activeThreadId !== threadId) {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: 'New message',
+                body: body || 'You have a new message',
+                data: { type: 'dm', threadId },
+              },
+              trigger: null,
+            }).catch(() => {});
+          }
         }
       },
       error: (e: any) => console.error('DM subscription error:', e),
@@ -1186,13 +1257,18 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         states.map(async (s) => {
           let title = 'Conversation';
           let preview = '';
+          let avatarKey: string | null = null;
           let lastMessageAt = s.lastMessageAt || null;
           try {
             const thread = await validateThreadForUser(s.threadId, mySub);
             if (thread?.lastMessagePreview) preview = thread.lastMessagePreview;
             if (thread?.lastMessageAt) lastMessageAt = thread.lastMessageAt;
             const otherId = thread?.userAId === mySub ? thread?.userBId : thread?.userAId;
-            if (otherId) title = await profileLabel(otherId);
+            if (otherId) {
+              const summary = await profileSummary(otherId);
+              title = summary.label;
+              avatarKey = summary.avatarKey || null;
+            }
           } catch {
             // Invalid or unauthorized thread: hide from inbox.
             return null;
@@ -1201,6 +1277,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             threadId: s.threadId,
             title,
             preview,
+            avatarKey,
             unreadCount: s.unreadCount,
             lastMessageAt: lastMessageAt || undefined,
           };

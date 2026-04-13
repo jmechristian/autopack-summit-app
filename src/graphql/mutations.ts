@@ -47,6 +47,20 @@ export const sendModeratedDmMessage = /* GraphQL */ `mutation SendModeratedDmMes
   APITypes.SendModeratedDmMessageMutationVariables,
   APITypes.SendModeratedDmMessageMutation
 >;
+export const syncMyThinkificProgress = /* GraphQL */ `mutation SyncMyThinkificProgress($input: SyncThinkificProgressInput) {
+  syncMyThinkificProgress(input: $input) {
+    thinkificUserId
+    apcProgramProgress
+    updated
+    syncedAt
+    message
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.SyncMyThinkificProgressMutationVariables,
+  APITypes.SyncMyThinkificProgressMutation
+>;
 export const updateAPS = /* GraphQL */ `mutation UpdateAPS(
   $input: UpdateAPSInput!
   $condition: ModelAPSConditionInput

@@ -113,6 +113,8 @@ export const getAppUserByRegistrantId = /* GraphQL */ `
           website
           location
           resume
+          thinkificId
+          apcProgress
           affiliates {
             items {
               id

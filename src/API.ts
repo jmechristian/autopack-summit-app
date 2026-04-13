@@ -1099,6 +1099,19 @@ export type UpdateApsUserEngageStateInput = {
   updatedAt?: string | null,
 };
 
+export type SyncThinkificProgressInput = {
+  email?: string | null,
+};
+
+export type ThinkificProgressSyncResult = {
+  __typename: "ThinkificProgressSyncResult",
+  thinkificUserId?: number | null,
+  apcProgramProgress?: number | null,
+  updated: boolean,
+  syncedAt: string,
+  message?: string | null,
+};
+
 export type UpdateAPSInput = {
   id: string,
   year?: string | null,
@@ -4730,6 +4743,8 @@ export type GetAppUserByRegistrantIdQuery = {
         website?: Array< string | null > | null,
         location?: string | null,
         resume?: string | null,
+        thinkificId?: number | null,
+        apcProgress?: number | null,
         affiliates?:  {
           __typename: "ModelProfileAffiliateConnection",
           items:  Array< {
@@ -5448,6 +5463,21 @@ export type SendModeratedDmMessageMutation = {
     body?: string | null,
     createdAt: string,
     updatedAt: string,
+  } | null,
+};
+
+export type SyncMyThinkificProgressMutationVariables = {
+  input?: SyncThinkificProgressInput | null,
+};
+
+export type SyncMyThinkificProgressMutation = {
+  syncMyThinkificProgress?:  {
+    __typename: "ThinkificProgressSyncResult",
+    thinkificUserId?: number | null,
+    apcProgramProgress?: number | null,
+    updated: boolean,
+    syncedAt: string,
+    message?: string | null,
   } | null,
 };
 

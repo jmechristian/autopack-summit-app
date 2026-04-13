@@ -1,7 +1,9 @@
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { useEngageStore } from '../../../src/store/engageStore';
+import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 
@@ -16,6 +18,7 @@ type EngageTile = {
 export default function EngageHome() {
   const insets = useSafeAreaInsets();
   const unread = useEngageStore((s) => s.unread);
+  const profile = useCurrentUserProfile();
 
   const tiles: EngageTile[] = [
     {
@@ -70,7 +73,7 @@ export default function EngageHome() {
     >
       <View style={styles.body}>
         <View style={styles.toolsGrid}>
-          {tiles.map((t, index) => (
+          {tiles.map((t) => (
             <View key={t.id} style={styles.toolsCell}>
               <IconCard
                 icon={t.icon}
@@ -82,7 +85,7 @@ export default function EngageHome() {
                 onPress={t.onPress}
                 style={[
                   styles.toolsCard,
-                  index % 2 === 0 ? styles.toolsCardPrimary : styles.toolsCardAlt,
+                  styles.toolsCardPrimary,
                 ]}
                 iconWrapStyle={styles.toolsIconWrap}
                 labelStyle={styles.toolsCardLabel}
@@ -90,6 +93,12 @@ export default function EngageHome() {
             </View>
           ))}
         </View>
+
+        <ApcCertificateCard
+          progress={profile?.apcProgress}
+          style={styles.certificateCard}
+          onPrimaryPress={() => router.push('/(main)/profile')}
+        />
       </View>
     </ScrollView>
   );
@@ -106,6 +115,9 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: 20,
     paddingVertical: 16,
+  },
+  certificateCard: {
+    marginTop: 16,
   },
   toolsGrid: {
     flexDirection: 'row',
@@ -127,9 +139,6 @@ const styles = StyleSheet.create({
   },
   toolsCardPrimary: {
     backgroundColor: ui.colors.primary,
-  },
-  toolsCardAlt: {
-    backgroundColor: '#4b5563',
   },
   toolsIconWrap: {
     width: 30,

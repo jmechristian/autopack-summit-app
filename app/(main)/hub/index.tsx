@@ -30,6 +30,7 @@ import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
+import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 
 type QuickTool = {
   id: string;
@@ -39,12 +40,30 @@ type QuickTool = {
   comingSoon?: boolean;
 };
 
-const MAX_QUICK_TOOLS = 6;
-const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v1';
+const MAX_QUICK_TOOLS = 8;
+const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v2';
 const WINDOW_HEIGHT = Dimensions.get('window').height;
-// Default pinned quick tools (max 6)
-const DEFAULT_TOOL_IDS = ['contacts', 'notes', 'requests', 'messages', 'announcements', 'favorites'];
-const EXHIBITOR_DEFAULT_TOOL_IDS = ['exhibitor-profile', 'contacts', 'notes', 'requests', 'messages', 'favorites'];
+// Default pinned quick tools (max 8)
+const DEFAULT_TOOL_IDS = [
+  'contacts',
+  'notes',
+  'requests',
+  'messages',
+  'announcements',
+  'favorites',
+  'sponsors',
+  'speakers',
+];
+const EXHIBITOR_DEFAULT_TOOL_IDS = [
+  'exhibitor-profile',
+  'contacts',
+  'notes',
+  'requests',
+  'messages',
+  'favorites',
+  'announcements',
+  'sponsors',
+];
 
 const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'contacts', icon: 'person', label: 'Contacts', route: '/(main)/hub/contacts' },
@@ -499,7 +518,7 @@ export default function HubScreen() {
       >
         <View style={styles.heroOverlay} />
 
-        <View style={[styles.heroTopRow, { paddingTop: insets.top + 12 }]}>
+        <View style={[styles.heroTopRow, { paddingTop: insets.top + 6 }]}>
           <View style={styles.heroLeft}>
             <View style={styles.avatar}>
               {avatarUri ? (
@@ -531,6 +550,7 @@ export default function HubScreen() {
 
         <View style={styles.heroTextWrap}>
           <Text style={styles.heroTitle}>Countdown to Greenville!</Text>
+          <Text style={styles.heroDateText}>Sept 30 - Oct 2, 2026</Text>
         </View>
       </ImageBackground>
 
@@ -549,20 +569,15 @@ export default function HubScreen() {
           style={styles.quickToolsWrap}
           entering={FadeInDown.duration(600).delay(150)}
         >
-          <View style={styles.sectionHeaderBanner}>
-            <View style={styles.sectionHeaderLeft}>
-              <View style={styles.sectionIconWrap}>
-                <Ionicons name='grid-outline' size={14} color='#1d4ed8' />
-              </View>
-              <Text style={styles.sectionHeaderText}>Quick Tools</Text>
-            </View>
+          <View style={styles.quickToolsHeaderRow}>
+            <Text style={styles.quickToolsHeaderText}>Quick Tools</Text>
             <TouchableOpacity activeOpacity={0.85} onPress={openToolsModal}>
               <Text style={styles.editLink}>Edit</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.toolsGrid}>
-            {selectedTools.map((t, index) => (
+            {selectedTools.map((t) => (
               <View key={t.id} style={styles.toolsCell}>
                 <IconCard
                   icon={t.icon}
@@ -573,7 +588,7 @@ export default function HubScreen() {
                   onPress={() => handleToolPress(t)}
                   style={[
                     styles.toolsCard,
-                    index % 2 === 0 ? styles.toolsCardPrimary : styles.toolsCardAlt,
+                    styles.toolsCardPrimary,
                   ]}
                   iconWrapStyle={styles.toolsIconWrap}
                   labelStyle={styles.toolsCardLabel}
@@ -660,6 +675,18 @@ export default function HubScreen() {
               {Math.min(nextSessions.length, sessionIndex + 1)} / {nextSessions.length}
             </Text>
           </View>
+        </Animated.View>
+
+        <View style={styles.certificateDividerWrap}>
+          <View style={styles.certificateDivider} />
+        </View>
+
+        <Animated.View entering={FadeInDown.duration(600).delay(280)}>
+          <ApcCertificateCard
+            progress={profile?.apcProgress}
+            style={styles.certificateCard}
+            onPrimaryPress={() => router.push('/(main)/profile')}
+          />
         </Animated.View>
       </View>
 
@@ -799,13 +826,13 @@ export default function HubScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#E6F1F8',
   },
   scrollContent: {
     paddingBottom: 24,
   },
 
-  hero: { height: 266, width: '100%' },
+  hero: { height: 282, width: '100%' },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: autopackColors.apDarkBlue,
@@ -834,7 +861,7 @@ const styles = StyleSheet.create({
   greeting: { color: '#fff', fontWeight: '700' },
   bellButton: { padding: 8 },
   bellBadge: { position: 'absolute', top: 0, right: 0 },
-  heroTextWrap: { paddingHorizontal: 20, marginTop: 28 },
+  heroTextWrap: { paddingHorizontal: 20, marginTop: 24, marginBottom: 26 },
   heroTitle: {
     fontSize: 42,
     fontWeight: '700',
@@ -847,6 +874,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginHorizontal: 'auto',
     paddingTop: 2,
+  },
+  heroDateText: {
+    marginTop: 2,
+    color: '#E5E7EB',
+    fontSize: 17,
+    lineHeight: 20,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 
   countdownStrip: {
@@ -885,8 +920,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   nextSessionHeaderBanner: {
-    borderColor: '#fed7aa',
-    backgroundColor: '#fff7ed',
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
   },
   sectionHeaderLeft: {
     flexDirection: 'row',
@@ -902,7 +937,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nextSessionIconWrap: {
-    backgroundColor: '#ffedd5',
+    backgroundColor: '#dbeafe',
   },
   sectionHeaderText: {
     color: '#111827',
@@ -914,7 +949,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
-  quickToolsWrap: { marginTop: 8, marginBottom: 32 },
+  quickToolsHeaderRow: {
+    marginBottom: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  quickToolsHeaderText: {
+    color: '#111827',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  quickToolsWrap: { marginTop: 4, marginBottom: 32 },
+  certificateDividerWrap: {
+    marginTop: 18,
+    marginBottom: 10,
+    paddingHorizontal: 2,
+  },
+  certificateDivider: {
+    height: 1,
+    backgroundColor: '#C7D8E6',
+  },
+  certificateCard: { marginTop: 10, marginBottom: 8 },
   quickToolsHint: {
     marginTop: 4,
     color: ui.colors.muted,
@@ -942,9 +998,6 @@ const styles = StyleSheet.create({
   },
   toolsCardPrimary: {
     backgroundColor: ui.colors.primary,
-  },
-  toolsCardAlt: {
-    backgroundColor: '#4b5563',
   },
   toolsIconWrap: {
     width: 30,

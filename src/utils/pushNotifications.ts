@@ -9,7 +9,10 @@ import { createApsPushToken, updateApsPushToken } from '../graphql/mutations';
 
 type NavigateHandlers = {
   onAnnouncementId: (announcementId: string) => void;
+  onDmThreadId?: (threadId: string) => void;
+  onRequests?: () => void;
   onDeepLink?: (url: string) => void;
+  shouldSuppressForegroundNotification?: (data: Record<string, any>) => boolean;
   /** Called when an announcement notification is received while app is running. Returns new total badge count. */
   onAnnouncementReceived?: () => number;
   /** Called for any notification received while app is running (good place to refresh counts). */
@@ -24,10 +27,24 @@ function getExpoProjectId(): string | undefined {
   // Best-effort (works for EAS builds). For Expo Go it can be undefined and still work.
   const anyConstants = Constants as any;
   return (
-    anyConstants?.expoConfig?.extra?.eas?.projectId ||
+    // Prefer native easConfig first so account/project migrations don't get blocked by stale app.json extras.
     anyConstants?.easConfig?.projectId ||
+    anyConstants?.expoConfig?.extra?.eas?.projectId ||
     undefined
   );
+}
+
+function getExpoProjectIdDebug() {
+  const anyConstants = Constants as any;
+  const fromNative = anyConstants?.easConfig?.projectId;
+  const fromExpoConfig = anyConstants?.expoConfig?.extra?.eas?.projectId;
+  const selected = fromNative || fromExpoConfig || null;
+  const source = fromNative
+    ? 'Constants.easConfig.projectId'
+    : fromExpoConfig
+      ? 'Constants.expoConfig.extra.eas.projectId'
+      : 'none';
+  return { selected, source, fromNative: fromNative || null, fromExpoConfig: fromExpoConfig || null };
 }
 
 export async function registerAndUpsertPushToken(): Promise<string | null> {
@@ -55,6 +72,8 @@ export async function registerAndUpsertPushToken(): Promise<string | null> {
   }
 
   const projectId = getExpoProjectId();
+  const projectDebug = getExpoProjectIdDebug();
+  console.log('Push projectId resolution:', projectDebug);
   const tokenResp = await Notifications.getExpoPushTokenAsync(
     projectId ? { projectId } : undefined
   );
@@ -102,11 +121,15 @@ export async function registerAndUpsertPushToken(): Promise<string | null> {
 export function initPushNotificationHandlers(handlers: NavigateHandlers) {
   // Show notifications when the app is foregrounded (instead of dropping them silently).
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: false,
-      shouldSetBadge: true,
-    }),
+    handleNotification: async (notification) => {
+      const data: any = notification.request?.content?.data || {};
+      const suppress = handlers.shouldSuppressForegroundNotification?.(data) || false;
+      return {
+        shouldShowAlert: !suppress,
+        shouldPlaySound: false,
+        shouldSetBadge: true,
+      };
+    },
   });
 
   const subReceived = Notifications.addNotificationReceivedListener((notif) => {
@@ -132,10 +155,21 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
 
   const subResponse = Notifications.addNotificationResponseReceivedListener((resp) => {
     const data: any = resp.notification.request.content.data || {};
+    const type = String(data.type || '').toLowerCase();
 
     const announcementId =
       data.announcementId ?? data.announcementID ?? data.announcement_id ?? data.id;
+    const dmThreadId = data.threadId ?? data.threadID ?? data.thread_id;
     const deepLink = data.deepLink ?? data.deeplink ?? data.url;
+
+    if (type === 'dm' && dmThreadId && handlers.onDmThreadId) {
+      handlers.onDmThreadId(String(dmThreadId));
+      return;
+    }
+    if ((type === 'request' || type === 'requestaccepted') && handlers.onRequests) {
+      handlers.onRequests();
+      return;
+    }
 
     if (announcementId) {
       handlers.onAnnouncementId(String(announcementId));
@@ -158,10 +192,21 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
     const resp = await Notifications.getLastNotificationResponseAsync();
     if (!resp) return;
     const data: any = resp.notification.request.content.data || {};
+    const type = String(data.type || '').toLowerCase();
 
     const announcementId =
       data.announcementId ?? data.announcementID ?? data.announcement_id ?? data.id;
+    const dmThreadId = data.threadId ?? data.threadID ?? data.thread_id;
     const deepLink = data.deepLink ?? data.deeplink ?? data.url;
+
+    if (type === 'dm' && dmThreadId && handlers.onDmThreadId) {
+      handlers.onDmThreadId(String(dmThreadId));
+      return;
+    }
+    if ((type === 'request' || type === 'requestaccepted') && handlers.onRequests) {
+      handlers.onRequests();
+      return;
+    }
 
     if (announcementId) {
       handlers.onAnnouncementId(String(announcementId));

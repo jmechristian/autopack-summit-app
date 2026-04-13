@@ -330,7 +330,7 @@ export default function Profile() {
             <Text style={styles.actionTileText}>Show QR Code</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionTile, styles.actionTileAlt]}
+            style={styles.actionTile}
             onPress={() => router.push('/(main)/scan')}
           >
             <View style={styles.actionIconWrap}>
@@ -348,7 +348,7 @@ export default function Profile() {
             <Text style={styles.actionTileText}>Contacts</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionTile, styles.actionTileAlt]}
+            style={styles.actionTile}
             onPress={() => router.push('/(main)/profile/notes')}
           >
             <View style={styles.actionIconWrap}>
@@ -634,9 +634,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 8,
-  },
-  actionTileAlt: {
-    backgroundColor: '#4b5563',
   },
   actionTileDisabled: {
     opacity: 0.5,

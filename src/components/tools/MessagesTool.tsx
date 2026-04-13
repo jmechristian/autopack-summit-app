@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useEngageStore } from '../../store/engageStore';
 import { AppCard } from '../../ui/AppCard';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
+import { resolveProfilePictureUri } from '../../utils/storageUtils';
 
 type MessagesToolProps = {
   threadBasePath?: string;
@@ -22,6 +23,7 @@ export default function MessagesTool({
   threadBasePath = '/(main)/engage/messages',
 }: MessagesToolProps) {
   const [search, setSearch] = useState('');
+  const [avatarUrisByThreadId, setAvatarUrisByThreadId] = useState<Record<string, string | null>>({});
   const inbox = useEngageStore((s) => s.inbox);
   const loading = useEngageStore((s) => s.loading.inbox);
   const error = useEngageStore((s) => s.error.inbox);
@@ -40,6 +42,34 @@ export default function MessagesTool({
   useEffect(() => {
     loadInbox();
   }, [loadInbox]);
+
+  useEffect(() => {
+    const pending = inbox.filter(
+      (item) => item.avatarKey && avatarUrisByThreadId[item.threadId] === undefined
+    );
+    if (!pending.length) return;
+
+    let cancelled = false;
+    async function resolveAvatarUris() {
+      const entries = await Promise.all(
+        pending.map(async (item) => {
+          const uri = await resolveProfilePictureUri(item.avatarKey);
+          return [item.threadId, uri] as const;
+        })
+      );
+      if (cancelled) return;
+      setAvatarUrisByThreadId((prev) => {
+        const next = { ...prev };
+        for (const [threadId, uri] of entries) next[threadId] = uri;
+        return next;
+      });
+    }
+
+    void resolveAvatarUris();
+    return () => {
+      cancelled = true;
+    };
+  }, [inbox, avatarUrisByThreadId]);
 
   return (
     <AppScreen>
@@ -71,7 +101,11 @@ export default function MessagesTool({
           >
             <View style={styles.rowContent}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initialsFor(item.title)}</Text>
+                {avatarUrisByThreadId[item.threadId] ? (
+                  <Image source={{ uri: avatarUrisByThreadId[item.threadId]! }} style={styles.avatarImg} />
+                ) : (
+                  <Text style={styles.avatarText}>{initialsFor(item.title)}</Text>
+                )}
               </View>
               <View style={styles.textWrap}>
                 <View style={styles.titleRow}>
@@ -128,7 +162,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#e5e7eb',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  avatarImg: { width: 44, height: 44, borderRadius: 999 },
   avatarText: { fontWeight: '800', color: '#111827' },
   textWrap: { flex: 1, minWidth: 0 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -34,8 +34,23 @@ input SendModeratedDmMessageInput {
   body: String!
 }
 
+input SyncThinkificProgressInput {
+  email: String
+}
+
+type ThinkificProgressSyncResult {
+  thinkificUserId: Int
+  apcProgramProgress: Float
+  updated: Boolean!
+  syncedAt: AWSDateTime!
+  message: String
+}
+
 type Mutation {
   sendModeratedDmMessage(input: SendModeratedDmMessageInput!): ApsDmMessage
+    @function(name: "apsPushFanout-${env}")
+    @aws_cognito_user_pools
+  syncMyThinkificProgress(input: SyncThinkificProgressInput): ThinkificProgressSyncResult
     @function(name: "apsPushFanout-${env}")
     @aws_cognito_user_pools
 }
