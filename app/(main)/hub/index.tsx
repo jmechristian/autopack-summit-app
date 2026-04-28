@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Animated as RNAnimated,
   Dimensions,
@@ -19,6 +20,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCurrentAppUser, useCurrentUserProfile } from '../../../src/hooks/useApsStore';
+import { useApsStore } from '../../../src/store/apsStore';
 import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
 import { APS_ID } from '../../../src/config/apsConfig';
@@ -79,7 +81,7 @@ const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'exhibitors', icon: 'business', label: 'Exhibitors', route: '/(main)/hub/exhibitors' },
   { id: 'sponsors', icon: 'ribbon', label: 'Sponsors', route: '/(main)/hub/sponsors' },
   { id: 'speakers', icon: 'mic', label: 'Speakers', route: '/(main)/hub/speakers' },
-  { id: 'passport', icon: 'book', label: 'Passport', comingSoon: true },
+  { id: 'passport', icon: 'book', label: 'Passport', route: '/(main)/hub/passport' },
 ];
 
 type NextSession = {
@@ -155,6 +157,7 @@ export default function HubScreen() {
   const insets = useSafeAreaInsets();
   const profile = useCurrentUserProfile();
   const currentAppUser = useCurrentAppUser();
+  const appUserLoading = useApsStore((s) => s.loading.currentAppUser);
   const companyId = currentAppUser?.registrant?.companyId || null;
   const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
   const [sessionIndex, setSessionIndex] = useState(0);
@@ -388,6 +391,8 @@ export default function HubScreen() {
     .trim()
     .slice(0, 1)}`.toUpperCase();
   const countdownCompact = `${timeLeft.days}:${timeLeft.hours}:${timeLeft.minutes}:${timeLeft.seconds}`;
+  const isHubBootLoading =
+    appUserLoading || !toolsLoaded || !currentAppUser?.id || !profile?.id || !fullName;
 
   // Resolve profile picture from either URL or S3 key.
   React.useEffect(() => {
@@ -443,7 +448,7 @@ export default function HubScreen() {
 
   const handleToolPress = (tool: QuickTool) => {
     if (tool.route) {
-      router.push(tool.route);
+      router.push(tool.route as any);
       return;
     }
     Alert.alert('Coming soon', 'This tool is on the way.');
@@ -503,6 +508,15 @@ export default function HubScreen() {
     const defaults = hasExhibitorProfile ? EXHIBITOR_DEFAULT_TOOL_IDS : DEFAULT_TOOL_IDS;
     persistTools(defaults);
   };
+
+  if (isHubBootLoading) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator size="large" color={autopackColors.apBlue} />
+        <Text style={styles.loadingTitle}>Loading your summit hub...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -696,8 +710,9 @@ export default function HubScreen() {
         transparent
         onRequestClose={() => setToolsModalVisible(false)}
       >
-        <Pressable style={styles.modalBackdrop} onPress={() => setToolsModalVisible(false)}>
-          <Pressable style={[styles.modalCard, { paddingBottom: bottomInset }]} onPress={() => {}}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={styles.modalScrim} onPress={() => setToolsModalVisible(false)} />
+          <View style={[styles.modalCard, { paddingBottom: bottomInset }]}>
             <View style={styles.modalHeaderRow}>
               <View>
                 <Text style={styles.modalTitle}>Customize quick tools</Text>
@@ -716,6 +731,11 @@ export default function HubScreen() {
                 styles.modalScrollContent,
                 { paddingBottom: bottomInset + 32 },
               ]}
+              nestedScrollEnabled
+              alwaysBounceVertical
+              bounces
+              scrollEventThrottle={16}
+              keyboardShouldPersistTaps='handled'
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.selectedList}>
@@ -816,14 +836,27 @@ export default function HubScreen() {
                 </TouchableOpacity>
               </View>
             </ScrollView>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingScreen: {
+    flex: 1,
+    backgroundColor: '#E6F1F8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  loadingTitle: {
+    marginTop: 12,
+    color: '#1f2937',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     backgroundColor: '#E6F1F8',
@@ -1087,16 +1120,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'flex-end',
   },
+  modalScrim: {
+    ...StyleSheet.absoluteFillObject,
+  },
   modalCard: {
     backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingTop: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: WINDOW_HEIGHT * 0.9,
+    height: WINDOW_HEIGHT * 0.9,
   },
-  modalScroll: { maxHeight: WINDOW_HEIGHT * 0.75 },
-  modalScrollContent: { paddingBottom: 32 },
+  modalScroll: { flex: 1, minHeight: 0 },
+  modalScrollContent: { paddingBottom: 32, flexGrow: 1 },
   modalHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEngageStore } from '../../store/engageStore';
+import { APS_ID } from '../../config/apsConfig';
 import { AppButton } from '../../ui/AppButton';
 import { AppCard } from '../../ui/AppCard';
 import { AppScreen } from '../../ui/AppScreen';
@@ -8,6 +9,7 @@ import { ui } from '../../ui/tokens';
 
 export default function RequestsTool() {
   const [tab, setTab] = useState<'received' | 'sent'>('received');
+  const [cancelingRequestId, setCancelingRequestId] = useState<string | null>(null);
 
   const incoming = useEngageStore((s) => s.incomingRequests);
   const sent = useEngageStore((s) => s.sentRequests);
@@ -17,6 +19,7 @@ export default function RequestsTool() {
   const loadSentRequests = useEngageStore((s) => s.loadSentRequests);
   const acceptRequest = useEngageStore((s) => s.acceptRequest);
   const declineRequest = useEngageStore((s) => s.declineRequest);
+  const cancelSentContactRequest = useEngageStore((s) => s.cancelSentContactRequest);
 
   useEffect(() => {
     loadIncomingRequests();
@@ -74,6 +77,43 @@ export default function RequestsTool() {
                 <Text style={styles.meta}>
                   Pending • {new Date((item as any).createdAt).toLocaleString()}
                 </Text>
+                <View style={styles.actions}>
+                  <AppButton
+                    title={cancelingRequestId === item.id ? 'Canceling…' : 'Cancel request'}
+                    onPress={() => {
+                      const sentItem = item as any;
+                      Alert.alert(
+                        'Cancel request?',
+                        'Are you sure you want to cancel this request?',
+                        [
+                          { text: 'No', style: 'cancel' },
+                          {
+                            text: 'Yes, cancel',
+                            style: 'destructive',
+                            onPress: async () => {
+                              setCancelingRequestId(item.id);
+                              try {
+                                await cancelSentContactRequest({
+                                  eventId: APS_ID,
+                                  otherUserId: sentItem.toUserId,
+                                });
+                              } catch (e: any) {
+                                Alert.alert(
+                                  'Cancel failed',
+                                  e?.message || 'Unable to cancel request. Please try again.'
+                                );
+                              } finally {
+                                setCancelingRequestId(null);
+                              }
+                            },
+                          },
+                        ]
+                      );
+                    }}
+                    variant='muted'
+                    disabled={cancelingRequestId === item.id}
+                  />
+                </View>
               </>
             )}
           </AppCard>

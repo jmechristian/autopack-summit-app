@@ -16,6 +16,7 @@ import * as Contacts from 'expo-contacts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { APS_ID } from '../../config/apsConfig';
 import {
+  apsAppUserContactsByUserId,
   profileAffiliatesByProfileId,
   profileEducationsByProfileId,
   profileInterestsByProfileId,
@@ -119,6 +120,7 @@ export default function CommunityProfileScreen() {
     'incoming' | 'sent' | null
   >(null);
   const [contactRequestStatusRemote, setContactRequestStatusRemote] = useState<string | null>(null);
+  const [hasAcceptedContactRecord, setHasAcceptedContactRecord] = useState(false);
   const [addingPhoneContact, setAddingPhoneContact] = useState(false);
   const [requestActionBusy, setRequestActionBusy] = useState(false);
 
@@ -159,6 +161,39 @@ export default function CommunityProfileScreen() {
   useEffect(() => {
     void refreshRequestState();
   }, [refreshRequestState]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadAcceptedContactRecord() {
+      if (!currentAppUser?.id || !profile?.id || (currentProfileId && currentProfileId === profile.id)) {
+        if (!cancelled) setHasAcceptedContactRecord(false);
+        return;
+      }
+      try {
+        const resp = await graphqlApiKeyClient.graphql({
+          query: apsAppUserContactsByUserId,
+          variables: {
+            userId: currentAppUser.id,
+            filter: { contactId: { eq: profile.id } },
+            limit: 1,
+          },
+        });
+        const data = resp.data as {
+          apsAppUserContactsByUserId?: {
+            items?: Array<{ id?: string | null } | null> | null;
+          } | null;
+        };
+        const exists = !!(data.apsAppUserContactsByUserId?.items || []).find((x) => !!x?.id);
+        if (!cancelled) setHasAcceptedContactRecord(exists);
+      } catch {
+        if (!cancelled) setHasAcceptedContactRecord(false);
+      }
+    }
+    void loadAcceptedContactRecord();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentAppUser?.id, currentProfileId, profile?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -259,6 +294,7 @@ export default function CommunityProfileScreen() {
   const pending = !!(contactId && pendingContactIds[contactId]);
   const isSelf = !!contactId && !!currentAppUser?.profileId && currentAppUser.profileId === contactId;
   const isRequestAccepted = contactRequestStatusRemote === 'ACCEPTED';
+  const canViewEmail = isSelf || isRequestAccepted || hasAcceptedContactRecord;
   const isRequestPending =
     contactRequestStatusRemote === 'PENDING' || !!effectivePendingRequestState;
   const requestTileLabel = isRequestAccepted
@@ -411,6 +447,9 @@ export default function CommunityProfileScreen() {
           <Text style={styles.name}>{displayName}</Text>
           {!!profile.jobTitle && <Text style={styles.muted}>{profile.jobTitle}</Text>}
           {!!profile.company && <Text style={styles.muted}>{profile.company}</Text>}
+          {canViewEmail && !!profile.email && (
+            <Text style={styles.emailText}>{profile.email}</Text>
+          )}
         </View>
 
         <View style={styles.headerActions}>
@@ -657,6 +696,7 @@ const styles = StyleSheet.create({
   avatarImg: { width: 56, height: 56, borderRadius: 999 },
   avatarText: { fontWeight: '900', color: '#111827', fontSize: 18 },
   name: { fontSize: 18, fontWeight: '900', color: '#111827' },
+  emailText: { color: '#1f2937', fontSize: 13, marginTop: 2 },
 
   headerActions: { flexDirection: 'row', gap: 6 },
   iconBtn: { padding: 6, borderRadius: 10 },

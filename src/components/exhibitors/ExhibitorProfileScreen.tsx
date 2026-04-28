@@ -6,8 +6,10 @@ import {
   Alert,
   Image,
   Linking,
+  Modal,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -28,6 +30,8 @@ type ExhibitorProfile = {
   views?: number | null;
   visits?: number | null;
   likes?: number | null;
+  qrCode?: string | null;
+  passportQrPayload?: string | null;
   company?: {
     id?: string | null;
     name?: string | null;
@@ -180,6 +184,8 @@ const getExhibitorProfileById = /* GraphQL */ `
       views
       visits
       likes
+      qrCode
+      passportQrPayload
       company {
         id
         name
@@ -267,6 +273,7 @@ export default function ExhibitorProfileScreen() {
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [favoriteBusy, setFavoriteBusy] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [qrPreviewVisible, setQrPreviewVisible] = useState(false);
   const [form, setForm] = useState({
     video: '',
     videoCaption: '',
@@ -321,6 +328,8 @@ export default function ExhibitorProfileScreen() {
             views?: number | null;
             visits?: number | null;
             likes?: number | null;
+            qrCode?: string | null;
+            passportQrPayload?: string | null;
             company?: ExhibitorProfile['company'];
             promotions?: {
               items?: ({ id?: string | null; promotion?: string | null; link?: string | null } | null)[] | null;
@@ -352,6 +361,8 @@ export default function ExhibitorProfileScreen() {
           views: raw.views ?? null,
           visits: raw.visits ?? null,
           likes: raw.likes ?? null,
+          qrCode: raw.qrCode || null,
+          passportQrPayload: raw.passportQrPayload || null,
           company: raw.company || null,
           promotions: (raw.promotions?.items || [])
             .filter((x): x is { id?: string | null; promotion?: string | null; link?: string | null } => !!x)
@@ -754,62 +765,111 @@ export default function ExhibitorProfileScreen() {
     }
   }
 
+  async function shareQrCode() {
+    if (!profile?.qrCode) return;
+    try {
+      await Share.share({
+        title: `${clean(profile.company?.name) || 'Exhibitor'} passport QR code`,
+        message: profile.qrCode,
+        url: profile.qrCode,
+      });
+    } catch (e: any) {
+      Alert.alert('Unable to share QR code', e?.message || 'Please try again.');
+    }
+  }
+
+  async function openQrCode() {
+    if (!profile?.qrCode) return;
+    try {
+      await Linking.openURL(profile.qrCode);
+    } catch (e: any) {
+      Alert.alert('Unable to open QR code', e?.message || 'Please try again.');
+    }
+  }
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.headerRow}>
-        <View style={styles.logoWrap}>
-          {logoUri ? (
-            <Image source={{ uri: logoUri }} style={styles.logoImg} resizeMode='contain' />
-          ) : (
-            <Text style={styles.logoFallback}>
-              {clean(profile.company?.name).slice(0, 1).toUpperCase() || 'E'}
+    <>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <View style={styles.headerRow}>
+          <View style={styles.logoWrap}>
+            {logoUri ? (
+              <Image source={{ uri: logoUri }} style={styles.logoImg} resizeMode='contain' />
+            ) : (
+              <Text style={styles.logoFallback}>
+                {clean(profile.company?.name).slice(0, 1).toUpperCase() || 'E'}
+              </Text>
+            )}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.name}>{clean(profile.company?.name) || 'Exhibitor'}</Text>
+            {!!profile.boothNumber && <Text style={styles.muted}>Booth {profile.boothNumber}</Text>}
+          </View>
+        </View>
+
+        {isCompanyEmployee && (
+          <View style={styles.statsRow}>
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{profile.views ?? 0}</Text>
+              <Text style={styles.statLabel}>Views</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{profile.visits ?? 0}</Text>
+              <Text style={styles.statLabel}>Visits</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{likesCount}</Text>
+              <Text style={styles.statLabel}>Likes</Text>
+            </View>
+          </View>
+        )}
+
+        {canEdit && !!profile.qrCode && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Passport QR Code</Text>
+            <Text style={styles.muted}>
+              Display this code at your booth so attendees can collect their passport stamp.
             </Text>
-          )}
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{clean(profile.company?.name) || 'Exhibitor'}</Text>
-          {!!profile.boothNumber && <Text style={styles.muted}>Booth {profile.boothNumber}</Text>}
-        </View>
-      </View>
+            <Pressable style={styles.qrPreviewCard} onPress={() => setQrPreviewVisible(true)}>
+              <Image source={{ uri: profile.qrCode }} style={styles.qrImage} resizeMode='contain' />
+            </Pressable>
+            <View style={styles.qrActions}>
+              <Pressable style={styles.qrActionBtn} onPress={() => setQrPreviewVisible(true)}>
+                <Ionicons name='expand-outline' size={16} color={autopackColors.apBlue} />
+                <Text style={styles.qrActionText}>Display</Text>
+              </Pressable>
+              <Pressable style={styles.qrActionBtn} onPress={shareQrCode}>
+                <Ionicons name='share-outline' size={16} color={autopackColors.apBlue} />
+                <Text style={styles.qrActionText}>Share</Text>
+              </Pressable>
+              <Pressable style={styles.qrActionBtn} onPress={openQrCode}>
+                <Ionicons name='download-outline' size={16} color={autopackColors.apBlue} />
+                <Text style={styles.qrActionText}>Download</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
 
-      {isCompanyEmployee && (
-        <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{profile.views ?? 0}</Text>
-            <Text style={styles.statLabel}>Views</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{profile.visits ?? 0}</Text>
-            <Text style={styles.statLabel}>Visits</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{likesCount}</Text>
-            <Text style={styles.statLabel}>Likes</Text>
-          </View>
-        </View>
-      )}
-
-      {!isCompanyEmployee && (
-        <Pressable
-          style={[
-            styles.favoritePill,
-            (!currentProfileId || favoriteBusy) && styles.favoritePillDisabled,
-          ]}
-          disabled={!currentProfileId || favoriteBusy}
-          onPress={toggleFavorite}
-        >
-          <Ionicons name={isFavorite ? 'star' : 'star-outline'} size={18} color={isFavorite ? '#f59e0b' : '#6b7280'} />
-          <Text style={styles.favoritePillText}>
-            {!currentProfileId
-              ? 'Profile required'
-              : favoriteBusy
-                ? 'Updating...'
-                : isFavorite
-                  ? 'Favorited'
-                  : 'Add to favorites'}
-          </Text>
-        </Pressable>
-      )}
+        {!isCompanyEmployee && (
+          <Pressable
+            style={[
+              styles.favoritePill,
+              (!currentProfileId || favoriteBusy) && styles.favoritePillDisabled,
+            ]}
+            disabled={!currentProfileId || favoriteBusy}
+            onPress={toggleFavorite}
+          >
+            <Ionicons name={isFavorite ? 'star' : 'star-outline'} size={18} color={isFavorite ? '#f59e0b' : '#6b7280'} />
+            <Text style={styles.favoritePillText}>
+              {!currentProfileId
+                ? 'Profile required'
+                : favoriteBusy
+                  ? 'Updating...'
+                  : isFavorite
+                    ? 'Favorited'
+                    : 'Add to favorites'}
+            </Text>
+          </Pressable>
+        )}
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Contact</Text>
@@ -1024,19 +1084,37 @@ export default function ExhibitorProfileScreen() {
         </View>
       )}
 
-      {(profile.photos || []).length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Photos</Text>
-          <View style={styles.photoGrid}>
-            {(profile.photos || []).map((photo) => {
-              const uri = photoUris[photo.id];
-              if (!uri) return null;
-              return <Image key={photo.id} source={{ uri }} style={styles.photo} />;
-            })}
+        {(profile.photos || []).length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Photos</Text>
+            <View style={styles.photoGrid}>
+              {(profile.photos || []).map((photo) => {
+                const uri = photoUris[photo.id];
+                if (!uri) return null;
+                return <Image key={photo.id} source={{ uri }} style={styles.photo} />;
+              })}
+            </View>
           </View>
-        </View>
+        )}
+      </ScrollView>
+
+      {canEdit && !!profile.qrCode && (
+        <Modal visible={qrPreviewVisible} animationType='fade' transparent onRequestClose={() => setQrPreviewVisible(false)}>
+          <View style={styles.qrModalBackdrop}>
+            <View style={styles.qrModalCard}>
+              <Text style={styles.qrModalTitle}>{clean(profile.company?.name) || 'Exhibitor'} Passport QR</Text>
+              <Image source={{ uri: profile.qrCode }} style={styles.qrModalImage} resizeMode='contain' />
+              <Pressable style={styles.saveBtn} onPress={openQrCode}>
+                <Text style={styles.saveBtnText}>Open / Download Image</Text>
+              </Pressable>
+              <Pressable style={styles.secondaryModalBtn} onPress={() => setQrPreviewVisible(false)}>
+                <Text style={styles.secondaryModalBtnText}>Close</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       )}
-    </ScrollView>
+    </>
   );
 }
 
@@ -1125,6 +1203,58 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   linkText: { color: autopackColors.apBlue, fontWeight: '600' },
+  qrPreviewCard: {
+    alignSelf: 'center',
+    width: 220,
+    height: 220,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fff',
+    padding: 12,
+  },
+  qrImage: { width: '100%', height: '100%' },
+  qrActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+  qrActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#eff6ff',
+  },
+  qrActionText: { color: autopackColors.apBlue, fontWeight: '800', fontSize: 12 },
+  qrModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(17,24,39,0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  qrModalCard: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    padding: 16,
+    gap: 12,
+  },
+  qrModalTitle: { color: '#111827', fontSize: 18, fontWeight: '900', textAlign: 'center' },
+  qrModalImage: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 14,
+    backgroundColor: '#fff',
+  },
+  secondaryModalBtn: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#d1d5db',
+  },
+  secondaryModalBtnText: { color: '#111827', fontWeight: '800' },
   photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   photo: { width: 92, height: 92, borderRadius: 10, backgroundColor: '#f3f4f6' },
   fieldLabel: { marginTop: 8, color: '#374151', fontWeight: '700', fontSize: 12 },

@@ -312,22 +312,15 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
   }, [incomingRequests, sentRequests, profilesById, contacts, currentAppUser?.id, search]);
 
   const sections: ContactSection[] = useMemo(() => {
-    const map = new Map<string, ContactProfile[]>();
-    for (const p of filteredProfiles) {
-      const key = getSectionKey(p);
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(p);
+    const accepted = [...filteredProfiles].sort((a, b) =>
+      getFullName(a).toLowerCase().localeCompare(getFullName(b).toLowerCase())
+    );
+    const out: ContactSection[] = [];
+    if (pendingProfiles.length) {
+      out.push({ title: 'Pending Requests', data: pendingProfiles });
     }
-
-    const titles = Array.from(map.keys()).sort((a, b) => {
-      if (a === '#') return 1;
-      if (b === '#') return -1;
-      return a.localeCompare(b);
-    });
-
-    const alphaSections = titles.map((title) => ({ title, data: map.get(title)! }));
-    if (!pendingProfiles.length) return alphaSections;
-    return [{ title: 'Pending Requests', data: pendingProfiles }, ...alphaSections];
+    out.push({ title: 'Accepted Contacts', data: accepted });
+    return out;
   }, [filteredProfiles, pendingProfiles]);
 
   useEffect(() => {
@@ -457,12 +450,14 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
               style={[
                 styles.sectionHeader,
                 section.title === 'Pending Requests' && styles.pendingSectionHeader,
+                section.title === 'Accepted Contacts' && styles.acceptedSectionHeader,
               ]}
             >
               <Text
                 style={[
                   styles.sectionHeaderText,
                   section.title === 'Pending Requests' && styles.pendingSectionHeaderText,
+                  section.title === 'Accepted Contacts' && styles.acceptedSectionHeaderText,
                 ]}
               >
                 {section.title}
@@ -475,7 +470,10 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
             const isPending = !!pendingContactIds[item.profileId];
             const hasNotes = profileIdsWithNotes.has(item.profileId);
             const name = getFullName(item) || '(No name)';
-            const subtitle = [item.jobTitle, item.company].filter(Boolean).join(' • ');
+            const isPendingRequestRow = item.contactItemId.startsWith('pending:');
+            const subtitle = [item.jobTitle, item.company, !isPendingRequestRow ? item.email : null]
+              .filter(Boolean)
+              .join(' • ');
             const isSelf = !!currentProfileId && currentProfileId === item.profileId;
             const initials = `${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(
               item.lastName,
@@ -545,6 +543,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   pendingSectionHeaderText: { color: '#b45309' },
+  acceptedSectionHeader: {
+    paddingVertical: 10,
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  acceptedSectionHeaderText: { color: '#1d4ed8' },
 
   sep: { height: StyleSheet.hairlineWidth, backgroundColor: '#e5e7eb', marginLeft: 16 },
 
