@@ -305,42 +305,6 @@ export const createAPSCode = /* GraphQL */ `mutation CreateAPSCode(
   APITypes.CreateAPSCodeMutationVariables,
   APITypes.CreateAPSCodeMutation
 >;
-export const updateAPSCode = /* GraphQL */ `mutation UpdateAPSCode(
-  $input: UpdateAPSCodeInput!
-  $condition: ModelAPSCodeConditionInput
-) {
-  updateAPSCode(input: $input, condition: $condition) {
-    id
-    code
-    eventId
-    event {
-      id
-      year
-      startDate
-      endDate
-      location
-      address
-      city
-      state
-      zip
-      website
-      createdAt
-      updatedAt
-      aPSAgendaId
-      __typename
-    }
-    limit
-    used
-    createdAt
-    updatedAt
-    aPSCodesId
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateAPSCodeMutationVariables,
-  APITypes.UpdateAPSCodeMutation
->;
 export const deleteAPSCode = /* GraphQL */ `mutation DeleteAPSCode(
   $input: DeleteAPSCodeInput!
   $condition: ModelAPSCodeConditionInput
@@ -5379,6 +5343,9 @@ export const createApsContactRequest = /* GraphQL */ `mutation CreateApsContactR
     owners
     requestedByUserId
     status
+    introMessage
+    introSentAt
+    introDeliveredAt
     acceptedAt
     declinedAt
     blockedAt
@@ -5404,6 +5371,9 @@ export const updateApsContactRequest = /* GraphQL */ `mutation UpdateApsContactR
     owners
     requestedByUserId
     status
+    introMessage
+    introSentAt
+    introDeliveredAt
     acceptedAt
     declinedAt
     blockedAt
@@ -5429,6 +5399,9 @@ export const deleteApsContactRequest = /* GraphQL */ `mutation DeleteApsContactR
     owners
     requestedByUserId
     status
+    introMessage
+    introSentAt
+    introDeliveredAt
     acceptedAt
     declinedAt
     blockedAt
@@ -6332,6 +6305,42 @@ export const createAPS = /* GraphQL */ `mutation CreateAPS(
 ` as GeneratedMutation<
   APITypes.CreateAPSMutationVariables,
   APITypes.CreateAPSMutation
+>;
+export const updateAPSCode = /* GraphQL */ `mutation UpdateAPSCode(
+  $input: UpdateAPSCodeInput!
+  $condition: ModelAPSCodeConditionInput
+) {
+  updateAPSCode(input: $input, condition: $condition) {
+    id
+    code
+    eventId
+    event {
+      id
+      year
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    limit
+    used
+    createdAt
+    updatedAt
+    aPSCodesId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAPSCodeMutationVariables,
+  APITypes.UpdateAPSCodeMutation
 >;
 export const createAPSBoard = /* GraphQL */ `mutation CreateAPSBoard(
   $input: CreateAPSBoardInput!

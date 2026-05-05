@@ -37,6 +37,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const setEngageActiveUser = useEngageStore((s) => s.setActiveUser);
   const resetEngageStore = useEngageStore((s) => s.resetAll);
   const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const routeToRequests = useCallback((requestId?: string) => {
+    // Build a predictable back stack when opened from a push tap:
+    // Engage home -> Requests.
+    router.push('/(main)/engage');
+    if (requestId) {
+      router.push({ pathname: '/(main)/engage/requests', params: { requestId } } as any);
+      return;
+    }
+    router.push('/(main)/engage/requests');
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -156,8 +166,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
       onDmThreadId: (threadId) => {
         router.push(`/(main)/engage/messages/${threadId}`);
       },
-      onRequests: () => {
-        router.push('/(main)/engage/requests');
+      onRequests: (requestId) => {
+        routeToRequests(requestId);
       },
       onAnnouncementReceived: () => {
         // Increment announcements unread locally and return the new total Engage badge count.
@@ -190,13 +200,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
       onDmThreadId: (threadId) => {
         router.push(`/(main)/engage/messages/${threadId}`);
       },
-      onRequests: () => {
-        router.push('/(main)/engage/requests');
+      onRequests: (requestId) => {
+        routeToRequests(requestId);
       },
     }).catch(() => {});
 
     return cleanup;
-  }, [authUserId, setEngageActiveUser, resetEngageStore, refreshUnreadCounts, markAnnouncementsSeen]);
+  }, [authUserId, setEngageActiveUser, resetEngageStore, refreshUnreadCounts, markAnnouncementsSeen, routeToRequests]);
 
   // On every successful validation, refresh unread counts once.
   useEffect(() => {

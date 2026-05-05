@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { APS_ID } from '../config/apsConfig';
 import { useEngageStore } from '../store/engageStore';
 import { useCommunityStore } from '../store/communityStore';
 import { autopackColors } from '../theme';
+import { RequestIntroModal } from './requests/RequestIntroModal';
 
 type Props = {
   profileId: string;
@@ -47,6 +49,8 @@ export function AppUserRow({
   pendingFavorite,
   onPressProfile,
 }: Props) {
+  const [introModalVisible, setIntroModalVisible] = useState(false);
+  const [sendingIntroRequest, setSendingIntroRequest] = useState(false);
   const toggleFavorite = useCommunityStore((s) => s.toggleFavorite);
 
   const pendingRequestState = useEngageStore((s) => {
@@ -60,6 +64,17 @@ export function AppUserRow({
   const ensureDmThreadForAcceptedRequest = useEngageStore((s) => s.ensureDmThreadForAcceptedRequest);
 
   const showHourglass = !!pendingRequestState;
+
+  const startRequestWithIntro = () => {
+    Alert.alert(
+      'Send contact request?',
+      `This will send a contact request to ${name}.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Continue', onPress: () => setIntroModalVisible(true) },
+      ]
+    );
+  };
 
   return (
     <View style={styles.row}>
@@ -156,31 +171,7 @@ export function AppUserRow({
               return;
             }
 
-            try {
-              const { status } = await getOrCreateContactRequest({
-                eventId: APS_ID,
-                otherUserId: userId,
-              });
-
-              if (status !== 'ACCEPTED') {
-                Alert.alert('Request sent', 'You can message once they accept your request.');
-                return;
-              }
-
-              const { threadId } = await ensureDmThreadForAcceptedRequest({
-                eventId: APS_ID,
-                otherUserId: userId,
-              });
-
-              router.push(`/(main)/engage/messages/${threadId}`);
-            } catch (e: any) {
-              const msg = (e?.message || '').toLowerCase();
-              if (msg.includes('not accepted')) {
-                Alert.alert('Waiting for acceptance', 'You can message once they accept your request.');
-                return;
-              }
-              Alert.alert('Unable to start chat', e?.message || 'Please try again.');
-            }
+            startRequestWithIntro();
           }}
           style={styles.iconBtn}
         >
@@ -199,6 +190,41 @@ export function AppUserRow({
           />
         </Pressable>
       </View>
+      <RequestIntroModal
+        visible={introModalVisible}
+        recipientName={name}
+        loading={sendingIntroRequest}
+        onCancel={() => setIntroModalVisible(false)}
+        onSubmit={async (introMessage) => {
+          setSendingIntroRequest(true);
+          try {
+            const { status } = await getOrCreateContactRequest({
+              eventId: APS_ID,
+              otherUserId: userId,
+              introMessage,
+            });
+            setIntroModalVisible(false);
+            if (status !== 'ACCEPTED') {
+              Alert.alert('Request sent', `You sent a contact request and message to ${name}.`);
+              return;
+            }
+            const { threadId } = await ensureDmThreadForAcceptedRequest({
+              eventId: APS_ID,
+              otherUserId: userId,
+            });
+            router.push(`/(main)/engage/messages/${threadId}`);
+          } catch (e: any) {
+            const msg = (e?.message || '').toLowerCase();
+            if (msg.includes('not accepted')) {
+              Alert.alert('Waiting for acceptance', 'You can message once they accept your request.');
+              return;
+            }
+            Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+          } finally {
+            setSendingIntroRequest(false);
+          }
+        }}
+      />
     </View>
   );
 }

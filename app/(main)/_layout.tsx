@@ -6,6 +6,11 @@ import { useEngageStore } from '../../src/store/engageStore';
 
 export default function MainTabs() {
   const engageBadgeCount = useEngageStore((s) => s.getEngageBadgeCount());
+  const goToTabRoot = (path: '/(main)/hub' | '/(main)/agenda' | '/(main)/engage' | '/(main)/community' | '/(main)/profile') => ({
+    tabPress: () => {
+      router.replace(path);
+    },
+  });
   return (
     <AuthGuard>
       <Tabs
@@ -17,6 +22,7 @@ export default function MainTabs() {
       >
       <Tabs.Screen
         name='hub'
+        listeners={goToTabRoot('/(main)/hub')}
         options={{
           title: 'Hub',
           headerShown: false, // no header on Hub
@@ -28,6 +34,7 @@ export default function MainTabs() {
 
       <Tabs.Screen
         name='agenda'
+        listeners={goToTabRoot('/(main)/agenda')}
         options={{
           title: 'Agenda',
           headerShown: false,
@@ -39,6 +46,7 @@ export default function MainTabs() {
 
       <Tabs.Screen
         name='engage'
+        listeners={goToTabRoot('/(main)/engage')}
         options={{
           title: 'Engage',
           headerShown: false,
@@ -52,6 +60,7 @@ export default function MainTabs() {
 
       <Tabs.Screen
         name='community'
+        listeners={goToTabRoot('/(main)/community')}
         options={{
           title: 'Community',
           headerShown: false,
@@ -73,6 +82,7 @@ export default function MainTabs() {
 
       <Tabs.Screen
         name='profile'
+        listeners={goToTabRoot('/(main)/profile')}
         options={{
           title: 'Profile',
           headerShown: false,

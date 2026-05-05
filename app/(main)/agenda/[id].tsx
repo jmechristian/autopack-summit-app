@@ -322,7 +322,12 @@ export default function AgendaDetails() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps='handled'
+      automaticallyAdjustKeyboardInsets
+    >
       <Text style={styles.time}>{timeLabel}</Text>
       <View style={styles.titleRow}>
         <Text style={styles.title}>{title}</Text>

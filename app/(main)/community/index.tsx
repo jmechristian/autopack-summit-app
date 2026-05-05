@@ -277,9 +277,7 @@ export default function CommunityIndex() {
           )}
           renderItem={({ item }) => {
             const name = getFullName(item) || '(No name)';
-            const subtitle = [item.jobTitle, item.company]
-              .filter(Boolean)
-              .join(' • ');
+            const subtitle = item.company || '';
             const fav = !!favoriteContactIds[item.profileId];
             const pending = !!pendingContactIds[item.profileId];
             const isSelf =

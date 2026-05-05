@@ -1,15 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { getCurrentUser } from 'aws-amplify/auth';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEngageStore } from '../../store/engageStore';
 import { APS_ID } from '../../config/apsConfig';
+import { apsAppUserProfilesByUserId, apsContactRequestsByStatusAndUpdatedAt } from '../../graphql/queries';
 import { AppButton } from '../../ui/AppButton';
 import { AppCard } from '../../ui/AppCard';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
+import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
 
-export default function RequestsTool() {
-  const [tab, setTab] = useState<'received' | 'sent'>('received');
+type RequestsToolProps = {
+  threadBasePath?: string;
+  communityBasePath?: string;
+};
+
+export default function RequestsTool({
+  threadBasePath = '/(main)/engage/messages',
+  communityBasePath = '/(main)/hub/community',
+}: RequestsToolProps) {
+  const params = useLocalSearchParams<{ requestId?: string | string[] }>();
+  const focusedRequestId = Array.isArray(params.requestId) ? params.requestId[0] : params.requestId;
+  const [tab, setTab] = useState<'received' | 'sent' | 'accepted'>('received');
   const [cancelingRequestId, setCancelingRequestId] = useState<string | null>(null);
+  const [openingChatUserId, setOpeningChatUserId] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState<
+    {
+      id: string;
+      otherUserId: string;
+      otherProfileId: string | null;
+      userLabel: string;
+      acceptedAt: string;
+      direction: 'sent' | 'received';
+    }[]
+  >([]);
 
   const incoming = useEngageStore((s) => s.incomingRequests);
   const sent = useEngageStore((s) => s.sentRequests);
@@ -20,11 +46,98 @@ export default function RequestsTool() {
   const acceptRequest = useEngageStore((s) => s.acceptRequest);
   const declineRequest = useEngageStore((s) => s.declineRequest);
   const cancelSentContactRequest = useEngageStore((s) => s.cancelSentContactRequest);
+  const ensureDmThreadForAcceptedRequest = useEngageStore((s) => s.ensureDmThreadForAcceptedRequest);
+
+  const resolveUserSummary = useCallback(async (userId: string) => {
+    try {
+      const resp = await graphqlApiKeyClient.graphql({
+        query: apsAppUserProfilesByUserId,
+        variables: { userId, limit: 1 },
+      });
+      const data = resp.data as {
+        apsAppUserProfilesByUserId?: {
+          items?: { id?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null }[] | null;
+        };
+      };
+      const match = (data.apsAppUserProfilesByUserId?.items || []).find((item) => !!item);
+      const fullName = `${match?.firstName || ''} ${match?.lastName || ''}`.trim();
+      if (fullName) return { label: fullName, profileId: match?.id || null };
+      if (match?.email) return { label: match.email, profileId: match?.id || null };
+    } catch {
+      // fall through to default label
+    }
+    return { label: 'Community Member', profileId: null };
+  }, []);
+
+  const loadAcceptedRequests = useCallback(async () => {
+    try {
+      const me = await getCurrentUser();
+      const mySub = me.userId;
+      const resp = await graphqlAuthClient.graphql({
+        query: apsContactRequestsByStatusAndUpdatedAt,
+        variables: {
+          status: 'ACCEPTED',
+          sortDirection: 'DESC',
+          limit: 200,
+        },
+      });
+      const data = resp.data as {
+        apsContactRequestsByStatusAndUpdatedAt?: {
+          items?: {
+            id?: string | null;
+            owners?: string[] | null;
+            requestedByUserId?: string | null;
+            acceptedAt?: string | null;
+            updatedAt?: string | null;
+          }[] | null;
+        };
+      };
+
+      const acceptedItems = (data.apsContactRequestsByStatusAndUpdatedAt?.items || [])
+        .filter((item) => !!item?.id && Array.isArray(item.owners) && item.owners.includes(mySub))
+        .map((item) => {
+          const requestedByMe = item?.requestedByUserId === mySub;
+          const otherUserId = (item?.owners || []).find((id) => id && id !== mySub) || '';
+          return {
+            id: String(item?.id),
+            otherUserId,
+            acceptedAt: item?.acceptedAt || item?.updatedAt || new Date().toISOString(),
+            direction: requestedByMe ? ('sent' as const) : ('received' as const),
+          };
+        });
+
+      const withLabels = await Promise.all(
+        acceptedItems.map(async (item) => {
+          const summary = item.otherUserId
+            ? await resolveUserSummary(item.otherUserId)
+            : { label: 'Community Member', profileId: null };
+          return {
+            id: item.id,
+            otherUserId: item.otherUserId,
+            otherProfileId: summary.profileId,
+            acceptedAt: item.acceptedAt,
+            direction: item.direction,
+            userLabel: summary.label,
+          };
+        })
+      );
+      setAccepted(withLabels);
+    } catch {
+      setAccepted([]);
+    }
+  }, [resolveUserSummary]);
 
   useEffect(() => {
     loadIncomingRequests();
     loadSentRequests();
-  }, [loadIncomingRequests, loadSentRequests]);
+    void loadAcceptedRequests();
+  }, [loadAcceptedRequests, loadIncomingRequests, loadSentRequests]);
+
+  useEffect(() => {
+    if (focusedRequestId) setTab('received');
+  }, [focusedRequestId]);
+
+  const rows = tab === 'received' ? incoming : tab === 'sent' ? sent : accepted;
 
   return (
     <AppScreen>
@@ -45,33 +158,58 @@ export default function RequestsTool() {
             Sent
           </Text>
         </Pressable>
+        <Pressable
+          style={[styles.toggleBtn, tab === 'accepted' && styles.toggleBtnActive]}
+          onPress={() => setTab('accepted')}
+        >
+          <Text style={[styles.toggleText, tab === 'accepted' && styles.toggleTextActive]}>
+            Accepted
+          </Text>
+        </Pressable>
       </View>
 
       {loading ? <Text style={styles.muted}>Loading…</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <FlatList
-        data={tab === 'received' ? incoming : sent}
-        keyExtractor={(r) => r.id}
+        data={rows}
+        keyExtractor={(r) => (r as any).id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <AppCard style={styles.row}>
+          <AppCard style={[styles.row, focusedRequestId === (item as any).id && styles.focusedRow]}>
             {tab === 'received' ? (
               <>
                 <Text style={styles.title}>{(item as any).fromLabel}</Text>
                 <Text style={styles.meta}>
                   {new Date((item as any).createdAt).toLocaleString()}
                 </Text>
+                {!!(item as any).introMessage && (
+                  <Text style={styles.introMessage}>{(item as any).introMessage}</Text>
+                )}
                 <View style={styles.actions}>
-                  <AppButton title='Accept' onPress={() => acceptRequest(item.id)} />
+                  <AppButton
+                    title='Accept'
+                    onPress={async () => {
+                      const acceptedRequest = await acceptRequest(item.id);
+                      const { threadId } = await ensureDmThreadForAcceptedRequest({
+                        eventId: APS_ID,
+                        otherUserId: acceptedRequest.otherUserId,
+                      });
+                      await loadAcceptedRequests();
+                      router.push(`${threadBasePath}/${threadId}`);
+                    }}
+                  />
                   <AppButton
                     title='Decline'
-                    onPress={() => declineRequest(item.id)}
+                    onPress={async () => {
+                      await declineRequest(item.id);
+                      await loadAcceptedRequests();
+                    }}
                     variant='muted'
                   />
                 </View>
               </>
-            ) : (
+            ) : tab === 'sent' ? (
               <>
                 <Text style={styles.title}>{(item as any).toLabel}</Text>
                 <Text style={styles.meta}>
@@ -97,6 +235,7 @@ export default function RequestsTool() {
                                   eventId: APS_ID,
                                   otherUserId: sentItem.toUserId,
                                 });
+                                await loadAcceptedRequests();
                               } catch (e: any) {
                                 Alert.alert(
                                   'Cancel failed',
@@ -115,13 +254,69 @@ export default function RequestsTool() {
                   />
                 </View>
               </>
+            ) : (
+              <>
+                <Text style={styles.title}>{(item as any).userLabel}</Text>
+                <Text style={styles.meta}>
+                  {(item as any).direction === 'sent' ? 'Sent request accepted' : 'Accepted by you'} •{' '}
+                  {new Date((item as any).acceptedAt).toLocaleString()}
+                </Text>
+                <View style={styles.actions}>
+                  <Pressable
+                    style={styles.iconActionButton}
+                    onPress={() => {
+                      const acceptedItem = item as any;
+                      if (!acceptedItem.otherProfileId) {
+                        Alert.alert('Unavailable', 'Could not open this profile.');
+                        return;
+                      }
+                      router.push(`${communityBasePath}/${encodeURIComponent(acceptedItem.otherProfileId)}`);
+                    }}
+                  >
+                    <Ionicons name='person-circle-outline' size={20} color={ui.colors.primary} />
+                  </Pressable>
+                  <Pressable
+                    style={styles.iconActionButton}
+                    onPress={async () => {
+                      const acceptedItem = item as any;
+                      if (!acceptedItem.otherUserId) {
+                        Alert.alert('Unavailable', 'Could not determine this user for chat.');
+                        return;
+                      }
+                      setOpeningChatUserId(acceptedItem.otherUserId);
+                      try {
+                        const { threadId } = await ensureDmThreadForAcceptedRequest({
+                          eventId: APS_ID,
+                          otherUserId: acceptedItem.otherUserId,
+                        });
+                        router.push(`${threadBasePath}/${threadId}`);
+                      } catch (e: any) {
+                        Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+                      } finally {
+                        setOpeningChatUserId(null);
+                      }
+                    }}
+                    disabled={openingChatUserId === (item as any).otherUserId}
+                  >
+                    <Ionicons
+                      name='chatbubble-ellipses-outline'
+                      size={20}
+                      color={openingChatUserId === (item as any).otherUserId ? ui.colors.muted : ui.colors.primary}
+                    />
+                  </Pressable>
+                </View>
+              </>
             )}
           </AppCard>
         )}
         ListEmptyComponent={
           !loading ? (
             <Text style={styles.muted}>
-              {tab === 'received' ? 'No pending received requests.' : 'No pending sent requests.'}
+              {tab === 'received'
+                ? 'No pending received requests.'
+                : tab === 'sent'
+                  ? 'No pending sent requests.'
+                  : 'No accepted requests yet.'}
             </Text>
           ) : null
         }
@@ -146,7 +341,19 @@ const styles = StyleSheet.create({
   row: { marginBottom: ui.space.sm },
   title: { fontSize: 16, fontWeight: '700', color: ui.colors.primary },
   meta: { marginTop: ui.space.xs, color: ui.colors.muted, fontSize: 12 },
+  introMessage: { marginTop: ui.space.sm, color: ui.colors.text, fontSize: 13, lineHeight: 18 },
   actions: { flexDirection: 'row', gap: ui.space.sm, marginTop: ui.space.md },
+  focusedRow: { borderWidth: 1, borderColor: ui.colors.primary, backgroundColor: '#F8FBFF' },
+  iconActionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: ui.colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
   muted: { color: ui.colors.muted },
   error: { color: ui.colors.danger, marginBottom: ui.space.sm },
 });

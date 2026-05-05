@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { APS_ID } from '../../../src/config/apsConfig';
 import {
@@ -55,6 +55,7 @@ export default function PassportScanScreen() {
   const [scanState, setScanState] = useState<ScanState>('scanning');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [lastRaw, setLastRaw] = useState<string | null>(null);
+  const scanInFlightRef = useRef(false);
 
   const canScan = useMemo(
     () => !!permission?.granted && scanState === 'scanning',
@@ -142,7 +143,19 @@ export default function PassportScanScreen() {
               },
             });
           } catch (e) {
-            if (!isDuplicateError(e)) throw e;
+            if (!isDuplicateError(e)) {
+              const verifyResp = await graphqlAuthClient.graphql({
+                query: apsAppUserPassportStampsByStampKey,
+                variables: { stampKey, limit: 1 },
+              });
+              const verifyData = (verifyResp as any).data as {
+                apsAppUserPassportStampsByStampKey?: { items?: ({ id?: string | null } | null)[] | null };
+              };
+              const createdDespiteError = verifyData.apsAppUserPassportStampsByStampKey?.items?.some(
+                (item) => !!item?.id,
+              );
+              if (!createdDespiteError) throw e;
+            }
           }
         }
 
@@ -168,7 +181,8 @@ export default function PassportScanScreen() {
 
   const onBarcodeScanned = useCallback(
     (scan: { data?: string }) => {
-      if (!canScan) return;
+      if (!canScan || scanInFlightRef.current) return;
+      scanInFlightRef.current = true;
       completeScan(scan?.data || '');
     },
     [canScan, completeScan],
@@ -177,6 +191,7 @@ export default function PassportScanScreen() {
   function resetScan() {
     setResult(null);
     setLastRaw(null);
+    scanInFlightRef.current = false;
     setScanState('scanning');
   }
 

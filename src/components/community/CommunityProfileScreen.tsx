@@ -28,6 +28,7 @@ import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { NotesSection } from '../notes/NotesSection';
+import { RequestIntroModal } from '../requests/RequestIntroModal';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` can include fields that now depend on USER_POOLS-only models (notes),
@@ -87,6 +88,15 @@ function nameOf(p: Profile | null) {
   return [p.firstName?.trim(), p.lastName?.trim()].filter(Boolean).join(' ');
 }
 
+function toDateRank(value?: string | null, fallback = -1) {
+  if (!value) return fallback;
+  const asDate = new Date(value).getTime();
+  if (!Number.isNaN(asDate)) return asDate;
+  const normalized = value.length === 7 ? `${value}-01` : value;
+  const altDate = new Date(normalized).getTime();
+  return Number.isNaN(altDate) ? fallback : altDate;
+}
+
 export default function CommunityProfileScreen() {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
@@ -123,6 +133,8 @@ export default function CommunityProfileScreen() {
   const [hasAcceptedContactRecord, setHasAcceptedContactRecord] = useState(false);
   const [addingPhoneContact, setAddingPhoneContact] = useState(false);
   const [requestActionBusy, setRequestActionBusy] = useState(false);
+  const [introModalVisible, setIntroModalVisible] = useState(false);
+  const [introOpensChatWhenAccepted, setIntroOpensChatWhenAccepted] = useState(false);
 
   const otherUserId = profile?.userId || null;
   const pendingRequestState = useEngageStore((s) =>
@@ -332,13 +344,43 @@ export default function CommunityProfileScreen() {
         return;
       }
 
+      Alert.alert(
+        'Send contact request?',
+        `This will send a contact request to ${displayName}.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Continue',
+            onPress: () => {
+              setIntroOpensChatWhenAccepted(openChatWhenAccepted);
+              setIntroModalVisible(true);
+            },
+          },
+        ]
+      );
+    },
+    [
+      displayName,
+      ensureDmThreadForAcceptedRequest,
+      isRequestAccepted,
+      isRequestPending,
+      isSelf,
+      profile?.userId,
+    ]
+  );
+
+  const submitIntroRequest = useCallback(
+    async (introMessage: string) => {
+      if (!profile?.userId) return;
       setRequestActionBusy(true);
       try {
         const { status } = await getOrCreateContactRequest({
           eventId: APS_ID,
           otherUserId: profile.userId,
+          introMessage,
         });
         setContactRequestStatusRemote(status || null);
+        setIntroModalVisible(false);
 
         await Promise.allSettled([loadIncomingRequests(), loadSentRequests()]);
         const latestPending = await fetchPendingRequestState({
@@ -347,7 +389,7 @@ export default function CommunityProfileScreen() {
         }).catch(() => null);
         setPendingRequestStateRemote(latestPending);
 
-        if (status === 'ACCEPTED' && openChatWhenAccepted) {
+        if (status === 'ACCEPTED' && introOpensChatWhenAccepted) {
           const { threadId } = await ensureDmThreadForAcceptedRequest({
             eventId: APS_ID,
             otherUserId: profile.userId,
@@ -361,7 +403,7 @@ export default function CommunityProfileScreen() {
           return;
         }
 
-        Alert.alert('Request sent', 'You can message once they accept your request.');
+        Alert.alert('Request sent', `You sent a contact request and message to ${displayName}.`);
       } catch (e: any) {
         const msg = (e?.message || '').toLowerCase();
         if (msg.includes('not accepted')) {
@@ -378,12 +420,11 @@ export default function CommunityProfileScreen() {
       }
     },
     [
+      displayName,
       ensureDmThreadForAcceptedRequest,
       fetchPendingRequestState,
       getOrCreateContactRequest,
-      isRequestAccepted,
-      isRequestPending,
-      isSelf,
+      introOpensChatWhenAccepted,
       loadIncomingRequests,
       loadSentRequests,
       profile?.userId,
@@ -420,6 +461,12 @@ export default function CommunityProfileScreen() {
   const affiliates =
     (profile.affiliates?.items || [])
       .filter(Boolean)
+      .sort((a: any, b: any) => {
+        const aEndRank = toDateRank(a?.endDate, Number.POSITIVE_INFINITY);
+        const bEndRank = toDateRank(b?.endDate, Number.POSITIVE_INFINITY);
+        if (aEndRank !== bEndRank) return bEndRank - aEndRank;
+        return toDateRank(b?.startDate) - toDateRank(a?.startDate);
+      })
       .map((a: any) => [a.affiliate, a.role].filter(Boolean).join(' — '))
       .filter(Boolean) || [];
 
@@ -430,7 +477,12 @@ export default function CommunityProfileScreen() {
       .filter(Boolean) || [];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps='handled'
+      automaticallyAdjustKeyboardInsets
+    >
       <View style={styles.headerRow}>
         <View style={styles.avatar}>
           {avatarUri ? (
@@ -664,6 +716,13 @@ export default function CommunityProfileScreen() {
       </View>
 
       <NotesSection profileId={profile.id} />
+      <RequestIntroModal
+        visible={introModalVisible}
+        recipientName={displayName}
+        loading={requestActionBusy}
+        onCancel={() => setIntroModalVisible(false)}
+        onSubmit={submitIntroRequest}
+      />
     </ScrollView>
   );
 }

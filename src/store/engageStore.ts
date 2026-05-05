@@ -70,6 +70,9 @@ type IncomingRequestItem = {
   fromUserId: string;
   fromLabel: string;
   createdAt: string;
+  introMessage?: string | null;
+  introSentAt?: string | null;
+  introDeliveredAt?: string | null;
 };
 
 type SentRequestItem = {
@@ -78,6 +81,8 @@ type SentRequestItem = {
   toUserId: string;
   toLabel: string;
   createdAt: string;
+  introMessage?: string | null;
+  introSentAt?: string | null;
 };
 
 type EngageStore = {
@@ -140,7 +145,7 @@ type EngageStore = {
 
   loadIncomingRequests: () => Promise<void>;
   loadSentRequests: () => Promise<void>;
-  acceptRequest: (id: string) => Promise<void>;
+  acceptRequest: (id: string) => Promise<{ otherUserId: string; introMessage?: string | null }>;
   declineRequest: (id: string) => Promise<void>;
 
   // Pending request state for UI (hourglass vs chat)
@@ -166,6 +171,7 @@ type EngageStore = {
   getOrCreateContactRequest: (params: {
     eventId: string;
     otherUserId: string; // Cognito sub
+    introMessage?: string;
   }) => Promise<{ status: string; requestId: string; requestKey: string }>;
   cancelSentContactRequest: (params: {
     eventId: string;
@@ -212,6 +218,11 @@ type ContactRequestSnapshot = {
   id?: string | null;
   status?: string | null;
   requestedByUserId?: string | null;
+  userAId?: string | null;
+  userBId?: string | null;
+  introMessage?: string | null;
+  introSentAt?: string | null;
+  introDeliveredAt?: string | null;
 };
 
 async function getContactRequestForPair(eventId: string, a: string, b: string): Promise<ContactRequestSnapshot | null> {
@@ -585,6 +596,8 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             toUserId: String(toUserId),
             toLabel: String(toUserId),
             createdAt,
+            introMessage: r.introMessage || null,
+            introSentAt: r.introSentAt || null,
           };
           set({ sentRequests: [item, ...get().sentRequests] });
           void profileLabel(item.toUserId).then((label) => {
@@ -612,6 +625,9 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           fromUserId: String(fromUserId),
           fromLabel: String(fromUserId),
           createdAt,
+          introMessage: r.introMessage || null,
+          introSentAt: r.introSentAt || null,
+          introDeliveredAt: r.introDeliveredAt || null,
         };
         set({ incomingRequests: [item, ...get().incomingRequests] });
         get().setUnread({ requests: get().incomingRequests.length + 1 });
@@ -677,6 +693,9 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             fromUserId: String(fromUserId),
             fromLabel: String(fromUserId),
             createdAt,
+            introMessage: r.introMessage || null,
+            introSentAt: r.introSentAt || null,
+            introDeliveredAt: r.introDeliveredAt || null,
           };
           set({ incomingRequests: [item, ...get().incomingRequests] });
           get().setUnread({ requests: get().incomingRequests.length + 1 });
@@ -875,6 +894,9 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             createdAt?: string | null;
             userAId?: string | null;
             userBId?: string | null;
+            introMessage?: string | null;
+            introSentAt?: string | null;
+            introDeliveredAt?: string | null;
           } | null>;
         };
       };
@@ -891,6 +913,9 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             fromUserId,
             fromLabel: fromUserId,
             createdAt: (r?.createdAt || nowIso()) as string,
+            introMessage: r?.introMessage || null,
+            introSentAt: r?.introSentAt || null,
+            introDeliveredAt: r?.introDeliveredAt || null,
           } satisfies IncomingRequestItem;
         });
 
@@ -938,6 +963,8 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             createdAt?: string | null;
             userAId?: string | null;
             userBId?: string | null;
+            introMessage?: string | null;
+            introSentAt?: string | null;
           } | null>;
         };
       };
@@ -963,6 +990,8 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             toUserId: String(toUserId),
             toLabel: String(toUserId),
             createdAt: (r?.createdAt || nowIso()) as string,
+            introMessage: r?.introMessage || null,
+            introSentAt: r?.introSentAt || null,
           } satisfies SentRequestItem;
         })
         .filter((r) => !!r.toUserId);
@@ -989,6 +1018,9 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           status?: string | null;
           owners?: string[] | null;
           requestedByUserId?: string | null;
+          userAId?: string | null;
+          userBId?: string | null;
+          introMessage?: string | null;
         }
       | null;
     if (!request?.id) throw new Error('Request not found');
@@ -1012,8 +1044,16 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         },
       },
     });
+    const otherUserId = request.userAId === mySub ? request.userBId : request.userAId;
+    if (!otherUserId) {
+      throw new Error('Request participants are invalid');
+    }
     await get().loadIncomingRequests();
     Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+    return {
+      otherUserId: String(otherUserId),
+      introMessage: request.introMessage || null,
+    };
   },
 
   async declineRequest(id: string) {
@@ -1025,10 +1065,11 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
   },
 
-  async getOrCreateContactRequest({ eventId, otherUserId }) {
+  async getOrCreateContactRequest({ eventId, otherUserId, introMessage }) {
     const mySub = await getMySub();
     const [a, b] = sortPair(mySub, otherUserId);
     const requestKey = requestKeyFor(eventId, a, b);
+    const cleanedIntro = (introMessage || '').trim();
 
     const resp = await graphqlAuthClient.graphql({
       query: apsContactRequestsByRequestKey,
@@ -1036,11 +1077,28 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     });
     const data = resp.data as {
       apsContactRequestsByRequestKey?: {
-        items?: Array<{ id?: string | null; status?: string | null } | null>;
+        items?: Array<{ id?: string | null; status?: string | null; introMessage?: string | null } | null>;
       };
     };
     const existing = data.apsContactRequestsByRequestKey?.items?.find((x) => x?.id);
     if (existing?.id) {
+      if (cleanedIntro && existing.status === 'PENDING' && !existing.introMessage) {
+        try {
+          await graphqlAuthClient.graphql({
+            query: updateApsContactRequest,
+            variables: {
+              input: {
+                id: existing.id,
+                introMessage: cleanedIntro,
+                introSentAt: nowIso(),
+              } as any,
+              condition: { status: { eq: 'PENDING' } },
+            },
+          });
+        } catch {
+          // best effort: if update races we still return existing request
+        }
+      }
       return { status: existing.status || 'PENDING', requestId: existing.id, requestKey };
     }
 
@@ -1058,6 +1116,12 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             owners: [a, b],
             requestedByUserId: mySub,
             status: 'PENDING',
+            ...(cleanedIntro
+              ? {
+                  introMessage: cleanedIntro,
+                  introSentAt: nowIso(),
+                }
+              : {}),
           },
         },
       });

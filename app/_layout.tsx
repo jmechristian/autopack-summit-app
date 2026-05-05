@@ -1,9 +1,10 @@
+import 'react-native-get-random-values'; // must be first
+import '../src/utils/disableFontScaling';
 import { ThemeProvider } from '@rneui/themed';
 import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import 'react-native-get-random-values'; // must be first
 import { configureAmplify } from '../src/amplifyConfig';
 import { theme } from '../src/theme';
 

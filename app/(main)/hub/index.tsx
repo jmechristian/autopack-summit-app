@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -25,11 +25,14 @@ import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
 import { APS_ID } from '../../../src/config/apsConfig';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
-import { apsAppExhibitorProfilesByCompanyId } from '../../../src/graphql/queries';
+import {
+  apsAppExhibitorProfilesByCompanyId,
+  apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
+} from '../../../src/graphql/queries';
 import { AppBadge } from '../../../src/ui/AppBadge';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
-import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
+import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
@@ -81,7 +84,6 @@ const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'exhibitors', icon: 'business', label: 'Exhibitors', route: '/(main)/hub/exhibitors' },
   { id: 'sponsors', icon: 'ribbon', label: 'Sponsors', route: '/(main)/hub/sponsors' },
   { id: 'speakers', icon: 'mic', label: 'Speakers', route: '/(main)/hub/speakers' },
-  { id: 'passport', icon: 'book', label: 'Passport', route: '/(main)/hub/passport' },
 ];
 
 type NextSession = {
@@ -95,6 +97,18 @@ type NextSession = {
 };
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
+const passportExhibitorsByEvent = /* GraphQL */ `
+  query HubPassportExhibitorsByEvent($eventId: ID!, $limit: Int, $nextToken: String) {
+    apsAppExhibitorProfilesByEventId(eventId: $eventId, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 
 const MOCK_NEXT_SESSIONS: NextSession[] = [
   {
@@ -169,6 +183,9 @@ export default function HubScreen() {
   const [toolsModalVisible, setToolsModalVisible] = useState(false);
   const [toolsLoaded, setToolsLoaded] = useState(false);
   const [hasExhibitorProfile, setHasExhibitorProfile] = useState<boolean | null>(null);
+  const [passportLoading, setPassportLoading] = useState(true);
+  const [passportTotal, setPassportTotal] = useState(0);
+  const [passportCollected, setPassportCollected] = useState(0);
 
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
@@ -253,6 +270,70 @@ export default function HubScreen() {
       console.warn('Hub: unable to save quick tools selection', e);
     });
   }, [hasExhibitorProfile, selectedToolIds, toolsLoaded]);
+
+  const loadPassportProgress = useCallback(async () => {
+    setPassportLoading(true);
+    try {
+      const profileId = profile?.id || null;
+      const exhibitorIds = new Set<string>();
+      let exhibitorNextToken: string | null | undefined = null;
+      do {
+        const resp = await graphqlApiKeyClient.graphql({
+          query: passportExhibitorsByEvent,
+          variables: { eventId: APS_ID, limit: 200, nextToken: exhibitorNextToken },
+        });
+        const data = (resp as any).data as {
+          apsAppExhibitorProfilesByEventId?: {
+            items?: ({ id?: string | null } | null)[] | null;
+            nextToken?: string | null;
+          };
+        };
+        for (const item of data.apsAppExhibitorProfilesByEventId?.items || []) {
+          if (item?.id) exhibitorIds.add(item.id);
+        }
+        exhibitorNextToken = data.apsAppExhibitorProfilesByEventId?.nextToken;
+      } while (exhibitorNextToken);
+
+      const stampIds = new Set<string>();
+      if (profileId) {
+        let stampNextToken: string | null | undefined = null;
+        do {
+          const resp = await graphqlAuthClient.graphql({
+            query: apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
+            variables: {
+              userProfileId: profileId,
+              filter: { eventId: { eq: APS_ID } },
+              limit: 200,
+              nextToken: stampNextToken,
+            },
+          });
+          const data = (resp as any).data as {
+            apsAppUserPassportStampsByUserProfileIdAndCreatedAt?: {
+              items?: ({ exhibitorId?: string | null; eventId?: string | null } | null)[] | null;
+              nextToken?: string | null;
+            };
+          };
+          for (const item of data.apsAppUserPassportStampsByUserProfileIdAndCreatedAt?.items || []) {
+            if (item?.eventId === APS_ID && item.exhibitorId) stampIds.add(item.exhibitorId);
+          }
+          stampNextToken = data.apsAppUserPassportStampsByUserProfileIdAndCreatedAt?.nextToken;
+        } while (stampNextToken);
+      }
+
+      setPassportTotal(exhibitorIds.size);
+      setPassportCollected([...stampIds].filter((id) => exhibitorIds.has(id)).length);
+    } catch (e) {
+      console.warn('Hub passport progress failed:', e);
+      setPassportTotal(0);
+      setPassportCollected(0);
+    } finally {
+      setPassportLoading(false);
+    }
+  }, [profile?.id]);
+
+  useEffect(() => {
+    loadPassportProgress();
+  }, [loadPassportProgress]);
 
   useEffect(() => {
     // Target: 8:00 AM Eastern (New York) on Sept 30, 2026
@@ -368,6 +449,10 @@ export default function HubScreen() {
   }, []);
 
   const screenW = Dimensions.get('window').width;
+  const passportPercent = useMemo(
+    () => (passportTotal > 0 ? Math.round((passportCollected / passportTotal) * 100) : 0),
+    [passportCollected, passportTotal],
+  );
   const progressTranslateX = useMemo(() => {
     const trackW = 120;
     const dotW = 16;
@@ -552,7 +637,7 @@ export default function HubScreen() {
 
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => router.push('/(main)/engage')}
+            onPress={() => router.push('/(main)/hub/notifications')}
             style={styles.bellButton}
           >
             <Ionicons name='notifications-outline' size={22} color='#fff' />
@@ -611,6 +696,33 @@ export default function HubScreen() {
             ))}
           </View>
         </Animated.View>
+
+        <Pressable style={styles.passportCard} onPress={() => router.push('/(main)/hub/passport' as any)}>
+          <View style={styles.passportHeaderRow}>
+            <View style={styles.passportIconWrap}>
+              <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
+            </View>
+            <View style={styles.passportTitleWrap}>
+              <Text style={styles.passportEyebrow}>Passport Challenge</Text>
+              <Text style={styles.passportTitle}>
+                {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
+              </Text>
+            </View>
+            <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
+          </View>
+          {passportLoading ? (
+            <ActivityIndicator color='#fff' style={styles.passportLoader} />
+          ) : (
+            <>
+              <Text style={styles.passportSubtitle}>
+                {passportCollected} of {passportTotal} exhibitor stamps collected
+              </Text>
+              <View style={styles.passportProgressTrack}>
+                <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
+              </View>
+            </>
+          )}
+        </Pressable>
 
         {/* Next Session carousel (dummy) */}
         <Animated.View entering={FadeInDown.duration(600).delay(220)}>
@@ -993,7 +1105,49 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 16,
   },
-  quickToolsWrap: { marginTop: 4, marginBottom: 32 },
+  quickToolsWrap: { marginTop: 4, marginBottom: 16 },
+  passportCard: {
+    marginBottom: 16,
+    borderRadius: 18,
+    backgroundColor: ui.colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    gap: 10,
+  },
+  passportHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  passportIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: ui.colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  passportTitleWrap: { flex: 1 },
+  passportEyebrow: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  passportTitle: { color: '#fff', fontSize: 20, fontWeight: '900', marginTop: 2 },
+  passportSubtitle: { color: 'rgba(255,255,255,0.9)', fontWeight: '700' },
+  passportLoader: { alignSelf: 'flex-start', marginTop: 4 },
+  passportProgressTrack: {
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    overflow: 'hidden',
+  },
+  passportProgressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: ui.colors.secondary,
+  },
   certificateDividerWrap: {
     marginTop: 18,
     marginBottom: 10,

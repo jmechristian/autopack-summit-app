@@ -264,6 +264,7 @@ export default function Profile() {
   const jobTitle = profile.jobTitle || '';
   const company = profile.company || '';
   const roleCompanyLine = [jobTitle, company].filter(Boolean).join(', ');
+  const profileEmail = (profile.email || registrant?.email || '').trim();
   const registrantType = formatRegistrantType(registrant?.attendeeType || null);
 
   return (
@@ -310,6 +311,9 @@ export default function Profile() {
           <Text style={styles.nameText}>{fullName}</Text>
           {!!roleCompanyLine && (
             <Text style={styles.roleCompanyText}>{roleCompanyLine}</Text>
+          )}
+          {!!profileEmail && (
+            <Text style={styles.profileEmailText}>{profileEmail}</Text>
           )}
           {!!registrantType && (
             <View style={styles.typeBadge}>
@@ -601,6 +605,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '500',
     color: '#6b7280',
+    marginBottom: 2,
+  },
+  profileEmailText: {
+    fontSize: 14,
+    lineHeight: 18,
+    color: '#374151',
     marginBottom: 2,
   },
   typeBadge: {

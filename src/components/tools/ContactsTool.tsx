@@ -470,10 +470,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
             const isPending = !!pendingContactIds[item.profileId];
             const hasNotes = profileIdsWithNotes.has(item.profileId);
             const name = getFullName(item) || '(No name)';
-            const isPendingRequestRow = item.contactItemId.startsWith('pending:');
-            const subtitle = [item.jobTitle, item.company, !isPendingRequestRow ? item.email : null]
-              .filter(Boolean)
-              .join(' • ');
+            const subtitle = item.company || '';
             const isSelf = !!currentProfileId && currentProfileId === item.profileId;
             const initials = `${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(
               item.lastName,

@@ -10,7 +10,7 @@ import { createApsPushToken, updateApsPushToken } from '../graphql/mutations';
 type NavigateHandlers = {
   onAnnouncementId: (announcementId: string) => void;
   onDmThreadId?: (threadId: string) => void;
-  onRequests?: () => void;
+  onRequests?: (requestId?: string) => void;
   onDeepLink?: (url: string) => void;
   shouldSuppressForegroundNotification?: (data: Record<string, any>) => boolean;
   /** Called when an announcement notification is received while app is running. Returns new total badge count. */
@@ -160,6 +160,7 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
     const announcementId =
       data.announcementId ?? data.announcementID ?? data.announcement_id ?? data.id;
     const dmThreadId = data.threadId ?? data.threadID ?? data.thread_id;
+    const requestId = data.requestId ?? data.requestID ?? data.request_id;
     const deepLink = data.deepLink ?? data.deeplink ?? data.url;
 
     if (type === 'dm' && dmThreadId && handlers.onDmThreadId) {
@@ -167,7 +168,7 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
       return;
     }
     if ((type === 'request' || type === 'requestaccepted') && handlers.onRequests) {
-      handlers.onRequests();
+      handlers.onRequests(requestId ? String(requestId) : undefined);
       return;
     }
 
@@ -197,6 +198,7 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
     const announcementId =
       data.announcementId ?? data.announcementID ?? data.announcement_id ?? data.id;
     const dmThreadId = data.threadId ?? data.threadID ?? data.thread_id;
+    const requestId = data.requestId ?? data.requestID ?? data.request_id;
     const deepLink = data.deepLink ?? data.deeplink ?? data.url;
 
     if (type === 'dm' && dmThreadId && handlers.onDmThreadId) {
@@ -204,7 +206,7 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
       return;
     }
     if ((type === 'request' || type === 'requestaccepted') && handlers.onRequests) {
-      handlers.onRequests();
+      handlers.onRequests(requestId ? String(requestId) : undefined);
       return;
     }
 

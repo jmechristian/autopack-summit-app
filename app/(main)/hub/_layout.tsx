@@ -7,6 +7,7 @@ export default function HubLayout() {
       <Stack.Screen name='contacts' options={{ title: 'Contacts' }} />
       <Stack.Screen name='notes' options={{ title: 'My Notes' }} />
       <Stack.Screen name='messages' options={{ title: 'Messages' }} />
+      <Stack.Screen name='notifications' options={{ title: 'Notifications' }} />
       <Stack.Screen name='requests' options={{ title: 'Requests' }} />
       <Stack.Screen name='announcements' options={{ title: 'Announcements' }} />
       <Stack.Screen name='qr' options={{ title: 'My QR Code' }} />

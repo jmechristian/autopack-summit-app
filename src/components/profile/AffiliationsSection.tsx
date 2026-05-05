@@ -16,7 +16,23 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
   const [modalVisible, setModalVisible] = useState(false);
   const [editingAffiliate, setEditingAffiliate] = useState<APITypes.ProfileAffiliate | null>(null);
 
-  const affiliates = profile.affiliates?.items?.filter((a) => a !== null) as APITypes.ProfileAffiliate[] || [];
+  const affiliates = (profile.affiliates?.items?.filter((a) => a !== null) as APITypes.ProfileAffiliate[] | undefined) || [];
+  const toDateRank = (value?: string | null, fallback = -1) => {
+    if (!value) return fallback;
+    const asDate = new Date(value).getTime();
+    if (!Number.isNaN(asDate)) return asDate;
+    const normalized = value.length === 7 ? `${value}-01` : value;
+    const altDate = new Date(normalized).getTime();
+    return Number.isNaN(altDate) ? fallback : altDate;
+  };
+  const sortedAffiliates = [...affiliates].sort((a, b) => {
+    const aEndRank = toDateRank(a.endDate, Number.POSITIVE_INFINITY);
+    const bEndRank = toDateRank(b.endDate, Number.POSITIVE_INFINITY);
+    if (aEndRank !== bEndRank) return bEndRank - aEndRank;
+    const aStartRank = toDateRank(a.startDate);
+    const bStartRank = toDateRank(b.startDate);
+    return bStartRank - aStartRank;
+  });
 
   const handleAdd = () => {
     setEditingAffiliate(null);
@@ -41,7 +57,7 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
             try {
               await deleteAffiliate(affiliate.id);
               await onUpdate();
-            } catch (error) {
+            } catch {
               Alert.alert('Error', 'Failed to delete experience');
             }
           },
@@ -83,10 +99,10 @@ export function AffiliationsSection({ profile, onUpdate }: AffiliationsSectionPr
         </TouchableOpacity>
       </View>
 
-      {affiliates.length === 0 ? (
+      {sortedAffiliates.length === 0 ? (
         <Text style={styles.emptyText}>No experience, edit to add</Text>
       ) : (
-        affiliates.map((affiliate) => (
+        sortedAffiliates.map((affiliate) => (
           <View key={affiliate.id} style={styles.item}>
             <View style={styles.itemContent}>
               <Text style={styles.itemTitle}>{affiliate.affiliate || 'Untitled'}</Text>
