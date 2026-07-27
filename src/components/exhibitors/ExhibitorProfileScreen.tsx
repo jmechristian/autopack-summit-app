@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Linking,
@@ -20,6 +19,7 @@ import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { autopackColors } from '../../theme';
 import { graphqlAuthClient, graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import { RiveLoader } from '../RiveLoader';
 
 type ExhibitorProfile = {
   id: string;
@@ -504,12 +504,7 @@ export default function ExhibitorProfileScreen() {
   }, [favoriteKey, reloadKey]);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading exhibitor...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error || !profile) {

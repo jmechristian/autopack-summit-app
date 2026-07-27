@@ -8,6 +8,48 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
+export const adminGetThinkificByEmail = /* GraphQL */ `query AdminGetThinkificByEmail($email: String!) {
+  adminGetThinkificByEmail(email: $email) {
+    email
+    thinkificUserId
+    apcEnrollments {
+      enrollmentId
+      courseId
+      courseName
+      percentageCompleted
+      completedAt
+      activatedAt
+      __typename
+    }
+    otherEnrollments {
+      enrollmentId
+      courseId
+      courseName
+      percentageCompleted
+      completedAt
+      activatedAt
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AdminGetThinkificByEmailQueryVariables,
+  APITypes.AdminGetThinkificByEmailQuery
+>;
+export const adminGetLatestRegistrantTempCredential = /* GraphQL */ `query AdminGetLatestRegistrantTempCredential($registrantId: ID!) {
+  adminGetLatestRegistrantTempCredential(registrantId: $registrantId) {
+    registrantId
+    email
+    tempPassword
+    createdAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AdminGetLatestRegistrantTempCredentialQueryVariables,
+  APITypes.AdminGetLatestRegistrantTempCredentialQuery
+>;
 export const getApsTempCredential = /* GraphQL */ `query GetApsTempCredential($id: ID!) {
   getApsTempCredential(id: $id) {
     id
@@ -81,7 +123,9 @@ export const getApsAppUserNote = /* GraphQL */ `query GetApsAppUserNote($id: ID!
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -724,7 +768,9 @@ export const getApsAppUserFavoriteSession = /* GraphQL */ `query GetApsAppUserFa
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -1157,6 +1203,8 @@ export const getApsAdminAnnouncement = /* GraphQL */ `query GetApsAdminAnnouncem
     title
     body
     deepLink
+    scheduledAt
+    publishedAt
     createdAt
     updatedAt
     __typename
@@ -1182,6 +1230,8 @@ export const listApsAdminAnnouncements = /* GraphQL */ `query ListApsAdminAnnoun
       title
       body
       deepLink
+      scheduledAt
+      publishedAt
       createdAt
       updatedAt
       __typename
@@ -2754,6 +2804,8 @@ export const apsAdminAnnouncementsByEventIdAndCreatedAt = /* GraphQL */ `query A
       title
       body
       deepLink
+      scheduledAt
+      publishedAt
       createdAt
       updatedAt
       __typename
@@ -2765,6 +2817,42 @@ export const apsAdminAnnouncementsByEventIdAndCreatedAt = /* GraphQL */ `query A
 ` as GeneratedQuery<
   APITypes.ApsAdminAnnouncementsByEventIdAndCreatedAtQueryVariables,
   APITypes.ApsAdminAnnouncementsByEventIdAndCreatedAtQuery
+>;
+export const apsAdminAnnouncementsByEventIdAndScheduledAt = /* GraphQL */ `query ApsAdminAnnouncementsByEventIdAndScheduledAt(
+  $eventId: ID!
+  $scheduledAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAdminAnnouncementFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAdminAnnouncementsByEventIdAndScheduledAt(
+    eventId: $eventId
+    scheduledAt: $scheduledAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      eventId
+      title
+      body
+      deepLink
+      scheduledAt
+      publishedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAdminAnnouncementsByEventIdAndScheduledAtQueryVariables,
+  APITypes.ApsAdminAnnouncementsByEventIdAndScheduledAtQuery
 >;
 export const apsPushTokensByUserIdAndUpdatedAt = /* GraphQL */ `query ApsPushTokensByUserIdAndUpdatedAt(
   $userId: ID!
@@ -4755,6 +4843,7 @@ export const getApsAppSession = /* GraphQL */ `query GetApsAppSession($id: ID!) 
     endTime
     location
     description
+    embedUrl
     agendaId
     agenda {
       id
@@ -4783,6 +4872,7 @@ export const getApsAppSession = /* GraphQL */ `query GetApsAppSession($id: ID!) 
       nextToken
       __typename
     }
+    draft
     createdAt
     updatedAt
     apsAgendaItemsId
@@ -4807,7 +4897,9 @@ export const listApsAppSessions = /* GraphQL */ `query ListApsAppSessions(
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -4843,7 +4935,9 @@ export const apsAppSessionsByAgendaId = /* GraphQL */ `query ApsAppSessionsByAge
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -4869,7 +4963,9 @@ export const getApsAppSessionQuestion = /* GraphQL */ `query GetApsAppSessionQue
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -7157,7 +7253,9 @@ export const getSessionSpeakers = /* GraphQL */ `query GetSessionSpeakers($id: I
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -7278,7 +7376,9 @@ export const getSessionSponsors = /* GraphQL */ `query GetSessionSponsors($id: I
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId

@@ -38,11 +38,89 @@ input SyncThinkificProgressInput {
   email: String
 }
 
+input AdminCreateRegistrantInput {
+  apsID: ID
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  companyId: ID
+  jobTitle: String
+  attendeeType: RegistrantType!
+  status: RegistrantStatus!
+}
+
 type ThinkificProgressSyncResult {
   thinkificUserId: Int
   apcProgramProgress: Float
   updated: Boolean!
   syncedAt: AWSDateTime!
+  message: String
+}
+
+type AdminCreateRegistrantResult {
+  id: ID!
+  email: String!
+  companyId: ID
+  tempPassword: String
+}
+
+input AdminReissueRegistrantTempPasswordInput {
+  registrantId: ID!
+  email: String
+}
+
+type AdminReissueRegistrantTempPasswordResult {
+  registrantId: ID!
+  email: String!
+  tempPassword: String!
+}
+
+input AdminCreateExhibitorInput {
+  companyId: ID!
+  eventId: ID!
+  boothNumber: String
+}
+
+type AdminCreateExhibitorResult {
+  id: ID!
+  companyId: ID!
+  eventId: ID!
+  boothNumber: String
+  passportQrPayload: String!
+  qrCode: String!
+}
+
+type AdminLatestTempCredentialResult {
+  registrantId: ID!
+  email: String!
+  tempPassword: String!
+  createdAt: AWSDateTime!
+}
+
+type AdminThinkificEnrollment {
+  enrollmentId: Int
+  courseId: Int
+  courseName: String
+  percentageCompleted: Float
+  completedAt: String
+  activatedAt: String
+}
+
+type AdminThinkificByEmailResult {
+  email: String!
+  thinkificUserId: Int
+  apcEnrollments: [AdminThinkificEnrollment!]!
+  otherEnrollments: [AdminThinkificEnrollment!]!
+}
+
+type AdminPublishDueAnnouncementsResult {
+  publishedCount: Int!
+  publishedIds: [ID!]!
+}
+
+type DeleteMyAccountResult {
+  success: Boolean!
   message: String
 }
 
@@ -54,6 +132,40 @@ type Mutation {
     input: SyncThinkificProgressInput
   ): ThinkificProgressSyncResult
     @function(name: "apsPushFanout-${env}")
+    @aws_cognito_user_pools
+  adminCreateRegistrant(
+    input: AdminCreateRegistrantInput!
+  ): AdminCreateRegistrantResult
+    @function(name: "adminRegistrantOps-${env}")
+    @aws_cognito_user_pools
+  adminReissueRegistrantTempPassword(
+    input: AdminReissueRegistrantTempPasswordInput!
+  ): AdminReissueRegistrantTempPasswordResult
+    @function(name: "adminRegistrantOps-${env}")
+    @aws_cognito_user_pools
+  adminCreateExhibitor(
+    input: AdminCreateExhibitorInput!
+  ): AdminCreateExhibitorResult
+    @function(name: "apsPushFanout-${env}")
+    @aws_cognito_user_pools
+  adminPublishDueAnnouncements(
+    eventId: ID!
+  ): AdminPublishDueAnnouncementsResult
+    @function(name: "apsPushFanout-${env}")
+    @aws_cognito_user_pools
+  deleteMyAccount: DeleteMyAccountResult
+    @function(name: "adminRegistrantOps-${env}")
+    @aws_cognito_user_pools
+}
+
+type Query {
+  adminGetThinkificByEmail(email: String!): AdminThinkificByEmailResult
+    @function(name: "apsPushFanout-${env}")
+    @aws_cognito_user_pools
+  adminGetLatestRegistrantTempCredential(
+    registrantId: ID!
+  ): AdminLatestTempCredentialResult
+    @function(name: "adminRegistrantOps-${env}")
     @aws_cognito_user_pools
 }
 
@@ -481,6 +593,7 @@ type ApsAppSession
   endTime: String
   location: String
   description: String
+  embedUrl: String
   agendaId: ID @index(name: "byAgenda")
   agenda: ApsAgenda @belongsTo(fields: ["agendaId"])
   sessionQuestions: [ApsAppSessionQuestion]
@@ -490,6 +603,7 @@ type ApsAppSession
   sponsors: [ApsSponsor] @manyToMany(relationName: "SessionSponsors")
   favoriteByUsers: [ApsAppUserFavoriteSession]
     @hasMany(indexName: "bySession", fields: ["id"])
+  draft: Boolean
 }
 
 # Session Questions
@@ -1104,11 +1218,15 @@ type ApsAdminAnnouncement
     ]
   ) {
   id: ID!
-  eventId: ID! @index(name: "byEventCreated", sortKeyFields: ["createdAt"])
+  eventId: ID!
+    @index(name: "byEventCreated", sortKeyFields: ["createdAt"])
+    @index(name: "byEventScheduled", sortKeyFields: ["scheduledAt"])
 
   title: String
   body: String!
   deepLink: String # optional, e.g. "app://announcements/<id>"
+  scheduledAt: AWSDateTime # optional future publish time
+  publishedAt: AWSDateTime # set when visible + push is sent
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

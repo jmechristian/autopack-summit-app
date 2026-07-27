@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -25,6 +24,7 @@ import {
 import { useCommunityStore } from '../../store/communityStore';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { useNotesPresence } from '../../hooks/useNotesPresence';
+import { RiveLoader } from '../RiveLoader';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` includes `notes { ... }`, but notes are now USER_POOLS-only.
@@ -405,12 +405,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
   }
 
   if (loading && !refreshing) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading contacts…</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

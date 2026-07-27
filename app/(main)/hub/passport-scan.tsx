@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { APS_ID } from '../../../src/config/apsConfig';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 import {
   apsAppExhibitorProfilesByPassportQrPayload,
   apsAppUserPassportStampsByStampKey,
@@ -196,12 +197,7 @@ export default function PassportScanScreen() {
   }
 
   if (!permission) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Checking camera permissions...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (!permission.granted) {

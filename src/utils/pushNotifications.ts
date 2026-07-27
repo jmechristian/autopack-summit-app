@@ -6,6 +6,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { graphqlAuthClient } from './graphqlClient';
 import { apsPushTokensByUserIdAndUpdatedAt } from '../graphql/queries';
 import { createApsPushToken, updateApsPushToken } from '../graphql/mutations';
+import { isNotificationsDeepLink } from './announcementDeepLinks';
 
 type NavigateHandlers = {
   onAnnouncementId: (announcementId: string) => void;
@@ -172,6 +173,15 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
       return;
     }
 
+    if (type === 'announcement') {
+      if (deepLink && handlers.onDeepLink && !isNotificationsDeepLink(String(deepLink))) {
+        handlers.onDeepLink(String(deepLink));
+        return;
+      }
+      handlers.onAnnouncementId('');
+      return;
+    }
+
     if (announcementId) {
       handlers.onAnnouncementId(String(announcementId));
       return;
@@ -207,6 +217,15 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
     }
     if ((type === 'request' || type === 'requestaccepted') && handlers.onRequests) {
       handlers.onRequests(requestId ? String(requestId) : undefined);
+      return;
+    }
+
+    if (type === 'announcement') {
+      if (deepLink && handlers.onDeepLink && !isNotificationsDeepLink(String(deepLink))) {
+        handlers.onDeepLink(String(deepLink));
+        return;
+      }
+      handlers.onAnnouncementId('');
       return;
     }
 

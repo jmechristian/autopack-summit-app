@@ -36,6 +36,10 @@ import {
   updateApsDmParticipantState,
   updateApsDmThread,
 } from '../graphql/mutations';
+import {
+  getAnnouncementDisplayAt,
+  isAnnouncementVisibleToAttendees,
+} from '../components/admin/announcements/adminAnnouncementsService';
 
 type Announcement = {
   id: string;
@@ -43,6 +47,8 @@ type Announcement = {
   title?: string | null;
   body: string;
   deepLink?: string | null;
+  scheduledAt?: string | null;
+  publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -826,7 +832,15 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       };
       const items = (data.apsAdminAnnouncementsByEventIdAndCreatedAt?.items || [])
         .filter((x): x is Announcement => !!x?.id)
-        .map((x) => x);
+        .filter((x) => isAnnouncementVisibleToAttendees(x))
+        .map((x) => ({
+          ...x,
+          createdAt: getAnnouncementDisplayAt(x) || x.createdAt,
+        }))
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
       const byId: Record<string, Announcement> = { ...get().announcementById };
       for (const a of items) byId[a.id] = a;
       set({
@@ -857,6 +871,9 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       });
       const data = resp.data as { getApsAdminAnnouncement?: Announcement | null };
       if (!data.getApsAdminAnnouncement?.id) throw new Error('Announcement not found');
+      if (!isAnnouncementVisibleToAttendees(data.getApsAdminAnnouncement)) {
+        throw new Error('Announcement not found');
+      }
       set({
         announcementById: { ...get().announcementById, [id]: data.getApsAdminAnnouncement },
         loading: { ...get().loading, announcementDetail: false },

@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   SectionList,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { AppUserRow } from '../../../src/components/AppUserRow';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 import { listApsAppUserProfiles } from '../../../src/graphql/queries';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
@@ -224,12 +224,7 @@ export default function CommunityIndex() {
   }, [profiles, profilePictureUris]);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading community…</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

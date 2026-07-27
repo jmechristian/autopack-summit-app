@@ -5,6 +5,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -139,15 +141,20 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top, paddingBottom: insets.bottom + 16 },
-      ]}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={insets.top}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={styles.container}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 16 },
+        ]}
         keyboardShouldPersistTaps='handled'
+        keyboardDismissMode='on-drag'
+        automaticallyAdjustKeyboardInsets
       >
         <Animated.View entering={FadeInDown.duration(500).delay(50)}>
           <Text style={styles.title}>Set a new password</Text>
@@ -209,7 +216,7 @@ export default function ChangePasswordScreen() {
           </View>
         </Animated.View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -221,7 +228,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 32,
   },
   card: {
     marginTop: 16,

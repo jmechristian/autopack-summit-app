@@ -10,7 +10,9 @@ import {
   ActivityIndicator,
   Alert,
   ImageBackground,
+  KeyboardAvoidingView,
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -37,6 +39,7 @@ import {
   uploadProfilePicture,
   uploadResume,
 } from '../../../src/utils/storageUtils';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
@@ -243,12 +246,7 @@ export default function Profile() {
   };
 
   if (!appUser || !profile) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size='large' color={autopackColors.apBlue} />
-        <Text style={styles.loadingText}>Loading profile...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   const qrCodeUrl = getQrCodeUrl();
@@ -268,11 +266,19 @@ export default function Profile() {
   const registrantType = formatRegistrantType(registrant?.attendeeType || null);
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={insets.top}
     >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps='handled'
+        keyboardDismissMode='on-drag'
+        automaticallyAdjustKeyboardInsets
+      >
       <ImageBackground
         source={require('../../../assets/images/mobile-bg.png')}
         style={[styles.headerBg, { paddingTop: insets.top + 12 }]}
@@ -359,6 +365,24 @@ export default function Profile() {
               <Ionicons name='document-text' size={20} color='#fff' />
             </View>
             <Text style={styles.actionTileText}>Notes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionTile}
+            onPress={() => router.push('/(main)/hub/favorites')}
+          >
+            <View style={styles.actionIconWrap}>
+              <Ionicons name='star' size={20} color='#fff' />
+            </View>
+            <Text style={styles.actionTileText}>Favorites</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionTile}
+            onPress={() => router.push('/(main)/profile/settings')}
+          >
+            <View style={styles.actionIconWrap}>
+              <Ionicons name='settings-outline' size={20} color='#fff' />
+            </View>
+            <Text style={styles.actionTileText}>Settings</Text>
           </TouchableOpacity>
         </View>
 
@@ -484,29 +508,30 @@ export default function Profile() {
         </TouchableOpacity>
       </View>
 
-      <Overlay
-        isVisible={qrCodeVisible}
-        onBackdropPress={() => setQrCodeVisible(false)}
-        overlayStyle={styles.qrCodeOverlay}
-      >
-        <View style={styles.qrCodeContainer}>
-          <Text style={styles.qrCodeTitle}>Your QR Code</Text>
-          {qrCodeUrl && (
-            <Image
-              source={{ uri: qrCodeUrl }}
-              style={styles.qrCodeImage}
-              contentFit='contain'
-            />
-          )}
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setQrCodeVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Overlay>
-    </ScrollView>
+        <Overlay
+          isVisible={qrCodeVisible}
+          onBackdropPress={() => setQrCodeVisible(false)}
+          overlayStyle={styles.qrCodeOverlay}
+        >
+          <View style={styles.qrCodeContainer}>
+            <Text style={styles.qrCodeTitle}>Your QR Code</Text>
+            {qrCodeUrl && (
+              <Image
+                source={{ uri: qrCodeUrl }}
+                style={styles.qrCodeImage}
+                contentFit='contain'
+              />
+            )}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setQrCodeVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Overlay>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -644,6 +669,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 8,
+  },
+  actionTileFull: {
+    width: '100%',
   },
   actionTileDisabled: {
     opacity: 0.5,

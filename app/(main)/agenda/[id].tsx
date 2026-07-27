@@ -1,7 +1,8 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -20,7 +21,9 @@ import {
   getApsAppSessionWithRelations,
 } from '../../../src/graphql/customQueries';
 import { NotesSection } from '../../../src/components/notes/NotesSection';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
+import { isSessionLive } from '../../../src/utils/sessionLive';
 
 type Speaker = {
   id: string;
@@ -47,6 +50,7 @@ type Session = {
   date?: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  embedUrl?: string | null;
   location?: string | null;
   description?: string | null;
   speakers?: Speaker[];
@@ -143,7 +147,7 @@ const deleteFavoriteSession = /* GraphQL */ `
 `;
 
 export default function AgendaDetails() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, returnTo } = useLocalSearchParams<{ id: string; returnTo?: string }>();
   const currentAppUser = useCurrentAppUser();
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const [loading, setLoading] = useState(true);
@@ -151,7 +155,15 @@ export default function AgendaDetails() {
   const [session, setSession] = useState<Session | null>(null);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [favoriteBusy, setFavoriteBusy] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const { width } = useWindowDimensions();
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNowMs(Date.now());
+    }, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -199,6 +211,7 @@ export default function AgendaDetails() {
           date: it.date ?? null,
           startTime: it.startTime ?? null,
           endTime: it.endTime ?? null,
+          embedUrl: it.embedUrl ?? null,
           location: it.location ?? null,
           description: resolvedDescription,
           speakers,
@@ -241,6 +254,12 @@ export default function AgendaDetails() {
     () => toSafeRenderableHtml(session?.description),
     [session?.description],
   );
+  const isLive = useMemo(() => (session ? isSessionLive(session, new Date(nowMs)) : false), [nowMs, session]);
+  const presentationUrl = useMemo(() => {
+    const raw = normalizeText(session?.embedUrl);
+    if (!raw) return '';
+    return /^https?:\/\//i.test(raw) ? raw : '';
+  }, [session?.embedUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -303,13 +322,21 @@ export default function AgendaDetails() {
     }
   }
 
+  function onPressPresentation() {
+    if (!presentationUrl || !session?.id) return;
+    router.push({
+      pathname: '/(main)/agenda/presentation',
+      params: {
+        url: presentationUrl,
+        title: normalizeText(session.title) || 'Presentation',
+        sessionId: session.id,
+        ...(returnTo ? { returnTo } : {}),
+      },
+    });
+  }
+
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={autopackColors.apBlue} />
-        <Text style={styles.centerText}>Loading session…</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error) {
@@ -322,102 +349,122 @@ export default function AgendaDetails() {
   }
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps='handled'
-      automaticallyAdjustKeyboardInsets
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Text style={styles.time}>{timeLabel}</Text>
-      <View style={styles.titleRow}>
-        <Text style={styles.title}>{title}</Text>
-        {!!currentProfileId && (
-          <Pressable style={styles.favoriteBtn} onPress={toggleFavorite} disabled={favoriteBusy}>
-            <Ionicons
-              name={favoriteRecordId ? 'star' : 'star-outline'}
-              size={20}
-              color={favoriteRecordId ? '#f59e0b' : favoriteBusy ? '#9ca3af' : '#6b7280'}
-            />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps='handled'
+        keyboardDismissMode='on-drag'
+        automaticallyAdjustKeyboardInsets
+      >
+        <Text style={styles.time}>{timeLabel}</Text>
+        <View style={styles.titleRow}>
+          <View style={styles.titleWrap}>
+            <Text style={styles.title}>{title}</Text>
+            {isLive && (
+              <View style={styles.livePill}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveText}>LIVE</Text>
+              </View>
+            )}
+          </View>
+          {!!currentProfileId && (
+            <Pressable style={styles.favoriteBtn} onPress={toggleFavorite} disabled={favoriteBusy}>
+              <Ionicons
+                name={favoriteRecordId ? 'star' : 'star-outline'}
+                size={20}
+                color={favoriteRecordId ? '#f59e0b' : favoriteBusy ? '#9ca3af' : '#6b7280'}
+              />
+            </Pressable>
+          )}
+        </View>
+        {!!normalizeText(session?.location) && (
+          <Text style={styles.location}>{normalizeText(session?.location)}</Text>
+        )}
+        {!!presentationUrl && (
+          <Pressable style={styles.presentationBtn} onPress={onPressPresentation}>
+            <Ionicons name='tv-outline' size={16} color='#FFFFFF' />
+            <Text style={styles.presentationBtnText}>View Presentation</Text>
           </Pressable>
         )}
-      </View>
-      {!!normalizeText(session?.location) && (
-        <Text style={styles.location}>{normalizeText(session?.location)}</Text>
-      )}
 
-      {!!descriptionText && (
-        <>
-          <View style={styles.divider} />
-          <RenderHtml
-            contentWidth={Math.max(1, width - 32)}
-            source={{ html: descriptionHtml }}
-            baseStyle={styles.description}
-            tagsStyles={{
-              p: { marginTop: 0, marginBottom: 12 },
-              br: { marginBottom: 0 },
-              ul: { marginTop: 0, marginBottom: 12, paddingLeft: 18 },
-              ol: { marginTop: 0, marginBottom: 12, paddingLeft: 18 },
-              li: { marginBottom: 6 },
-              a: { color: autopackColors.apBlue, textDecorationLine: 'underline' },
-              strong: { fontWeight: '700' },
-              b: { fontWeight: '700' },
-              em: { fontStyle: 'italic' },
-              i: { fontStyle: 'italic' },
-            }}
-          />
-        </>
-      )}
+        {!!descriptionText && (
+          <>
+            <View style={styles.divider} />
+            <RenderHtml
+              contentWidth={Math.max(1, width - 32)}
+              source={{ html: descriptionHtml }}
+              baseStyle={styles.description}
+              tagsStyles={{
+                p: { marginTop: 0, marginBottom: 12 },
+                br: { marginBottom: 0 },
+                ul: { marginTop: 0, marginBottom: 12, paddingLeft: 18 },
+                ol: { marginTop: 0, marginBottom: 12, paddingLeft: 18 },
+                li: { marginBottom: 6 },
+                a: { color: autopackColors.apBlue, textDecorationLine: 'underline' },
+                strong: { fontWeight: '700' },
+                b: { fontWeight: '700' },
+                em: { fontStyle: 'italic' },
+                i: { fontStyle: 'italic' },
+              }}
+            />
+          </>
+        )}
 
-      {!!(session?.speakers || []).length && (
-        <>
-          <View style={styles.divider} />
-          <Text style={styles.sectionTitle}>Speakers</Text>
-          {(session?.speakers || []).map((s) => {
-            const name = `${normalizeText(s.firstName || s.profile?.firstName)} ${normalizeText(
-              s.lastName || s.profile?.lastName,
-            )}`.trim();
-            const subtitle = [
-              normalizeText(s.title || s.profile?.jobTitle),
-              normalizeText(s.company || s.profile?.company),
-            ]
-              .filter(Boolean)
-              .join(' • ');
-            return (
-              <View key={s.id} style={styles.row}>
-                <Text style={styles.rowTitle}>
-                  {name ||
-                    `${normalizeText(s.profile?.firstName)} ${normalizeText(s.profile?.lastName)}`.trim() ||
-                    'Speaker'}
-                </Text>
-                {!!subtitle && <Text style={styles.rowSubtitle}>{subtitle}</Text>}
-              </View>
-            );
-          })}
-        </>
-      )}
+        {!!(session?.speakers || []).length && (
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>Speakers</Text>
+            {(session?.speakers || []).map((s) => {
+              const name = `${normalizeText(s.firstName || s.profile?.firstName)} ${normalizeText(
+                s.lastName || s.profile?.lastName,
+              )}`.trim();
+              const subtitle = [
+                normalizeText(s.title || s.profile?.jobTitle),
+                normalizeText(s.company || s.profile?.company),
+              ]
+                .filter(Boolean)
+                .join(' • ');
+              return (
+                <View key={s.id} style={styles.row}>
+                  <Text style={styles.rowTitle}>
+                    {name ||
+                      `${normalizeText(s.profile?.firstName)} ${normalizeText(s.profile?.lastName)}`.trim() ||
+                      'Speaker'}
+                  </Text>
+                  {!!subtitle && <Text style={styles.rowSubtitle}>{subtitle}</Text>}
+                </View>
+              );
+            })}
+          </>
+        )}
 
-      {!!(session?.sponsors || []).length && (
-        <>
-          <View style={styles.divider} />
-          <Text style={styles.sectionTitle}>Sponsors</Text>
-          {(session?.sponsors || []).map((s) => {
-            const name = normalizeText(s.company?.name || '');
-            return (
-              <View key={s.id} style={styles.row}>
-                <Text style={styles.rowTitle}>{name || 'Sponsor'}</Text>
-              </View>
-            );
-          })}
-        </>
-      )}
+        {!!(session?.sponsors || []).length && (
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>Sponsors</Text>
+            {(session?.sponsors || []).map((s) => {
+              const name = normalizeText(s.company?.name || '');
+              return (
+                <View key={s.id} style={styles.row}>
+                  <Text style={styles.rowTitle}>{name || 'Sponsor'}</Text>
+                </View>
+              );
+            })}
+          </>
+        )}
 
-      {!!session?.id && !!currentAppUser?.id && (
-        <>
-          <View style={styles.divider} />
-          <NotesSection sessionId={session.id} />
-        </>
-      )}
-    </ScrollView>
+        {!!session?.id && !!currentAppUser?.id && (
+          <>
+            <View style={styles.divider} />
+            <NotesSection sessionId={session.id} />
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -430,7 +477,26 @@ const styles = StyleSheet.create({
   errorBody: { marginTop: 8, color: '#6B7280', textAlign: 'center' },
   time: { color: autopackColors.apBlue, fontWeight: '800', fontSize: 13, marginBottom: 8 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  titleWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { flex: 1, fontSize: 22, fontWeight: '900', color: '#111827' },
+  livePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 999,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  liveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: '#DC2626',
+  },
+  liveText: { color: '#B91C1C', fontSize: 11, fontWeight: '800', letterSpacing: 0.4 },
   favoriteBtn: {
     width: 34,
     height: 34,
@@ -442,6 +508,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   location: { marginTop: 10, color: '#4B5563', fontWeight: '600' },
+  presentationBtn: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    borderRadius: 10,
+    backgroundColor: autopackColors.apBlue,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  presentationBtnText: { color: '#FFFFFF', fontWeight: '800' },
   divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 14 },
   description: { color: '#374151', lineHeight: 20, fontSize: 15 },
   sectionTitle: { fontSize: 16, fontWeight: '900', color: '#111827', marginBottom: 10 },

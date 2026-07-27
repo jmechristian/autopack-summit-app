@@ -1,11 +1,10 @@
 // app/redirect.tsx
 // This route handles OAuth redirects (like LinkedIn) via deep links
 import { useEffect } from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { handleLinkedInRedirect } from '../src/utils/linkedInAuth';
-import { autopackColors } from '../src/theme';
+import { RiveLoader } from '../src/components/RiveLoader';
 
 export default function RedirectHandler() {
   const params = useLocalSearchParams();
@@ -51,25 +50,6 @@ export default function RedirectHandler() {
     processRedirect();
   }, [params, router]);
 
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color={autopackColors.apBlue} />
-      <Text style={styles.text}>Completing authorization...</Text>
-    </View>
-  );
+  return <RiveLoader />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  text: {
-    marginTop: 16,
-    color: '#666',
-    fontSize: 16,
-  },
-});
 

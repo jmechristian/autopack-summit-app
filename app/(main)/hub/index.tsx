@@ -34,8 +34,15 @@ import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
+import { isCurrentUserAdmin } from '../../../src/utils/adminAccess';
+import {
+  compareSessionsByStart,
+  isSessionLive,
+  isSessionUpcoming,
+} from '../../../src/utils/sessionLive';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 
 type QuickTool = {
   id: string;
@@ -89,6 +96,10 @@ const ALL_QUICK_TOOLS: QuickTool[] = [
 type NextSession = {
   id: string;
   title: string;
+  date?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  embedUrl?: string | null;
   timeLabel: string;
   location: string;
   descriptionText: string;
@@ -110,37 +121,6 @@ const passportExhibitorsByEvent = /* GraphQL */ `
   }
 `;
 
-const MOCK_NEXT_SESSIONS: NextSession[] = [
-  {
-    id: 's1',
-    title:
-      'EV Battery Safety: Lithium Battery\nTransport & Storage Regulatory\nLandscape',
-    timeLabel: '9:30 AM - 10:00 AM',
-    location: 'Ballroom Main Stage',
-    descriptionText: '',
-    speakerNames: ['Mike Pagel'],
-    sponsorNames: [],
-  },
-  {
-    id: 's2',
-    title: 'Packaging Trends in 2026\nWhat’s Changing and Why',
-    timeLabel: '10:15 AM - 10:45 AM',
-    location: 'Track B',
-    descriptionText: '',
-    speakerNames: ['Taylor Nguyen'],
-    sponsorNames: [],
-  },
-  {
-    id: 's3',
-    title: 'Materials & Sustainability\nPractical Steps for OEMs',
-    timeLabel: '11:00 AM - 11:30 AM',
-    location: 'Track A',
-    descriptionText: '',
-    speakerNames: ['Jordan Lee'],
-    sponsorNames: [],
-  },
-];
-
 function normalizeText(v?: string | null) {
   return (v || '').trim();
 }
@@ -150,6 +130,32 @@ function formatTimeRange(start?: string | null, end?: string | null) {
   const e = normalizeText(end);
   if (s && e) return `${s} - ${e}`;
   return s || '';
+}
+
+function resolvePresentationUrl(embedUrl?: string | null) {
+  const raw = normalizeText(embedUrl);
+  if (!raw) return '';
+  return /^https?:\/\//i.test(raw) ? raw : '';
+}
+
+function selectHubSessions(sessions: NextSession[], now: Date) {
+  const liveSessions = sessions
+    .filter((session) => isSessionLive(session, now))
+    .sort(compareSessionsByStart);
+
+  if (liveSessions.length) {
+    return { sessions: liveSessions, headerLabel: 'Live Now' as const };
+  }
+
+  const upcomingSessions = sessions
+    .filter((session) => isSessionUpcoming(session, now))
+    .sort(compareSessionsByStart);
+
+  if (!upcomingSessions.length) {
+    return { sessions: [], headerLabel: 'Coming Up' as const };
+  }
+
+  return { sessions: [upcomingSessions[0]], headerLabel: 'Coming Up' as const };
 }
 
 function htmlToPlainText(input: string) {
@@ -176,16 +182,27 @@ export default function HubScreen() {
   const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
   const [sessionIndex, setSessionIndex] = useState(0);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [nextSessions, setNextSessions] = useState<NextSession[]>(MOCK_NEXT_SESSIONS);
+  const [allSessions, setAllSessions] = useState<NextSession[]>([]);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
   const [selectedToolIds, setSelectedToolIds] = useState<string[]>(DEFAULT_TOOL_IDS);
   const [editingToolIds, setEditingToolIds] = useState<string[]>([]);
   const [toolsModalVisible, setToolsModalVisible] = useState(false);
   const [toolsLoaded, setToolsLoaded] = useState(false);
   const [hasExhibitorProfile, setHasExhibitorProfile] = useState<boolean | null>(null);
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const [passportLoading, setPassportLoading] = useState(true);
   const [passportTotal, setPassportTotal] = useState(0);
   const [passportCollected, setPassportCollected] = useState(0);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  const now = useMemo(() => new Date(nowMs), [nowMs]);
+  const { sessions: nextSessions, headerLabel: nextSessionHeaderLabel } = useMemo(
+    () => selectHubSessions(allSessions, now),
+    [allSessions, now],
+  );
+
+  useEffect(() => {
+    setSessionIndex(0);
+  }, [nextSessions.length, nextSessionHeaderLabel]);
 
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
@@ -193,6 +210,13 @@ export default function HubScreen() {
     minutes: '00',
     seconds: '00',
   });
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNowMs(Date.now());
+    }, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const loadTools = async () => {
@@ -270,6 +294,19 @@ export default function HubScreen() {
       console.warn('Hub: unable to save quick tools selection', e);
     });
   }, [hasExhibitorProfile, selectedToolIds, toolsLoaded]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadAdminAccess = async () => {
+      const allowed = await isCurrentUserAdmin();
+      if (!mounted) return;
+      setIsAdminUser(allowed);
+    };
+    loadAdminAccess();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const loadPassportProgress = useCallback(async () => {
     setPassportLoading(true);
@@ -425,6 +462,10 @@ export default function HubScreen() {
           return {
             id: it.id,
             title,
+            date: it?.date ?? null,
+            startTime: it?.startTime ?? null,
+            endTime: it?.endTime ?? null,
+            embedUrl: it?.embedUrl ?? null,
             timeLabel: time || 'TBD',
             location: location || '',
             descriptionText,
@@ -433,9 +474,8 @@ export default function HubScreen() {
           };
         });
 
-        if (!cancelled && mapped.length) {
-          setNextSessions(mapped);
-          setSessionIndex(0);
+        if (!cancelled) {
+          setAllSessions(mapped);
         }
       } catch (e) {
         // Keep hub resilient: fall back to mock if anything goes wrong
@@ -595,12 +635,7 @@ export default function HubScreen() {
   };
 
   if (isHubBootLoading) {
-    return (
-      <View style={styles.loadingScreen}>
-        <ActivityIndicator size="large" color={autopackColors.apBlue} />
-        <Text style={styles.loadingTitle}>Loading your summit hub...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (
@@ -635,16 +670,27 @@ export default function HubScreen() {
             </Text>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => router.push('/(main)/hub/notifications')}
-            style={styles.bellButton}
-          >
-            <Ionicons name='notifications-outline' size={22} color='#fff' />
-            <View style={styles.bellBadge}>
-              <AppBadge value={engageBadge} />
-            </View>
-          </TouchableOpacity>
+          <View style={styles.heroActions}>
+            {isAdminUser ? (
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => router.push('/(main)/admin')}
+                style={styles.iconButton}
+              >
+                <Ionicons name='settings-outline' size={22} color='#fff' />
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => router.push('/(main)/hub/notifications')}
+              style={styles.iconButton}
+            >
+              <Ionicons name='notifications-outline' size={22} color='#fff' />
+              <View style={styles.bellBadge}>
+                <AppBadge value={engageBadge} />
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.heroTextWrap}>
@@ -724,14 +770,18 @@ export default function HubScreen() {
           )}
         </Pressable>
 
-        {/* Next Session carousel (dummy) */}
+        {nextSessions.length > 0 && (
         <Animated.View entering={FadeInDown.duration(600).delay(220)}>
           <View style={[styles.sectionHeaderBanner, styles.nextSessionHeaderBanner]}>
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIconWrap, styles.nextSessionIconWrap]}>
-                <Ionicons name='calendar-outline' size={14} color='#c2410c' />
+                <Ionicons
+                  name={nextSessionHeaderLabel === 'Live Now' ? 'radio-outline' : 'calendar-outline'}
+                  size={14}
+                  color='#c2410c'
+                />
               </View>
-              <Text style={styles.sectionHeaderText}>Next Session</Text>
+              <Text style={styles.sectionHeaderText}>{nextSessionHeaderLabel}</Text>
             </View>
           </View>
           <RNAnimated.ScrollView
@@ -753,7 +803,11 @@ export default function HubScreen() {
               setSessionIndex(i);
             }}
           >
-            {nextSessions.map((s) => (
+            {nextSessions.map((s) => {
+              const live = isSessionLive(s, now);
+              const presentationUrl = resolvePresentationUrl(s.embedUrl);
+
+              return (
               <View
                 key={s.id}
                 style={{ width: Dimensions.get('window').width }}
@@ -764,6 +818,7 @@ export default function HubScreen() {
                   <AgendaSessionCard
                     timeLabel={s.timeLabel}
                     title={s.title}
+                    isLive={live}
                     location={s.location}
                     descriptionText={s.descriptionText}
                     speakerNames={s.speakerNames}
@@ -771,18 +826,32 @@ export default function HubScreen() {
                     descriptionNumberOfLines={3}
                     metaNumberOfLines={1}
                     cardStyle={styles.nextSessionCard}
+                    showPresentationButton={live && !!presentationUrl}
+                    onPressPresentation={() => {
+                      router.push({
+                        pathname: '/(main)/agenda/presentation',
+                        params: {
+                          url: presentationUrl,
+                          title: s.title || 'Presentation',
+                          sessionId: s.id,
+                          returnTo: '/(main)/hub',
+                        },
+                      });
+                    }}
                     onPress={() =>
                       router.push({
                         pathname: '/(main)/agenda/[id]',
-                        params: { id: s.id },
+                        params: { id: s.id, returnTo: '/(main)/hub' },
                       })
                     }
                   />
                 </View>
               </View>
-            ))}
+              );
+            })}
           </RNAnimated.ScrollView>
 
+          {nextSessions.length > 1 && (
           <View style={styles.progressWrap} pointerEvents="none">
             <View style={styles.progressTrack}>
               <View style={styles.progressDotsRow}>
@@ -801,7 +870,9 @@ export default function HubScreen() {
               {Math.min(nextSessions.length, sessionIndex + 1)} / {nextSessions.length}
             </Text>
           </View>
+          )}
         </Animated.View>
+        )}
 
         <View style={styles.certificateDividerWrap}>
           <View style={styles.certificateDivider} />
@@ -1004,7 +1075,15 @@ const styles = StyleSheet.create({
   avatarImg: { width: 34, height: 34, borderRadius: 999 },
   avatarText: { fontWeight: '700', color: ui.colors.text },
   greeting: { color: '#fff', fontWeight: '700' },
-  bellButton: { padding: 8 },
+  heroActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 0,
+  },
+  iconButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+  },
   bellBadge: { position: 'absolute', top: 0, right: 0 },
   heroTextWrap: { paddingHorizontal: 20, marginTop: 24, marginBottom: 26 },
   heroTitle: {

@@ -28,6 +28,10 @@
     {
       "cloudFormationParameterName": "apcTotalCourses",
       "environmentVariableName": "APC_TOTAL_COURSES"
+    },
+    {
+      "cloudFormationParameterName": "apsEventId",
+      "environmentVariableName": "APS_EVENT_ID"
     }
   ],
   "permissions": {
@@ -35,6 +39,13 @@
       "autopacksummitapp": [
         "Query",
         "Mutation"
+      ]
+    },
+    "storage": {
+      "apsapp": [
+        "create",
+        "read",
+        "update"
       ]
     }
   }

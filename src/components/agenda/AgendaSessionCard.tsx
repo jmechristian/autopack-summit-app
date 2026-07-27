@@ -6,6 +6,7 @@ import { autopackColors } from '../../theme';
 type AgendaSessionCardProps = {
   timeLabel: string;
   title: string;
+  isLive?: boolean;
   location?: string;
   descriptionText?: string;
   speakerNames?: string[];
@@ -22,6 +23,8 @@ type AgendaSessionCardProps = {
   descriptionNumberOfLines?: number;
   metaNumberOfLines?: number;
   cardStyle?: StyleProp<ViewStyle>;
+  showPresentationButton?: boolean;
+  onPressPresentation?: () => void;
 };
 
 function formatPeopleList(names: string[]) {
@@ -31,6 +34,7 @@ function formatPeopleList(names: string[]) {
 export function AgendaSessionCard({
   timeLabel,
   title,
+  isLive = false,
   location,
   descriptionText,
   speakerNames = [],
@@ -47,6 +51,8 @@ export function AgendaSessionCard({
   descriptionNumberOfLines,
   metaNumberOfLines,
   cardStyle,
+  showPresentationButton = false,
+  onPressPresentation,
 }: AgendaSessionCardProps) {
   const descriptionLines =
     typeof descriptionNumberOfLines === 'number'
@@ -54,27 +60,65 @@ export function AgendaSessionCard({
       : isExpanded
         ? undefined
         : 6;
+  const hasTopRightMeta = showNoteIcon || showFavorite;
+  const needsWideRightInset = isLive || showNoteIcon || showFavorite;
+  const needsExtraWideRightInset = isLive && (showNoteIcon || showFavorite);
 
   return (
     <View style={[styles.card, cardStyle]}>
-      <View style={styles.topRightActions}>
-        {showNoteIcon && (
-          <View pointerEvents='none' style={styles.noteIcon}>
-            <Ionicons name='document-text-outline' size={18} color={autopackColors.apBlue} />
+      <View style={[styles.topRightActions, isLive && hasTopRightMeta && styles.topRightActionsLiveStack]}>
+        {isLive && (
+          <View pointerEvents='none' style={styles.livePill}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText}>LIVE</Text>
           </View>
         )}
-        {showFavorite && (
-          <Pressable style={styles.favoriteIconBtn} hitSlop={8} onPress={onToggleFavorite}>
-            <Ionicons
-              name={isFavorite ? 'star' : 'star-outline'}
-              size={18}
-              color={isFavorite ? '#f59e0b' : isFavoritePending ? '#9ca3af' : '#6b7280'}
-            />
-          </Pressable>
+        {isLive && hasTopRightMeta ? (
+          <View style={styles.topRightMetaRow}>
+            {showNoteIcon && (
+              <View pointerEvents='none' style={styles.noteIcon}>
+                <Ionicons name='document-text-outline' size={18} color={autopackColors.apBlue} />
+              </View>
+            )}
+            {showFavorite && (
+              <Pressable style={styles.favoriteIconBtn} hitSlop={8} onPress={onToggleFavorite}>
+                <Ionicons
+                  name={isFavorite ? 'star' : 'star-outline'}
+                  size={18}
+                  color={isFavorite ? '#f59e0b' : isFavoritePending ? '#9ca3af' : '#6b7280'}
+                />
+              </Pressable>
+            )}
+          </View>
+        ) : (
+          <>
+            {showNoteIcon && (
+              <View pointerEvents='none' style={styles.noteIcon}>
+                <Ionicons name='document-text-outline' size={18} color={autopackColors.apBlue} />
+              </View>
+            )}
+            {showFavorite && (
+              <Pressable style={styles.favoriteIconBtn} hitSlop={8} onPress={onToggleFavorite}>
+                <Ionicons
+                  name={isFavorite ? 'star' : 'star-outline'}
+                  size={18}
+                  color={isFavorite ? '#f59e0b' : isFavoritePending ? '#9ca3af' : '#6b7280'}
+                />
+              </Pressable>
+            )}
+          </>
         )}
       </View>
 
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.cardBodyPressable, pressed && styles.cardPressed]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.cardBodyPressable,
+          needsWideRightInset && styles.cardBodyPressableWide,
+          needsExtraWideRightInset && styles.cardBodyPressableExtraWide,
+          pressed && styles.cardPressed,
+        ]}
+      >
         <Text style={styles.time}>{timeLabel}</Text>
         <Text style={styles.title}>{title}</Text>
 
@@ -109,6 +153,13 @@ export function AgendaSessionCard({
           </Text>
         )}
       </Pressable>
+
+      {showPresentationButton && !!onPressPresentation && (
+        <Pressable style={styles.presentationBtn} onPress={onPressPresentation}>
+          <Ionicons name='tv-outline' size={16} color='#FFFFFF' />
+          <Text style={styles.presentationBtnText}>View Presentation</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -128,8 +179,10 @@ const styles = StyleSheet.create({
   },
   cardBodyPressable: {
     padding: 14,
-    paddingRight: 52,
+    paddingRight: 14,
   },
+  cardBodyPressableWide: { paddingRight: 80 },
+  cardBodyPressableExtraWide: { paddingRight: 150 },
   cardPressed: { opacity: 0.92 },
   noteIcon: {
     width: 26,
@@ -151,6 +204,16 @@ const styles = StyleSheet.create({
     zIndex: 20,
     elevation: 20,
   },
+  topRightActionsLiveStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  topRightMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   favoriteIconBtn: {
     width: 26,
     height: 26,
@@ -165,6 +228,29 @@ const styles = StyleSheet.create({
   },
   time: { color: autopackColors.apBlue, fontWeight: '800', fontSize: 13, marginBottom: 6 },
   title: { fontSize: 17, fontWeight: '800', color: '#111827' },
+  livePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 999,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  liveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: '#DC2626',
+  },
+  liveText: {
+    color: '#B91C1C',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+  },
   location: { marginTop: 6, color: '#4B5563', fontWeight: '600' },
   divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 12 },
   description: { color: '#374151', lineHeight: 20 },
@@ -172,4 +258,17 @@ const styles = StyleSheet.create({
   readMoreText: { color: autopackColors.apBlue, fontWeight: '700' },
   metaLine: { marginTop: 10, color: '#374151', lineHeight: 20 },
   metaLabel: { fontWeight: '800', color: '#111827' },
+  presentationBtn: {
+    marginHorizontal: 14,
+    marginBottom: 14,
+    alignSelf: 'flex-start',
+    borderRadius: 10,
+    backgroundColor: autopackColors.apBlue,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  presentationBtnText: { color: '#FFFFFF', fontWeight: '800' },
 });

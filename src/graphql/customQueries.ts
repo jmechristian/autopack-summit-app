@@ -302,6 +302,7 @@ export const apsAppSessionsByAgendaIdWithRelations = /* GraphQL */ `
         date
         startTime
         endTime
+        embedUrl
         location
         description
         speakers {
@@ -362,6 +363,7 @@ export const getApsAppSessionWithRelations = /* GraphQL */ `
       date
       startTime
       endTime
+      embedUrl
       location
       description
       speakers {

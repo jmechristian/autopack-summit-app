@@ -3,9 +3,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,6 +30,7 @@ import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { NotesSection } from '../notes/NotesSection';
 import { RequestIntroModal } from '../requests/RequestIntroModal';
+import { RiveLoader } from '../RiveLoader';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` can include fields that now depend on USER_POOLS-only models (notes),
@@ -432,12 +434,7 @@ export default function CommunityProfileScreen() {
   );
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading profile...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error || !profile) {
@@ -477,12 +474,18 @@ export default function CommunityProfileScreen() {
       .filter(Boolean) || [];
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps='handled'
-      automaticallyAdjustKeyboardInsets
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={insets.top}
     >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps='handled'
+        keyboardDismissMode='on-drag'
+        automaticallyAdjustKeyboardInsets
+      >
       <View style={styles.headerRow}>
         <View style={styles.avatar}>
           {avatarUri ? (
@@ -716,14 +719,15 @@ export default function CommunityProfileScreen() {
       </View>
 
       <NotesSection profileId={profile.id} />
-      <RequestIntroModal
-        visible={introModalVisible}
-        recipientName={displayName}
-        loading={requestActionBusy}
-        onCancel={() => setIntroModalVisible(false)}
-        onSubmit={submitIntroRequest}
-      />
-    </ScrollView>
+        <RequestIntroModal
+          visible={introModalVisible}
+          recipientName={displayName}
+          loading={requestActionBusy}
+          onCancel={() => setIntroModalVisible(false)}
+          onSubmit={submitIntroRequest}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

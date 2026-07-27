@@ -21,7 +21,30 @@
       "arn:aws:dynamodb:*:*:table/ApsDmMessage-*",
       "arn:aws:dynamodb:*:*:table/ApsDmMessage-*/index/*",
       "arn:aws:dynamodb:*:*:table/ApsDmParticipantState-*",
-      "arn:aws:dynamodb:*:*:table/ApsDmParticipantState-*/index/*"
+      "arn:aws:dynamodb:*:*:table/ApsDmParticipantState-*/index/*",
+      "arn:aws:dynamodb:*:*:table/ApsAppExhibitorProfile-*",
+      "arn:aws:dynamodb:*:*:table/ApsAppExhibitorProfile-*/index/*",
+      "arn:aws:dynamodb:*:*:table/ApsAdminAnnouncement-*",
+      "arn:aws:dynamodb:*:*:table/ApsAdminAnnouncement-*/index/*"
+    ]
+  },
+  {
+    "Action": [
+      "s3:PutObject"
+    ],
+    "Resource": [
+      "arn:aws:s3:::*/qrcodes/exhibitor-passport/*"
+    ]
+  },
+  {
+    "Action": [
+      "scheduler:CreateSchedule",
+      "scheduler:UpdateSchedule",
+      "scheduler:DeleteSchedule",
+      "scheduler:GetSchedule"
+    ],
+    "Resource": [
+      "arn:aws:scheduler:*:*:schedule/aps-announcements-*/*"
     ]
   }
 ]

@@ -1,1 +1,1 @@
-export { default } from '../../engage/announcements/[id]';
+export { default } from '../../../../src/components/tools/AnnouncementDetailTool';

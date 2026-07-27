@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -20,6 +19,8 @@ import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/cust
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
+import { RiveLoader } from '../../../src/components/RiveLoader';
+import { isSessionLive } from '../../../src/utils/sessionLive';
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
 
@@ -50,6 +51,7 @@ type AgendaSession = {
   date?: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  embedUrl?: string | null;
   location?: string | null;
   description?: string | null;
   speakers?: Speaker[];
@@ -200,6 +202,14 @@ export default function AgendaList() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNowMs(Date.now());
+    }, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const load = useCallback(async () => {
     setError(null);
@@ -215,7 +225,7 @@ export default function AgendaList() {
 
         const data = resp.data as any;
         const conn = data?.apsAppSessionsByAgendaId;
-        const items: Array<any> = conn?.items || [];
+        const items: any[] = conn?.items || [];
         for (const it of items) {
           if (!it?.id) continue;
           const speakers: Speaker[] = (it.speakers?.items || [])
@@ -230,6 +240,7 @@ export default function AgendaList() {
             date: it.date ?? null,
             startTime: it.startTime ?? null,
             endTime: it.endTime ?? null,
+            embedUrl: it.embedUrl ?? null,
             location: it.location ?? null,
             description: it.description ?? null,
             speakers,
@@ -270,7 +281,7 @@ export default function AgendaList() {
       });
       const data = resp.data as {
         apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?: {
-          items?: Array<{ id?: string | null; sessionId?: string | null } | null> | null;
+          items?: ({ id?: string | null; sessionId?: string | null } | null)[] | null;
         } | null;
       };
       const next: Record<string, string> = {};
@@ -436,11 +447,13 @@ export default function AgendaList() {
     const isFavoritePending = !!favoritePendingBySessionId[item.id];
     const isExpanded = !!expandedById[item.id];
     const shouldShowToggle = descriptionText.length > 260;
+    const live = isSessionLive(item, new Date(nowMs));
 
     return (
       <AgendaSessionCard
         timeLabel={time}
         title={title}
+        isLive={live}
         location={location}
         descriptionText={descriptionText}
         speakerNames={speakers}
@@ -472,18 +485,14 @@ export default function AgendaList() {
     currentProfileId,
     favoriteRecordIdBySessionId,
     favoritePendingBySessionId,
+    nowMs,
     toggleFavoriteSession,
   ]);
 
   const keyExtractor = useCallback((item: AgendaSession) => item.id, []);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={autopackColors.apBlue} />
-        <Text style={styles.centerText}>Loading agenda…</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error) {

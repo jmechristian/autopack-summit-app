@@ -3,7 +3,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   Pressable,
   SectionList,
@@ -19,6 +18,7 @@ import { apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt } from '../../gra
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import { RiveLoader } from '../RiveLoader';
 
 type SponsorsToolProps = {
   detailBasePath: '/(main)/engage/sponsors' | '/(main)/hub/sponsors';
@@ -321,12 +321,7 @@ export default function SponsorsTool({ detailBasePath }: SponsorsToolProps) {
   );
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading sponsors...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

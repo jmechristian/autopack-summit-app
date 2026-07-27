@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { APS_ID } from '../../../src/config/apsConfig';
 import { apsAppExhibitorProfilesByCompanyId } from '../../../src/graphql/queries';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { autopackColors } from '../../../src/theme';
 import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 
 export default function HubExhibitorProfileScreen() {
   const currentAppUser = useCurrentAppUser();
@@ -60,12 +61,7 @@ export default function HubExhibitorProfileScreen() {
   }, [error, loading, profileId]);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Opening your exhibitor profile...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error) {
@@ -89,12 +85,7 @@ export default function HubExhibitorProfileScreen() {
     );
   }
 
-  return (
-    <View style={styles.center}>
-      <ActivityIndicator />
-      <Text style={styles.muted}>Opening your exhibitor profile...</Text>
-    </View>
-  );
+  return <RiveLoader />;
 }
 
 const styles = StyleSheet.create({

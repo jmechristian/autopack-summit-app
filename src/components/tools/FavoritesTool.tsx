@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   SectionList,
   StyleSheet,
@@ -26,6 +25,7 @@ import {
   graphqlApiKeyClient,
   graphqlAuthClient,
 } from '../../utils/graphqlClient';
+import { RiveLoader } from '../RiveLoader';
 
 type FavoriteKind = 'exhibitor' | 'speaker' | 'sponsor' | 'session' | 'contact';
 
@@ -722,12 +722,7 @@ export default function FavoritesTool() {
   }
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading favorites...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

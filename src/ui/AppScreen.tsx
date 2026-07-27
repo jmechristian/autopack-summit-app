@@ -1,5 +1,11 @@
 import React from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+} from 'react-native';
 import { ui } from './tokens';
 
 export function AppScreen(props: {
@@ -8,9 +14,12 @@ export function AppScreen(props: {
   style?: StyleProp<ViewStyle>;
 }) {
   return (
-    <View style={[styles.base, props.padded !== false && styles.padded, props.style]}>
+    <KeyboardAvoidingView
+      style={[styles.base, props.padded !== false && styles.padded, props.style]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       {props.children}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

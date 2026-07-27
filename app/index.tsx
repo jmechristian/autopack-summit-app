@@ -1,39 +1,64 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { RiveLoader } from '../src/components/RiveLoader';
+
+// Minimum time the splash animation stays visible (one full loop) once it starts
+// playing, so it never just "flashes" before we navigate away.
+const MIN_SPLASH_DURATION = 2000;
+// Fallback in case the Rive `onReady`/onPlay callback never fires.
+const READY_FALLBACK = 800;
 
 export default function Index() {
-  const [checking, setChecking] = useState(true);
+  const [authDone, setAuthDone] = useState(false);
+  const destinationRef = useRef<string>('/(auth)/login');
+  const animationStartedAt = useRef<number | null>(null);
+
+  const markStarted = useCallback(() => {
+    if (animationStartedAt.current == null) {
+      animationStartedAt.current = Date.now();
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    async function boot() {
-      try {
-        await getCurrentUser();
-        // Session exists -> go straight to the app
-        router.replace('/(main)/hub');
-      } catch {
-        // No session -> go to auth flow
-        router.replace('/(auth)/splash');
-      } finally {
-        if (mounted) setChecking(false);
-      }
-    }
+    getCurrentUser()
+      .then(() => {
+        destinationRef.current = '/(main)/hub';
+      })
+      .catch(() => {
+        destinationRef.current = '/(auth)/login';
+      })
+      .finally(() => {
+        if (mounted) setAuthDone(true);
+      });
 
-    boot();
+    // If onReady never fires, still start the visible-duration clock.
+    const fallback = setTimeout(markStarted, READY_FALLBACK);
+
     return () => {
       mounted = false;
+      clearTimeout(fallback);
     };
-  }, []);
+  }, [markStarted]);
 
-  if (!checking) return null;
+  useEffect(() => {
+    if (!authDone) return;
 
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <ActivityIndicator />
-      <Text style={{ marginTop: 10, color: '#6b7280' }}>Loading…</Text>
-    </View>
-  );
+    let cancelled = false;
+    const start = animationStartedAt.current ?? Date.now();
+    const remaining = Math.max(0, MIN_SPLASH_DURATION - (Date.now() - start));
+
+    const timer = setTimeout(() => {
+      if (!cancelled) router.replace(destinationRef.current as any);
+    }, remaining);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [authDone]);
+
+  return <RiveLoader overlay={false} onReady={markStarted} />;
 }

@@ -81,6 +81,15 @@ export default function MainTabs() {
       />
 
       <Tabs.Screen
+        name='admin'
+        options={{
+          href: null,
+          headerShown: false,
+          title: 'Admin',
+        }}
+      />
+
+      <Tabs.Screen
         name='profile'
         listeners={goToTabRoot('/(main)/profile')}
         options={{

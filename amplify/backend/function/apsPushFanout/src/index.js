@@ -12,7 +12,17 @@ Amplify Params - DO NOT EDIT *//**
  *
  * @type {import('@types/aws-lambda').DynamoDBStreamHandler}
  */
+const crypto = require('crypto');
+const QRCode = require('qrcode');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const {
+  SchedulerClient,
+  CreateScheduleCommand,
+  UpdateScheduleCommand,
+  DeleteScheduleCommand,
+  GetScheduleCommand,
+} = require('@aws-sdk/client-scheduler');
 const {
   DynamoDBDocumentClient,
   GetCommand,
@@ -23,6 +33,8 @@ const {
 } = require('@aws-sdk/lib-dynamodb');
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
+const s3 = new S3Client({});
+const scheduler = new SchedulerClient({});
 
 const EXPO_PUSH_URL =
   process.env.EXPO_PUSH_URL || 'https://exp.host/--/api/v2/push/send';
@@ -38,6 +50,21 @@ const CONTACT_REQUEST_TABLE_NAME = process.env.CONTACT_REQUEST_TABLE_NAME;
 const DM_THREAD_TABLE_NAME = process.env.DM_THREAD_TABLE_NAME;
 const DM_MESSAGE_TABLE_NAME = process.env.DM_MESSAGE_TABLE_NAME;
 const DM_PARTICIPANT_STATE_TABLE_NAME = process.env.DM_PARTICIPANT_STATE_TABLE_NAME;
+const EXHIBITOR_PROFILE_TABLE_NAME = process.env.EXHIBITOR_PROFILE_TABLE_NAME;
+const ANNOUNCEMENT_TABLE_NAME = process.env.ANNOUNCEMENT_TABLE_NAME;
+const ANNOUNCEMENT_SCHEDULED_GSI_NAME =
+  process.env.ANNOUNCEMENT_SCHEDULED_GSI_NAME || 'byEventScheduled';
+const APS_EVENT_ID = process.env.APS_EVENT_ID || '';
+const ANNOUNCEMENT_SCHEDULER_GROUP = process.env.ANNOUNCEMENT_SCHEDULER_GROUP || '';
+const ANNOUNCEMENT_SCHEDULER_ROLE_ARN = process.env.ANNOUNCEMENT_SCHEDULER_ROLE_ARN || '';
+
+function getLambdaFunctionArn() {
+  const region = process.env.AWS_REGION || process.env.REGION || 'us-east-1';
+  const accountId = process.env.AWS_ACCOUNT_ID || '';
+  const functionName = process.env.AWS_LAMBDA_FUNCTION_NAME || '';
+  if (!accountId || !functionName) return '';
+  return `arn:aws:lambda:${region}:${accountId}:function:${functionName}`;
+}
 
 const APPSYNC_ENDPOINT = process.env.API_AUTOPACKSUMMITAPP_GRAPHQLAPIENDPOINTOUTPUT;
 const APPSYNC_API_KEY = process.env.API_AUTOPACKSUMMITAPP_GRAPHQLAPIKEYOUTPUT;
@@ -47,6 +74,29 @@ const THINKIFIC_ENROLLMENTS_URL =
 const THINKIFIC_API_KEY = process.env.THINKIFIC_API_KEY || '';
 const THINKIFIC_SUBDOMAIN = process.env.THINKIFIC_SUBDOMAIN || '';
 const APC_TOTAL_COURSES = Number(process.env.APC_TOTAL_COURSES || '10') || 10;
+function resolveExhibitorQrBucket() {
+  const candidates = [
+    'autopacksummitapp94b14feadba64f23aff0ed8deae77b99bc6-dev',
+    process.env.STORAGE_APSAPP_BUCKETNAME,
+    process.env.EXHIBITOR_QR_BUCKET,
+    process.env.S3_BUCKET,
+    'apsapp',
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .filter(
+      (value) =>
+        value !== 'storageapsappBucketName' &&
+        value !== 'STORAGE_APSAPP_BUCKETNAME'
+    );
+  return candidates[0] || 'apsapp';
+}
+const EXHIBITOR_QR_BUCKET = resolveExhibitorQrBucket();
+const EXHIBITOR_QR_SECRET =
+  process.env.EXHIBITOR_QR_SECRET ||
+  process.env.API_AUTOPACKSUMMITAPP_GRAPHQLAPIIDOUTPUT ||
+  'aps-qr-secret';
+const EXHIBITOR_QR_KEY_PREFIX = 'qrcodes/exhibitor-passport';
 
 const APC_PRIORITY_PROGRESS_COURSE_ID = 699298;
 const APC_COMPLETION_COURSE_IDS = new Set([591574]);
@@ -98,6 +148,24 @@ function getIdentitySub(event) {
     event?.identity?.username ||
     null
   );
+}
+
+function normalizeGroups(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || '').trim().toLowerCase())
+      .filter(Boolean);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return [value.trim().toLowerCase()];
+  }
+  return [];
+}
+
+function isAdminIdentity(event) {
+  const claims = event?.identity?.claims || {};
+  const groups = normalizeGroups(claims['cognito:groups']);
+  return groups.includes('admin');
 }
 
 function normalizeForModeration(text) {
@@ -272,6 +340,232 @@ function getStringList(attr) {
   if (Array.isArray(attr)) return attr.filter((x) => typeof x === 'string');
   if (attr.L) return attr.L.map((x) => getString(x)).filter(Boolean);
   return [];
+}
+
+function parseIsoMs(value) {
+  if (!value) return null;
+  const ms = Date.parse(String(value));
+  return Number.isFinite(ms) ? ms : null;
+}
+
+function isLegacyAnnouncement(img) {
+  return !getString(img?.scheduledAt) && !getString(img?.publishedAt);
+}
+
+function shouldSendAnnouncementPush(img, oldImg, eventName) {
+  const body = getString(img?.body);
+  const eventId = getString(img?.eventId);
+  const threadId = getString(img?.threadId);
+  if (!body || !eventId || threadId) return false;
+
+  const publishedAt = getString(img?.publishedAt);
+  const scheduledAt = getString(img?.scheduledAt);
+  const nowMs = Date.now();
+  const scheduledMs = parseIsoMs(scheduledAt);
+
+  if (eventName === 'INSERT') {
+    if (isLegacyAnnouncement(img)) return true;
+    if (!publishedAt) return false;
+    if (scheduledMs != null && scheduledMs > nowMs) return false;
+    return true;
+  }
+
+  if (eventName === 'MODIFY') {
+    const oldPublishedAt = getString(oldImg?.publishedAt);
+    if (oldPublishedAt || !publishedAt) return false;
+    if (scheduledMs != null && scheduledMs > nowMs) return false;
+    return true;
+  }
+
+  return false;
+}
+
+function buildAnnouncementPushMessages(announcement, tokens) {
+  const announcementId = getString(announcement?.id);
+  const title = getString(announcement?.title) || 'New announcement';
+  const body = getString(announcement?.body) || '';
+  const deepLink = getString(announcement?.deepLink);
+  const defaultDeepLink = 'app://notifications';
+
+  return tokens.map((token) => ({
+    to: token,
+    title,
+    body: safeSlice(body, 180),
+    badge: 1,
+    data: {
+      type: 'announcement',
+      announcementId: announcementId || null,
+      deepLink: deepLink || defaultDeepLink,
+    },
+  }));
+}
+
+async function sendAnnouncementPush(announcement) {
+  const tokens = await listAllTokens();
+  const messages = buildAnnouncementPushMessages(announcement, tokens);
+  await sendExpoPush(messages);
+  return messages.length;
+}
+
+function announcementScheduleName(announcementId) {
+  return `ann-${String(announcementId || '')
+    .replace(/[^a-zA-Z0-9-_]/g, '')
+    .slice(0, 56)}`;
+}
+
+function formatSchedulerAt(isoValue) {
+  const ms = parseIsoMs(isoValue);
+  if (ms == null) return null;
+  return new Date(ms).toISOString().slice(0, 19);
+}
+
+function canUseAnnouncementScheduler() {
+  return !!(
+    ANNOUNCEMENT_SCHEDULER_GROUP &&
+    ANNOUNCEMENT_SCHEDULER_ROLE_ARN &&
+    getLambdaFunctionArn()
+  );
+}
+
+async function deleteAnnouncementSchedule(announcementId) {
+  if (!canUseAnnouncementScheduler()) return;
+  try {
+    await scheduler.send(
+      new DeleteScheduleCommand({
+        Name: announcementScheduleName(announcementId),
+        GroupName: ANNOUNCEMENT_SCHEDULER_GROUP,
+      })
+    );
+  } catch (error) {
+    if (error?.name !== 'ResourceNotFoundException') {
+      console.log('deleteAnnouncementSchedule failed', {
+        announcementId,
+        error: error?.message || String(error),
+      });
+    }
+  }
+}
+
+async function publishAnnouncementById(announcementId) {
+  if (!ANNOUNCEMENT_TABLE_NAME) {
+    throw new Error('ANNOUNCEMENT_TABLE_NAME is not configured');
+  }
+  const nowIso = new Date().toISOString();
+  await ddb.send(
+    new UpdateCommand({
+      TableName: ANNOUNCEMENT_TABLE_NAME,
+      Key: { id: announcementId },
+      UpdateExpression: 'SET publishedAt = :publishedAt, updatedAt = :updatedAt',
+      ConditionExpression: 'attribute_not_exists(publishedAt)',
+      ExpressionAttributeValues: {
+        ':publishedAt': nowIso,
+        ':updatedAt': nowIso,
+      },
+    })
+  );
+  return { published: true, announcementId };
+}
+
+async function upsertAnnouncementSchedule(announcementId, scheduledAt) {
+  if (!canUseAnnouncementScheduler()) return;
+  const atExpression = formatSchedulerAt(scheduledAt);
+  const scheduledMs = parseIsoMs(scheduledAt);
+  if (!atExpression || scheduledMs == null) return;
+
+  if (scheduledMs <= Date.now()) {
+    try {
+      await publishAnnouncementById(announcementId);
+    } catch (error) {
+      if (error?.name !== 'ConditionalCheckFailedException') throw error;
+    }
+    await deleteAnnouncementSchedule(announcementId);
+    return;
+  }
+
+  const scheduleName = announcementScheduleName(announcementId);
+  const params = {
+    Name: scheduleName,
+    GroupName: ANNOUNCEMENT_SCHEDULER_GROUP,
+    ScheduleExpression: `at(${atExpression})`,
+    FlexibleTimeWindow: { Mode: 'OFF' },
+    ActionAfterCompletion: 'DELETE',
+    Target: {
+      Arn: getLambdaFunctionArn(),
+      RoleArn: ANNOUNCEMENT_SCHEDULER_ROLE_ARN,
+      Input: JSON.stringify({
+        action: 'publishAnnouncement',
+        announcementId,
+      }),
+      RetryPolicy: {
+        MaximumEventAgeInSeconds: 3600,
+        MaximumRetryAttempts: 2,
+      },
+    },
+  };
+
+  try {
+    await scheduler.send(
+      new GetScheduleCommand({
+        Name: scheduleName,
+        GroupName: ANNOUNCEMENT_SCHEDULER_GROUP,
+      })
+    );
+    await scheduler.send(new UpdateScheduleCommand(params));
+  } catch (error) {
+    if (error?.name === 'ResourceNotFoundException') {
+      await scheduler.send(new CreateScheduleCommand(params));
+    } else {
+      throw error;
+    }
+  }
+}
+
+async function syncAnnouncementPublishSchedule({
+  id,
+  scheduledAt,
+  publishedAt,
+  eventName,
+}) {
+  if (!id) return;
+  if (eventName === 'REMOVE' || publishedAt) {
+    await deleteAnnouncementSchedule(id);
+    return;
+  }
+  if (!scheduledAt) {
+    await deleteAnnouncementSchedule(id);
+    return;
+  }
+  await upsertAnnouncementSchedule(id, scheduledAt);
+}
+
+async function backfillUpcomingAnnouncementSchedules(eventId) {
+  if (!canUseAnnouncementScheduler() || !ANNOUNCEMENT_TABLE_NAME) return;
+  const nowIso = new Date().toISOString();
+  let lastEvaluatedKey = undefined;
+
+  do {
+    const resp = await ddb.send(
+      new QueryCommand({
+        TableName: ANNOUNCEMENT_TABLE_NAME,
+        IndexName: ANNOUNCEMENT_SCHEDULED_GSI_NAME,
+        KeyConditionExpression: 'eventId = :eventId AND scheduledAt > :now',
+        ExpressionAttributeValues: {
+          ':eventId': eventId,
+          ':now': nowIso,
+        },
+        ExclusiveStartKey: lastEvaluatedKey,
+        Limit: 100,
+      })
+    );
+
+    for (const item of resp.Items || []) {
+      if (item?.id && item?.scheduledAt && !getString(item?.publishedAt)) {
+        await upsertAnnouncementSchedule(String(item.id), String(item.scheduledAt));
+      }
+    }
+
+    lastEvaluatedKey = resp.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
 }
 
 async function appsyncRequest(query, variables) {
@@ -477,6 +771,52 @@ async function getThinkificRegistrantSummaryByEmail(email) {
   };
 }
 
+function mapThinkificEnrollment(item) {
+  const percentageRaw = Number(item?.percentage_completed);
+  const percentageCompleted = Number.isFinite(percentageRaw)
+    ? clampProgress(percentageRaw)
+    : null;
+  return {
+    enrollmentId: Number.isFinite(Number(item?.id)) ? Number(item.id) : null,
+    courseId: Number.isFinite(Number(item?.course_id)) ? Number(item.course_id) : null,
+    courseName: item?.course_name || null,
+    percentageCompleted,
+    completedAt: item?.completed_at || null,
+    activatedAt: item?.activated_at || null,
+  };
+}
+
+async function handleAdminGetThinkificByEmail(event) {
+  if (!isAdminIdentity(event)) throw new Error('Unauthorized');
+  const email = String(event?.arguments?.email || '')
+    .trim()
+    .toLowerCase();
+  if (!email) throw new Error('email is required');
+
+  const enrollments = await getThinkificEnrollmentsByEmail(email);
+  const mapped = enrollments.map(mapThinkificEnrollment);
+  const apcEnrollments = mapped.filter((item) =>
+    String(item?.courseName || '')
+      .toUpperCase()
+      .includes('APC')
+  );
+  const otherEnrollments = mapped.filter((item) =>
+    !String(item?.courseName || '')
+      .toUpperCase()
+      .includes('APC')
+  );
+  const thinkificUserId =
+    enrollments.find((enrollment) => Number.isFinite(Number(enrollment?.user_id)))?.user_id ??
+    null;
+
+  return {
+    email,
+    thinkificUserId: thinkificUserId == null ? null : Number(thinkificUserId),
+    apcEnrollments,
+    otherEnrollments,
+  };
+}
+
 async function handleSyncMyThinkificProgress(event) {
   const userSub = getIdentitySub(event);
   if (!userSub) throw new Error('Unauthorized');
@@ -610,7 +950,8 @@ async function listAllTokens() {
   const out = await ddb.send(
     new ScanCommand({ TableName: PUSH_TOKEN_TABLE_NAME })
   );
-  return (out.Items || []).map((x) => x?.token).filter(Boolean);
+  // Same physical device can register multiple user rows with the same Expo token.
+  return Array.from(new Set((out.Items || []).map((x) => x?.token).filter(Boolean)));
 }
 
 async function getAppUserProfileId(userSub) {
@@ -1269,17 +1610,43 @@ async function handleStreamFanout(event) {
     }
 
     // Announcements: have body + eventId and no threadId
-    if (r.eventName === 'INSERT' && announcementBody && getString(img.eventId) && !threadId) {
-      const tokens = await listAllTokens();
-      for (const token of tokens) {
-        expoMessages.push({
-          to: token,
-          title: announcementTitle || 'New announcement',
-          body: safeSlice(announcementBody, 180),
-          badge: 1,
-          data: { type: 'announcement', deepLink: deepLink || null },
+    const announcementId = getString(img.id);
+    const isAnnouncementRecord =
+      announcementId && announcementBody && eventId && !threadId;
+
+    if (isAnnouncementRecord) {
+      if (r.eventName === 'REMOVE') {
+        await syncAnnouncementPublishSchedule({
+          id: announcementId,
+          eventName: 'REMOVE',
+        });
+      } else {
+        await syncAnnouncementPublishSchedule({
+          id: announcementId,
+          scheduledAt: getString(img.scheduledAt),
+          publishedAt: getString(img.publishedAt),
+          eventName: r.eventName,
         });
       }
+    }
+
+    if (
+      announcementId &&
+      shouldSendAnnouncementPush(img, unmarshallOldImage(r), r.eventName)
+    ) {
+      const tokens = await listAllTokens();
+      for (const msg of buildAnnouncementPushMessages(
+        {
+          id: announcementId,
+          title: announcementTitle,
+          body: announcementBody,
+          deepLink,
+        },
+        tokens
+      )) {
+        expoMessages.push(msg);
+      }
+      continue;
     }
   }
 
@@ -1289,9 +1656,260 @@ async function handleStreamFanout(event) {
   return { ok: true, sent: expoMessages.length };
 }
 
+function buildExhibitorPassportPayload(eventId, exhibitorId) {
+  const nonce = crypto.randomBytes(18).toString('base64url');
+  const raw = `${eventId}:${exhibitorId}:${nonce}`;
+  const signature = crypto
+    .createHmac('sha256', String(EXHIBITOR_QR_SECRET))
+    .update(raw)
+    .digest('base64url');
+  return `aps-passport:v1:${eventId}:${exhibitorId}:${nonce}:${signature}`;
+}
+
+function buildS3PublicUrl(bucket, key) {
+  const region = process.env.REGION || process.env.AWS_REGION || 'us-east-1';
+  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+}
+
+async function createExhibitorBase(input) {
+  if (!EXHIBITOR_PROFILE_TABLE_NAME) throw new Error('Missing EXHIBITOR_PROFILE_TABLE_NAME');
+  const now = new Date().toISOString();
+  const created = {
+    id: crypto.randomUUID(),
+    companyId: input.companyId,
+    eventId: input.eventId,
+    boothNumber: input.boothNumber || null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await ddb.send(
+    new PutCommand({
+      TableName: EXHIBITOR_PROFILE_TABLE_NAME,
+      Item: created,
+      ConditionExpression: 'attribute_not_exists(#id)',
+      ExpressionAttributeNames: { '#id': 'id' },
+    })
+  );
+  return created;
+}
+
+async function uploadExhibitorQrPng({ exhibitorId, payload }) {
+  const key = `${EXHIBITOR_QR_KEY_PREFIX}/${exhibitorId}.png`;
+  const pngBuffer = await QRCode.toBuffer(payload, {
+    type: 'png',
+    width: 640,
+    errorCorrectionLevel: 'M',
+    margin: 1,
+  });
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: EXHIBITOR_QR_BUCKET,
+      Key: key,
+      Body: pngBuffer,
+      ContentType: 'image/png',
+    })
+  );
+  return {
+    key,
+    publicUrl: buildS3PublicUrl(EXHIBITOR_QR_BUCKET, key),
+  };
+}
+
+async function updateExhibitorQrFields({ exhibitorId, passportQrPayload, qrCode }) {
+  if (!EXHIBITOR_PROFILE_TABLE_NAME) throw new Error('Missing EXHIBITOR_PROFILE_TABLE_NAME');
+  await ddb.send(
+    new UpdateCommand({
+      TableName: EXHIBITOR_PROFILE_TABLE_NAME,
+      Key: { id: exhibitorId },
+      UpdateExpression:
+        'SET #passportQrPayload = :passportQrPayload, #qrCode = :qrCode, #updatedAt = :updatedAt',
+      ExpressionAttributeNames: {
+        '#passportQrPayload': 'passportQrPayload',
+        '#qrCode': 'qrCode',
+        '#updatedAt': 'updatedAt',
+      },
+      ExpressionAttributeValues: {
+        ':passportQrPayload': passportQrPayload,
+        ':qrCode': qrCode,
+        ':updatedAt': new Date().toISOString(),
+      },
+    })
+  );
+  const out = await ddb.send(
+    new GetCommand({
+      TableName: EXHIBITOR_PROFILE_TABLE_NAME,
+      Key: { id: exhibitorId },
+    })
+  );
+  return out?.Item || null;
+}
+
+async function handleAdminCreateExhibitor(event) {
+  if (!isAdminIdentity(event)) throw new Error('Unauthorized');
+  const input = event?.arguments?.input || {};
+  const companyId = String(input.companyId || '').trim();
+  const eventId = String(input.eventId || '').trim();
+  const boothNumber = String(input.boothNumber || '').trim();
+  if (!companyId) throw new Error('companyId is required');
+  if (!eventId) throw new Error('eventId is required');
+
+  let exhibitor = null;
+  try {
+    exhibitor = await createExhibitorBase({
+      companyId,
+      eventId,
+      boothNumber: boothNumber || null,
+    });
+  } catch (error) {
+    throw new Error(`adminCreateExhibitor:create profile failed: ${error?.message || String(error)}`);
+  }
+  if (!exhibitor?.id) throw new Error('adminCreateExhibitor:create profile returned no id');
+
+  const payload = buildExhibitorPassportPayload(eventId, exhibitor.id);
+
+  let uploaded = null;
+  try {
+    uploaded = await uploadExhibitorQrPng({
+      exhibitorId: exhibitor.id,
+      payload,
+    });
+  } catch (error) {
+    throw new Error(
+      `adminCreateExhibitor:upload qr failed (bucket=${EXHIBITOR_QR_BUCKET}): ${error?.message || String(error)}`
+    );
+  }
+
+  let updated = null;
+  try {
+    updated = await updateExhibitorQrFields({
+      exhibitorId: exhibitor.id,
+      passportQrPayload: payload,
+      qrCode: uploaded.publicUrl,
+    });
+  } catch (error) {
+    throw new Error(
+      `adminCreateExhibitor:update qr fields failed: ${error?.message || String(error)}`
+    );
+  }
+  if (!updated?.id) throw new Error('adminCreateExhibitor:update qr fields returned no id');
+
+  return {
+    id: String(updated.id),
+    companyId: String(updated.companyId || companyId),
+    eventId: String(updated.eventId || eventId),
+    boothNumber: updated.boothNumber || null,
+    passportQrPayload: String(updated.passportQrPayload || payload),
+    qrCode: String(updated.qrCode || uploaded.publicUrl),
+  };
+}
+
+async function publishDueAnnouncements(eventId) {
+  if (!ANNOUNCEMENT_TABLE_NAME) {
+    throw new Error('ANNOUNCEMENT_TABLE_NAME is not configured');
+  }
+
+  const nowIso = new Date().toISOString();
+  const due = [];
+  let lastEvaluatedKey = undefined;
+
+  do {
+    const resp = await ddb.send(
+      new QueryCommand({
+        TableName: ANNOUNCEMENT_TABLE_NAME,
+        IndexName: ANNOUNCEMENT_SCHEDULED_GSI_NAME,
+        KeyConditionExpression: 'eventId = :eventId AND scheduledAt <= :now',
+        ExpressionAttributeValues: {
+          ':eventId': eventId,
+          ':now': nowIso,
+        },
+        ExclusiveStartKey: lastEvaluatedKey,
+        Limit: 100,
+      })
+    );
+    due.push(
+      ...(resp.Items || []).filter((item) => item?.id && !getString(item?.publishedAt))
+    );
+    lastEvaluatedKey = resp.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+
+  const publishedIds = [];
+  for (const item of due) {
+    try {
+      await ddb.send(
+        new UpdateCommand({
+          TableName: ANNOUNCEMENT_TABLE_NAME,
+          Key: { id: String(item.id) },
+          UpdateExpression: 'SET publishedAt = :publishedAt, updatedAt = :updatedAt',
+          ConditionExpression: 'attribute_not_exists(publishedAt)',
+          ExpressionAttributeValues: {
+            ':publishedAt': nowIso,
+            ':updatedAt': nowIso,
+          },
+        })
+      );
+      publishedIds.push(String(item.id));
+    } catch (error) {
+      if (error?.name !== 'ConditionalCheckFailedException') {
+        throw error;
+      }
+    }
+  }
+
+  console.log('publishDueAnnouncements', {
+    eventId,
+    dueCount: due.length,
+    publishedCount: publishedIds.length,
+    publishedIds,
+  });
+
+  await backfillUpcomingAnnouncementSchedules(eventId);
+
+  return {
+    publishedCount: publishedIds.length,
+    publishedIds,
+  };
+}
+
+async function handleAdminPublishDueAnnouncements(event) {
+  if (!isAdminIdentity(event)) throw new Error('Unauthorized');
+  const eventId = String(event?.arguments?.eventId || '').trim();
+  if (!eventId) throw new Error('eventId is required');
+  return publishDueAnnouncements(eventId);
+}
+
+function isScheduledPublishInvocation(event) {
+  if (event?.action === 'publishDueAnnouncements') return true;
+  if (event?.action === 'publishAnnouncement') return false;
+  if (event?.source === 'aws.events') return true;
+  return event?.['detail-type'] === 'Scheduled Event';
+}
+
 exports.handler = async (event) => {
   const isStream = Array.isArray(event?.Records);
   if (isStream) return handleStreamFanout(event);
+
+  if (event?.action === 'publishAnnouncement') {
+    const announcementId = String(event?.announcementId || '').trim();
+    if (!announcementId) throw new Error('announcementId is required');
+    try {
+      return await publishAnnouncementById(announcementId);
+    } catch (error) {
+      if (error?.name === 'ConditionalCheckFailedException') {
+        return { published: false, announcementId, reason: 'already-published' };
+      }
+      throw error;
+    }
+  }
+
+  if (isScheduledPublishInvocation(event)) {
+    const eventId = String(APS_EVENT_ID || event?.eventId || '').trim();
+    if (!eventId) throw new Error('APS_EVENT_ID is required for scheduled publish');
+    return publishDueAnnouncements(eventId);
+  }
+
+  if (event?.typeName === 'Query' && event?.fieldName === 'adminGetThinkificByEmail') {
+    return handleAdminGetThinkificByEmail(event);
+  }
 
   if (event?.typeName === 'Mutation' && event?.fieldName === 'syncMyThinkificProgress') {
     return handleSyncMyThinkificProgress(event);
@@ -1299,6 +1917,14 @@ exports.handler = async (event) => {
 
   if (event?.typeName === 'Mutation' && event?.fieldName === 'sendModeratedDmMessage') {
     return handleSendModeratedDmMessage(event);
+  }
+
+  if (event?.typeName === 'Mutation' && event?.fieldName === 'adminCreateExhibitor') {
+    return handleAdminCreateExhibitor(event);
+  }
+
+  if (event?.typeName === 'Mutation' && event?.fieldName === 'adminPublishDueAnnouncements') {
+    return handleAdminPublishDueAnnouncements(event);
   }
 
   throw new Error('Unsupported invocation');

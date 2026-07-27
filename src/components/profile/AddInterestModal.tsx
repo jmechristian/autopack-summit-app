@@ -1,6 +1,14 @@
 // src/components/profile/AddInterestModal.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Button, Input, Overlay } from '@rneui/themed';
 import { autopackColors } from '../../theme';
 import * as APITypes from '../../API';
@@ -50,10 +58,14 @@ export function AddInterestModal({
 
   return (
     <Overlay isVisible={visible} onBackdropPress={onClose} overlayStyle={styles.overlay}>
-      <View style={styles.container}>
-        <Text style={styles.title}>
-          {editingInterest ? 'Edit Interest' : 'Add Interest'}
-        </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView keyboardShouldPersistTaps='handled'>
+          <View style={styles.container}>
+            <Text style={styles.title}>
+              {editingInterest ? 'Edit Interest' : 'Add Interest'}
+            </Text>
 
         <Input
           label="Interest *"
@@ -63,21 +75,23 @@ export function AddInterestModal({
           autoCapitalize="words"
         />
 
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Cancel"
-            onPress={onClose}
-            buttonStyle={[styles.button, styles.cancelButton]}
-            titleStyle={styles.cancelButtonText}
-          />
-          <Button
-            title="Save"
-            onPress={handleSave}
-            loading={loading}
-            buttonStyle={[styles.button, styles.saveButton]}
-          />
-        </View>
-      </View>
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Cancel"
+                onPress={onClose}
+                buttonStyle={[styles.button, styles.cancelButton]}
+                titleStyle={styles.cancelButtonText}
+              />
+              <Button
+                title="Save"
+                onPress={handleSave}
+                loading={loading}
+                buttonStyle={[styles.button, styles.saveButton]}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Overlay>
   );
 }

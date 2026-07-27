@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -18,6 +17,7 @@ import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { autopackColors } from '../../../src/theme';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 
 type ExhibitorItem = {
   id: string;
@@ -169,12 +169,7 @@ export default function PassportScreen() {
   }, [load]);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading passport challenge...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

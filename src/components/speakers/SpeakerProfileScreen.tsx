@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import RenderHtml from 'react-native-render-html';
 import { APS_ID } from '../../config/apsConfig';
+import { RiveLoader } from '../RiveLoader';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
@@ -311,12 +312,7 @@ export default function SpeakerProfileScreen() {
   const isFavorite = !!favoriteRecordId;
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading speaker...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error || !speaker) {

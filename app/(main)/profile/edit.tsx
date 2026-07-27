@@ -4,6 +4,8 @@ import {
   View,
   Text,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -26,6 +28,7 @@ import { uploadProfilePicture, uploadResume, resolveProfilePictureUri } from '..
 import { updateProfile, createAffiliate, createEducation } from '../../../src/utils/profileMutations';
 import { useApsStore } from '../../../src/store/apsStore';
 import { autopackColors } from '../../../src/theme';
+import { RiveLoader } from '../../../src/components/RiveLoader';
 
 export default function ProfileEdit() {
   const insets = useSafeAreaInsets();
@@ -178,21 +181,24 @@ export default function ProfileEdit() {
   };
 
   if (!appUser || !profile) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={autopackColors.apBlue} />
-        <Text style={styles.loadingText}>Loading profile...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   const resumeUrl = getResumeUrl();
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={styles.container}
-      contentContainerStyle={styles.contentContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={insets.top}
     >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps='handled'
+        keyboardDismissMode='on-drag'
+        automaticallyAdjustKeyboardInsets
+      >
       {/* Profile Picture Section */}
       <View style={styles.profilePictureSection}>
         <Avatar
@@ -245,17 +251,33 @@ export default function ProfileEdit() {
       <InterestsSection profile={profile} onUpdate={refreshProfile} />
 
       {/* Document Section */}
-      <View style={styles.resumeSection}>
-        <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>Career Document</Text>
-        </View>
-        <View style={styles.headerDivider} />
-        {resumeUrl ? (
-          <View style={styles.resumeActions}>
-            <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAlt]} onPress={handleResumeView}>
-              <Ionicons name="document-text" size={18} color="#fff" />
-              <Text style={styles.actionBtnText}>View Document</Text>
-            </TouchableOpacity>
+        <View style={styles.resumeSection}>
+          <View style={styles.headerRow}>
+            <Text style={styles.sectionTitle}>Career Document</Text>
+          </View>
+          <View style={styles.headerDivider} />
+          {resumeUrl ? (
+            <View style={styles.resumeActions}>
+              <TouchableOpacity style={[styles.actionBtn, styles.actionBtnAlt]} onPress={handleResumeView}>
+                <Ionicons name="document-text" size={18} color="#fff" />
+                <Text style={styles.actionBtnText}>View Document</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionBtn, uploadingResume && styles.actionBtnDisabled]}
+                onPress={handleResumeUpload}
+                disabled={uploadingResume}
+              >
+                {uploadingResume ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="cloud-upload" size={18} color="#fff" />
+                    <Text style={styles.actionBtnText}>Upload New</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          ) : (
             <TouchableOpacity
               style={[styles.actionBtn, uploadingResume && styles.actionBtnDisabled]}
               onPress={handleResumeUpload}
@@ -266,29 +288,14 @@ export default function ProfileEdit() {
               ) : (
                 <>
                   <Ionicons name="cloud-upload" size={18} color="#fff" />
-                  <Text style={styles.actionBtnText}>Upload New</Text>
+                  <Text style={styles.actionBtnText}>Upload Document (PDF, max 10MB)</Text>
                 </>
               )}
             </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={[styles.actionBtn, uploadingResume && styles.actionBtnDisabled]}
-            onPress={handleResumeUpload}
-            disabled={uploadingResume}
-          >
-            {uploadingResume ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="cloud-upload" size={18} color="#fff" />
-                <Text style={styles.actionBtnText}>Upload Document (PDF, max 10MB)</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
-      </View>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -1,6 +1,14 @@
 // src/components/profile/AddAffiliateModal.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Button, Input, Overlay } from '@rneui/themed';
 import { autopackColors } from '../../theme';
 import * as APITypes from '../../API';
@@ -63,10 +71,14 @@ export function AddAffiliateModal({
 
   return (
     <Overlay isVisible={visible} onBackdropPress={onClose} overlayStyle={styles.overlay}>
-      <View style={styles.container}>
-        <Text style={styles.title}>
-          {editingAffiliate ? 'Edit Experience' : 'Add Experience'}
-        </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView keyboardShouldPersistTaps='handled'>
+          <View style={styles.container}>
+            <Text style={styles.title}>
+              {editingAffiliate ? 'Edit Experience' : 'Add Experience'}
+            </Text>
 
         <Input
           label="Company / Organization *"
@@ -98,21 +110,23 @@ export function AddAffiliateModal({
           placeholder="e.g., 2023-12 (leave blank if current)"
         />
 
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Cancel"
-            onPress={onClose}
-            buttonStyle={[styles.button, styles.cancelButton]}
-            titleStyle={styles.cancelButtonText}
-          />
-          <Button
-            title="Save"
-            onPress={handleSave}
-            loading={loading}
-            buttonStyle={[styles.button, styles.saveButton]}
-          />
-        </View>
-      </View>
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Cancel"
+                onPress={onClose}
+                buttonStyle={[styles.button, styles.cancelButton]}
+                titleStyle={styles.cancelButtonText}
+              />
+              <Button
+                title="Save"
+                onPress={handleSave}
+                loading={loading}
+                buttonStyle={[styles.button, styles.saveButton]}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Overlay>
   );
 }

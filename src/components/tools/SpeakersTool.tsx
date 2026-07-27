@@ -3,7 +3,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
@@ -19,6 +18,7 @@ import { useCurrentAppUser } from '../../hooks/useApsStore';
 import {
   apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt,
 } from '../../graphql/queries';
+import { RiveLoader } from '../RiveLoader';
 
 type SpeakersToolProps = {
   detailBasePath: '/(main)/engage/speakers' | '/(main)/hub/speakers';
@@ -340,12 +340,7 @@ export default function SpeakersTool({ detailBasePath }: SpeakersToolProps) {
   );
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading speakers...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

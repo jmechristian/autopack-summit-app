@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "autopack-summit-app",
+    "name": "Automotive Packaging Summit",
     "slug": "autopack-summit-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "autopacksummitapp",
@@ -61,6 +61,12 @@
         "projectId": "dcb27779-4cbd-4b16-bd99-16f6d9da08d2",
         "owner": "the-packaging-school"
       }
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/dcb27779-4cbd-4b16-bd99-16f6d9da08d2"
     }
   }
 }

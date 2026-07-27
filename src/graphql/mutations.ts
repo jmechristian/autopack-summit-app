@@ -61,6 +61,70 @@ export const syncMyThinkificProgress = /* GraphQL */ `mutation SyncMyThinkificPr
   APITypes.SyncMyThinkificProgressMutationVariables,
   APITypes.SyncMyThinkificProgressMutation
 >;
+export const adminCreateRegistrant = /* GraphQL */ `mutation AdminCreateRegistrant($input: AdminCreateRegistrantInput!) {
+  adminCreateRegistrant(input: $input) {
+    id
+    email
+    companyId
+    tempPassword
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.AdminCreateRegistrantMutationVariables,
+  APITypes.AdminCreateRegistrantMutation
+>;
+export const adminReissueRegistrantTempPassword = /* GraphQL */ `mutation AdminReissueRegistrantTempPassword(
+  $input: AdminReissueRegistrantTempPasswordInput!
+) {
+  adminReissueRegistrantTempPassword(input: $input) {
+    registrantId
+    email
+    tempPassword
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.AdminReissueRegistrantTempPasswordMutationVariables,
+  APITypes.AdminReissueRegistrantTempPasswordMutation
+>;
+export const adminCreateExhibitor = /* GraphQL */ `mutation AdminCreateExhibitor($input: AdminCreateExhibitorInput!) {
+  adminCreateExhibitor(input: $input) {
+    id
+    companyId
+    eventId
+    boothNumber
+    passportQrPayload
+    qrCode
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.AdminCreateExhibitorMutationVariables,
+  APITypes.AdminCreateExhibitorMutation
+>;
+export const adminPublishDueAnnouncements = /* GraphQL */ `mutation AdminPublishDueAnnouncements($eventId: ID!) {
+  adminPublishDueAnnouncements(eventId: $eventId) {
+    publishedCount
+    publishedIds
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.AdminPublishDueAnnouncementsMutationVariables,
+  APITypes.AdminPublishDueAnnouncementsMutation
+>;
+export const deleteMyAccount = /* GraphQL */ `mutation DeleteMyAccount {
+  deleteMyAccount {
+    success
+    message
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMyAccountMutationVariables,
+  APITypes.DeleteMyAccountMutation
+>;
 export const updateAPS = /* GraphQL */ `mutation UpdateAPS(
   $input: UpdateAPSInput!
   $condition: ModelAPSConditionInput
@@ -1104,7 +1168,9 @@ export const createApsAppUserNote = /* GraphQL */ `mutation CreateApsAppUserNote
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -1274,7 +1340,9 @@ export const updateApsAppUserNote = /* GraphQL */ `mutation UpdateApsAppUserNote
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -1444,7 +1512,9 @@ export const deleteApsAppUserNote = /* GraphQL */ `mutation DeleteApsAppUserNote
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -2073,6 +2143,7 @@ export const createApsAppSession = /* GraphQL */ `mutation CreateApsAppSession(
     endTime
     location
     description
+    embedUrl
     agendaId
     agenda {
       id
@@ -2101,6 +2172,7 @@ export const createApsAppSession = /* GraphQL */ `mutation CreateApsAppSession(
       nextToken
       __typename
     }
+    draft
     createdAt
     updatedAt
     apsAgendaItemsId
@@ -2123,6 +2195,7 @@ export const updateApsAppSession = /* GraphQL */ `mutation UpdateApsAppSession(
     endTime
     location
     description
+    embedUrl
     agendaId
     agenda {
       id
@@ -2151,6 +2224,7 @@ export const updateApsAppSession = /* GraphQL */ `mutation UpdateApsAppSession(
       nextToken
       __typename
     }
+    draft
     createdAt
     updatedAt
     apsAgendaItemsId
@@ -2173,6 +2247,7 @@ export const deleteApsAppSession = /* GraphQL */ `mutation DeleteApsAppSession(
     endTime
     location
     description
+    embedUrl
     agendaId
     agenda {
       id
@@ -2201,6 +2276,7 @@ export const deleteApsAppSession = /* GraphQL */ `mutation DeleteApsAppSession(
       nextToken
       __typename
     }
+    draft
     createdAt
     updatedAt
     apsAgendaItemsId
@@ -2226,7 +2302,9 @@ export const createApsAppSessionQuestion = /* GraphQL */ `mutation CreateApsAppS
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -2267,7 +2345,9 @@ export const updateApsAppSessionQuestion = /* GraphQL */ `mutation UpdateApsAppS
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -2308,7 +2388,9 @@ export const deleteApsAppSessionQuestion = /* GraphQL */ `mutation DeleteApsAppS
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -4196,7 +4278,9 @@ export const createApsAppUserFavoriteSession = /* GraphQL */ `mutation CreateAps
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -4275,7 +4359,9 @@ export const updateApsAppUserFavoriteSession = /* GraphQL */ `mutation UpdateAps
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -4354,7 +4440,9 @@ export const deleteApsAppUserFavoriteSession = /* GraphQL */ `mutation DeleteAps
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -5742,6 +5830,8 @@ export const createApsAdminAnnouncement = /* GraphQL */ `mutation CreateApsAdmin
     title
     body
     deepLink
+    scheduledAt
+    publishedAt
     createdAt
     updatedAt
     __typename
@@ -5761,6 +5851,8 @@ export const updateApsAdminAnnouncement = /* GraphQL */ `mutation UpdateApsAdmin
     title
     body
     deepLink
+    scheduledAt
+    publishedAt
     createdAt
     updatedAt
     __typename
@@ -5780,6 +5872,8 @@ export const deleteApsAdminAnnouncement = /* GraphQL */ `mutation DeleteApsAdmin
     title
     body
     deepLink
+    scheduledAt
+    publishedAt
     createdAt
     updatedAt
     __typename
@@ -5966,7 +6060,9 @@ export const createSessionSpeakers = /* GraphQL */ `mutation CreateSessionSpeake
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -6008,7 +6104,9 @@ export const updateSessionSpeakers = /* GraphQL */ `mutation UpdateSessionSpeake
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -6050,7 +6148,9 @@ export const deleteSessionSpeakers = /* GraphQL */ `mutation DeleteSessionSpeake
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -6092,7 +6192,9 @@ export const createSessionSponsors = /* GraphQL */ `mutation CreateSessionSponso
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -6134,7 +6236,9 @@ export const updateSessionSponsors = /* GraphQL */ `mutation UpdateSessionSponso
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId
@@ -6176,7 +6280,9 @@ export const deleteSessionSponsors = /* GraphQL */ `mutation DeleteSessionSponso
       endTime
       location
       description
+      embedUrl
       agendaId
+      draft
       createdAt
       updatedAt
       apsAgendaItemsId

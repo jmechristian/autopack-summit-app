@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   Pressable,
   SectionList,
@@ -15,6 +14,7 @@ import { APS_ID } from '../../config/apsConfig';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import { RiveLoader } from '../RiveLoader';
 
 type ExhibitorsToolProps = {
   detailBasePath: '/(main)/engage/exhibitors' | '/(main)/hub/exhibitors';
@@ -178,12 +178,7 @@ export default function ExhibitorsTool({ detailBasePath }: ExhibitorsToolProps) 
   }, [items, logoUris]);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading exhibitors...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   return (

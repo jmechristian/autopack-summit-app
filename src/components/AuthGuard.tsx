@@ -1,20 +1,19 @@
 // src/components/AuthGuard.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { AppState } from 'react-native';
 import { router } from 'expo-router';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { useApsStore } from '../store/apsStore';
 import { signOut } from '../utils/authUtils';
-import { autopackColors } from '../theme';
-import { graphqlAuthClient } from '../utils/graphqlClient';
+import { RiveLoader } from './RiveLoader';
 import {
   initPushNotificationHandlers,
   handleLastNotificationResponse,
   registerAndUpsertPushToken,
 } from '../utils/pushNotifications';
 import { useEngageStore } from '../store/engageStore';
-import { syncMyThinkificProgress } from '../graphql/thinkificOps';
 import * as Notifications from 'expo-notifications';
+import { resolveAnnouncementDeepLink } from '../utils/announcementDeepLinks';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -24,11 +23,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [authUserId, setAuthUserId] = useState<string | null>(null);
   const pushInitForUserRef = useRef<string | null>(null);
-  const thinkificSyncUserIdRef = useRef<string | null>(null);
   const currentAppUser = useApsStore((state) => state.currentAppUser);
   const validateUserRegistrant = useApsStore((state) => state.validateUserRegistrant);
   const loadBasicInfo = useApsStore((state) => state.loadBasicInfo);
-  const refreshProfile = useApsStore((state) => state.refreshProfile);
   const reset = useApsStore((state) => state.reset);
   const refreshUnreadCounts = useEngageStore((s) => s.refreshUnreadCounts);
   const markAnnouncementsSeen = useEngageStore((s) => s.markAnnouncementsSeen);
@@ -47,6 +44,20 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
     router.push('/(main)/engage/requests');
   }, []);
+
+  const routeAnnouncementDeepLink = useCallback(
+    (url: string) => {
+      markAnnouncementsSeen();
+      Notifications.setBadgeCountAsync(0).catch(() => {});
+      const route = resolveAnnouncementDeepLink(url);
+      if (route) {
+        router.push(route as any);
+        return;
+      }
+      router.push('/(main)/hub/notifications');
+    },
+    [markAnnouncementsSeen],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -110,35 +121,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
     };
   }, [runValidation]);
 
-  // Trigger server-side Thinkific sync once per validated user session.
-  useEffect(() => {
-    const userId = currentAppUser?.id || null;
-    if (!userId) {
-      thinkificSyncUserIdRef.current = null;
-      return;
-    }
-    if (thinkificSyncUserIdRef.current === userId) {
-      return;
-    }
-    thinkificSyncUserIdRef.current = userId;
-
-    const runThinkificSync = async () => {
-      try {
-        const resp = await graphqlAuthClient.graphql({
-          query: syncMyThinkificProgress,
-          variables: { input: {} },
-        });
-        const result = (resp as any)?.data?.syncMyThinkificProgress;
-        console.log('Thinkific progress sync result:', result || null);
-        await refreshProfile();
-      } catch (error) {
-        console.warn('Thinkific progress sync failed:', error);
-      }
-    };
-
-    runThinkificSync();
-  }, [currentAppUser?.id, refreshProfile]);
-
   // Push notifications: once the user is validated, register token + set up tap handling.
   useEffect(() => {
     const userId = authUserId;
@@ -157,12 +139,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
         const senderUserId = String(data?.senderUserId || '');
         return type === 'dm' && !!senderUserId && senderUserId === userId;
       },
-      onAnnouncementId: (id) => {
-        // Consider this as "user saw it" since they're navigating directly to it.
+      onAnnouncementId: () => {
         markAnnouncementsSeen();
         Notifications.setBadgeCountAsync(0).catch(() => {});
-        router.push(`/(main)/engage/announcements/${id}`);
+        router.push('/(main)/hub/notifications');
       },
+      onDeepLink: routeAnnouncementDeepLink,
       onDmThreadId: (threadId) => {
         router.push(`/(main)/engage/messages/${threadId}`);
       },
@@ -192,11 +174,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // If app was launched from a notification tap, route immediately.
     handleLastNotificationResponse({
-      onAnnouncementId: (id) => {
+      onAnnouncementId: () => {
         markAnnouncementsSeen();
         Notifications.setBadgeCountAsync(0).catch(() => {});
-        router.push(`/(main)/engage/announcements/${id}`);
+        router.push('/(main)/hub/notifications');
       },
+      onDeepLink: routeAnnouncementDeepLink,
       onDmThreadId: (threadId) => {
         router.push(`/(main)/engage/messages/${threadId}`);
       },
@@ -206,7 +189,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }).catch(() => {});
 
     return cleanup;
-  }, [authUserId, setEngageActiveUser, resetEngageStore, refreshUnreadCounts, markAnnouncementsSeen, routeToRequests]);
+  }, [authUserId, setEngageActiveUser, resetEngageStore, refreshUnreadCounts, markAnnouncementsSeen, routeToRequests, routeAnnouncementDeepLink]);
 
   // On every successful validation, refresh unread counts once.
   useEffect(() => {
@@ -263,32 +246,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
   
   // Only block UI during explicit sign-out.
   if (isSigningOut) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={autopackColors.primary} />
-        <Text style={styles.loadingText}>
-          Signing out...
-        </Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   // User is validated, render children
   return <>{children}</>;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
-  },
-});
 

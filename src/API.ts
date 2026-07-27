@@ -82,6 +82,7 @@ export type ApsAppSession = {
   endTime?: string | null,
   location?: string | null,
   description?: string | null,
+  embedUrl?: string | null,
   agendaId?: string | null,
   agenda?: ApsAgenda | null,
   sessionQuestions?: ModelApsAppSessionQuestionConnection | null,
@@ -89,6 +90,7 @@ export type ApsAppSession = {
   speakers?: ModelSessionSpeakersConnection | null,
   sponsors?: ModelSessionSponsorsConnection | null,
   favoriteByUsers?: ModelApsAppUserFavoriteSessionConnection | null,
+  draft?: boolean | null,
   createdAt: string,
   updatedAt: string,
   apsAgendaItemsId?: string | null,
@@ -1141,6 +1143,66 @@ export type ThinkificProgressSyncResult = {
   message?: string | null,
 };
 
+export type AdminCreateRegistrantInput = {
+  apsID?: string | null,
+  firstName: string,
+  lastName: string,
+  email: string,
+  phone?: string | null,
+  companyId?: string | null,
+  jobTitle?: string | null,
+  attendeeType: RegistrantType,
+  status: RegistrantStatus,
+};
+
+export type AdminCreateRegistrantResult = {
+  __typename: "AdminCreateRegistrantResult",
+  id: string,
+  email: string,
+  companyId?: string | null,
+  tempPassword?: string | null,
+};
+
+export type AdminReissueRegistrantTempPasswordInput = {
+  registrantId: string,
+  email?: string | null,
+};
+
+export type AdminReissueRegistrantTempPasswordResult = {
+  __typename: "AdminReissueRegistrantTempPasswordResult",
+  registrantId: string,
+  email: string,
+  tempPassword: string,
+};
+
+export type AdminCreateExhibitorInput = {
+  companyId: string,
+  eventId: string,
+  boothNumber?: string | null,
+};
+
+export type AdminCreateExhibitorResult = {
+  __typename: "AdminCreateExhibitorResult",
+  id: string,
+  companyId: string,
+  eventId: string,
+  boothNumber?: string | null,
+  passportQrPayload: string,
+  qrCode: string,
+};
+
+export type AdminPublishDueAnnouncementsResult = {
+  __typename: "AdminPublishDueAnnouncementsResult",
+  publishedCount: number,
+  publishedIds: Array< string >,
+};
+
+export type DeleteMyAccountResult = {
+  __typename: "DeleteMyAccountResult",
+  success: boolean,
+  message?: string | null,
+};
+
 export type UpdateAPSInput = {
   id: string,
   year?: string | null,
@@ -1619,7 +1681,9 @@ export type CreateApsAppSessionInput = {
   endTime?: string | null,
   location?: string | null,
   description?: string | null,
+  embedUrl?: string | null,
   agendaId?: string | null,
+  draft?: boolean | null,
   apsAgendaItemsId?: string | null,
 };
 
@@ -1630,7 +1694,9 @@ export type ModelApsAppSessionConditionInput = {
   endTime?: ModelStringInput | null,
   location?: ModelStringInput | null,
   description?: ModelStringInput | null,
+  embedUrl?: ModelStringInput | null,
   agendaId?: ModelIDInput | null,
+  draft?: ModelBooleanInput | null,
   and?: Array< ModelApsAppSessionConditionInput | null > | null,
   or?: Array< ModelApsAppSessionConditionInput | null > | null,
   not?: ModelApsAppSessionConditionInput | null,
@@ -1647,7 +1713,9 @@ export type UpdateApsAppSessionInput = {
   endTime?: string | null,
   location?: string | null,
   description?: string | null,
+  embedUrl?: string | null,
   agendaId?: string | null,
+  draft?: boolean | null,
   apsAgendaItemsId?: string | null,
 };
 
@@ -2475,6 +2543,8 @@ export type CreateApsAdminAnnouncementInput = {
   title?: string | null,
   body: string,
   deepLink?: string | null,
+  scheduledAt?: string | null,
+  publishedAt?: string | null,
   createdAt?: string | null,
   updatedAt?: string | null,
 };
@@ -2484,6 +2554,8 @@ export type ModelApsAdminAnnouncementConditionInput = {
   title?: ModelStringInput | null,
   body?: ModelStringInput | null,
   deepLink?: ModelStringInput | null,
+  scheduledAt?: ModelStringInput | null,
+  publishedAt?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelApsAdminAnnouncementConditionInput | null > | null,
@@ -2498,6 +2570,8 @@ export type ApsAdminAnnouncement = {
   title?: string | null,
   body: string,
   deepLink?: string | null,
+  scheduledAt?: string | null,
+  publishedAt?: string | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -2508,6 +2582,8 @@ export type UpdateApsAdminAnnouncementInput = {
   title?: string | null,
   body?: string | null,
   deepLink?: string | null,
+  scheduledAt?: string | null,
+  publishedAt?: string | null,
   createdAt?: string | null,
   updatedAt?: string | null,
 };
@@ -3205,6 +3281,32 @@ export type UpdateAPSCompanyEventsInput = {
   aPSCompanyId?: string | null,
 };
 
+export type AdminThinkificByEmailResult = {
+  __typename: "AdminThinkificByEmailResult",
+  email: string,
+  thinkificUserId?: number | null,
+  apcEnrollments:  Array<AdminThinkificEnrollment >,
+  otherEnrollments:  Array<AdminThinkificEnrollment >,
+};
+
+export type AdminThinkificEnrollment = {
+  __typename: "AdminThinkificEnrollment",
+  enrollmentId?: number | null,
+  courseId?: number | null,
+  courseName?: string | null,
+  percentageCompleted?: number | null,
+  completedAt?: string | null,
+  activatedAt?: string | null,
+};
+
+export type AdminLatestTempCredentialResult = {
+  __typename: "AdminLatestTempCredentialResult",
+  registrantId: string,
+  email: string,
+  tempPassword: string,
+  createdAt: string,
+};
+
 export type ModelApsTempCredentialFilterInput = {
   id?: ModelIDInput | null,
   apsID?: ModelIDInput | null,
@@ -3422,6 +3524,8 @@ export type ModelApsAdminAnnouncementFilterInput = {
   title?: ModelStringInput | null,
   body?: ModelStringInput | null,
   deepLink?: ModelStringInput | null,
+  scheduledAt?: ModelStringInput | null,
+  publishedAt?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelApsAdminAnnouncementFilterInput | null > | null,
@@ -3768,7 +3872,9 @@ export type ModelApsAppSessionFilterInput = {
   endTime?: ModelStringInput | null,
   location?: ModelStringInput | null,
   description?: ModelStringInput | null,
+  embedUrl?: ModelStringInput | null,
   agendaId?: ModelIDInput | null,
+  draft?: ModelBooleanInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelApsAppSessionFilterInput | null > | null,
@@ -4225,6 +4331,8 @@ export type ModelSubscriptionApsAdminAnnouncementFilterInput = {
   title?: ModelSubscriptionStringInput | null,
   body?: ModelSubscriptionStringInput | null,
   deepLink?: ModelSubscriptionStringInput | null,
+  scheduledAt?: ModelSubscriptionStringInput | null,
+  publishedAt?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionApsAdminAnnouncementFilterInput | null > | null,
@@ -4527,7 +4635,9 @@ export type ModelSubscriptionApsAppSessionFilterInput = {
   endTime?: ModelSubscriptionStringInput | null,
   location?: ModelSubscriptionStringInput | null,
   description?: ModelSubscriptionStringInput | null,
+  embedUrl?: ModelSubscriptionStringInput | null,
   agendaId?: ModelSubscriptionIDInput | null,
+  draft?: ModelSubscriptionBooleanInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionApsAppSessionFilterInput | null > | null,
@@ -5077,6 +5187,7 @@ export type ApsAppSessionsByAgendaIdWithRelationsQuery = {
       date?: string | null,
       startTime?: string | null,
       endTime?: string | null,
+      embedUrl?: string | null,
       location?: string | null,
       description?: string | null,
       speakers?:  {
@@ -5138,6 +5249,7 @@ export type GetApsAppSessionWithRelationsQuery = {
     date?: string | null,
     startTime?: string | null,
     endTime?: string | null,
+    embedUrl?: string | null,
     location?: string | null,
     description?: string | null,
     speakers?:  {
@@ -5615,6 +5727,72 @@ export type SyncMyThinkificProgressMutation = {
     apcProgramProgress?: number | null,
     updated: boolean,
     syncedAt: string,
+    message?: string | null,
+  } | null,
+};
+
+export type AdminCreateRegistrantMutationVariables = {
+  input: AdminCreateRegistrantInput,
+};
+
+export type AdminCreateRegistrantMutation = {
+  adminCreateRegistrant?:  {
+    __typename: "AdminCreateRegistrantResult",
+    id: string,
+    email: string,
+    companyId?: string | null,
+    tempPassword?: string | null,
+  } | null,
+};
+
+export type AdminReissueRegistrantTempPasswordMutationVariables = {
+  input: AdminReissueRegistrantTempPasswordInput,
+};
+
+export type AdminReissueRegistrantTempPasswordMutation = {
+  adminReissueRegistrantTempPassword?:  {
+    __typename: "AdminReissueRegistrantTempPasswordResult",
+    registrantId: string,
+    email: string,
+    tempPassword: string,
+  } | null,
+};
+
+export type AdminCreateExhibitorMutationVariables = {
+  input: AdminCreateExhibitorInput,
+};
+
+export type AdminCreateExhibitorMutation = {
+  adminCreateExhibitor?:  {
+    __typename: "AdminCreateExhibitorResult",
+    id: string,
+    companyId: string,
+    eventId: string,
+    boothNumber?: string | null,
+    passportQrPayload: string,
+    qrCode: string,
+  } | null,
+};
+
+export type AdminPublishDueAnnouncementsMutationVariables = {
+  eventId: string,
+};
+
+export type AdminPublishDueAnnouncementsMutation = {
+  adminPublishDueAnnouncements?:  {
+    __typename: "AdminPublishDueAnnouncementsResult",
+    publishedCount: number,
+    publishedIds: Array< string >,
+  } | null,
+};
+
+export type DeleteMyAccountMutationVariables = {
+};
+
+export type DeleteMyAccountMutation = {
+  deleteMyAccount?:  {
+    __typename: "DeleteMyAccountResult",
+    success: boolean,
     message?: string | null,
   } | null,
 };
@@ -6650,7 +6828,9 @@ export type CreateApsAppUserNoteMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -6819,7 +6999,9 @@ export type UpdateApsAppUserNoteMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -6988,7 +7170,9 @@ export type DeleteApsAppUserNoteMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -7608,6 +7792,7 @@ export type CreateApsAppSessionMutation = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -7636,6 +7821,7 @@ export type CreateApsAppSessionMutation = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -7657,6 +7843,7 @@ export type UpdateApsAppSessionMutation = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -7685,6 +7872,7 @@ export type UpdateApsAppSessionMutation = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -7706,6 +7894,7 @@ export type DeleteApsAppSessionMutation = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -7734,6 +7923,7 @@ export type DeleteApsAppSessionMutation = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -7759,7 +7949,9 @@ export type CreateApsAppSessionQuestionMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -7799,7 +7991,9 @@ export type UpdateApsAppSessionQuestionMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -7839,7 +8033,9 @@ export type DeleteApsAppSessionQuestionMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -9702,7 +9898,9 @@ export type CreateApsAppUserFavoriteSessionMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -9780,7 +9978,9 @@ export type UpdateApsAppUserFavoriteSessionMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -9858,7 +10058,9 @@ export type DeleteApsAppUserFavoriteSessionMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -11218,6 +11420,8 @@ export type CreateApsAdminAnnouncementMutation = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -11236,6 +11440,8 @@ export type UpdateApsAdminAnnouncementMutation = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -11254,6 +11460,8 @@ export type DeleteApsAdminAnnouncementMutation = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -11433,7 +11641,9 @@ export type CreateSessionSpeakersMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -11474,7 +11684,9 @@ export type UpdateSessionSpeakersMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -11515,7 +11727,9 @@ export type DeleteSessionSpeakersMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -11556,7 +11770,9 @@ export type CreateSessionSponsorsMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -11597,7 +11813,9 @@ export type UpdateSessionSponsorsMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -11638,7 +11856,9 @@ export type DeleteSessionSponsorsMutation = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -13956,6 +14176,50 @@ export type UpdateAPSCompanyEventsMutation = {
   } | null,
 };
 
+export type AdminGetThinkificByEmailQueryVariables = {
+  email: string,
+};
+
+export type AdminGetThinkificByEmailQuery = {
+  adminGetThinkificByEmail?:  {
+    __typename: "AdminThinkificByEmailResult",
+    email: string,
+    thinkificUserId?: number | null,
+    apcEnrollments:  Array< {
+      __typename: "AdminThinkificEnrollment",
+      enrollmentId?: number | null,
+      courseId?: number | null,
+      courseName?: string | null,
+      percentageCompleted?: number | null,
+      completedAt?: string | null,
+      activatedAt?: string | null,
+    } >,
+    otherEnrollments:  Array< {
+      __typename: "AdminThinkificEnrollment",
+      enrollmentId?: number | null,
+      courseId?: number | null,
+      courseName?: string | null,
+      percentageCompleted?: number | null,
+      completedAt?: string | null,
+      activatedAt?: string | null,
+    } >,
+  } | null,
+};
+
+export type AdminGetLatestRegistrantTempCredentialQueryVariables = {
+  registrantId: string,
+};
+
+export type AdminGetLatestRegistrantTempCredentialQuery = {
+  adminGetLatestRegistrantTempCredential?:  {
+    __typename: "AdminLatestTempCredentialResult",
+    registrantId: string,
+    email: string,
+    tempPassword: string,
+    createdAt: string,
+  } | null,
+};
+
 export type GetApsTempCredentialQueryVariables = {
   id: string,
 };
@@ -14031,7 +14295,9 @@ export type GetApsAppUserNoteQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -14658,7 +14924,9 @@ export type GetApsAppUserFavoriteSessionQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -15074,6 +15342,8 @@ export type GetApsAdminAnnouncementQuery = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -15095,6 +15365,8 @@ export type ListApsAdminAnnouncementsQuery = {
       title?: string | null,
       body: string,
       deepLink?: string | null,
+      scheduledAt?: string | null,
+      publishedAt?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -16349,6 +16621,36 @@ export type ApsAdminAnnouncementsByEventIdAndCreatedAtQuery = {
       title?: string | null,
       body: string,
       deepLink?: string | null,
+      scheduledAt?: string | null,
+      publishedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAdminAnnouncementsByEventIdAndScheduledAtQueryVariables = {
+  eventId: string,
+  scheduledAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAdminAnnouncementFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAdminAnnouncementsByEventIdAndScheduledAtQuery = {
+  apsAdminAnnouncementsByEventIdAndScheduledAt?:  {
+    __typename: "ModelApsAdminAnnouncementConnection",
+    items:  Array< {
+      __typename: "ApsAdminAnnouncement",
+      id: string,
+      eventId: string,
+      title?: string | null,
+      body: string,
+      deepLink?: string | null,
+      scheduledAt?: string | null,
+      publishedAt?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -18225,6 +18527,7 @@ export type GetApsAppSessionQuery = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -18253,6 +18556,7 @@ export type GetApsAppSessionQuery = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -18277,7 +18581,9 @@ export type ListApsAppSessionsQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -18306,7 +18612,9 @@ export type ApsAppSessionsByAgendaIdQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -18333,7 +18641,9 @@ export type GetApsAppSessionQuestionQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -20394,7 +20704,9 @@ export type GetSessionSpeakersQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -20501,7 +20813,9 @@ export type GetSessionSponsorsQuery = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -20679,7 +20993,9 @@ export type OnCreateApsAppUserNoteSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -20848,7 +21164,9 @@ export type OnUpdateApsAppUserNoteSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -21017,7 +21335,9 @@ export type OnDeleteApsAppUserNoteSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -22150,7 +22470,9 @@ export type OnCreateApsAppUserFavoriteSessionSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -22228,7 +22550,9 @@ export type OnUpdateApsAppUserFavoriteSessionSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -22306,7 +22630,9 @@ export type OnDeleteApsAppUserFavoriteSessionSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -23004,6 +23330,8 @@ export type OnCreateApsAdminAnnouncementSubscription = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -23021,6 +23349,8 @@ export type OnUpdateApsAdminAnnouncementSubscription = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -23038,6 +23368,8 @@ export type OnDeleteApsAdminAnnouncementSubscription = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -25697,6 +26029,7 @@ export type OnCreateApsAppSessionSubscription = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -25725,6 +26058,7 @@ export type OnCreateApsAppSessionSubscription = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -25745,6 +26079,7 @@ export type OnUpdateApsAppSessionSubscription = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -25773,6 +26108,7 @@ export type OnUpdateApsAppSessionSubscription = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -25793,6 +26129,7 @@ export type OnDeleteApsAppSessionSubscription = {
     endTime?: string | null,
     location?: string | null,
     description?: string | null,
+    embedUrl?: string | null,
     agendaId?: string | null,
     agenda?:  {
       __typename: "ApsAgenda",
@@ -25821,6 +26158,7 @@ export type OnDeleteApsAppSessionSubscription = {
       __typename: "ModelApsAppUserFavoriteSessionConnection",
       nextToken?: string | null,
     } | null,
+    draft?: boolean | null,
     createdAt: string,
     updatedAt: string,
     apsAgendaItemsId?: string | null,
@@ -25845,7 +26183,9 @@ export type OnCreateApsAppSessionQuestionSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -25884,7 +26224,9 @@ export type OnUpdateApsAppSessionQuestionSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -25923,7 +26265,9 @@ export type OnDeleteApsAppSessionQuestionSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -28597,7 +28941,9 @@ export type OnCreateSessionSpeakersSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -28637,7 +28983,9 @@ export type OnUpdateSessionSpeakersSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -28677,7 +29025,9 @@ export type OnDeleteSessionSpeakersSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -28717,7 +29067,9 @@ export type OnCreateSessionSponsorsSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -28757,7 +29109,9 @@ export type OnUpdateSessionSponsorsSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,
@@ -28797,7 +29151,9 @@ export type OnDeleteSessionSponsorsSubscription = {
       endTime?: string | null,
       location?: string | null,
       description?: string | null,
+      embedUrl?: string | null,
       agendaId?: string | null,
+      draft?: boolean | null,
       createdAt: string,
       updatedAt: string,
       apsAgendaItemsId?: string | null,

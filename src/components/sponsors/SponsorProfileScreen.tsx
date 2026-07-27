@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import RenderHtml from 'react-native-render-html';
+import { RiveLoader } from '../RiveLoader';
 import { APS_ID } from '../../config/apsConfig';
 import { apsAppUserFavoriteSponsorsByFavoriteKey } from '../../graphql/queries';
 import { apsAppExhibitorProfilesByCompanyId } from '../../graphql/queries';
@@ -236,12 +237,7 @@ export default function SponsorProfileScreen() {
   }
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text style={styles.muted}>Loading sponsor...</Text>
-      </View>
-    );
+    return <RiveLoader />;
   }
 
   if (error || !sponsor) {

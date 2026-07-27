@@ -8,6 +8,13 @@
           ],
           "category": "auth",
           "resourceName": "autopacksummitappfefbe6f1"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "apsapp"
         }
       ],
       "output": {
@@ -58,6 +65,29 @@
     }
   },
   "function": {
+    "adminRegistrantOps": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "autopacksummitapp"
+        },
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "autopacksummitappfefbe6f1"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "apsPushFanout": {
       "build": true,
       "dependsOn": [
@@ -69,6 +99,13 @@
           ],
           "category": "api",
           "resourceName": "autopacksummitapp"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "apsapp"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -77,6 +114,14 @@
   },
   "parameters": {
     "AMPLIFY_function_apsPushFanout_apcTotalCourses": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "apsPushFanout"
+        }
+      ]
+    },
+    "AMPLIFY_function_apsPushFanout_apsEventId": {
       "usedBy": [
         {
           "category": "function",

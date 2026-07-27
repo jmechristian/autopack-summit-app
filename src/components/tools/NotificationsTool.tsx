@@ -1,26 +1,55 @@
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text } from 'react-native';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { type NotificationKind } from '../notifications/notificationThemes';
+import { NotificationCard } from '../notifications/NotificationCard';
 import { apsAppUserProfilesByUserId, apsContactRequestsByStatusAndUpdatedAt } from '../../graphql/queries';
 import { useEngageStore } from '../../store/engageStore';
-import { AppCard } from '../../ui/AppCard';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
 
 type NotificationRow = {
   id: string;
-  title: string;
+  kind: NotificationKind;
   body: string;
+  subtitle?: string;
   timestamp: string;
   badgeCount?: number;
+  targetId?: string;
 };
 
 type RequestHistoryItem = {
   id: string;
+  requestId: string;
   message: string;
   timestamp: string;
 };
+
+function truncateText(value: string, maxLength = 120) {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, maxLength).trim()}…`;
+}
+
+function openNotification(row: NotificationRow) {
+  if (!row.targetId) return;
+
+  if (row.kind === 'announcement') {
+    router.push(`/(main)/hub/announcements/${row.targetId}`);
+    return;
+  }
+
+  if (row.kind === 'contact-request') {
+    router.push(`/(main)/hub/requests/${row.targetId}`);
+    return;
+  }
+
+  if (row.kind === 'message') {
+    router.push(`/(main)/hub/messages/${row.targetId}`);
+  }
+}
 
 export default function NotificationsTool() {
   const announcements = useEngageStore((s) => s.announcements);
@@ -31,6 +60,7 @@ export default function NotificationsTool() {
   const loadAnnouncements = useEngageStore((s) => s.loadAnnouncements);
   const loadInbox = useEngageStore((s) => s.loadInbox);
   const refreshAnnouncementUnread = useEngageStore((s) => s.refreshAnnouncementUnread);
+  const markAnnouncementsSeen = useEngageStore((s) => s.markAnnouncementsSeen);
 
   const [requestHistory, setRequestHistory] = useState<RequestHistoryItem[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
@@ -104,6 +134,7 @@ export default function NotificationsTool() {
           const otherLabel = otherUserId ? await resolveUserLabel(otherUserId) : 'Community Member';
           return {
             id: `request-pending-${item?.id}`,
+            requestId: String(item?.id),
             message: `${otherLabel} sent you a contact request`,
             timestamp: item?.createdAt || new Date().toISOString(),
           } satisfies RequestHistoryItem;
@@ -117,6 +148,7 @@ export default function NotificationsTool() {
           const otherLabel = otherUserId ? await resolveUserLabel(otherUserId) : 'Community Member';
           return {
             id: `request-accepted-${item?.id}`,
+            requestId: String(item?.id),
             message: requestedByMe
               ? `${otherLabel} accepted your contact request`
               : `You accepted ${otherLabel}'s contact request`,
@@ -133,6 +165,12 @@ export default function NotificationsTool() {
     }
   }, [resolveUserLabel]);
 
+  useFocusEffect(
+    useCallback(() => {
+      void markAnnouncementsSeen();
+    }, [markAnnouncementsSeen]),
+  );
+
   useEffect(() => {
     void Promise.all([loadAnnouncements(), loadInbox(), refreshAnnouncementUnread(), loadRequestHistory()]);
   }, [loadAnnouncements, loadInbox, loadRequestHistory, refreshAnnouncementUnread]);
@@ -140,30 +178,39 @@ export default function NotificationsTool() {
   const notificationRows = useMemo(() => {
     const announcementRows: NotificationRow[] = announcements.map((announcement) => {
       const isUnread = !lastSeenAnnouncementAt || announcement.createdAt > lastSeenAnnouncementAt;
+      const title = announcement.title?.trim() || 'Announcement';
+      const preview = truncateText(announcement.body || '');
       return {
         id: `announcement-${announcement.id}`,
-        title: announcement.title || 'Announcement',
-        body: 'New announcement',
+        kind: 'announcement',
+        body: title,
+        subtitle: preview || undefined,
         timestamp: announcement.createdAt,
         badgeCount: isUnread ? 1 : undefined,
+        targetId: announcement.id,
       };
     });
 
     const requestRows: NotificationRow[] = requestHistory.map((request) => ({
       id: request.id,
-      title: 'Contact request',
+      kind: 'contact-request',
       body: request.message,
       timestamp: request.timestamp,
+      targetId: request.requestId,
     }));
 
     const unreadMessageRows: NotificationRow[] = inbox
       .filter((thread) => (thread.unreadCount || 0) > 0)
       .map((thread) => ({
         id: `message-${thread.threadId}`,
-        title: 'Unread messages',
-        body: `${thread.title}: ${thread.unreadCount} unread message${thread.unreadCount === 1 ? '' : 's'}`,
+        kind: 'message',
+        body: thread.title,
+        subtitle: `${thread.unreadCount} unread message${thread.unreadCount === 1 ? '' : 's'}${
+          thread.preview ? ` • ${truncateText(thread.preview, 80)}` : ''
+        }`,
         timestamp: thread.lastMessageAt || new Date().toISOString(),
         badgeCount: thread.unreadCount || undefined,
+        targetId: thread.threadId,
       }));
 
     return [...unreadMessageRows, ...requestRows, ...announcementRows].sort(
@@ -182,18 +229,14 @@ export default function NotificationsTool() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <AppCard style={styles.row}>
-            <View style={styles.titleRow}>
-              <Text style={styles.title}>{item.title}</Text>
-              {!!item.badgeCount && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{item.badgeCount}</Text>
-                </View>
-              )}
-            </View>
-            <Text style={styles.body}>{item.body}</Text>
-            <Text style={styles.meta}>{new Date(item.timestamp).toLocaleString()}</Text>
-          </AppCard>
+          <NotificationCard
+            kind={item.kind}
+            body={item.body}
+            subtitle={item.subtitle}
+            timestamp={item.timestamp}
+            badgeCount={item.badgeCount}
+            onPress={item.targetId ? () => openNotification(item) : undefined}
+          />
         )}
         ListEmptyComponent={!loading ? <Text style={styles.muted}>No notifications yet.</Text> : null}
       />
@@ -203,17 +246,5 @@ export default function NotificationsTool() {
 
 const styles = StyleSheet.create({
   listContent: { paddingBottom: ui.space.lg },
-  row: { marginBottom: ui.space.sm },
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: ui.colors.primary, flex: 1 },
-  body: { marginTop: ui.space.xs, color: '#374151', lineHeight: 20 },
-  meta: { marginTop: ui.space.sm, color: ui.colors.muted, fontSize: 12 },
-  badge: {
-    backgroundColor: ui.colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-  },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   muted: { color: ui.colors.muted },
 });

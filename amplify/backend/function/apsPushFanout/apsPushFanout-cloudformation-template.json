@@ -57,6 +57,14 @@
     "apcTotalCourses": {
       "Type": "String",
       "Default": "10"
+    },
+    "apsEventId": {
+      "Type": "String",
+      "Default": "d00b35f5-c45b-42eb-b306-fa3dfeee0251"
+    },
+    "storageapsappBucketName": {
+      "Type": "String",
+      "Default": "storageapsappBucketName"
     }
   },
   "Conditions": {
@@ -142,6 +150,23 @@
             "APC_TOTAL_COURSES": {
               "Ref": "apcTotalCourses"
             },
+            "APS_EVENT_ID": {
+              "Ref": "apsEventId"
+            },
+            "AWS_ACCOUNT_ID": {
+              "Ref": "AWS::AccountId"
+            },
+            "EXHIBITOR_QR_BUCKET": {
+              "Fn::Join": [
+                "",
+                [
+                  "autopacksummitapp94b14feadba64f23aff0ed8deae77b99bc6-dev"
+                ]
+              ]
+            },
+            "EXHIBITOR_QR_SECRET": {
+              "Ref": "apiautopacksummitappGraphQLAPIIdOutput"
+            },
             "APP_USER_TABLE_NAME": {
               "Fn::Join": [
                 "",
@@ -177,6 +202,21 @@
                 "",
                 [
                   "ApsAppUserProfile-",
+                  {
+                    "Ref": "apiautopacksummitappGraphQLAPIIdOutput"
+                  },
+                  "-",
+                  {
+                    "Ref": "env"
+                  }
+                ]
+              ]
+            },
+            "EXHIBITOR_PROFILE_TABLE_NAME": {
+              "Fn::Join": [
+                "",
+                [
+                  "ApsAppExhibitorProfile-",
                   {
                     "Ref": "apiautopacksummitappGraphQLAPIIdOutput"
                   },
@@ -247,6 +287,28 @@
                   }
                 ]
               ]
+            },
+            "ANNOUNCEMENT_TABLE_NAME": {
+              "Fn::Join": [
+                "",
+                [
+                  "ApsAdminAnnouncement-",
+                  {
+                    "Ref": "apiautopacksummitappGraphQLAPIIdOutput"
+                  },
+                  "-",
+                  {
+                    "Ref": "env"
+                  }
+                ]
+              ]
+            },
+            "ANNOUNCEMENT_SCHEDULED_GSI_NAME": "byEventScheduled",
+            "ANNOUNCEMENT_SCHEDULER_GROUP": {
+              "Fn::Sub": "aps-announcements-${env}"
+            },
+            "ANNOUNCEMENT_SCHEDULER_ROLE_ARN": {
+              "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/aps-announcement-scheduler-${env}"
             }
           }
         },
@@ -455,6 +517,62 @@
         "StartingPosition": "LATEST"
       }
     },
+    "LambdaTriggerPolicyApsAdminAnnouncement": {
+      "DependsOn": [
+        "LambdaExecutionRole"
+      ],
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "amplify-lambda-execution-policy-ApsAdminAnnouncement",
+        "Roles": [
+          {
+            "Ref": "LambdaExecutionRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:ListStreams"
+              ],
+              "Resource": {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${apiautopacksummitappGraphQLAPIIdOutput}:GetAtt:ApsAdminAnnouncementTable:StreamArn"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "LambdaEventSourceMappingApsAdminAnnouncement": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [
+        "LambdaTriggerPolicyApsAdminAnnouncement",
+        "LambdaExecutionRole"
+      ],
+      "Properties": {
+        "BatchSize": 100,
+        "Enabled": true,
+        "EventSourceArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${apiautopacksummitappGraphQLAPIIdOutput}:GetAtt:ApsAdminAnnouncementTable:StreamArn"
+          }
+        },
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaFunction",
+            "Arn"
+          ]
+        },
+        "StartingPosition": "LATEST"
+      }
+    },
     "AmplifyResourcesPolicy": {
       "DependsOn": [
         "LambdaExecutionRole"
@@ -495,6 +613,26 @@
                       "/types/Query/*"
                     ]
                   ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:appsync:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":apis/",
+                      {
+                        "Ref": "apiautopacksummitappGraphQLAPIIdOutput"
+                      },
+                      "/types/Mutation/*"
+                    ]
+                  ]
                 }
               ]
             }
@@ -531,7 +669,32 @@
                 "arn:aws:dynamodb:*:*:table/ApsDmMessage-*",
                 "arn:aws:dynamodb:*:*:table/ApsDmMessage-*/index/*",
                 "arn:aws:dynamodb:*:*:table/ApsDmParticipantState-*",
-                "arn:aws:dynamodb:*:*:table/ApsDmParticipantState-*/index/*"
+                "arn:aws:dynamodb:*:*:table/ApsDmParticipantState-*/index/*",
+                "arn:aws:dynamodb:*:*:table/ApsAppExhibitorProfile-*",
+                "arn:aws:dynamodb:*:*:table/ApsAppExhibitorProfile-*/index/*",
+                "arn:aws:dynamodb:*:*:table/ApsAdminAnnouncement-*",
+                "arn:aws:dynamodb:*:*:table/ApsAdminAnnouncement-*/index/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "s3:PutObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::*/qrcodes/exhibitor-passport/*"
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "scheduler:CreateSchedule",
+                "scheduler:UpdateSchedule",
+                "scheduler:DeleteSchedule",
+                "scheduler:GetSchedule"
+              ],
+              "Resource": [
+                "arn:aws:scheduler:*:*:schedule/aps-announcements-*/*"
               ],
               "Effect": "Allow"
             }
@@ -544,6 +707,100 @@
         ]
       },
       "DependsOn": "LambdaExecutionRole"
+    },
+    "PublishDueAnnouncementsScheduleRule": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Publish scheduled announcements when due",
+        "ScheduleExpression": "cron(0/1 * * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": "PublishDueAnnouncementsTarget",
+            "Input": "{\"action\":\"publishDueAnnouncements\"}"
+          }
+        ]
+      }
+    },
+    "PublishDueAnnouncementsSchedulePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "PublishDueAnnouncementsScheduleRule",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "AnnouncementSchedulerGroup": {
+      "Type": "AWS::Scheduler::ScheduleGroup",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "aps-announcements-${env}"
+        }
+      }
+    },
+    "AnnouncementSchedulerRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "aps-announcement-scheduler-${env}"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "invoke-publish-lambda",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:apsPushFanout-${env}"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AnnouncementSchedulerInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Principal": "scheduler.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/aps-announcements-${env}/*"
+        }
+      }
     }
   },
   "Outputs": {
