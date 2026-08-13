@@ -25,6 +25,8 @@ type AgendaSessionCardProps = {
   cardStyle?: StyleProp<ViewStyle>;
   showPresentationButton?: boolean;
   onPressPresentation?: () => void;
+  /** Text link + chevron under the description (e.g. Hub Coming Up). */
+  showViewSessionButton?: boolean;
 };
 
 function formatPeopleList(names: string[]) {
@@ -53,6 +55,7 @@ export function AgendaSessionCard({
   cardStyle,
   showPresentationButton = false,
   onPressPresentation,
+  showViewSessionButton = false,
 }: AgendaSessionCardProps) {
   const descriptionLines =
     typeof descriptionNumberOfLines === 'number'
@@ -137,6 +140,13 @@ export function AgendaSessionCard({
               </Pressable>
             )}
           </>
+        )}
+
+        {showViewSessionButton && (
+          <Pressable onPress={onPress} hitSlop={8} style={styles.viewSessionBtn}>
+            <Text style={styles.viewSessionText}>View session</Text>
+            <Ionicons name='chevron-forward' size={16} color={autopackColors.apBlue} />
+          </Pressable>
         )}
 
         {!!speakerNames.length && (
@@ -256,6 +266,18 @@ const styles = StyleSheet.create({
   description: { color: '#374151', lineHeight: 20 },
   readMoreBtn: { alignSelf: 'flex-start', marginTop: 8 },
   readMoreText: { color: autopackColors.apBlue, fontWeight: '700' },
+  viewSessionBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  viewSessionText: {
+    color: autopackColors.apBlue,
+    fontWeight: '800',
+    fontSize: 14,
+  },
   metaLine: { marginTop: 10, color: '#374151', lineHeight: 20 },
   metaLabel: { fontWeight: '800', color: '#111827' },
   presentationBtn: {

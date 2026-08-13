@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, Text } from 'react-native';
 import { router } from 'expo-router';
 import { NotificationCard } from '../notifications/NotificationCard';
 import { useEngageStore } from '../../store/engageStore';
-import * as Notifications from 'expo-notifications';
+import { setAppBadgeCount } from '../../utils/pushNotifications';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
 
@@ -30,7 +30,7 @@ export default function AnnouncementsTool({
   useEffect(() => {
     loadAnnouncements();
     markAnnouncementsSeen();
-    Notifications.setBadgeCountAsync(0).catch(() => {});
+    setAppBadgeCount(0);
   }, [loadAnnouncements, markAnnouncementsSeen]);
 
   const rows = useMemo(

@@ -1,9 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Alert,
-  Image,
   Pressable,
   SectionList,
   StyleSheet,
@@ -83,6 +81,7 @@ type ContactSection = { title: string; data: ContactProfile[] };
 
 type ContactsToolProps = {
   profileBasePath?: string;
+  threadBasePath?: string;
 };
 
 function normalizeNamePart(v?: string | null) {
@@ -101,7 +100,10 @@ function getSectionKey(p: ContactProfile) {
   return /[A-Z]/.test(letter) ? letter : '#';
 }
 
-export default function ContactsTool({ profileBasePath = '/(main)/community' }: ContactsToolProps) {
+export default function ContactsTool({
+  profileBasePath = '/(main)/community',
+  threadBasePath = '/(main)/engage/messages',
+}: ContactsToolProps) {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
@@ -117,6 +119,13 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Keep a ref so loaders can skip already-fetched profiles without depending on
+  // profilesById state (which previously recreated `load` and re-triggered the
+  // mount effect in a loop, freezing this screen).
+  const profilesByIdRef = useRef(profilesById);
+  profilesByIdRef.current = profilesById;
+  const profilePictureUrlsRef = useRef(profilePictureUrls);
+  profilePictureUrlsRef.current = profilePictureUrls;
 
   const favoriteContactIds = useCommunityStore((s) => s.favoriteContactIds) || {};
   const pendingContactIds = useCommunityStore((s) => s.pendingContactIds) || {};
@@ -172,8 +181,9 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
       const deduped = Array.from(byContact.values());
       setContacts(deduped);
 
-      // Fetch missing profiles
-      const missing = deduped.map((c) => c.contactId).filter((id) => !profilesById[id]);
+      // Fetch missing profiles (read cache via ref to keep this callback stable)
+      const cached = profilesByIdRef.current;
+      const missing = deduped.map((c) => c.contactId).filter((id) => !cached[id]);
       if (missing.length) {
         const entries = await Promise.all(
           missing.map(async (id) => {
@@ -205,25 +215,21 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
     } finally {
       setLoading(false);
     }
-  }, [currentAppUser?.id, profilesById]);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    await loadContacts();
-  }, [loadContacts]);
+  }, [currentAppUser?.id]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    setLoading(true);
+    void loadContacts();
+  }, [loadContacts]);
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await load();
+      await loadContacts();
     } finally {
       setRefreshing(false);
     }
-  }, [load]);
+  }, [loadContacts]);
 
   const filteredProfiles = useMemo(() => {
     const items = contacts;
@@ -331,7 +337,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
       ])
     ) as string[];
     const knownUserIds = new Set(
-      Object.values(profilesById)
+      Object.values(profilesByIdRef.current)
         .map((p) => p.userId)
         .filter(Boolean)
     );
@@ -375,26 +381,32 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
     return () => {
       cancelled = true;
     };
-  }, [incomingRequests, sentRequests, profilesById]);
+  }, [incomingRequests, sentRequests]);
 
   useEffect(() => {
-    const loadUrls = async () => {
-      const missing = Object.values(profilesById).filter(
-        (p) => p.profilePicture && profilePictureUrls[p.id] === undefined
-      );
-      if (!missing.length) return;
+    const cachedUrls = profilePictureUrlsRef.current;
+    const missing = Object.values(profilesById).filter(
+      (p) => p.profilePicture && cachedUrls[p.id] === undefined
+    );
+    if (!missing.length) return;
+
+    let cancelled = false;
+    async function loadUrls() {
       const updates: Record<string, string | null> = {};
       await Promise.all(
         missing.map(async (p) => {
           updates[p.id] = await resolveProfilePictureUri(p.profilePicture);
         })
       );
-      if (Object.keys(updates).length) {
-        setProfilePictureUrls((prev) => ({ ...prev, ...updates }));
-      }
+      if (cancelled || !Object.keys(updates).length) return;
+      setProfilePictureUrls((prev) => ({ ...prev, ...updates }));
+    }
+
+    void loadUrls();
+    return () => {
+      cancelled = true;
     };
-    loadUrls();
-  }, [profilesById, profilePictureUrls]);
+  }, [profilesById]);
 
   if (!currentAppUser?.id) {
     return (
@@ -429,7 +441,13 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
         <View style={styles.errorBox}>
           <Text style={styles.errorTitle}>Could not load contacts</Text>
           <Text style={styles.errorText}>{error}</Text>
-          <Pressable style={styles.retryBtn} onPress={load}>
+          <Pressable
+            style={styles.retryBtn}
+            onPress={() => {
+              setLoading(true);
+              void loadContacts();
+            }}
+          >
             <Text style={styles.retryText}>Retry</Text>
           </Pressable>
         </View>
@@ -459,7 +477,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
               </Text>
             </View>
           )}
-          renderItem={({ item }) => {
+          renderItem={({ item, section }) => {
             const avatarUrl = profilePictureUrls[item.profileId] ?? null;
             const isFavorite = !!favoriteContactIds[item.profileId];
             const isPending = !!pendingContactIds[item.profileId];
@@ -470,6 +488,7 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
             const initials = `${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(
               item.lastName,
             ).slice(0, 1)}`.toUpperCase();
+            const isAcceptedContact = section.title === 'Accepted Contacts';
             return (
               <AppUserRow
                 profileId={item.profileId}
@@ -483,10 +502,12 @@ export default function ContactsTool({ profileBasePath = '/(main)/community' }: 
                 currentAppUserProfileId={currentProfileId}
                 favorite={isFavorite}
                 pendingFavorite={isPending}
-                onPressProfile={() =>
+                isAcceptedContact={isAcceptedContact}
+                threadBasePath={threadBasePath}
+                onPressProfile={(id) =>
                   router.push({
                     pathname: `${profileBasePath}/[id]`,
-                    params: { id: item.profileId },
+                    params: { id },
                   })
                 }
               />

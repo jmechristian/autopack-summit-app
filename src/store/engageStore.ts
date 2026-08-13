@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { getCurrentUser } from 'aws-amplify/auth';
-import * as Notifications from 'expo-notifications';
+import { setAppBadgeCount } from '../utils/pushNotifications';
+import { scheduleLocalNotification } from '../utils/localNotify';
+import { isWeb } from '../utils/platform';
 import { AppState } from 'react-native';
 import type * as APITypes from '../API';
 import { APS_ID } from '../config/apsConfig';
@@ -560,18 +562,19 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
 
         if (!isMine) {
           get().setUnread({ messages: get().unread.messages + 1 });
-          Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+          setAppBadgeCount(get().getEngageBadgeCount());
 
           // Foreground fallback alert for DMs when push delivery is unavailable
           // (e.g. simulator) or delayed. Suppress while actively viewing thread.
-          if (AppState.currentState === 'active' && get().activeThreadId !== threadId) {
-            Notifications.scheduleNotificationAsync({
-              content: {
-                title: 'New message',
-                body: body || 'You have a new message',
-                data: { type: 'dm', threadId },
-              },
-              trigger: null,
+          if (
+            !isWeb &&
+            AppState.currentState === 'active' &&
+            get().activeThreadId !== threadId
+          ) {
+            void scheduleLocalNotification({
+              title: 'New message',
+              body: body || 'You have a new message',
+              data: { type: 'dm', threadId },
             }).catch(() => {});
           }
         }
@@ -637,7 +640,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         };
         set({ incomingRequests: [item, ...get().incomingRequests] });
         get().setUnread({ requests: get().incomingRequests.length + 1 });
-        Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+        setAppBadgeCount(get().getEngageBadgeCount());
         void profileLabel(item.fromUserId).then((label) => {
           const list = get().incomingRequests;
           const ix = list.findIndex((x) => x.id === item.id);
@@ -678,7 +681,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           next.splice(ix, 1);
           set({ incomingRequests: next });
           get().setUnread({ requests: next.length });
-          Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+          setAppBadgeCount(get().getEngageBadgeCount());
           return;
         }
 
@@ -705,7 +708,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           };
           set({ incomingRequests: [item, ...get().incomingRequests] });
           get().setUnread({ requests: get().incomingRequests.length + 1 });
-          Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+          setAppBadgeCount(get().getEngageBadgeCount());
           void profileLabel(item.fromUserId).then((label) => {
             const cur = get().incomingRequests;
             const j = cur.findIndex((x) => x.id === item.id);
@@ -946,7 +949,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         loading: { ...get().loading, requests: false },
       });
       get().setUnread({ requests: labeled.length });
-      Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+      setAppBadgeCount(get().getEngageBadgeCount());
     } catch (e: any) {
       set({
         loading: { ...get().loading, requests: false },
@@ -1066,7 +1069,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       throw new Error('Request participants are invalid');
     }
     await get().loadIncomingRequests();
-    Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+    setAppBadgeCount(get().getEngageBadgeCount());
     return {
       otherUserId: String(otherUserId),
       introMessage: request.introMessage || null,
@@ -1079,7 +1082,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       variables: { input: { id, status: 'DECLINED', declinedAt: nowIso() } },
     });
     await get().loadIncomingRequests();
-    Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+    setAppBadgeCount(get().getEngageBadgeCount());
   },
 
   async getOrCreateContactRequest({ eventId, otherUserId, introMessage }) {
@@ -1186,7 +1189,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     });
 
     await Promise.allSettled([get().loadIncomingRequests(), get().loadSentRequests()]);
-    Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+    setAppBadgeCount(get().getEngageBadgeCount());
   },
 
   async ensureDmThreadForAcceptedRequest({ eventId, otherUserId }) {
@@ -1378,7 +1381,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         0
       );
       get().setUnread({ messages: unreadMessages });
-      Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+      setAppBadgeCount(get().getEngageBadgeCount());
     } catch (e: any) {
       set({
         loading: { ...get().loading, inbox: false },
@@ -1552,7 +1555,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         variables: { input: { id: state.id, lastReadAt: nowIso(), unreadCount: 0 } },
       });
       await get().loadInbox();
-      Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+      setAppBadgeCount(get().getEngageBadgeCount());
     } catch {
       // ignore
     }
@@ -1584,7 +1587,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         ? announcements.filter((a) => a.createdAt > lastSeen).length
         : announcements.length;
       get().setUnread({ announcements: unread });
-      Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+      setAppBadgeCount(get().getEngageBadgeCount());
     } catch (e: any) {
       set({
         loading: { ...get().loading, engageState: false },
@@ -1627,12 +1630,12 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
 
       set({ lastSeenAnnouncementAt: ts });
       get().setUnread({ announcements: 0 });
-      Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+      setAppBadgeCount(get().getEngageBadgeCount());
     } catch {
       // ignore (e.g. schema not deployed yet)
       set({ lastSeenAnnouncementAt: nowIso() });
       get().setUnread({ announcements: 0 });
-      Notifications.setBadgeCountAsync(get().getEngageBadgeCount()).catch(() => {});
+      setAppBadgeCount(get().getEngageBadgeCount());
     }
   },
 }));

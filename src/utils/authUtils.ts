@@ -29,14 +29,19 @@ export async function getCurrentUserEmail(): Promise<string | null> {
 }
 
 /**
- * Sign out the current user
+ * Sign out the current user (clears local + global Cognito sessions).
+ * Call this *before* navigating to login so session-restore cannot bounce back to Hub.
  */
 export async function signOut(): Promise<void> {
   try {
-    await amplifySignOut();
-  } catch (error) {
-    console.error('Error signing out:', error);
-    throw error;
+    await amplifySignOut({ global: true });
+  } catch (globalErr) {
+    try {
+      await amplifySignOut();
+    } catch (error) {
+      console.error('Error signing out:', error || globalErr);
+      throw error || globalErr;
+    }
   }
 }
 

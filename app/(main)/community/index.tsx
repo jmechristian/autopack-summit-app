@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   SectionList,
@@ -8,8 +8,9 @@ import {
   Text,
   TextInput,
   View,
+  type SectionListData,
 } from 'react-native';
-import { AppUserRow } from '../../../src/components/AppUserRow';
+import { APP_USER_ROW_HEIGHT, AppUserRow } from '../../../src/components/AppUserRow';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { listApsAppUserProfiles } from '../../../src/graphql/queries';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
@@ -19,6 +20,7 @@ import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
 import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
+import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
 
 type CommunityProfile = {
   profileId: string; // ApsAppUserProfile.id
@@ -33,6 +35,10 @@ type CommunityProfile = {
 };
 
 type CommunitySection = { title: string; data: CommunityProfile[] };
+
+/** Integer heights only — fractional hairlines accumulate and thrash sticky headers mid-list. */
+const SECTION_HEADER_HEIGHT = 32;
+const SEPARATOR_HEIGHT = 1;
 
 function normalizeNamePart(v?: string | null) {
   return (v || '').trim();
@@ -50,13 +56,50 @@ function getSectionKey(p: CommunityProfile) {
   return /[A-Z]/.test(letter) ? letter : '#';
 }
 
+function ItemSeparator() {
+  return <View style={styles.sep} />;
+}
+
+function buildSectionLayout(sections: CommunitySection[]) {
+  // VirtualizedSectionList flattens each section as: [header, ...items, footer].
+  // Footers exist even without renderSectionFooter (render null → height 0).
+  // Getting this wrong makes sticky headers thrash harder the deeper you scroll.
+  const lengths: number[] = [];
+  const offsets: number[] = [];
+  let offset = 0;
+
+  for (const section of sections) {
+    lengths.push(SECTION_HEADER_HEIGHT);
+    offsets.push(offset);
+    offset += SECTION_HEADER_HEIGHT;
+
+    const count = section.data.length;
+    for (let i = 0; i < count; i++) {
+      // Separators render inside the item cell; include them on every non-last row.
+      const length =
+        i < count - 1 ? APP_USER_ROW_HEIGHT + SEPARATOR_HEIGHT : APP_USER_ROW_HEIGHT;
+      lengths.push(length);
+      offsets.push(offset);
+      offset += length;
+    }
+
+    lengths.push(0);
+    offsets.push(offset);
+  }
+
+  return { lengths, offsets };
+}
+
 export default function CommunityIndex() {
+  const contentInset = useContentInset(16);
+  const tabScrollPad = useMainTabScrollPadding();
   const currentAppUser = useCurrentAppUser();
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { profileIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
   const [profilePictureUris, setProfilePictureUris] = useState<Record<string, string | null>>({});
+  const avatarRequestedRef = useRef<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +110,19 @@ export default function CommunityIndex() {
 
   const loadIncomingRequests = useEngageStore((s) => s.loadIncomingRequests);
   const loadSentRequests = useEngageStore((s) => s.loadSentRequests);
+  const incomingRequests = useEngageStore((s) => s.incomingRequests);
+  const sentRequests = useEngageStore((s) => s.sentRequests);
+
+  const contactRequestByUserId = useMemo(() => {
+    const map = new Map<string, 'incoming' | 'sent'>();
+    for (const r of incomingRequests) {
+      if (r?.fromUserId) map.set(r.fromUserId, 'incoming');
+    }
+    for (const r of sentRequests) {
+      if (r?.toUserId && !map.has(r.toUserId)) map.set(r.toUserId, 'sent');
+    }
+    return map;
+  }, [incomingRequests, sentRequests]);
 
   useEffect(() => {
     if (currentProfileId) {
@@ -164,22 +220,14 @@ export default function CommunityIndex() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const base = profiles.filter((p) => {
-      // Never show the current user in Community list
-      if (currentProfileId && p.profileId === currentProfileId)
-        return false;
-      if (currentAppUser?.id && p.userId === currentAppUser.id) return false;
-      return true;
-    });
-
-    if (!q) return base;
-    return base.filter((p) => {
+    if (!q) return profiles;
+    return profiles.filter((p) => {
       const fullName = getFullName(p).toLowerCase();
       const company = (p.company || '').toLowerCase();
       const title = (p.jobTitle || '').toLowerCase();
       return fullName.includes(q) || company.includes(q) || title.includes(q);
     });
-  }, [profiles, search, currentProfileId, currentAppUser?.id]);
+  }, [profiles, search]);
 
   const sections: CommunitySection[] = useMemo(() => {
     const map = new Map<string, CommunityProfile[]>();
@@ -198,12 +246,28 @@ export default function CommunityIndex() {
     return titles.map((title) => ({ title, data: map.get(title)! }));
   }, [filtered]);
 
+  const sectionLayout = useMemo(() => buildSectionLayout(sections), [sections]);
+
+  const getItemLayout = useCallback(
+    (_data: SectionListData<CommunityProfile, CommunitySection>[] | null, index: number) => ({
+      length: sectionLayout.lengths[index] ?? APP_USER_ROW_HEIGHT,
+      offset: sectionLayout.offsets[index] ?? 0,
+      index,
+    }),
+    [sectionLayout]
+  );
+
+  // Resolve avatars once per profile id — do not depend on uri state (avoids effect loops / mid-scroll thrash).
   useEffect(() => {
     let cancelled = false;
     const unresolved = profiles.filter(
-      (p) => p.profilePicture && profilePictureUris[p.profileId] === undefined
+      (p) => p.profilePicture && !avatarRequestedRef.current.has(p.profileId)
     );
     if (!unresolved.length) return;
+
+    for (const p of unresolved) {
+      avatarRequestedRef.current.add(p.profileId);
+    }
 
     async function loadAvatarUris() {
       const updates: Record<string, string | null> = {};
@@ -221,7 +285,80 @@ export default function CommunityIndex() {
     return () => {
       cancelled = true;
     };
-  }, [profiles, profilePictureUris]);
+  }, [profiles]);
+
+  const onPressProfile = useCallback((profileId: string) => {
+    router.push({
+      pathname: '/(main)/community/[id]',
+      params: { id: profileId },
+    });
+  }, []);
+
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: SectionListData<CommunityProfile, CommunitySection> }) => (
+      <View style={[styles.sectionHeader, { paddingHorizontal: contentInset }]}>
+        <Text style={styles.sectionHeaderText}>{section.title}</Text>
+      </View>
+    ),
+    [contentInset]
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: CommunityProfile }) => {
+      const name = getFullName(item) || '(No name)';
+      const subtitle = item.company || '';
+      const fav = !!favoriteContactIds[item.profileId];
+      const pending = !!pendingContactIds[item.profileId];
+      const isSelf = !!currentProfileId && currentProfileId === item.profileId;
+      const hasNote = profileIdsWithNotes.has(item.profileId);
+
+      return (
+        <AppUserRow
+          profileId={item.profileId}
+          userId={item.userId}
+          name={name}
+          subtitle={subtitle}
+          avatarUri={profilePictureUris[item.profileId] ?? null}
+          initials={`${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(item.lastName).slice(0, 1)}`.toUpperCase()}
+          isSelf={isSelf}
+          hasNote={hasNote}
+          currentAppUserProfileId={currentProfileId}
+          favorite={fav}
+          pendingFavorite={pending}
+          contactRequestState={contactRequestByUserId.get(item.userId) ?? null}
+          onPressProfile={onPressProfile}
+          style={{ paddingHorizontal: contentInset }}
+        />
+      );
+    },
+    [
+      favoriteContactIds,
+      pendingContactIds,
+      currentProfileId,
+      profileIdsWithNotes,
+      profilePictureUris,
+      contactRequestByUserId,
+      onPressProfile,
+      contentInset,
+    ]
+  );
+
+  const listExtraData = useMemo(
+    () => ({
+      favoriteContactIds,
+      pendingContactIds,
+      profilePictureUris,
+      contactRequestByUserId,
+      profileIdsWithNotes,
+    }),
+    [
+      favoriteContactIds,
+      pendingContactIds,
+      profilePictureUris,
+      contactRequestByUserId,
+      profileIdsWithNotes,
+    ]
+  );
 
   if (loading) {
     return <RiveLoader />;
@@ -229,7 +366,7 @@ export default function CommunityIndex() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, { marginHorizontal: contentInset }]}>
         <Ionicons name='search' size={18} color='#6b7280' />
         <TextInput
           value={search}
@@ -244,7 +381,7 @@ export default function CommunityIndex() {
       </View>
 
       {error ? (
-        <View style={styles.errorBox}>
+        <View style={[styles.errorBox, { paddingHorizontal: contentInset }]}>
           <Text style={styles.errorTitle}>Couldn’t load community</Text>
           <Text style={styles.errorText}>{error}</Text>
           <Pressable style={styles.retryBtn} onPress={load}>
@@ -258,6 +395,14 @@ export default function CommunityIndex() {
           stickySectionHeadersEnabled
           refreshing={refreshing}
           onRefresh={onRefresh}
+          getItemLayout={getItemLayout}
+          extraData={listExtraData}
+          initialNumToRender={16}
+          maxToRenderPerBatch={12}
+          windowSize={7}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews={false}
+          contentContainerStyle={{ paddingBottom: tabScrollPad }}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.muted}>
@@ -265,44 +410,9 @@ export default function CommunityIndex() {
               </Text>
             </View>
           }
-          renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>{section.title}</Text>
-            </View>
-          )}
-          renderItem={({ item }) => {
-            const name = getFullName(item) || '(No name)';
-            const subtitle = item.company || '';
-            const fav = !!favoriteContactIds[item.profileId];
-            const pending = !!pendingContactIds[item.profileId];
-            const isSelf =
-              !!currentProfileId &&
-              currentProfileId === item.profileId;
-            const hasNote = profileIdsWithNotes.has(item.profileId);
-
-            return (
-              <AppUserRow
-                profileId={item.profileId}
-                userId={item.userId}
-                name={name}
-                subtitle={subtitle}
-                avatarUri={profilePictureUris[item.profileId] ?? null}
-                initials={`${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(item.lastName).slice(0, 1)}`.toUpperCase()}
-                isSelf={isSelf}
-                hasNote={hasNote}
-                currentAppUserProfileId={currentProfileId}
-                favorite={fav}
-                pendingFavorite={pending}
-                onPressProfile={() =>
-                  router.push({
-                    pathname: '/(main)/community/[id]',
-                    params: { id: item.profileId },
-                  })
-                }
-              />
-            );
-          }}
-          ItemSeparatorComponent={() => <View style={styles.sep} />}
+          renderSectionHeader={renderSectionHeader}
+          renderItem={renderItem}
+          ItemSeparatorComponent={ItemSeparator}
         />
       )}
     </View>
@@ -310,7 +420,7 @@ export default function CommunityIndex() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', width: '100%' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   muted: { color: '#6b7280' },
 
@@ -318,7 +428,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    margin: 12,
+    marginVertical: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 12,
@@ -327,23 +437,22 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontSize: 16, color: '#111827' },
 
   sectionHeader: {
+    height: SECTION_HEADER_HEIGHT,
     backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    justifyContent: 'center',
+    borderTopWidth: SEPARATOR_HEIGHT,
     borderTopColor: '#e5e7eb',
   },
   sectionHeaderText: { fontWeight: '800', color: '#111827' },
 
   sep: {
-    height: StyleSheet.hairlineWidth,
+    height: SEPARATOR_HEIGHT,
     backgroundColor: '#e5e7eb',
-    marginLeft: 12,
   },
 
   empty: { padding: 18 },
 
-  errorBox: { padding: 16 },
+  errorBox: { paddingVertical: 16 },
   errorTitle: {
     fontSize: 16,
     fontWeight: '800',

@@ -1,5 +1,11 @@
-import React from 'react';
-import { Modal, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Dimensions,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+} from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import Rive, { Alignment, Fit } from 'rive-react-native';
 import { autopackColors } from '../theme';
@@ -10,43 +16,66 @@ const STATE_MACHINE_NAME = 'State Machine 1';
 const FADE_DURATION = 350;
 
 export interface RiveLoaderProps {
-  /** How the animation is scaled inside its container. Defaults to Cover (fills the screen). */
   fit?: Fit;
-  /** Background shown behind/around the animation. Defaults to the brand dark blue. */
   backgroundColor?: string;
-  /** Extra styles for the outer container. */
   style?: StyleProp<ViewStyle>;
-  /** Whether the animation plays automatically. Defaults to true. */
   autoplay?: boolean;
   /**
-   * When true (default) the loader renders inside a Modal so it covers everything
-   * above it, including the bottom tab bar, stack headers and the status bar.
-   * Set false to render inline within the current view (e.g. the launch splash).
+   * Kept for API compatibility. Overlay no longer uses RN Modal — presenting a
+   * Modal during navigation (e.g. splash → Hub) freezes iOS with
+   * "presentation is in progress". Full-screen cover uses window dimensions
+   * + absolute fill instead.
    */
   overlay?: boolean;
-  /** Controls Modal visibility when `overlay` is true. Defaults to true. */
   visible?: boolean;
-  /** Fired when the Rive animation actually starts playing (first frame). */
   onReady?: () => void;
   testID?: string;
 }
 
 /**
- * Full-screen Rive animation used for the app splash and as the global loading
- * screen. The `State Machine 1` timeline loops, so it can run for 2s as a splash
- * or indefinitely while data loads. It fades in and out for a smooth transition.
+ * Full-screen Rive loading view (inline, never a Modal).
+ * Falls back to a spinner if Rive errors or never starts.
  */
 export function RiveLoader({
   fit = Fit.Cover,
   backgroundColor = autopackColors.apDarkBlue,
   style,
   autoplay = true,
-  overlay = true,
+  overlay = false,
   visible = true,
   onReady,
   testID,
 }: RiveLoaderProps) {
-  const animation = (
+  const [useFallback, setUseFallback] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
+  const { width, height } = Dimensions.get('window');
+
+  useEffect(() => {
+    if (!visible) return;
+    if (useFallback) {
+      onReady?.();
+      return;
+    }
+    const t = setTimeout(() => {
+      if (!hasPlayed) setUseFallback(true);
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [hasPlayed, onReady, useFallback, visible]);
+
+  const handleError = useCallback(() => {
+    setUseFallback(true);
+  }, []);
+
+  const handlePlay = useCallback(() => {
+    setHasPlayed(true);
+    onReady?.();
+  }, [onReady]);
+
+  if (!visible) return null;
+
+  const content = useFallback ? (
+    <ActivityIndicator size="large" color="#fff" />
+  ) : (
     <Rive
       source={RIVE_SOURCE}
       artboardName={ARTBOARD_NAME}
@@ -54,36 +83,25 @@ export function RiveLoader({
       autoplay={autoplay}
       fit={fit}
       alignment={Alignment.Center}
-      onPlay={onReady}
+      onPlay={handlePlay}
+      onError={handleError}
       style={styles.rive}
     />
   );
 
-  // Modal handles both true full-screen coverage and the fade in/out animation.
-  if (overlay) {
-    return (
-      <Modal
-        visible={visible}
-        transparent
-        statusBarTranslucent
-        animationType='fade'
-        onRequestClose={() => {}}
-        testID={testID}
-      >
-        <View style={[styles.container, { backgroundColor }, style]}>{animation}</View>
-      </Modal>
-    );
-  }
-
-  // Inline usage (e.g. root splash): reanimated drives the fade in/out.
   return (
     <Animated.View
       entering={FadeIn.duration(FADE_DURATION)}
       exiting={FadeOut.duration(FADE_DURATION)}
-      style={[styles.container, { backgroundColor }, style]}
+      style={[
+        styles.container,
+        { backgroundColor, width, height },
+        overlay && styles.overlay,
+        style,
+      ]}
       testID={testID}
     >
-      {animation}
+      {content}
     </Animated.View>
   );
 }
@@ -93,6 +111,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  /** Cover the screen from a nested parent without RN Modal. */
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
+    elevation: 1000,
   },
   rive: {
     width: '100%',

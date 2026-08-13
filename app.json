@@ -2,8 +2,8 @@
   "expo": {
     "name": "Automotive Packaging Summit",
     "slug": "autopack-summit-app",
-    "version": "1.0.1",
-    "orientation": "portrait",
+    "version": "1.1.0",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "autopacksummitapp",
     "userInterfaceStyle": "automatic",
@@ -14,7 +14,7 @@
       "buildNumber": "3",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "We use your photo library so you can select and upload a profile picture.",
-        "NSCameraUsageDescription": "We use the camera to let you capture a profile picture.",
+        "NSCameraUsageDescription": "We use the camera to scan QR codes and capture a profile picture.",
         "NSPhotoLibraryAddUsageDescription": "We need access to save your uploaded or captured profile picture.",
         "NSContactsUsageDescription": "We use your contacts to save scanned attendee contact details to your phone.",
         "ITSAppUsesNonExemptEncryption": false

@@ -1,7 +1,9 @@
 import { Stack } from 'expo-router';
+import { ContentWidthShell } from '../../../src/components/ContentWidthShell';
 
 export default function ProfileLayout() {
   return (
+    <ContentWidthShell>
     <Stack>
       <Stack.Screen name='index' options={{ headerShown: false }} />
       <Stack.Screen
@@ -36,10 +38,15 @@ export default function ProfileLayout() {
         }} 
       />
       <Stack.Screen
+        name='messages/[threadId]'
+        options={{ title: 'Chat' }}
+      />
+      <Stack.Screen
         name='community/[id]'
         options={{ title: 'Profile', headerBackTitle: 'Profile' }}
       />
     </Stack>
+    </ContentWidthShell>
   );
 }
 

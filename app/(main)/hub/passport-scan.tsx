@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { APS_ID } from '../../../src/config/apsConfig';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import {
@@ -25,6 +25,7 @@ type ScanResult = {
 type ExhibitorLookup = {
   id: string;
   eventId: string;
+  visits?: number | null;
   company?: { name?: string | null } | null;
 };
 
@@ -33,6 +34,16 @@ const createPassportStamp = /* GraphQL */ `
     createApsAppUserPassportStamp(input: $input) {
       id
       stampKey
+      __typename
+    }
+  }
+`;
+
+const updateExhibitorVisits = /* GraphQL */ `
+  mutation UpdateExhibitorVisits($input: UpdateApsAppExhibitorProfileInput!) {
+    updateApsAppExhibitorProfile(input: $input) {
+      id
+      visits
       __typename
     }
   }
@@ -90,6 +101,7 @@ export default function PassportScanScreen() {
             items?: ({
               id?: string | null;
               eventId?: string | null;
+              visits?: number | null;
               company?: { name?: string | null } | null;
             } | null)[] | null;
           };
@@ -129,6 +141,7 @@ export default function PassportScanScreen() {
         const exhibitorName = clean(exhibitor.company?.name) || 'Exhibitor';
 
         if (!existing) {
+          let stampCreated = false;
           try {
             await graphqlAuthClient.graphql({
               query: createPassportStamp,
@@ -143,6 +156,7 @@ export default function PassportScanScreen() {
                 },
               },
             });
+            stampCreated = true;
           } catch (e) {
             if (!isDuplicateError(e)) {
               const verifyResp = await graphqlAuthClient.graphql({
@@ -156,6 +170,24 @@ export default function PassportScanScreen() {
                 (item) => !!item?.id,
               );
               if (!createdDespiteError) throw e;
+              stampCreated = true;
+            }
+          }
+
+          // Unique booth scan → bump exhibitor visits (same uniqueness as stamp).
+          if (stampCreated) {
+            try {
+              await graphqlApiKeyClient.graphql({
+                query: updateExhibitorVisits,
+                variables: {
+                  input: {
+                    id: exhibitor.id,
+                    visits: (exhibitor.visits ?? 0) + 1,
+                  },
+                },
+              });
+            } catch {
+              // Don't fail the stamp if the counter write fails.
             }
           }
         }
@@ -201,16 +233,27 @@ export default function PassportScanScreen() {
   }
 
   if (!permission.granted) {
+    // Apple 5.1.1(iv): pre-permission UI must use Continue/Next (not "Grant permission")
+    // and must not offer Cancel that delays the system permission dialog.
+    // If the user already denied, direct them to Settings instead.
+    const previouslyDenied = permission.canAskAgain === false;
     return (
       <View style={styles.center}>
-        <Text style={styles.title}>Camera permission required</Text>
-        <Text style={styles.muted}>Enable camera access to scan exhibitor passport QR codes.</Text>
-        <Pressable style={styles.primaryBtn} onPress={requestPermission}>
-          <Text style={styles.primaryBtnText}>Grant permission</Text>
-        </Pressable>
-        <Pressable style={styles.secondaryBtn} onPress={() => router.back()}>
-          <Text style={styles.secondaryBtnText}>Cancel</Text>
-        </Pressable>
+        <Text style={styles.title}>Camera access</Text>
+        <Text style={styles.muted}>
+          {previouslyDenied
+            ? 'Camera access is turned off. Open Settings to enable it so you can scan passport QR codes.'
+            : 'This feature uses the camera to scan exhibitor passport QR codes.'}
+        </Text>
+        {previouslyDenied ? (
+          <Pressable style={styles.primaryBtn} onPress={() => void Linking.openSettings()}>
+            <Text style={styles.primaryBtnText}>Open Settings</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={styles.primaryBtn} onPress={requestPermission}>
+            <Text style={styles.primaryBtnText}>Continue</Text>
+          </Pressable>
+        )}
       </View>
     );
   }

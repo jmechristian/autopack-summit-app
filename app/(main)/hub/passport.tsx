@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -17,6 +18,7 @@ import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { autopackColors } from '../../../src/theme';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import { isWeb, platformUnavailableMessage } from '../../../src/utils/platform';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 
 type ExhibitorItem = {
@@ -188,13 +190,27 @@ export default function PassportScreen() {
           <View style={[styles.progressFill, { width: `${completion}%` }]} />
         </View>
         <Pressable
-          style={[styles.primaryBtn, !profileId && styles.primaryBtnDisabled]}
+          style={[styles.primaryBtn, (!profileId || isWeb) && styles.primaryBtnDisabled]}
           disabled={!profileId}
-          onPress={() => router.push('/(main)/hub/passport-scan' as any)}
+          onPress={() => {
+            if (isWeb) {
+              Alert.alert(
+                'Unavailable on desktop',
+                platformUnavailableMessage('Passport QR scanning'),
+              );
+              return;
+            }
+            router.push('/(main)/hub/passport-scan' as any);
+          }}
         >
           <Ionicons name='scan-outline' size={18} color='#fff' />
-          <Text style={styles.primaryBtnText}>Scan Passport QR</Text>
+          <Text style={styles.primaryBtnText}>
+            {isWeb ? 'Scan on mobile app' : 'Scan Passport QR'}
+          </Text>
         </Pressable>
+        {isWeb ? (
+          <Text style={styles.webHint}>{platformUnavailableMessage('Passport QR scanning')}</Text>
+        ) : null}
       </View>
 
       {!profileId && (
@@ -228,19 +244,29 @@ export default function PassportScreen() {
                   {!!item.boothNumber && <Text style={styles.muted}>Booth {item.boothNumber}</Text>}
                 </View>
                 <Pressable
-                  style={[styles.scanIconBtn, collected && styles.scanIconBtnDisabled]}
-                  disabled={collected || !profileId}
-                  onPress={() =>
+                  style={[
+                    styles.scanIconBtn,
+                    (collected || isWeb) && styles.scanIconBtnDisabled,
+                  ]}
+                  disabled={collected || !profileId || isWeb}
+                  onPress={() => {
+                    if (isWeb) {
+                      Alert.alert(
+                        'Unavailable on desktop',
+                        platformUnavailableMessage('Passport QR scanning'),
+                      );
+                      return;
+                    }
                     router.push({
                       pathname: '/(main)/hub/passport-scan',
                       params: { exhibitorId: item.id },
-                    } as any)
-                  }
+                    } as any);
+                  }}
                 >
                   <Ionicons
                     name='scan-outline'
                     size={21}
-                    color={collected || !profileId ? '#9ca3af' : autopackColors.apBlue}
+                    color={collected || !profileId || isWeb ? '#9ca3af' : autopackColors.apBlue}
                   />
                 </Pressable>
               </View>
@@ -286,6 +312,12 @@ const styles = StyleSheet.create({
   },
   primaryBtnDisabled: { opacity: 0.55 },
   primaryBtnText: { color: '#fff', fontWeight: '900' },
+  webHint: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 2,
+  },
   noticeCard: {
     flexDirection: 'row',
     gap: 8,

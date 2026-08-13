@@ -298,6 +298,116 @@ export const listApsAppUserNotes = /* GraphQL */ `query ListApsAppUserNotes(
   APITypes.ListApsAppUserNotesQueryVariables,
   APITypes.ListApsAppUserNotesQuery
 >;
+export const getApsAppUserExhibitorView = /* GraphQL */ `query GetApsAppUserExhibitorView($id: ID!) {
+  getApsAppUserExhibitorView(id: $id) {
+    id
+    owner
+    userProfileId
+    userProfile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      eventId
+      video
+      videoCaption
+      boothNumber
+      qrCode
+      passportQrPayload
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    viewKey
+    createdAt
+    updatedAt
+    aPSExhibitorViewsId
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetApsAppUserExhibitorViewQueryVariables,
+  APITypes.GetApsAppUserExhibitorViewQuery
+>;
+export const listApsAppUserExhibitorViews = /* GraphQL */ `query ListApsAppUserExhibitorViews(
+  $filter: ModelApsAppUserExhibitorViewFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listApsAppUserExhibitorViews(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userProfileId
+      exhibitorId
+      eventId
+      viewKey
+      createdAt
+      updatedAt
+      aPSExhibitorViewsId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListApsAppUserExhibitorViewsQueryVariables,
+  APITypes.ListApsAppUserExhibitorViewsQuery
+>;
 export const getApsAppUserPassportStamp = /* GraphQL */ `query GetApsAppUserPassportStamp($id: ID!) {
   getApsAppUserPassportStamp(id: $id) {
     id
@@ -1324,6 +1434,48 @@ export const listApsPushTokens = /* GraphQL */ `query ListApsPushTokens(
   APITypes.ListApsPushTokensQueryVariables,
   APITypes.ListApsPushTokensQuery
 >;
+export const getApsAppFeedback = /* GraphQL */ `query GetApsAppFeedback($id: ID!) {
+  getApsAppFeedback(id: $id) {
+    id
+    owner
+    userId
+    eventId
+    message
+    imageKeys
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetApsAppFeedbackQueryVariables,
+  APITypes.GetApsAppFeedbackQuery
+>;
+export const listApsAppFeedbacks = /* GraphQL */ `query ListApsAppFeedbacks(
+  $filter: ModelApsAppFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listApsAppFeedbacks(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      owner
+      userId
+      eventId
+      message
+      imageKeys
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListApsAppFeedbacksQueryVariables,
+  APITypes.ListApsAppFeedbacksQuery
+>;
 export const apsTempCredentialsByApsIDAndCreatedAt = /* GraphQL */ `query ApsTempCredentialsByApsIDAndCreatedAt(
   $apsID: ID!
   $createdAt: ModelStringKeyConditionInput
@@ -1619,6 +1771,148 @@ export const apsAppUserNotesByCompanyId = /* GraphQL */ `query ApsAppUserNotesBy
 ` as GeneratedQuery<
   APITypes.ApsAppUserNotesByCompanyIdQueryVariables,
   APITypes.ApsAppUserNotesByCompanyIdQuery
+>;
+export const apsAppUserExhibitorViewsByUserProfileIdAndCreatedAt = /* GraphQL */ `query ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAt(
+  $userProfileId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAppUserExhibitorViewFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAppUserExhibitorViewsByUserProfileIdAndCreatedAt(
+    userProfileId: $userProfileId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userProfileId
+      exhibitorId
+      eventId
+      viewKey
+      createdAt
+      updatedAt
+      aPSExhibitorViewsId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAtQueryVariables,
+  APITypes.ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAtQuery
+>;
+export const apsAppUserExhibitorViewsByExhibitorIdAndCreatedAt = /* GraphQL */ `query ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAt(
+  $exhibitorId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAppUserExhibitorViewFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAppUserExhibitorViewsByExhibitorIdAndCreatedAt(
+    exhibitorId: $exhibitorId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userProfileId
+      exhibitorId
+      eventId
+      viewKey
+      createdAt
+      updatedAt
+      aPSExhibitorViewsId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAtQueryVariables,
+  APITypes.ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAtQuery
+>;
+export const apsAppUserExhibitorViewsByEventIdAndCreatedAt = /* GraphQL */ `query ApsAppUserExhibitorViewsByEventIdAndCreatedAt(
+  $eventId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAppUserExhibitorViewFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAppUserExhibitorViewsByEventIdAndCreatedAt(
+    eventId: $eventId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userProfileId
+      exhibitorId
+      eventId
+      viewKey
+      createdAt
+      updatedAt
+      aPSExhibitorViewsId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAppUserExhibitorViewsByEventIdAndCreatedAtQueryVariables,
+  APITypes.ApsAppUserExhibitorViewsByEventIdAndCreatedAtQuery
+>;
+export const apsAppUserExhibitorViewsByViewKey = /* GraphQL */ `query ApsAppUserExhibitorViewsByViewKey(
+  $viewKey: String!
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAppUserExhibitorViewFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAppUserExhibitorViewsByViewKey(
+    viewKey: $viewKey
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userProfileId
+      exhibitorId
+      eventId
+      viewKey
+      createdAt
+      updatedAt
+      aPSExhibitorViewsId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAppUserExhibitorViewsByViewKeyQueryVariables,
+  APITypes.ApsAppUserExhibitorViewsByViewKeyQuery
 >;
 export const apsAppUserPassportStampsByUserProfileIdAndCreatedAt = /* GraphQL */ `query ApsAppUserPassportStampsByUserProfileIdAndCreatedAt(
   $userProfileId: ID!
@@ -2887,6 +3181,76 @@ export const apsPushTokensByUserIdAndUpdatedAt = /* GraphQL */ `query ApsPushTok
   APITypes.ApsPushTokensByUserIdAndUpdatedAtQueryVariables,
   APITypes.ApsPushTokensByUserIdAndUpdatedAtQuery
 >;
+export const apsAppFeedbacksByUserIdAndCreatedAt = /* GraphQL */ `query ApsAppFeedbacksByUserIdAndCreatedAt(
+  $userId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAppFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAppFeedbacksByUserIdAndCreatedAt(
+    userId: $userId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userId
+      eventId
+      message
+      imageKeys
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAppFeedbacksByUserIdAndCreatedAtQueryVariables,
+  APITypes.ApsAppFeedbacksByUserIdAndCreatedAtQuery
+>;
+export const apsAppFeedbacksByEventIdAndCreatedAt = /* GraphQL */ `query ApsAppFeedbacksByEventIdAndCreatedAt(
+  $eventId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsAppFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsAppFeedbacksByEventIdAndCreatedAt(
+    eventId: $eventId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      userId
+      eventId
+      message
+      imageKeys
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsAppFeedbacksByEventIdAndCreatedAtQueryVariables,
+  APITypes.ApsAppFeedbacksByEventIdAndCreatedAtQuery
+>;
 export const getAPS = /* GraphQL */ `query GetAPS($id: ID!) {
   getAPS(id: $id) {
     id
@@ -2971,6 +3335,10 @@ export const getAPS = /* GraphQL */ `query GetAPS($id: ID!) {
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    exhibitorViews {
       nextToken
       __typename
     }
@@ -4214,6 +4582,10 @@ export const getApsAppUserProfile = /* GraphQL */ `query GetApsAppUserProfile($i
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    exhibitorViews {
       nextToken
       __typename
     }
@@ -5707,6 +6079,10 @@ export const getApsAppExhibitorProfile = /* GraphQL */ `query GetApsAppExhibitor
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    viewedByUsers {
       nextToken
       __typename
     }

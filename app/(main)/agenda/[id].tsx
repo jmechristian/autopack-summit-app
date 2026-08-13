@@ -24,6 +24,7 @@ import { NotesSection } from '../../../src/components/notes/NotesSection';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { isSessionLive } from '../../../src/utils/sessionLive';
+import { useContentInset } from '../../../src/utils/layout';
 
 type Speaker = {
   id: string;
@@ -157,6 +158,7 @@ export default function AgendaDetails() {
   const [favoriteBusy, setFavoriteBusy] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const { width } = useWindowDimensions();
+  const contentInset = useContentInset(16);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -355,7 +357,10 @@ export default function AgendaDetails() {
     >
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingHorizontal: contentInset },
+        ]}
         keyboardShouldPersistTaps='handled'
         keyboardDismissMode='on-drag'
         automaticallyAdjustKeyboardInsets
@@ -395,7 +400,7 @@ export default function AgendaDetails() {
           <>
             <View style={styles.divider} />
             <RenderHtml
-              contentWidth={Math.max(1, width - 32)}
+              contentWidth={Math.max(1, width - contentInset * 2)}
               source={{ html: descriptionHtml }}
               baseStyle={styles.description}
               tagsStyles={{
@@ -470,7 +475,7 @@ export default function AgendaDetails() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  content: { padding: 16, paddingTop: 14 },
+  content: { paddingVertical: 14 },
   center: { flex: 1, padding: 16, alignItems: 'center', justifyContent: 'center' },
   centerText: { marginTop: 10, color: '#4B5563' },
   errorTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },

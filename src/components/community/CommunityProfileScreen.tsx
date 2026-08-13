@@ -463,15 +463,10 @@ export default function CommunityProfileScreen() {
         const bEndRank = toDateRank(b?.endDate, Number.POSITIVE_INFINITY);
         if (aEndRank !== bEndRank) return bEndRank - aEndRank;
         return toDateRank(b?.startDate) - toDateRank(a?.startDate);
-      })
-      .map((a: any) => [a.affiliate, a.role].filter(Boolean).join(' — '))
-      .filter(Boolean) || [];
+      }) || [];
 
   const education =
-    (profile.education?.items || [])
-      .filter(Boolean)
-      .map((e: any) => [e.school, e.degree, e.fieldOfStudy].filter(Boolean).join(' • '))
-      .filter(Boolean) || [];
+    (profile.education?.items || []).filter(Boolean) || [];
 
   return (
     <KeyboardAvoidingView
@@ -665,10 +660,16 @@ export default function CommunityProfileScreen() {
           </View>
         </View>
         {affiliates.length ? (
-          affiliates.map((t: string) => (
-            <Text key={t} style={styles.sectionListItem}>
-              • {t}
-            </Text>
+          affiliates.map((a: any) => (
+            <View key={a.id || `${a.affiliate}-${a.role}-${a.startDate}`} style={styles.experienceItem}>
+              <Text style={styles.experienceTitle}>{a.affiliate || 'Untitled'}</Text>
+              {!!a.role && <Text style={styles.experienceRole}>{a.role}</Text>}
+              {(a.startDate || a.endDate) && (
+                <Text style={styles.experienceDate}>
+                  {a.startDate || '?'} - {a.endDate || 'Present'}
+                </Text>
+              )}
+            </View>
           ))
         ) : (
           <Text style={styles.sectionBodyText}>No experience provided.</Text>
@@ -686,10 +687,12 @@ export default function CommunityProfileScreen() {
           </View>
         </View>
         {education.length ? (
-          education.map((t: string) => (
-            <Text key={t} style={styles.sectionListItem}>
-              • {t}
-            </Text>
+          education.map((e: any) => (
+            <View key={e.id || `${e.school}-${e.degree}-${e.fieldOfStudy}`} style={styles.experienceItem}>
+              <Text style={styles.experienceTitle}>{e.school || 'Untitled'}</Text>
+              {!!e.degree && <Text style={styles.experienceRole}>{e.degree}</Text>}
+              {!!e.fieldOfStudy && <Text style={styles.experienceRole}>{e.fieldOfStudy}</Text>}
+            </View>
           ))
         ) : (
           <Text style={styles.sectionBodyText}>No education provided.</Text>
@@ -854,6 +857,29 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     paddingHorizontal: 4,
     paddingVertical: 2,
+  },
+  experienceItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e5e7eb',
+  },
+  experienceTitle: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  experienceRole: {
+    fontSize: 14,
+    lineHeight: 19,
+    color: '#6b7280',
+    marginBottom: 2,
+  },
+  experienceDate: {
+    fontSize: 12,
+    color: '#9ca3af',
   },
   sectionDivider: {
     height: StyleSheet.hairlineWidth,

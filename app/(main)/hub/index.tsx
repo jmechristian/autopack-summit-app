@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   Animated as RNAnimated,
-  Dimensions,
   ImageBackground,
   Modal,
   Pressable,
@@ -15,12 +14,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCurrentAppUser, useCurrentUserProfile } from '../../../src/hooks/useApsStore';
-import { useApsStore } from '../../../src/store/apsStore';
 import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
 import { APS_ID } from '../../../src/config/apsConfig';
@@ -36,13 +35,29 @@ import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graph
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 import { isCurrentUserAdmin } from '../../../src/utils/adminAccess';
 import {
+  breakpoints,
+  hubWideColumnWidths,
+  isHubWideLayout,
+  toolGridCellWidth,
+  toolGridColumns,
+  useContentFrame,
+  useMainTabScrollPadding,
+} from '../../../src/utils/layout';
+import {
   compareSessionsByStart,
   isSessionLive,
   isSessionUpcoming,
 } from '../../../src/utils/sessionLive';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
-import { RiveLoader } from '../../../src/components/RiveLoader';
+import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
+import { HubHeroRive } from '../../../src/components/hub/HubHeroRive';
+import { HubCountdownStrip } from '../../../src/components/hub/HubCountdownStrip';
+import { HubHelpMenu } from '../../../src/components/hub/HubHelpMenu';
+import { HubQrBadge } from '../../../src/components/hub/HubQrBadge';
+import { HubSponsorBlock } from '../../../src/components/hub/HubSponsorBlock';
+
+const HUB_HERO_RIVE = require('../../../assets/hub_header.riv');
 
 type QuickTool = {
   id: string;
@@ -53,28 +68,27 @@ type QuickTool = {
 };
 
 const MAX_QUICK_TOOLS = 8;
-const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v2';
-const WINDOW_HEIGHT = Dimensions.get('window').height;
+const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v3';
 // Default pinned quick tools (max 8)
 const DEFAULT_TOOL_IDS = [
   'contacts',
-  'notes',
   'requests',
   'messages',
   'announcements',
-  'favorites',
   'sponsors',
   'speakers',
+  'exhibitors',
+  'lead-capture',
 ];
 const EXHIBITOR_DEFAULT_TOOL_IDS = [
   'exhibitor-profile',
   'contacts',
-  'notes',
   'requests',
   'messages',
-  'favorites',
   'announcements',
   'sponsors',
+  'speakers',
+  'lead-capture',
 ];
 
 const ALL_QUICK_TOOLS: QuickTool[] = [
@@ -132,6 +146,18 @@ function formatTimeRange(start?: string | null, end?: string | null) {
   return s || '';
 }
 
+function formatSessionDateLabel(date?: string | null) {
+  const raw = normalizeText(date);
+  if (!raw) return '';
+  const parsed = new Date(`${raw}T12:00:00`);
+  if (Number.isNaN(parsed.getTime())) return raw;
+  return parsed.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 function resolvePresentationUrl(embedUrl?: string | null) {
   const raw = normalizeText(embedUrl);
   if (!raw) return '';
@@ -175,13 +201,28 @@ function htmlToPlainText(input: string) {
 
 export default function HubScreen() {
   const insets = useSafeAreaInsets();
+  const { width: screenW, height: screenH } = useWindowDimensions();
+  const { frame, inset: contentInset, frameWidth } = useContentFrame(20);
+  const tabScrollPad = useMainTabScrollPadding();
+  const hubWide = isHubWideLayout(screenW);
+  const heroChromeScale = screenW >= breakpoints.lg ? 2 : screenW >= breakpoints.md ? 1 : 0;
+  const heroAvatarSize = heroChromeScale === 2 ? 52 : heroChromeScale === 1 ? 44 : 34;
+  const heroIconSize = heroChromeScale === 2 ? 30 : heroChromeScale === 1 ? 26 : 22;
+  const heroIconBtnSize = heroChromeScale === 2 ? 52 : heroChromeScale === 1 ? 46 : 38;
+  const wideCols = hubWideColumnWidths({ screenWidth: frameWidth, contentInset });
+  const toolsColumns = hubWide ? 2 : toolGridColumns(screenW);
+  const toolsContainerW = hubWide ? wideCols.stack : frameWidth - contentInset * 2;
+  const toolsCellWidth = toolGridCellWidth({
+    containerWidth: toolsContainerW,
+    columns: toolsColumns,
+  });
   const profile = useCurrentUserProfile();
   const currentAppUser = useCurrentAppUser();
-  const appUserLoading = useApsStore((s) => s.loading.currentAppUser);
   const companyId = currentAppUser?.registrant?.companyId || null;
   const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
   const [sessionIndex, setSessionIndex] = useState(0);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [avatarReady, setAvatarReady] = useState(false);
   const [allSessions, setAllSessions] = useState<NextSession[]>([]);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
   const [selectedToolIds, setSelectedToolIds] = useState<string[]>(DEFAULT_TOOL_IDS);
@@ -203,13 +244,6 @@ export default function HubScreen() {
   useEffect(() => {
     setSessionIndex(0);
   }, [nextSessions.length, nextSessionHeaderLabel]);
-
-  const [timeLeft, setTimeLeft] = useState({
-    days: '00',
-    hours: '00',
-    minutes: '00',
-    seconds: '00',
-  });
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -373,45 +407,6 @@ export default function HubScreen() {
   }, [loadPassportProgress]);
 
   useEffect(() => {
-    // Target: 8:00 AM Eastern (New York) on Sept 30, 2026
-    // 8:00 AM ET on 2026-09-30 corresponds to 12:00:00 UTC.
-    const target = new Date('2026-09-30T12:00:00Z').getTime();
-
-    const updateCountdown = () => {
-      const now = Date.now();
-      const diff = target - now;
-
-      if (diff <= 0) {
-        setTimeLeft({
-          days: '00',
-          hours: '00',
-          minutes: '00',
-          seconds: '00',
-        });
-        return;
-      }
-
-      const totalSeconds = Math.floor(diff / 1000);
-      const days = Math.floor(totalSeconds / (60 * 60 * 24));
-      const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
-      const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-      const seconds = totalSeconds % 60;
-
-      setTimeLeft({
-        days: String(days).padStart(2, '0'),
-        hours: String(hours).padStart(2, '0'),
-        minutes: String(minutes).padStart(2, '0'),
-        seconds: String(seconds).padStart(2, '0'),
-      });
-    };
-
-    updateCountdown();
-    const intervalId = setInterval(updateCountdown, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
     async function loadNextSessions() {
       try {
@@ -488,49 +483,64 @@ export default function HubScreen() {
     };
   }, []);
 
-  const screenW = Dimensions.get('window').width;
   const passportPercent = useMemo(
     () => (passportTotal > 0 ? Math.round((passportCollected / passportTotal) * 100) : 0),
     [passportCollected, passportTotal],
   );
+  const comingUpPageW = hubWide ? wideCols.hero : screenW - contentInset * 2;
   const progressTranslateX = useMemo(() => {
     const trackW = 120;
     const dotW = 16;
     const maxTranslate = trackW - dotW;
     const count = nextSessions.length;
-    const maxScroll = screenW * Math.max(1, count - 1);
+    // On web SSR, window width can be 0 → negative page width; Animated requires
+    // a monotonically non-decreasing inputRange.
+    const pageW = Math.max(1, comingUpPageW || 1);
+    const maxScroll = Math.max(1, pageW * Math.max(1, count - 1));
     return scrollX.interpolate({
       inputRange: [0, maxScroll],
       outputRange: [0, maxTranslate],
       extrapolate: 'clamp',
     });
-  }, [nextSessions.length, screenW, scrollX]);
+  }, [comingUpPageW, nextSessions.length, scrollX]);
 
   const fullName = [profile?.firstName?.trim(), profile?.lastName?.trim()]
     .filter(Boolean)
     .join(' ')
     .trim();
+  const qrCodeUrl = currentAppUser?.registrant?.qrCode || null;
   const initials = `${(profile?.firstName || '').trim().slice(0, 1)}${(
     profile?.lastName || ''
   )
     .trim()
     .slice(0, 1)}`.toUpperCase();
-  const countdownCompact = `${timeLeft.days}:${timeLeft.hours}:${timeLeft.minutes}:${timeLeft.seconds}`;
-  const isHubBootLoading =
-    appUserLoading || !toolsLoaded || !currentAppUser?.id || !profile?.id || !fullName;
-
   // Resolve profile picture from either URL or S3 key.
+  // Stay hidden until resolution finishes so we never flash initials/"U".
   React.useEffect(() => {
     let cancelled = false;
+    setAvatarReady(false);
+
     const loadAvatar = async () => {
-      if (!profile?.profilePicture) {
-        setAvatarUri(null);
+      if (!profile?.id) {
+        if (!cancelled) {
+          setAvatarUri(null);
+          setAvatarReady(false);
+        }
+        return;
+      }
+
+      if (!profile.profilePicture) {
+        if (!cancelled) {
+          setAvatarUri(null);
+          setAvatarReady(true);
+        }
         return;
       }
 
       const url = await resolveProfilePictureUri(profile.profilePicture);
       if (!cancelled) {
         setAvatarUri(url);
+        setAvatarReady(true);
       }
     };
 
@@ -538,9 +548,8 @@ export default function HubScreen() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.profilePicture]);
+  }, [profile?.id, profile?.profilePicture]);
 
-  const heroImage = require('../../../assets/images/mobile-bg.png');
   const bottomInset = Math.max(insets.bottom, 16);
 
   const toolMap = useMemo(() => new Map(ALL_QUICK_TOOLS.map((t) => [t.id, t])), []);
@@ -634,168 +643,190 @@ export default function HubScreen() {
     persistTools(defaults);
   };
 
-  if (isHubBootLoading) {
-    return <RiveLoader />;
-  }
-
-  return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
+  const heroBlock = (
+    <HubHeroRive
+      source={HUB_HERO_RIVE}
+      center={<HubQrBadge qrUri={qrCodeUrl} name={fullName} />}
+      style={hubWide ? styles.heroWide : undefined}
     >
-      {/* Hero */}
-      <ImageBackground
-        source={heroImage}
-        style={styles.hero}
-        resizeMode='cover'
+      <View
+        style={[
+          styles.heroTopRow,
+          { paddingTop: hubWide ? 12 : insets.top + 4 },
+        ]}
       >
-        <View style={styles.heroOverlay} />
-
-        <View style={[styles.heroTopRow, { paddingTop: insets.top + 6 }]}>
-          <View style={styles.heroLeft}>
-            <View style={styles.avatar}>
-              {avatarUri ? (
-                <ImageBackground
-                  source={{ uri: avatarUri }}
-                  style={styles.avatarImg}
-                  imageStyle={styles.avatarImg}
-                />
-              ) : (
-                <Text style={styles.avatarText}>{initials || 'U'}</Text>
-              )}
-            </View>
-            <Text style={styles.greeting}>
-              Hi, {fullName || 'First LastName'}
-            </Text>
-          </View>
-
-          <View style={styles.heroActions}>
-            {isAdminUser ? (
+        <View style={styles.heroLeft}>
+          {avatarReady ? (
+            <SafeEnteringView entering={FadeIn.duration(150)}>
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => router.push('/(main)/admin')}
-                style={styles.iconButton}
+                onPress={() => router.push('/(main)/profile')}
+                style={[
+                  styles.avatar,
+                  { width: heroAvatarSize, height: heroAvatarSize },
+                ]}
+                accessibilityRole='button'
+                accessibilityLabel='Open your profile'
               >
-                <Ionicons name='settings-outline' size={22} color='#fff' />
+                {avatarUri ? (
+                  <ImageBackground
+                    source={{ uri: avatarUri }}
+                    style={{
+                      width: heroAvatarSize,
+                      height: heroAvatarSize,
+                      borderRadius: 999,
+                    }}
+                    imageStyle={{
+                      width: heroAvatarSize,
+                      height: heroAvatarSize,
+                      borderRadius: 999,
+                    }}
+                  />
+                ) : initials ? (
+                  <Text
+                    style={[
+                      styles.avatarText,
+                      heroChromeScale > 0 && { fontSize: heroChromeScale === 2 ? 18 : 15 },
+                    ]}
+                  >
+                    {initials}
+                  </Text>
+                ) : null}
               </TouchableOpacity>
-            ) : null}
+            </SafeEnteringView>
+          ) : null}
+        </View>
+
+        <View style={styles.heroActions}>
+          {isAdminUser ? (
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => router.push('/(main)/hub/notifications')}
-              style={styles.iconButton}
+              onPress={() => router.push('/(main)/admin')}
+              style={[
+                styles.iconButton,
+                { width: heroIconBtnSize, height: heroIconBtnSize },
+              ]}
             >
-              <Ionicons name='notifications-outline' size={22} color='#fff' />
-              <View style={styles.bellBadge}>
-                <AppBadge value={engageBadge} />
-              </View>
+              <Ionicons name='settings-outline' size={heroIconSize} color='#fff' />
             </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.heroTextWrap}>
-          <Text style={styles.heroTitle}>Countdown to Greenville!</Text>
-          <Text style={styles.heroDateText}>Sept 30 - Oct 2, 2026</Text>
-        </View>
-      </ImageBackground>
-
-      {/* Countdown strip */}
-      <View style={styles.countdownStrip}>
-        <Text style={styles.countdownStripText}>{countdownCompact}</Text>
-        <View style={styles.livePill}>
-          <Text style={styles.liveText}>LIVE</Text>
+          ) : null}
+          <HubHelpMenu
+            iconButtonStyle={[
+              styles.iconButton,
+              { width: heroIconBtnSize, height: heroIconBtnSize },
+            ]}
+            iconSize={heroIconSize}
+          />
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => router.push('/(main)/hub/notifications')}
+            style={[
+              styles.iconButton,
+              { width: heroIconBtnSize, height: heroIconBtnSize },
+            ]}
+          >
+            <Ionicons name='notifications-outline' size={heroIconSize} color='#fff' />
+            <View style={styles.bellBadge}>
+              <AppBadge value={engageBadge} />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
+    </HubHeroRive>
+  );
 
-      {/* Body */}
-      <View style={styles.body}>
-        {/* Quick Tools */}
-        <Animated.View
-          style={styles.quickToolsWrap}
-          entering={FadeInDown.duration(600).delay(150)}
+  const quickToolsBlock = (
+    <SafeEnteringView
+      style={hubWide ? styles.quickToolsWrapWide : undefined}
+      entering={FadeInDown.duration(600).delay(150)}
+    >
+      <View style={styles.quickToolsHeaderRow}>
+        <Text style={styles.quickToolsHeaderText}>Quick Tools</Text>
+        <TouchableOpacity activeOpacity={0.85} onPress={openToolsModal}>
+          <Text style={styles.editLink}>Edit</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.toolsGrid}>
+        {selectedTools.map((t) => (
+          <View key={t.id} style={{ width: toolsCellWidth }}>
+            <IconCard
+              icon={t.icon}
+              label={t.label}
+              iconBgColor='transparent'
+              iconColor='#FFFFFF'
+              iconSize={20}
+              onPress={() => handleToolPress(t)}
+              style={[styles.toolsCard, styles.toolsCardPrimary]}
+              iconWrapStyle={styles.toolsIconWrap}
+              labelStyle={styles.toolsCardLabel}
+            />
+          </View>
+        ))}
+      </View>
+    </SafeEnteringView>
+  );
+
+  const comingUpBlock =
+    nextSessions.length > 0 ? (
+      <SafeEnteringView
+        entering={FadeInDown.duration(600).delay(160)}
+        style={hubWide ? styles.comingUpFill : undefined}
+      >
+        <View
+          style={[
+            styles.comingUpModule,
+            hubWide && styles.comingUpModuleFill,
+            nextSessionHeaderLabel === 'Live Now' && styles.comingUpModuleLive,
+          ]}
         >
-          <View style={styles.quickToolsHeaderRow}>
-            <Text style={styles.quickToolsHeaderText}>Quick Tools</Text>
-            <TouchableOpacity activeOpacity={0.85} onPress={openToolsModal}>
-              <Text style={styles.editLink}>Edit</Text>
+          <View
+            style={[
+              styles.comingUpHeader,
+              nextSessionHeaderLabel === 'Live Now' && styles.comingUpHeaderLive,
+            ]}
+          >
+            <View style={styles.comingUpHeaderLeft}>
+              <View
+                style={[
+                  styles.comingUpIconWrap,
+                  nextSessionHeaderLabel === 'Live Now' && styles.comingUpIconWrapLive,
+                ]}
+              >
+                <Ionicons
+                  name={nextSessionHeaderLabel === 'Live Now' ? 'radio' : 'calendar'}
+                  size={16}
+                  color="#fff"
+                />
+              </View>
+              <View>
+                <Text style={styles.comingUpEyebrow}>ON THE AGENDA</Text>
+                <Text style={styles.comingUpHeaderText}>{nextSessionHeaderLabel}</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.comingUpAgendaBtn}
+              onPress={() => router.push('/(main)/agenda')}
+              accessibilityRole="button"
+              accessibilityLabel="Open full agenda"
+            >
+              <Text style={styles.comingUpAgendaBtnText}>Agenda</Text>
+              <Ionicons name="chevron-forward" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.toolsGrid}>
-            {selectedTools.map((t) => (
-              <View key={t.id} style={styles.toolsCell}>
-                <IconCard
-                  icon={t.icon}
-                  label={t.label}
-                  iconBgColor='transparent'
-                  iconColor='#FFFFFF'
-                  iconSize={20}
-                  onPress={() => handleToolPress(t)}
-                  style={[
-                    styles.toolsCard,
-                    styles.toolsCardPrimary,
-                  ]}
-                  iconWrapStyle={styles.toolsIconWrap}
-                  labelStyle={styles.toolsCardLabel}
-                />
-              </View>
-            ))}
-          </View>
-        </Animated.View>
-
-        <Pressable style={styles.passportCard} onPress={() => router.push('/(main)/hub/passport' as any)}>
-          <View style={styles.passportHeaderRow}>
-            <View style={styles.passportIconWrap}>
-              <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
-            </View>
-            <View style={styles.passportTitleWrap}>
-              <Text style={styles.passportEyebrow}>Passport Challenge</Text>
-              <Text style={styles.passportTitle}>
-                {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
-              </Text>
-            </View>
-            <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
-          </View>
-          {passportLoading ? (
-            <ActivityIndicator color='#fff' style={styles.passportLoader} />
-          ) : (
-            <>
-              <Text style={styles.passportSubtitle}>
-                {passportCollected} of {passportTotal} exhibitor stamps collected
-              </Text>
-              <View style={styles.passportProgressTrack}>
-                <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
-              </View>
-            </>
-          )}
-        </Pressable>
-
-        {nextSessions.length > 0 && (
-        <Animated.View entering={FadeInDown.duration(600).delay(220)}>
-          <View style={[styles.sectionHeaderBanner, styles.nextSessionHeaderBanner]}>
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIconWrap, styles.nextSessionIconWrap]}>
-                <Ionicons
-                  name={nextSessionHeaderLabel === 'Live Now' ? 'radio-outline' : 'calendar-outline'}
-                  size={14}
-                  color='#c2410c'
-                />
-              </View>
-              <Text style={styles.sectionHeaderText}>{nextSessionHeaderLabel}</Text>
-            </View>
-          </View>
           <RNAnimated.ScrollView
             horizontal
             pagingEnabled
+            style={hubWide ? styles.comingUpPagerFill : undefined}
+            contentContainerStyle={hubWide ? styles.comingUpPagerContentFill : undefined}
             showsHorizontalScrollIndicator={false}
             onScroll={RNAnimated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
               { useNativeDriver: true },
             )}
             scrollEventThrottle={16}
-            // This ScrollView lives inside a padded container (body).
-            // Use negative margin to avoid double-left padding so cards align with headers.
-            style={{ marginTop: 0, marginHorizontal: -20 }}
             onMomentumScrollEnd={(e) => {
               const w = e.nativeEvent.layoutMeasurement.width;
               const x = e.nativeEvent.contentOffset.x;
@@ -806,85 +837,188 @@ export default function HubScreen() {
             {nextSessions.map((s) => {
               const live = isSessionLive(s, now);
               const presentationUrl = resolvePresentationUrl(s.embedUrl);
+              const dateLabel = formatSessionDateLabel(s.date);
+              const timeLabel = dateLabel ? `${dateLabel} · ${s.timeLabel}` : s.timeLabel;
 
               return (
-              <View
-                key={s.id}
-                style={{ width: Dimensions.get('window').width }}
-              >
                 <View
-                  style={[styles.sessionCardWrap, { paddingHorizontal: 20 }]}
+                  key={s.id}
+                  style={[
+                    { width: comingUpPageW },
+                    hubWide && styles.comingUpPageFill,
+                  ]}
                 >
-                  <AgendaSessionCard
-                    timeLabel={s.timeLabel}
-                    title={s.title}
-                    isLive={live}
-                    location={s.location}
-                    descriptionText={s.descriptionText}
-                    speakerNames={s.speakerNames}
-                    sponsorNames={s.sponsorNames}
-                    descriptionNumberOfLines={3}
-                    metaNumberOfLines={1}
-                    cardStyle={styles.nextSessionCard}
-                    showPresentationButton={live && !!presentationUrl}
-                    onPressPresentation={() => {
-                      router.push({
-                        pathname: '/(main)/agenda/presentation',
-                        params: {
-                          url: presentationUrl,
-                          title: s.title || 'Presentation',
-                          sessionId: s.id,
-                          returnTo: '/(main)/hub',
-                        },
-                      });
-                    }}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/(main)/agenda/[id]',
-                        params: { id: s.id, returnTo: '/(main)/hub' },
-                      })
-                    }
-                  />
+                  <View
+                    style={[
+                      styles.sessionCardWrap,
+                      hubWide && styles.sessionCardWrapFill,
+                    ]}
+                  >
+                    <AgendaSessionCard
+                      timeLabel={timeLabel}
+                      title={s.title}
+                      isLive={live}
+                      location={s.location}
+                      descriptionText={s.descriptionText}
+                      speakerNames={s.speakerNames}
+                      sponsorNames={s.sponsorNames}
+                      descriptionNumberOfLines={hubWide ? 6 : 5}
+                      metaNumberOfLines={1}
+                      showViewSessionButton
+                      cardStyle={[
+                        styles.nextSessionCard,
+                        hubWide ? styles.nextSessionCardFill : styles.nextSessionCardPhone,
+                      ]}
+                      showPresentationButton={live && !!presentationUrl}
+                      onPressPresentation={() => {
+                        router.push({
+                          pathname: '/(main)/agenda/presentation',
+                          params: {
+                            url: presentationUrl,
+                            title: s.title || 'Presentation',
+                            sessionId: s.id,
+                            returnTo: '/(main)/hub',
+                          },
+                        });
+                      }}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/(main)/agenda/[id]',
+                          params: { id: s.id, returnTo: '/(main)/hub' },
+                        })
+                      }
+                    />
+                  </View>
                 </View>
-              </View>
               );
             })}
           </RNAnimated.ScrollView>
 
           {nextSessions.length > 1 && (
-          <View style={styles.progressWrap} pointerEvents="none">
-            <View style={styles.progressTrack}>
-              <View style={styles.progressDotsRow}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <View key={i} style={styles.progressDotBg} />
-                ))}
+            <View style={styles.progressWrap} pointerEvents="none">
+              <View style={styles.progressTrack}>
+                <View style={styles.progressDotsRow}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <View key={i} style={styles.progressDotBg} />
+                  ))}
+                </View>
+                <RNAnimated.View
+                  style={[
+                    styles.progressActiveDot,
+                    { transform: [{ translateX: progressTranslateX }] },
+                  ]}
+                />
               </View>
-              <RNAnimated.View
-                style={[
-                  styles.progressActiveDot,
-                  { transform: [{ translateX: progressTranslateX }] },
-                ]}
-              />
+              <Text style={styles.progressLabel}>
+                {Math.min(nextSessions.length, sessionIndex + 1)} / {nextSessions.length}
+              </Text>
             </View>
-            <Text style={styles.progressLabel}>
-              {Math.min(nextSessions.length, sessionIndex + 1)} / {nextSessions.length}
+          )}
+        </View>
+      </SafeEnteringView>
+    ) : null;
+
+  const sideStackBlock = (
+    <>
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(180)}>
+        <HubSponsorBlock />
+      </SafeEnteringView>
+
+      <Pressable style={styles.passportCard} onPress={() => router.push('/(main)/hub/passport' as any)}>
+        <View style={styles.passportHeaderRow}>
+          <View style={styles.passportIconWrap}>
+            <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
+          </View>
+          <View style={styles.passportTitleWrap}>
+            <Text style={styles.passportEyebrow}>Passport Challenge</Text>
+            <Text style={styles.passportTitle}>
+              {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
             </Text>
           </View>
-          )}
-        </Animated.View>
-        )}
-
-        <View style={styles.certificateDividerWrap}>
-          <View style={styles.certificateDivider} />
+          <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
         </View>
+        {passportLoading ? (
+          <ActivityIndicator color='#fff' style={styles.passportLoader} />
+        ) : (
+          <>
+            <Text style={styles.passportSubtitle}>
+              {passportCollected} of {passportTotal} exhibitor stamps collected
+            </Text>
+            <View style={styles.passportProgressTrack}>
+              <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
+            </View>
+          </>
+        )}
+      </Pressable>
 
-        <Animated.View entering={FadeInDown.duration(600).delay(280)}>
-          <ApcCertificateCard
-            progress={profile?.apcProgress}
-            style={styles.certificateCard}
-            onPrimaryPress={() => router.push('/(main)/profile')}
-          />
-        </Animated.View>
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(280)}>
+        <ApcCertificateCard progress={profile?.apcProgress} />
+      </SafeEnteringView>
+
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(340)}>
+        <TouchableOpacity
+          activeOpacity={0.88}
+          style={styles.feedbackCallout}
+          onPress={() => router.push('/(main)/hub/feedback')}
+          accessibilityRole="button"
+          accessibilityLabel="Send app feedback"
+        >
+          <View style={styles.feedbackCalloutIcon}>
+            <Ionicons name="chatbox-ellipses-outline" size={18} color={autopackColors.apBlue} />
+          </View>
+          <View style={styles.feedbackCalloutTextWrap}>
+            <Text style={styles.feedbackCalloutTitle}>Got feedback?</Text>
+            <Text style={styles.feedbackCalloutBody}>
+              Tell us what’s working or what we should improve.
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+        </TouchableOpacity>
+      </SafeEnteringView>
+    </>
+  );
+
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.scrollContent, { paddingBottom: tabScrollPad }]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.frame, frame]}>
+      {hubWide ? (
+        <View
+          style={[
+            styles.wideRow,
+            {
+              paddingTop: insets.top + 24,
+              paddingHorizontal: contentInset,
+              gap: wideCols.gap,
+            },
+          ]}
+        >
+          <View style={[styles.wideHeroCol, { width: wideCols.hero }]}>
+            {heroBlock}
+            <View style={styles.countdownInStack}>
+              <HubCountdownStrip />
+            </View>
+            {comingUpBlock}
+          </View>
+          <View style={[styles.wideStack, { width: wideCols.stack }]}>
+            {quickToolsBlock}
+            {sideStackBlock}
+          </View>
+        </View>
+      ) : (
+        <>
+          {heroBlock}
+          <HubCountdownStrip />
+          <View style={[styles.body, { paddingHorizontal: contentInset }]}>
+            {quickToolsBlock}
+            {comingUpBlock}
+            {sideStackBlock}
+          </View>
+        </>
+      )}
       </View>
 
       <Modal
@@ -895,7 +1029,7 @@ export default function HubScreen() {
       >
         <View style={styles.modalBackdrop}>
           <Pressable style={styles.modalScrim} onPress={() => setToolsModalVisible(false)} />
-          <View style={[styles.modalCard, { paddingBottom: bottomInset }]}>
+          <View style={[styles.modalCard, { height: screenH * 0.9, paddingBottom: bottomInset }]}>
             <View style={styles.modalHeaderRow}>
               <View>
                 <Text style={styles.modalTitle}>Customize quick tools</Text>
@@ -1045,15 +1179,61 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6F1F8',
   },
   scrollContent: {
-    paddingBottom: 24,
+    width: '100%',
+    alignItems: 'center',
+  },
+  frame: {
+    width: '100%',
   },
 
-  hero: { height: 282, width: '100%' },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: autopackColors.apDarkBlue,
-    opacity: 0.6,
+  wideRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    width: '100%',
   },
+  wideHeroCol: {
+    gap: 12,
+    flexShrink: 0,
+  },
+  wideStack: {
+    gap: 12,
+    paddingBottom: 8,
+    flexShrink: 0,
+  },
+  comingUpFill: {
+    flex: 1,
+    minHeight: 0,
+  },
+  comingUpModuleFill: {
+    flex: 1,
+    minHeight: 0,
+  },
+  comingUpPagerFill: {
+    flex: 1,
+    minHeight: 0,
+  },
+  comingUpPagerContentFill: {
+    flexGrow: 1,
+    alignItems: 'stretch',
+  },
+  comingUpPageFill: {
+    alignSelf: 'stretch',
+  },
+  sessionCardWrapFill: {
+    flex: 1,
+  },
+  countdownInStack: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  heroWide: {
+    borderRadius: 16,
+  },
+  quickToolsWrapWide: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
+
   heroTopRow: {
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -1074,100 +1254,22 @@ const styles = StyleSheet.create({
   },
   avatarImg: { width: 34, height: 34, borderRadius: 999 },
   avatarText: { fontWeight: '700', color: ui.colors.text },
-  greeting: { color: '#fff', fontWeight: '700' },
   heroActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 0,
+    gap: 2,
   },
   iconButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 2,
-  },
-  bellBadge: { position: 'absolute', top: 0, right: 0 },
-  heroTextWrap: { paddingHorizontal: 20, marginTop: 24, marginBottom: 26 },
-  heroTitle: {
-    fontSize: 42,
-    fontWeight: '700',
-    color: '#fff',
-    lineHeight: 46,
-    textTransform: 'uppercase',
-    fontFamily: 'Oswald-Bold',
-    textAlign: 'center',
-    maxWidth: '80%',
-    flexWrap: 'wrap',
-    marginHorizontal: 'auto',
-    paddingTop: 2,
-  },
-  heroDateText: {
-    marginTop: 2,
-    color: '#E5E7EB',
-    fontSize: 17,
-    lineHeight: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  countdownStrip: {
-    backgroundColor: '#000',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  countdownStripText: {
-    color: ui.colors.secondary,
-    fontWeight: '800',
-    fontSize: 20,
-  },
-  livePill: {
-    backgroundColor: autopackColors.apRed,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 5,
-  },
-  liveText: { color: '#fff', fontWeight: '800', letterSpacing: 0.5 },
-
-  body: { paddingHorizontal: 20, paddingVertical: 16 },
-  sectionHeaderBanner: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
-    backgroundColor: '#eff6ff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  nextSessionHeaderBanner: {
-    borderColor: '#bfdbfe',
-    backgroundColor: '#eff6ff',
-  },
-  sectionHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  sectionIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#dbeafe',
+    width: 38,
+    height: 38,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.28)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  nextSessionIconWrap: {
-    backgroundColor: '#dbeafe',
-  },
-  sectionHeaderText: {
-    color: '#111827',
-    fontWeight: '800',
-    fontSize: 16,
-  },
+  bellBadge: { position: 'absolute', top: -2, right: -2 },
+
+  body: { paddingVertical: 16, gap: 12 },
   editLink: {
     color: autopackColors.apBlue,
     fontSize: 13,
@@ -1184,9 +1286,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 16,
   },
-  quickToolsWrap: { marginTop: 4, marginBottom: 16 },
   passportCard: {
-    marginBottom: 16,
     borderRadius: 18,
     backgroundColor: ui.colors.primary,
     paddingHorizontal: 16,
@@ -1227,16 +1327,28 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: ui.colors.secondary,
   },
-  certificateDividerWrap: {
-    marginTop: 18,
-    marginBottom: 10,
-    paddingHorizontal: 2,
+  feedbackCallout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: '#fff',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#dbeafe',
   },
-  certificateDivider: {
-    height: 1,
-    backgroundColor: '#C7D8E6',
+  feedbackCalloutIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  certificateCard: { marginTop: 10, marginBottom: 8 },
+  feedbackCalloutTextWrap: { flex: 1, gap: 2 },
+  feedbackCalloutTitle: { fontWeight: '800', color: ui.colors.text, fontSize: 15 },
+  feedbackCalloutBody: { color: ui.colors.muted, fontSize: 13, lineHeight: 18 },
   quickToolsHint: {
     marginTop: 4,
     color: ui.colors.muted,
@@ -1246,11 +1358,9 @@ const styles = StyleSheet.create({
   toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
     gap: 12,
     marginTop: 8,
   },
-  toolsCell: { width: '48%' },
   toolsCard: {
     minHeight: 84,
     borderRadius: 12,
@@ -1285,11 +1395,85 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
 
-  sessionCardWrap: { paddingVertical: 8 },
+  comingUpModule: {
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: autopackColors.apBlue,
+  },
+  comingUpModuleLive: {
+    borderColor: '#DC2626',
+  },
+  comingUpHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: autopackColors.apDarkBlue,
+  },
+  comingUpHeaderLive: {
+    backgroundColor: '#B91C1C',
+  },
+  comingUpHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  comingUpIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  comingUpIconWrapLive: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
+  comingUpEyebrow: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.7,
+  },
+  comingUpHeaderText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '800',
+    marginTop: 1,
+  },
+  comingUpAgendaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+  },
+  comingUpAgendaBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  sessionCardWrap: { paddingVertical: 0 },
   nextSessionCard: {
-    height: 244,
     marginBottom: 0,
     overflow: 'hidden',
+    borderWidth: 0,
+    borderRadius: 0,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  nextSessionCardPhone: {
+    height: 320,
+  },
+  nextSessionCardFill: {
+    flex: 1,
   },
   sessionCard: {
     backgroundColor: '#fff',
@@ -1362,7 +1546,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: WINDOW_HEIGHT * 0.9,
   },
   modalScroll: { flex: 1, minHeight: 0 },
   modalScrollContent: { paddingBottom: 32, flexGrow: 1 },

@@ -5,11 +5,14 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { apsPushTokensByUserIdAndUpdatedAt } from '../graphql/queries';
 import { deleteApsPushToken } from '../graphql/mutations';
 import { graphqlAuthClient } from './graphqlClient';
-import { registerAndUpsertPushToken } from './pushNotifications';
+import { registerAndUpsertPushToken, setAppBadgeCount } from './pushNotifications';
+import { isWeb } from './platform';
 
 export type NotificationPermissionStatus = 'granted' | 'denied' | 'undetermined';
 
 export async function getNotificationPermissionStatus(): Promise<NotificationPermissionStatus> {
+  if (isWeb) return 'denied';
+
   const perm = await Notifications.getPermissionsAsync();
   if (perm.status === 'granted') return 'granted';
   if (perm.status === 'denied') return 'denied';
@@ -47,10 +50,18 @@ export async function getPushNotificationEnabledState(): Promise<{
 }
 
 export async function openSystemNotificationSettings(): Promise<void> {
+  if (isWeb) return;
   await Linking.openSettings();
 }
 
 export async function enablePushNotifications(): Promise<{ ok: boolean; message?: string }> {
+  if (isWeb) {
+    return {
+      ok: false,
+      message: 'Push notifications are available in the iOS and Android apps.',
+    };
+  }
+
   if (!Device.isDevice) {
     return {
       ok: false,
@@ -99,6 +110,8 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; message?
 }
 
 export async function disablePushNotifications(): Promise<void> {
+  if (isWeb) return;
+
   try {
     const user = await getCurrentUser();
     const resp = await graphqlAuthClient.graphql({
@@ -127,16 +140,20 @@ export async function disablePushNotifications(): Promise<void> {
     // Best-effort: user may still have OS permission enabled.
   }
 
-  await Notifications.setBadgeCountAsync(0).catch(() => {});
+  await setAppBadgeCount(0);
 }
 
 export function getNotificationStatusLabel(status: NotificationPermissionStatus): string {
+  if (isWeb) return 'Unavailable on desktop';
   if (status === 'granted') return 'Allowed';
   if (status === 'denied') return 'Blocked in device settings';
   return 'Not set';
 }
 
 export function getNotificationStatusDescription(status: NotificationPermissionStatus): string {
+  if (isWeb) {
+    return 'Push notifications are available in the iOS and Android apps.';
+  }
   if (status === 'granted') {
     return 'You will receive push notifications for announcements, messages, and contact requests.';
   }

@@ -27,6 +27,7 @@ import {
   useCurrentUserRegistrant,
 } from '../../../src/hooks/useApsStore';
 import { useApsStore } from '../../../src/store/apsStore';
+import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
 import { AffiliationsSection } from '../../../src/components/profile/AffiliationsSection';
 import { EducationSection } from '../../../src/components/profile/EducationSection';
@@ -40,14 +41,19 @@ import {
   uploadResume,
 } from '../../../src/utils/storageUtils';
 import { RiveLoader } from '../../../src/components/RiveLoader';
+import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
+import { isWeb, platformUnavailableMessage } from '../../../src/utils/platform';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
+  const contentInset = useContentInset(ui.space.lg);
+  const tabScrollPad = useMainTabScrollPadding();
   const appUser = useCurrentAppUser();
   const profile = useCurrentUserProfile();
   const registrant = useCurrentUserRegistrant();
   const refreshProfile = useApsStore((state) => state.refreshProfile);
   const reset = useApsStore((state) => state.reset);
+  const resetEngageStore = useEngageStore((s) => s.resetAll);
 
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(
@@ -273,7 +279,7 @@ export default function Profile() {
     >
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabScrollPad }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'
         keyboardDismissMode='on-drag'
@@ -283,11 +289,12 @@ export default function Profile() {
         source={require('../../../assets/images/mobile-bg.png')}
         style={[styles.headerBg, { paddingTop: insets.top + 12 }]}
         imageStyle={styles.headerBgImage}
+        resizeMode='cover'
       >
         <View style={styles.headerOverlay} />
       </ImageBackground>
 
-      <View style={styles.contentSection}>
+      <View style={[styles.contentSection, { paddingHorizontal: contentInset }]}>
         <View style={styles.profileCard}>
           <View style={styles.avatarWrap}>
             {profilePictureUrl ? (
@@ -339,15 +346,29 @@ export default function Profile() {
             </View>
             <Text style={styles.actionTileText}>Show QR Code</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionTile}
-            onPress={() => router.push('/(main)/scan')}
-          >
-            <View style={styles.actionIconWrap}>
-              <Ionicons name='scan-outline' size={20} color='#fff' />
-            </View>
-            <Text style={styles.actionTileText}>Scan Contact</Text>
-          </TouchableOpacity>
+          {!isWeb ? (
+            <TouchableOpacity
+              style={styles.actionTile}
+              onPress={() => router.push('/(main)/scan')}
+            >
+              <View style={styles.actionIconWrap}>
+                <Ionicons name='scan-outline' size={20} color='#fff' />
+              </View>
+              <Text style={styles.actionTileText}>Scan Contact</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[styles.actionTile, styles.actionTileDisabled]}
+              onPress={() =>
+                Alert.alert('Unavailable on desktop', platformUnavailableMessage('QR scanning'))
+              }
+            >
+              <View style={styles.actionIconWrap}>
+                <Ionicons name='scan-outline' size={20} color='#fff' />
+              </View>
+              <Text style={styles.actionTileText}>Scan Contact</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.actionTile}
             onPress={() => router.push('/(main)/profile/contacts')}
@@ -488,16 +509,17 @@ export default function Profile() {
           style={styles.logoutButton}
           onPress={async () => {
             setIsSigningOut(true);
-            reset();
-            router.dismissAll();
-            router.replace('/(auth)/login');
             try {
+              // Clear Cognito first — navigating before signOut lets login
+              // session-restore bounce straight back to Hub (web + mobile).
               await signOut();
             } catch (error) {
               console.error('Error signing out:', error);
-            } finally {
-              setIsSigningOut(false);
             }
+            reset();
+            resetEngageStore();
+            router.replace('/(auth)/login');
+            setIsSigningOut(false);
           }}
           disabled={isSigningOut}
         >
@@ -541,7 +563,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6F1F8',
   },
   scrollContent: {
-    paddingBottom: 56,
+    paddingBottom: 0,
   },
   loadingText: {
     marginTop: 16,
@@ -549,10 +571,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerBg: {
+    width: '100%',
     height: 174,
     justifyContent: 'flex-end',
+    overflow: 'hidden',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   headerBgImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
@@ -564,7 +593,6 @@ const styles = StyleSheet.create({
   },
   contentSection: {
     marginTop: -28,
-    paddingHorizontal: ui.space.lg,
     paddingTop: 10,
     gap: 24,
   },

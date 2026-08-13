@@ -9,6 +9,9 @@ const MIN_SPLASH_DURATION = 2000;
 // Fallback in case the Rive `onReady`/onPlay callback never fires.
 const READY_FALLBACK = 800;
 
+/**
+ * Native splash + auth gate. Web uses `index.web.tsx` (Redirect → login).
+ */
 export default function Index() {
   const [authDone, setAuthDone] = useState(false);
   const destinationRef = useRef<string>('/(auth)/login');
@@ -23,18 +26,22 @@ export default function Index() {
   useEffect(() => {
     let mounted = true;
 
-    getCurrentUser()
+    const authPromise = getCurrentUser()
       .then(() => {
         destinationRef.current = '/(main)/hub';
       })
       .catch(() => {
         destinationRef.current = '/(auth)/login';
-      })
-      .finally(() => {
-        if (mounted) setAuthDone(true);
       });
 
-    // If onReady never fires, still start the visible-duration clock.
+    const timeoutPromise = new Promise<void>((resolve) => {
+      setTimeout(resolve, 15000);
+    });
+
+    Promise.race([authPromise, timeoutPromise]).finally(() => {
+      if (mounted) setAuthDone(true);
+    });
+
     const fallback = setTimeout(markStarted, READY_FALLBACK);
 
     return () => {

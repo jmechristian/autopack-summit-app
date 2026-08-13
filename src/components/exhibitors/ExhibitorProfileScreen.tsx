@@ -1,7 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Linking,
@@ -18,8 +21,17 @@ import { APS_ID } from '../../config/apsConfig';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { autopackColors } from '../../theme';
 import { graphqlAuthClient, graphqlApiKeyClient } from '../../utils/graphqlClient';
-import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import {
+  resolveProfilePictureUri,
+  uploadExhibitorAsset,
+} from '../../utils/storageUtils';
+import { isAllowedVideoUrl, parseVideoEmbed } from '../../utils/videoEmbed';
 import { RiveLoader } from '../RiveLoader';
+import { ExhibitorVideoEmbed } from './ExhibitorVideoEmbed';
+import { PhotoGalleryModal } from './PhotoGalleryModal';
+
+const MAX_HANDOUTS = 1;
+const MAX_PHOTOS = 12;
 
 type ExhibitorProfile = {
   id: string;
@@ -47,7 +59,6 @@ type ExhibitorProfile = {
     logo?: string | null;
   } | null;
   promotions?: { id: string; promotion?: string | null; link?: string | null }[];
-  deals?: { id: string; deal?: string | null; link?: string | null }[];
   handouts?: { id: string; handout?: string | null }[];
   photos?: { id: string; photo?: string | null; caption?: string | null }[];
 };
@@ -82,24 +93,6 @@ const createPromotion = /* GraphQL */ `
 const deletePromotion = /* GraphQL */ `
   mutation DeleteApsAppExhibitorPromotion($input: DeleteApsAppExhibitorPromotionInput!) {
     deleteApsAppExhibitorPromotion(input: $input) {
-      id
-      __typename
-    }
-  }
-`;
-
-const createDeal = /* GraphQL */ `
-  mutation CreateApsAppExhibitorDeal($input: CreateApsAppExhibitorDealInput!) {
-    createApsAppExhibitorDeal(input: $input) {
-      id
-      __typename
-    }
-  }
-`;
-
-const deleteDeal = /* GraphQL */ `
-  mutation DeleteApsAppExhibitorDeal($input: DeleteApsAppExhibitorDealInput!) {
-    deleteApsAppExhibitorDeal(input: $input) {
       id
       __typename
     }
@@ -173,6 +166,33 @@ const deleteFavoriteExhibitor = /* GraphQL */ `
   }
 `;
 
+const viewsByViewKey = /* GraphQL */ `
+  query ViewsByViewKey($viewKey: String!, $limit: Int) {
+    apsAppUserExhibitorViewsByViewKey(viewKey: $viewKey, limit: $limit) {
+      items {
+        id
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+const createExhibitorView = /* GraphQL */ `
+  mutation CreateExhibitorView($input: CreateApsAppUserExhibitorViewInput!) {
+    createApsAppUserExhibitorView(input: $input) {
+      id
+      __typename
+    }
+  }
+`;
+
+function isDuplicateGraphError(error: unknown) {
+  const message = String((error as any)?.errors?.[0]?.message || (error as any)?.message || '');
+  return /conditional|already exists|duplicate/i.test(message);
+}
+
 const getExhibitorProfileById = /* GraphQL */ `
   query GetExhibitorProfileById($id: ID!) {
     getApsAppExhibitorProfile(id: $id) {
@@ -205,15 +225,6 @@ const getExhibitorProfileById = /* GraphQL */ `
         items {
           id
           promotion
-          link
-          __typename
-        }
-        __typename
-      }
-      deals {
-        items {
-          id
-          deal
           link
           __typename
         }
@@ -273,12 +284,23 @@ export default function ExhibitorProfileScreen() {
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [favoriteBusy, setFavoriteBusy] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [viewsCount, setViewsCount] = useState(0);
   const [qrPreviewVisible, setQrPreviewVisible] = useState(false);
+  const [gallery, setGallery] = useState<{ uris: string[]; index: number } | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingHandout, setUploadingHandout] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [formLogoPreview, setFormLogoPreview] = useState<string | null>(null);
+  const [formPhotoPreviews, setFormPhotoPreviews] = useState<Record<string, string | null>>({});
+  const [handoutUrlDraft, setHandoutUrlDraft] = useState('');
+  const [acceptedPromotionIds, setAcceptedPromotionIds] = useState<Record<string, true>>({});
+  const companyEmailInputRef = useRef<TextInput>(null);
   const [form, setForm] = useState({
     video: '',
     videoCaption: '',
     companyDescription: '',
     companyWebsite: '',
+    companyEmail: '',
     companyPhone: '',
     companyAddress: '',
     companyCity: '',
@@ -287,9 +309,8 @@ export default function ExhibitorProfileScreen() {
     companyCountry: '',
     companyLogo: '',
     promotions: [] as PairRow[],
-    deals: [] as PairRow[],
     handouts: [] as SingleRow[],
-    photos: [] as PairRow[],
+    photos: [] as SingleRow[],
   });
 
   const exhibitorIdRaw = params.id;
@@ -334,9 +355,6 @@ export default function ExhibitorProfileScreen() {
             promotions?: {
               items?: ({ id?: string | null; promotion?: string | null; link?: string | null } | null)[] | null;
             };
-            deals?: {
-              items?: ({ id?: string | null; deal?: string | null; link?: string | null } | null)[] | null;
-            };
             handouts?: {
               items?: ({ id?: string | null; handout?: string | null } | null)[] | null;
             };
@@ -368,10 +386,6 @@ export default function ExhibitorProfileScreen() {
             .filter((x): x is { id?: string | null; promotion?: string | null; link?: string | null } => !!x)
             .filter((x) => !!x.id)
             .map((x) => ({ id: x.id!, promotion: x.promotion || null, link: x.link || null })),
-          deals: (raw.deals?.items || [])
-            .filter((x): x is { id?: string | null; deal?: string | null; link?: string | null } => !!x)
-            .filter((x) => !!x.id)
-            .map((x) => ({ id: x.id!, deal: x.deal || null, link: x.link || null })),
           handouts: (raw.handouts?.items || [])
             .filter((x): x is { id?: string | null; handout?: string | null } => !!x)
             .filter((x) => !!x.id)
@@ -383,12 +397,14 @@ export default function ExhibitorProfileScreen() {
         };
         if (mounted) setProfile(normalized);
         if (mounted) setLikesCount(normalized.likes ?? 0);
+        if (mounted) setViewsCount(normalized.views ?? 0);
         if (mounted) {
           setForm({
             video: clean(normalized.video),
             videoCaption: clean(normalized.videoCaption),
             companyDescription: clean(normalized.company?.description),
             companyWebsite: clean(normalized.company?.website),
+            companyEmail: clean(normalized.company?.email),
             companyPhone: clean(normalized.company?.phone),
             companyAddress: clean(normalized.company?.address),
             companyCity: clean(normalized.company?.city),
@@ -401,21 +417,21 @@ export default function ExhibitorProfileScreen() {
               text: clean(x.promotion),
               link: clean(x.link),
             })),
-            deals: (normalized.deals || []).map((x) => ({
-              id: makeRowId(),
-              text: clean(x.deal),
-              link: clean(x.link),
-            })),
-            handouts: (normalized.handouts || []).map((x) => ({
-              id: makeRowId(),
-              text: clean(x.handout),
-            })),
-            photos: (normalized.photos || []).map((x) => ({
-              id: makeRowId(),
-              text: clean(x.photo),
-              link: clean(x.caption),
-            })),
+            handouts: (normalized.handouts || [])
+              .map((x) => ({
+                id: makeRowId(),
+                text: clean(x.handout),
+              }))
+              .slice(0, MAX_HANDOUTS),
+            photos: (normalized.photos || [])
+              .map((x) => ({
+                id: makeRowId(),
+                text: clean(x.photo),
+              }))
+              .slice(0, MAX_PHOTOS),
           });
+          setHandoutUrlDraft('');
+          setAcceptedPromotionIds({});
         }
       } catch (e: any) {
         console.error('Error loading exhibitor profile:', e);
@@ -444,6 +460,18 @@ export default function ExhibitorProfileScreen() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadFormLogoPreview() {
+      const uri = await resolveProfilePictureUri(form.companyLogo || null);
+      if (!cancelled) setFormLogoPreview(uri);
+    }
+    loadFormLogoPreview();
+    return () => {
+      cancelled = true;
+    };
+  }, [form.companyLogo]);
+
+  useEffect(() => {
+    let cancelled = false;
     const unresolved = (profile?.photos || []).filter((photo) => photo.photo && photoUris[photo.id] === undefined);
     if (!unresolved.length) return;
     async function loadPhotoUris() {
@@ -463,9 +491,32 @@ export default function ExhibitorProfileScreen() {
     };
   }, [profile?.photos, photoUris]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const unresolved = form.photos.filter((row) => row.text && formPhotoPreviews[row.id] === undefined);
+    if (!unresolved.length) return;
+    async function loadFormPhotoPreviews() {
+      const updates: Record<string, string | null> = {};
+      await Promise.all(
+        unresolved.map(async (row) => {
+          updates[row.id] = await resolveProfilePictureUri(row.text);
+        })
+      );
+      if (!cancelled && Object.keys(updates).length) {
+        setFormPhotoPreviews((prev) => ({ ...prev, ...updates }));
+      }
+    }
+    loadFormPhotoPreviews();
+    return () => {
+      cancelled = true;
+    };
+  }, [form.photos, formPhotoPreviews]);
+
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const favoriteKey =
     currentProfileId && profile?.id ? `e:${profile.eventId || APS_ID}|u:${currentProfileId}|x:${profile.id}` : '';
+  const viewKey =
+    currentProfileId && profile?.id ? `v:${profile.eventId || APS_ID}|u:${currentProfileId}|x:${profile.id}` : '';
 
   useEffect(() => {
     let cancelled = false;
@@ -503,6 +554,81 @@ export default function ExhibitorProfileScreen() {
     };
   }, [favoriteKey, reloadKey]);
 
+  // Count one unique view per logged-in user (skip the exhibitor's own company staff).
+  useEffect(() => {
+    let cancelled = false;
+    async function recordUniqueView() {
+      if (!profile?.id || !currentProfileId || !viewKey) return;
+
+      const isApprovedRegistrant =
+        String(currentAppUser?.registrant?.status || '').toUpperCase() === 'APPROVED';
+      const isOwnCompany =
+        !!currentAppUser?.registrant?.companyId &&
+        !!profile.company?.id &&
+        currentAppUser.registrant.companyId === profile.company.id &&
+        isApprovedRegistrant;
+      if (isOwnCompany) return;
+
+      try {
+        const existingResp = await graphqlAuthClient.graphql({
+          query: viewsByViewKey,
+          variables: { viewKey, limit: 1 },
+        });
+        const existingData = existingResp.data as {
+          apsAppUserExhibitorViewsByViewKey?: {
+            items?: ({ id?: string | null } | null)[] | null;
+          };
+        };
+        const alreadyViewed = existingData.apsAppUserExhibitorViewsByViewKey?.items?.some((x) => !!x?.id);
+        if (alreadyViewed || cancelled) return;
+
+        try {
+          await graphqlAuthClient.graphql({
+            query: createExhibitorView,
+            variables: {
+              input: {
+                id: viewKey,
+                userProfileId: currentProfileId,
+                exhibitorId: profile.id,
+                eventId: profile.eventId || APS_ID,
+                viewKey,
+              },
+            },
+          });
+        } catch (e) {
+          if (isDuplicateGraphError(e)) return;
+          throw e;
+        }
+        if (cancelled) return;
+
+        const nextViews = (profile.views ?? viewsCount ?? 0) + 1;
+        await graphqlApiKeyClient.graphql({
+          query: updateExhibitorProfile,
+          variables: { input: { id: profile.id, views: nextViews } },
+        });
+        if (!cancelled) {
+          setViewsCount(nextViews);
+          setProfile((prev) => (prev ? { ...prev, views: nextViews } : prev));
+        }
+      } catch {
+        // Silent — view tracking should never block the profile screen.
+      }
+    }
+    void recordUniqueView();
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally keyed to identity + exhibitor, not viewsCount (avoid re-entry).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    viewKey,
+    profile?.id,
+    profile?.company?.id,
+    currentProfileId,
+    currentAppUser?.registrant?.companyId,
+    currentAppUser?.registrant?.status,
+  ]);
+
   if (loading) {
     return <RiveLoader />;
   }
@@ -527,6 +653,15 @@ export default function ExhibitorProfileScreen() {
     currentAppUser.registrant.companyId === profile.company.id &&
     isApprovedRegistrant;
   const canEdit = isCompanyEmployee;
+  const previewVideoUrl = canEdit ? form.video : profile.video;
+  const previewVideoCaption = canEdit ? form.videoCaption : profile.videoCaption;
+  const hasPreviewVideo = !!parseVideoEmbed(previewVideoUrl);
+  const previewPhotoUris = (profile.photos || [])
+    .map((photo) => photoUris[photo.id])
+    .filter((uri): uri is string => !!uri);
+  const editPhotoUris = form.photos
+    .map((row) => formPhotoPreviews[row.id])
+    .filter((uri): uri is string => !!uri);
 
   async function toggleFavorite() {
     if (!profile?.id || !currentProfileId || !favoriteKey || favoriteBusy) return;
@@ -541,7 +676,7 @@ export default function ExhibitorProfileScreen() {
         setLikesCount(nextLikes);
         setIsFavorite(false);
         setFavoriteRecordId(null);
-        await graphqlAuthClient.graphql({
+        await graphqlApiKeyClient.graphql({
           query: updateExhibitorProfile,
           variables: { input: { id: profile.id, likes: nextLikes } },
         });
@@ -565,7 +700,7 @@ export default function ExhibitorProfileScreen() {
         setLikesCount(nextLikes);
         setIsFavorite(true);
         setFavoriteRecordId(createdId);
-        await graphqlAuthClient.graphql({
+        await graphqlApiKeyClient.graphql({
           query: updateExhibitorProfile,
           variables: { input: { id: profile.id, likes: nextLikes } },
         });
@@ -577,142 +712,299 @@ export default function ExhibitorProfileScreen() {
     }
   }
 
-  function addPairRow(field: 'promotions' | 'deals' | 'photos') {
+  function addPromotionRow() {
     setForm((prev) => ({
       ...prev,
-      [field]: [...prev[field], { id: makeRowId(), text: '', link: '' }],
+      promotions: [...prev.promotions, { id: makeRowId(), text: '', link: '' }],
     }));
   }
 
-  function addSingleRow(field: 'handouts') {
+  function updatePromotionRow(rowId: string, patch: Partial<Omit<PairRow, 'id'>>) {
+    setAcceptedPromotionIds((prev) => {
+      if (!prev[rowId]) return prev;
+      const next = { ...prev };
+      delete next[rowId];
+      return next;
+    });
     setForm((prev) => ({
       ...prev,
-      [field]: [...prev[field], { id: makeRowId(), text: '' }],
+      promotions: prev.promotions.map((row) => (row.id === rowId ? { ...row, ...patch } : row)),
     }));
   }
 
-  function updatePairRow(
-    field: 'promotions' | 'deals' | 'photos',
-    rowId: string,
-    patch: Partial<PairRow>
-  ) {
+  function acceptPromotionRow(rowId: string) {
+    // Visual affordance only — real persistence is Save Changes.
+    setAcceptedPromotionIds((prev) => ({ ...prev, [rowId]: true }));
+  }
+
+  function removePromotionRow(rowId: string) {
+    setAcceptedPromotionIds((prev) => {
+      if (!prev[rowId]) return prev;
+      const next = { ...prev };
+      delete next[rowId];
+      return next;
+    });
     setForm((prev) => ({
       ...prev,
-      [field]: prev[field].map((row) => (row.id === rowId ? { ...row, ...patch } : row)),
+      promotions: prev.promotions.filter((row) => row.id !== rowId),
     }));
   }
 
-  function updateSingleRow(field: 'handouts', rowId: string, text: string) {
-    setForm((prev) => ({
-      ...prev,
-      [field]: prev[field].map((row) => (row.id === rowId ? { ...row, text } : row)),
-    }));
+  function removeHandout() {
+    setForm((prev) => ({ ...prev, handouts: [] }));
+    setHandoutUrlDraft('');
   }
 
-  function removePairRow(field: 'promotions' | 'deals' | 'photos', rowId: string) {
+  function removePhotoRow(rowId: string) {
     setForm((prev) => ({
       ...prev,
-      [field]: prev[field].filter((row) => row.id !== rowId),
+      photos: prev.photos.filter((row) => row.id !== rowId),
     }));
+    setFormPhotoPreviews((prev) => {
+      const next = { ...prev };
+      delete next[rowId];
+      return next;
+    });
   }
 
-  function removeSingleRow(field: 'handouts', rowId: string) {
+  async function ensureMediaLibraryPermission() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Photo access needed',
+        'Allow photo library access in Settings to upload images.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => void Linking.openSettings() },
+        ]
+      );
+      return false;
+    }
+    return true;
+  }
+
+  async function uploadLogo() {
+    if (!profile?.company?.id || uploadingLogo) return;
+    const ok = await ensureMediaLibraryPermission();
+    if (!ok) return;
+    const picked = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.9,
+      aspect: [1, 1],
+    });
+    if (picked.canceled || !picked.assets?.[0]?.uri) return;
+
+    setUploadingLogo(true);
+    try {
+      const asset = picked.assets[0];
+      const key = await uploadExhibitorAsset({
+        fileUri: asset.uri,
+        companyId: profile.company.id,
+        kind: 'logo',
+        mimeType: asset.mimeType,
+        fileName: asset.fileName,
+      });
+      setForm((prev) => ({ ...prev, companyLogo: key }));
+      const preview = await resolveProfilePictureUri(key);
+      setFormLogoPreview(preview);
+      setLogoUri(preview);
+    } catch (e: any) {
+      Alert.alert('Upload failed', e?.message || 'Could not upload logo.');
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
+
+  async function uploadHandoutFile() {
+    if (!profile?.company?.id || uploadingHandout) return;
+    if (form.handouts.length >= MAX_HANDOUTS) {
+      Alert.alert('Limit reached', `You can add up to ${MAX_HANDOUTS} handout.`);
+      return;
+    }
+    const picked = await DocumentPicker.getDocumentAsync({
+      type: ['application/pdf', 'image/*'],
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+    if (picked.canceled || !picked.assets?.[0]?.uri) return;
+
+    setUploadingHandout(true);
+    try {
+      const asset = picked.assets[0];
+      const key = await uploadExhibitorAsset({
+        fileUri: asset.uri,
+        companyId: profile.company.id,
+        kind: 'handout',
+        mimeType: asset.mimeType,
+        fileName: asset.name,
+      });
+      setForm((prev) => ({
+        ...prev,
+        handouts: [{ id: makeRowId(), text: key }],
+      }));
+      setHandoutUrlDraft('');
+    } catch (e: any) {
+      Alert.alert('Upload failed', e?.message || 'Could not upload handout.');
+    } finally {
+      setUploadingHandout(false);
+    }
+  }
+
+  function applyHandoutUrl() {
+    if (form.handouts.length >= MAX_HANDOUTS) {
+      Alert.alert('Limit reached', `You can add up to ${MAX_HANDOUTS} handout.`);
+      return;
+    }
+    const url = normalizeUrl(handoutUrlDraft);
+    if (!url) {
+      Alert.alert('Add a URL', 'Paste a handout link first.');
+      return;
+    }
     setForm((prev) => ({
       ...prev,
-      [field]: prev[field].filter((row) => row.id !== rowId),
+      handouts: [{ id: makeRowId(), text: url }],
     }));
+    setHandoutUrlDraft('');
+  }
+
+  async function uploadPhotos() {
+    if (!profile?.company?.id || uploadingPhotos) return;
+    const remaining = MAX_PHOTOS - form.photos.length;
+    if (remaining <= 0) {
+      Alert.alert('Limit reached', `You can add up to ${MAX_PHOTOS} photos.`);
+      return;
+    }
+    const ok = await ensureMediaLibraryPermission();
+    if (!ok) return;
+
+    const picked = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      quality: 0.85,
+    });
+    if (picked.canceled || !picked.assets?.length) return;
+
+    setUploadingPhotos(true);
+    try {
+      const created: SingleRow[] = [];
+      const previews: Record<string, string | null> = {};
+      for (const asset of picked.assets.slice(0, remaining)) {
+        if (!asset.uri) continue;
+        const key = await uploadExhibitorAsset({
+          fileUri: asset.uri,
+          companyId: profile.company.id,
+          kind: 'photo',
+          mimeType: asset.mimeType,
+          fileName: asset.fileName,
+        });
+        const id = makeRowId();
+        created.push({ id, text: key });
+        previews[id] = await resolveProfilePictureUri(key);
+      }
+      if (!created.length) return;
+      setForm((prev) => ({
+        ...prev,
+        photos: [...prev.photos, ...created].slice(0, MAX_PHOTOS),
+      }));
+      setFormPhotoPreviews((prev) => ({ ...prev, ...previews }));
+    } catch (e: any) {
+      Alert.alert('Upload failed', e?.message || 'Could not upload photos.');
+    } finally {
+      setUploadingPhotos(false);
+    }
   }
 
   async function saveEdits() {
     if (!profile?.id || !profile.company?.id) return;
+    const video = clean(form.video);
+    if (video && !isAllowedVideoUrl(video)) {
+      Alert.alert(
+        'Video URL',
+        'Only YouTube or Vimeo links are allowed. Paste a YouTube or Vimeo video URL.'
+      );
+      return;
+    }
+    const companyEmail = clean(form.companyEmail);
+    if (companyEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyEmail)) {
+      Alert.alert('Company email', 'Enter a valid email address (e.g. name@company.com).');
+      return;
+    }
     setSaving(true);
     try {
-      await graphqlAuthClient.graphql({
-        query: updateExhibitorProfile,
-        variables: {
-          input: {
-            id: profile.id,
-            video: form.video || null,
-            videoCaption: form.videoCaption || null,
-          },
-        },
-      });
+      // Exhibitor/company updates use API key auth. Amplify's API-key update resolver
+      // allows those fields but rejects null values (`nullAllowedFields` is empty),
+      // so only send defined non-empty scalars.
+      const profileInput: Record<string, string> = { id: profile.id };
+      const videoCaption = clean(form.videoCaption);
+      if (video) profileInput.video = video;
+      if (videoCaption) profileInput.videoCaption = videoCaption;
+      if (video || videoCaption) {
+        await graphqlApiKeyClient.graphql({
+          query: updateExhibitorProfile,
+          variables: { input: profileInput },
+        });
+      }
 
-      await graphqlAuthClient.graphql({
-        query: updateCompany,
-        variables: {
-          input: {
-            id: profile.company.id,
-            description: form.companyDescription || null,
-            website: form.companyWebsite || null,
-            phone: form.companyPhone || null,
-            address: form.companyAddress || null,
-            city: form.companyCity || null,
-            state: form.companyState || null,
-            zip: form.companyZip || null,
-            country: form.companyCountry || null,
-            logo: form.companyLogo || null,
-          },
-        },
-      });
+      const companyInput: Record<string, string> = { id: profile.company.id };
+      const companyFields: Array<[string, string]> = [
+        ['description', clean(form.companyDescription)],
+        ['website', clean(form.companyWebsite)],
+        ['email', companyEmail],
+        ['phone', clean(form.companyPhone)],
+        ['address', clean(form.companyAddress)],
+        ['city', clean(form.companyCity)],
+        ['state', clean(form.companyState)],
+        ['zip', clean(form.companyZip)],
+        ['country', clean(form.companyCountry)],
+        ['logo', clean(form.companyLogo)],
+      ];
+      for (const [key, value] of companyFields) {
+        if (value) companyInput[key] = value;
+      }
+      if (Object.keys(companyInput).length > 1) {
+        await graphqlApiKeyClient.graphql({
+          query: updateCompany,
+          variables: { input: companyInput },
+        });
+      }
 
       await Promise.all(
         (profile.promotions || []).map((item) =>
-          graphqlAuthClient.graphql({ query: deletePromotion, variables: { input: { id: item.id } } })
+          graphqlApiKeyClient.graphql({ query: deletePromotion, variables: { input: { id: item.id } } })
         )
       );
       const promotionsToCreate = form.promotions
         .map((row) => ({ text: clean(row.text), link: clean(row.link) }))
         .filter((row) => !!row.text);
       await Promise.all(
-        promotionsToCreate.map((item) =>
-          graphqlAuthClient.graphql({
+        promotionsToCreate.map((item) => {
+          const input: Record<string, string> = {
+            exhibitorId: profile.id,
+            eventId: profile.eventId,
+            promotion: item.text,
+          };
+          if (item.link) input.link = item.link;
+          return graphqlApiKeyClient.graphql({
             query: createPromotion,
-            variables: {
-              input: {
-                exhibitorId: profile.id,
-                eventId: profile.eventId,
-                promotion: item.text,
-                link: item.link || null,
-              },
-            },
-          })
-        )
-      );
-
-      await Promise.all(
-        (profile.deals || []).map((item) =>
-          graphqlAuthClient.graphql({ query: deleteDeal, variables: { input: { id: item.id } } })
-        )
-      );
-      const dealsToCreate = form.deals
-        .map((row) => ({ text: clean(row.text), link: clean(row.link) }))
-        .filter((row) => !!row.text);
-      await Promise.all(
-        dealsToCreate.map((item) =>
-          graphqlAuthClient.graphql({
-            query: createDeal,
-            variables: {
-              input: {
-                exhibitorId: profile.id,
-                eventId: profile.eventId,
-                deal: item.text,
-                link: item.link || null,
-              },
-            },
-          })
-        )
+            variables: { input },
+          });
+        })
       );
 
       await Promise.all(
         (profile.handouts || []).map((item) =>
-          graphqlAuthClient.graphql({ query: deleteHandout, variables: { input: { id: item.id } } })
+          graphqlApiKeyClient.graphql({ query: deleteHandout, variables: { input: { id: item.id } } })
         )
       );
-      const handoutsToCreate = form.handouts.map((row) => clean(row.text)).filter(Boolean);
+      const handoutsToCreate = form.handouts
+        .map((row) => clean(row.text))
+        .filter(Boolean)
+        .slice(0, MAX_HANDOUTS);
       await Promise.all(
         handoutsToCreate.map((item) =>
-          graphqlAuthClient.graphql({
+          graphqlApiKeyClient.graphql({
             query: createHandout,
             variables: {
               input: {
@@ -727,22 +1019,23 @@ export default function ExhibitorProfileScreen() {
 
       await Promise.all(
         (profile.photos || []).map((item) =>
-          graphqlAuthClient.graphql({ query: deletePhoto, variables: { input: { id: item.id } } })
+          graphqlApiKeyClient.graphql({ query: deletePhoto, variables: { input: { id: item.id } } })
         )
       );
       const photosToCreate = form.photos
-        .map((row) => ({ text: clean(row.text), link: clean(row.link) }))
-        .filter((row) => !!row.text);
+        .map((row) => clean(row.text))
+        .filter(Boolean)
+        .slice(0, MAX_PHOTOS);
       await Promise.all(
-        photosToCreate.map((item) =>
-          graphqlAuthClient.graphql({
+        photosToCreate.map((photo) =>
+          graphqlApiKeyClient.graphql({
             query: createPhoto,
             variables: {
               input: {
                 exhibitorId: profile.id,
                 eventId: profile.eventId,
-                photo: item.text,
-                caption: item.link || null,
+                photo,
+                caption: null,
                 approved: true,
               },
             },
@@ -754,7 +1047,11 @@ export default function ExhibitorProfileScreen() {
       setReloadKey((v) => v + 1);
     } catch (e: any) {
       console.error('Failed saving exhibitor profile changes:', e);
-      Alert.alert('Update failed', e?.message || 'Could not save changes.');
+      const graphMessage =
+        e?.errors?.[0]?.message ||
+        e?.message ||
+        'Could not save changes.';
+      Alert.alert('Update failed', graphMessage);
     } finally {
       setSaving(false);
     }
@@ -770,6 +1067,22 @@ export default function ExhibitorProfileScreen() {
       });
     } catch (e: any) {
       Alert.alert('Unable to share QR code', e?.message || 'Please try again.');
+    }
+  }
+
+  async function openHandout(value?: string | null) {
+    const raw = clean(value);
+    if (!raw) return;
+    try {
+      if (/^https?:\/\//i.test(raw)) {
+        await Linking.openURL(raw);
+        return;
+      }
+      const uri = await resolveProfilePictureUri(raw);
+      if (!uri) throw new Error('Handout file unavailable.');
+      await Linking.openURL(uri);
+    } catch (e: any) {
+      Alert.alert('Unable to open handout', e?.message || 'Please try again.');
     }
   }
 
@@ -799,12 +1112,28 @@ export default function ExhibitorProfileScreen() {
             <Text style={styles.name}>{clean(profile.company?.name) || 'Exhibitor'}</Text>
             {!!profile.boothNumber && <Text style={styles.muted}>Booth {profile.boothNumber}</Text>}
           </View>
+          <Pressable
+            style={[
+              styles.favoriteHeaderBtn,
+              (!currentProfileId || favoriteBusy) && styles.favoritePillDisabled,
+            ]}
+            disabled={!currentProfileId || favoriteBusy}
+            onPress={toggleFavorite}
+            accessibilityRole="button"
+            accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Ionicons
+              name={isFavorite ? 'star' : 'star-outline'}
+              size={22}
+              color={isFavorite ? '#f59e0b' : '#6b7280'}
+            />
+          </Pressable>
         </View>
 
         {isCompanyEmployee && (
           <View style={styles.statsRow}>
             <View style={styles.stat}>
-              <Text style={styles.statValue}>{profile.views ?? 0}</Text>
+              <Text style={styles.statValue}>{viewsCount}</Text>
               <Text style={styles.statLabel}>Views</Text>
             </View>
             <View style={styles.stat}>
@@ -818,6 +1147,101 @@ export default function ExhibitorProfileScreen() {
           </View>
         )}
 
+        {canEdit ? (
+          <Text style={styles.previewLabel}>Public preview</Text>
+        ) : null}
+
+        {(!!profile.company?.phone || !!profile.company?.email || !!website) && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Contact</Text>
+            {!!profile.company?.phone && (
+              <Pressable onPress={() => Linking.openURL(`tel:${profile.company?.phone}`)} style={styles.linkRow}>
+                <Ionicons name="call-outline" size={16} color={autopackColors.apBlue} />
+                <Text style={styles.linkText}>{profile.company?.phone}</Text>
+              </Pressable>
+            )}
+            {!!profile.company?.email && (
+              <Pressable onPress={() => Linking.openURL(`mailto:${profile.company?.email}`)} style={styles.linkRow}>
+                <Ionicons name="mail-outline" size={16} color={autopackColors.apBlue} />
+                <Text style={styles.linkText}>{profile.company?.email}</Text>
+              </Pressable>
+            )}
+            {!!website && (
+              <Pressable onPress={() => Linking.openURL(website)} style={styles.linkRow}>
+                <Ionicons name="globe-outline" size={16} color={autopackColors.apBlue} />
+                <Text style={styles.linkText}>{profile.company?.website}</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {!!profile.company?.description && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>About</Text>
+            <Text style={styles.body}>{profile.company.description}</Text>
+          </View>
+        )}
+
+        {(profile.promotions || []).length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Promotions</Text>
+            {(profile.promotions || []).map((item) => (
+              <View key={item.id} style={styles.listItem}>
+                <Text style={styles.body}>{item.promotion || 'Promotion'}</Text>
+                {!!item.link && (
+                  <Pressable onPress={() => Linking.openURL(item.link!)} style={styles.linkRow}>
+                    <Ionicons name="open-outline" size={14} color={autopackColors.apBlue} />
+                    <Text style={styles.linkText}>Open</Text>
+                  </Pressable>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {hasPreviewVideo && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Video</Text>
+            <ExhibitorVideoEmbed url={previewVideoUrl} caption={previewVideoCaption} />
+          </View>
+        )}
+
+        {(profile.handouts || []).length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Handouts</Text>
+            {(profile.handouts || []).map((item) => (
+              <Pressable
+                key={item.id}
+                onPress={() => void openHandout(item.handout)}
+                style={styles.linkRow}
+              >
+                <Ionicons name="document-text-outline" size={16} color={autopackColors.apBlue} />
+                <Text style={styles.linkText} numberOfLines={1}>
+                  Open handout
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {previewPhotoUris.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Photos</Text>
+            <View style={styles.photoGrid}>
+              {previewPhotoUris.map((uri, index) => (
+                <Pressable
+                  key={`${uri}-${index}`}
+                  onPress={() => setGallery({ uris: previewPhotoUris, index })}
+                  accessibilityRole="imagebutton"
+                  accessibilityLabel={`Open photo ${index + 1}`}
+                >
+                  <Image source={{ uri }} style={styles.photo} />
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
         {canEdit && !!profile.qrCode && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Passport QR Code</Text>
@@ -825,75 +1249,24 @@ export default function ExhibitorProfileScreen() {
               Display this code at your booth so attendees can collect their passport stamp.
             </Text>
             <Pressable style={styles.qrPreviewCard} onPress={() => setQrPreviewVisible(true)}>
-              <Image source={{ uri: profile.qrCode }} style={styles.qrImage} resizeMode='contain' />
+              <Image source={{ uri: profile.qrCode }} style={styles.qrImage} resizeMode="contain" />
             </Pressable>
             <View style={styles.qrActions}>
               <Pressable style={styles.qrActionBtn} onPress={() => setQrPreviewVisible(true)}>
-                <Ionicons name='expand-outline' size={16} color={autopackColors.apBlue} />
+                <Ionicons name="expand-outline" size={16} color={autopackColors.apBlue} />
                 <Text style={styles.qrActionText}>Display</Text>
               </Pressable>
               <Pressable style={styles.qrActionBtn} onPress={shareQrCode}>
-                <Ionicons name='share-outline' size={16} color={autopackColors.apBlue} />
+                <Ionicons name="share-outline" size={16} color={autopackColors.apBlue} />
                 <Text style={styles.qrActionText}>Share</Text>
               </Pressable>
               <Pressable style={styles.qrActionBtn} onPress={openQrCode}>
-                <Ionicons name='download-outline' size={16} color={autopackColors.apBlue} />
+                <Ionicons name="download-outline" size={16} color={autopackColors.apBlue} />
                 <Text style={styles.qrActionText}>Download</Text>
               </Pressable>
             </View>
           </View>
         )}
-
-        {!isCompanyEmployee && (
-          <Pressable
-            style={[
-              styles.favoritePill,
-              (!currentProfileId || favoriteBusy) && styles.favoritePillDisabled,
-            ]}
-            disabled={!currentProfileId || favoriteBusy}
-            onPress={toggleFavorite}
-          >
-            <Ionicons name={isFavorite ? 'star' : 'star-outline'} size={18} color={isFavorite ? '#f59e0b' : '#6b7280'} />
-            <Text style={styles.favoritePillText}>
-              {!currentProfileId
-                ? 'Profile required'
-                : favoriteBusy
-                  ? 'Updating...'
-                  : isFavorite
-                    ? 'Favorited'
-                    : 'Add to favorites'}
-            </Text>
-          </Pressable>
-        )}
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Contact</Text>
-        {!!profile.company?.phone && (
-          <Pressable onPress={() => Linking.openURL(`tel:${profile.company?.phone}`)} style={styles.linkRow}>
-            <Ionicons name='call-outline' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.linkText}>{profile.company?.phone}</Text>
-          </Pressable>
-        )}
-        {!!profile.company?.email && (
-          <Pressable onPress={() => Linking.openURL(`mailto:${profile.company?.email}`)} style={styles.linkRow}>
-            <Ionicons name='mail-outline' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.linkText}>{profile.company?.email}</Text>
-          </Pressable>
-        )}
-        {!!website && (
-          <Pressable onPress={() => Linking.openURL(website)} style={styles.linkRow}>
-            <Ionicons name='globe-outline' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.linkText}>{profile.company?.website}</Text>
-          </Pressable>
-        )}
-      </View>
-
-      {!!profile.company?.description && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>About</Text>
-          <Text style={styles.body}>{profile.company.description}</Text>
-        </View>
-      )}
 
       {canEdit && (
         <View style={styles.card}>
@@ -907,6 +1280,27 @@ export default function ExhibitorProfileScreen() {
           />
           <Text style={styles.fieldLabel}>Website</Text>
           <TextInput value={form.companyWebsite} onChangeText={(v) => setForm((p) => ({ ...p, companyWebsite: v }))} style={styles.input} />
+          <Text style={styles.fieldLabel}>Email</Text>
+          <TextInput
+            ref={companyEmailInputRef}
+            value={form.companyEmail}
+            onChangeText={(v) => setForm((p) => ({ ...p, companyEmail: v }))}
+            onFocus={() => {
+              // Values often look like "@company.com" — put the caret before "@"
+              // so exhibitors can type the local part immediately.
+              const at = form.companyEmail.indexOf('@');
+              if (at < 0) return;
+              const selection = { start: at, end: at };
+              requestAnimationFrame(() => {
+                companyEmailInputRef.current?.setNativeProps({ selection });
+              });
+            }}
+            placeholder="name@company.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={styles.input}
+          />
           <Text style={styles.fieldLabel}>Phone</Text>
           <TextInput value={form.companyPhone} onChangeText={(v) => setForm((p) => ({ ...p, companyPhone: v }))} style={styles.input} />
           <Text style={styles.fieldLabel}>Address</Text>
@@ -919,178 +1313,212 @@ export default function ExhibitorProfileScreen() {
           <TextInput value={form.companyZip} onChangeText={(v) => setForm((p) => ({ ...p, companyZip: v }))} style={styles.input} />
           <Text style={styles.fieldLabel}>Country</Text>
           <TextInput value={form.companyCountry} onChangeText={(v) => setForm((p) => ({ ...p, companyCountry: v }))} style={styles.input} />
-          <Text style={styles.fieldLabel}>Logo Key/URL</Text>
-          <TextInput value={form.companyLogo} onChangeText={(v) => setForm((p) => ({ ...p, companyLogo: v }))} style={styles.input} />
+
+          <Text style={styles.fieldLabel}>Logo</Text>
+          <View style={styles.uploadRow}>
+            <View style={styles.logoUploadPreview}>
+              {formLogoPreview || logoUri ? (
+                <Image
+                  source={{ uri: formLogoPreview || logoUri || undefined }}
+                  style={styles.logoUploadImg}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Ionicons name="image-outline" size={22} color="#9ca3af" />
+              )}
+            </View>
+            <View style={{ flex: 1, gap: 8 }}>
+              <Pressable
+                style={[styles.uploadBtn, uploadingLogo && styles.saveBtnDisabled]}
+                disabled={uploadingLogo}
+                onPress={() => void uploadLogo()}
+              >
+                {uploadingLogo ? (
+                  <ActivityIndicator color={autopackColors.apBlue} />
+                ) : (
+                  <>
+                    <Ionicons name="cloud-upload-outline" size={16} color={autopackColors.apBlue} />
+                    <Text style={styles.uploadBtnText}>{form.companyLogo ? 'Replace logo' : 'Upload logo'}</Text>
+                  </>
+                )}
+              </Pressable>
+              {!!form.companyLogo ? (
+                <Pressable
+                  onPress={() => {
+                    setForm((p) => ({ ...p, companyLogo: '' }));
+                    setFormLogoPreview(null);
+                  }}
+                >
+                  <Text style={styles.removeLink}>Remove</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
+
           <Text style={styles.fieldLabel}>Video URL</Text>
-          <TextInput value={form.video} onChangeText={(v) => setForm((p) => ({ ...p, video: v }))} style={styles.input} />
+          <Text style={styles.fieldHint}>YouTube or Vimeo only — paste a link.</Text>
+          <TextInput
+            value={form.video}
+            onChangeText={(v) => setForm((p) => ({ ...p, video: v }))}
+            placeholder="https://www.youtube.com/watch?v=… or https://vimeo.com/…"
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={styles.input}
+          />
+          {!!form.video.trim() && !isAllowedVideoUrl(form.video) ? (
+            <Text style={styles.fieldError}>
+              Enter a valid YouTube or Vimeo URL.
+            </Text>
+          ) : null}
           <Text style={styles.fieldLabel}>Video Caption</Text>
           <TextInput value={form.videoCaption} onChangeText={(v) => setForm((p) => ({ ...p, videoCaption: v }))} style={styles.input} />
           <Text style={styles.fieldLabel}>Promotions</Text>
-          {form.promotions.map((row, idx) => (
-            <View key={row.id} style={styles.rowEditor}>
-              <TextInput
-                value={row.text}
-                onChangeText={(v) => updatePairRow('promotions', row.id, { text: v })}
-                placeholder={`Promotion ${idx + 1}`}
-                style={[styles.input, styles.rowEditorMain]}
-              />
-              <TextInput
-                value={row.link}
-                onChangeText={(v) => updatePairRow('promotions', row.id, { link: v })}
-                placeholder='Optional link'
-                style={[styles.input, styles.rowEditorSecondary]}
-              />
-              <Pressable style={styles.rowRemoveBtn} onPress={() => removePairRow('promotions', row.id)}>
-                <Ionicons name='trash-outline' size={16} color='#dc2626' />
-              </Pressable>
-            </View>
-          ))}
-          <Pressable style={styles.rowAddBtn} onPress={() => addPairRow('promotions')}>
-            <Ionicons name='add' size={16} color={autopackColors.apBlue} />
+          <Text style={styles.fieldHint}>Show specials, booth offers, or limited-time incentives.</Text>
+          {form.promotions.map((row) => {
+            const accepted = !!acceptedPromotionIds[row.id];
+            return (
+              <View key={row.id} style={styles.promotionEditor}>
+                <TextInput
+                  value={row.text}
+                  onChangeText={(v) => updatePromotionRow(row.id, { text: v })}
+                  placeholder="e.g. 20% off orders placed at the show"
+                  style={styles.input}
+                />
+                <TextInput
+                  value={row.link}
+                  onChangeText={(v) => updatePromotionRow(row.id, { link: v })}
+                  placeholder="Optional link (https://...)"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  style={styles.input}
+                />
+                <View style={styles.promotionActions}>
+                  <Pressable
+                    style={[styles.promotionAcceptBtn, accepted && styles.promotionAcceptBtnOn]}
+                    onPress={() => acceptPromotionRow(row.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Accept promotion"
+                  >
+                    <Ionicons
+                      name={accepted ? 'checkmark-circle' : 'checkmark-circle-outline'}
+                      size={20}
+                      color={accepted ? '#059669' : '#9ca3af'}
+                    />
+                  </Pressable>
+                  <Pressable style={styles.promotionRemoveBtn} onPress={() => removePromotionRow(row.id)}>
+                    <Ionicons name="trash-outline" size={16} color="#dc2626" />
+                    <Text style={styles.removeLink}>Remove</Text>
+                  </Pressable>
+                </View>
+              </View>
+            );
+          })}
+          <Pressable style={styles.rowAddBtn} onPress={addPromotionRow}>
+            <Ionicons name="add" size={16} color={autopackColors.apBlue} />
             <Text style={styles.rowAddText}>Add promotion</Text>
           </Pressable>
 
-          <Text style={styles.fieldLabel}>Deals</Text>
-          {form.deals.map((row, idx) => (
-            <View key={row.id} style={styles.rowEditor}>
-              <TextInput
-                value={row.text}
-                onChangeText={(v) => updatePairRow('deals', row.id, { text: v })}
-                placeholder={`Deal ${idx + 1}`}
-                style={[styles.input, styles.rowEditorMain]}
-              />
-              <TextInput
-                value={row.link}
-                onChangeText={(v) => updatePairRow('deals', row.id, { link: v })}
-                placeholder='Optional link'
-                style={[styles.input, styles.rowEditorSecondary]}
-              />
-              <Pressable style={styles.rowRemoveBtn} onPress={() => removePairRow('deals', row.id)}>
-                <Ionicons name='trash-outline' size={16} color='#dc2626' />
-              </Pressable>
-            </View>
-          ))}
-          <Pressable style={styles.rowAddBtn} onPress={() => addPairRow('deals')}>
-            <Ionicons name='add' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.rowAddText}>Add deal</Text>
-          </Pressable>
-
           <Text style={styles.fieldLabel}>Handouts</Text>
-          {form.handouts.map((row, idx) => (
-            <View key={row.id} style={styles.rowEditor}>
-              <TextInput
-                value={row.text}
-                onChangeText={(v) => updateSingleRow('handouts', row.id, v)}
-                placeholder={`Handout ${idx + 1}`}
-                style={[styles.input, styles.rowEditorMain]}
-              />
-              <Pressable style={styles.rowRemoveBtn} onPress={() => removeSingleRow('handouts', row.id)}>
-                <Ionicons name='trash-outline' size={16} color='#dc2626' />
+          <Text style={styles.fieldHint}>Limit 1 — upload a file or paste a URL.</Text>
+          {form.handouts.length > 0 ? (
+            <View style={styles.assetRow}>
+              <Ionicons name="document-text-outline" size={18} color={autopackColors.apBlue} />
+              <Text style={styles.assetRowText} numberOfLines={1}>
+                {/^https?:\/\//i.test(form.handouts[0].text)
+                  ? form.handouts[0].text
+                  : 'Uploaded handout'}
+              </Text>
+              <Pressable style={styles.rowRemoveBtn} onPress={removeHandout}>
+                <Ionicons name="trash-outline" size={16} color="#dc2626" />
               </Pressable>
             </View>
-          ))}
-          <Pressable style={styles.rowAddBtn} onPress={() => addSingleRow('handouts')}>
-            <Ionicons name='add' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.rowAddText}>Add handout</Text>
-          </Pressable>
+          ) : (
+            <View style={{ gap: 8 }}>
+              <Pressable
+                style={[styles.uploadBtn, uploadingHandout && styles.saveBtnDisabled]}
+                disabled={uploadingHandout}
+                onPress={() => void uploadHandoutFile()}
+              >
+                {uploadingHandout ? (
+                  <ActivityIndicator color={autopackColors.apBlue} />
+                ) : (
+                  <>
+                    <Ionicons name="cloud-upload-outline" size={16} color={autopackColors.apBlue} />
+                    <Text style={styles.uploadBtnText}>Upload handout</Text>
+                  </>
+                )}
+              </Pressable>
+              <View style={styles.rowEditor}>
+                <TextInput
+                  value={handoutUrlDraft}
+                  onChangeText={setHandoutUrlDraft}
+                  placeholder="https://..."
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  style={[styles.input, styles.rowEditorMain]}
+                />
+                <Pressable style={styles.rowAddBtn} onPress={applyHandoutUrl}>
+                  <Text style={styles.rowAddText}>Use URL</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
 
           <Text style={styles.fieldLabel}>Photos</Text>
-          {form.photos.map((row, idx) => (
-            <View key={row.id} style={styles.rowEditor}>
-              <TextInput
-                value={row.text}
-                onChangeText={(v) => updatePairRow('photos', row.id, { text: v })}
-                placeholder={`Photo URL/S3 key ${idx + 1}`}
-                style={[styles.input, styles.rowEditorMain]}
-              />
-              <TextInput
-                value={row.link}
-                onChangeText={(v) => updatePairRow('photos', row.id, { link: v })}
-                placeholder='Optional caption'
-                style={[styles.input, styles.rowEditorSecondary]}
-              />
-              <Pressable style={styles.rowRemoveBtn} onPress={() => removePairRow('photos', row.id)}>
-                <Ionicons name='trash-outline' size={16} color='#dc2626' />
+          <Text style={styles.fieldHint}>Limit {MAX_PHOTOS} — upload only.</Text>
+          <View style={styles.photoGrid}>
+            {form.photos.map((row) => {
+              const uri = formPhotoPreviews[row.id];
+              const galleryIndex = form.photos
+                .filter((r) => !!formPhotoPreviews[r.id])
+                .findIndex((r) => r.id === row.id);
+              return (
+                <View key={row.id} style={styles.photoEditTile}>
+                  {uri ? (
+                    <Pressable
+                      onPress={() => {
+                        if (galleryIndex >= 0) setGallery({ uris: editPhotoUris, index: galleryIndex });
+                      }}
+                      accessibilityRole="imagebutton"
+                      accessibilityLabel="Open photo"
+                    >
+                      <Image source={{ uri }} style={styles.photoEditImg} />
+                    </Pressable>
+                  ) : (
+                    <View style={styles.photoEditFallback}>
+                      <ActivityIndicator color="#9ca3af" />
+                    </View>
+                  )}
+                  <Pressable style={styles.photoRemoveBtn} onPress={() => removePhotoRow(row.id)}>
+                    <Ionicons name="close" size={14} color="#fff" />
+                  </Pressable>
+                </View>
+              );
+            })}
+            {form.photos.length < MAX_PHOTOS ? (
+              <Pressable
+                style={[styles.photoAddTile, uploadingPhotos && styles.saveBtnDisabled]}
+                disabled={uploadingPhotos}
+                onPress={() => void uploadPhotos()}
+              >
+                {uploadingPhotos ? (
+                  <ActivityIndicator color={autopackColors.apBlue} />
+                ) : (
+                  <>
+                    <Ionicons name="add" size={22} color={autopackColors.apBlue} />
+                    <Text style={styles.photoAddText}>
+                      {form.photos.length}/{MAX_PHOTOS}
+                    </Text>
+                  </>
+                )}
               </Pressable>
-            </View>
-          ))}
-          <Pressable style={styles.rowAddBtn} onPress={() => addPairRow('photos')}>
-            <Ionicons name='add' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.rowAddText}>Add photo</Text>
-          </Pressable>
+            ) : null}
+          </View>
           <Pressable disabled={saving} style={[styles.saveBtn, saving && styles.saveBtnDisabled]} onPress={saveEdits}>
             <Text style={styles.saveBtnText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
           </Pressable>
         </View>
       )}
-
-      {!!profile.video && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Video</Text>
-          <Pressable onPress={() => Linking.openURL(profile.video!)} style={styles.linkRow}>
-            <Ionicons name='play-circle-outline' size={16} color={autopackColors.apBlue} />
-            <Text style={styles.linkText}>{profile.videoCaption || profile.video}</Text>
-          </Pressable>
-        </View>
-      )}
-
-      {(profile.promotions || []).length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Promotions</Text>
-          {(profile.promotions || []).map((item) => (
-            <View key={item.id} style={styles.listItem}>
-              <Text style={styles.body}>{item.promotion || 'Promotion'}</Text>
-              {!!item.link && (
-                <Pressable onPress={() => Linking.openURL(item.link!)} style={styles.linkRow}>
-                  <Ionicons name='open-outline' size={14} color={autopackColors.apBlue} />
-                  <Text style={styles.linkText}>Open</Text>
-                </Pressable>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {(profile.deals || []).length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Deals</Text>
-          {(profile.deals || []).map((item) => (
-            <View key={item.id} style={styles.listItem}>
-              <Text style={styles.body}>{item.deal || 'Deal'}</Text>
-              {!!item.link && (
-                <Pressable onPress={() => Linking.openURL(item.link!)} style={styles.linkRow}>
-                  <Ionicons name='open-outline' size={14} color={autopackColors.apBlue} />
-                  <Text style={styles.linkText}>Open</Text>
-                </Pressable>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {(profile.handouts || []).length > 0 && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Handouts</Text>
-          {(profile.handouts || []).map((item) => (
-            <Text key={item.id} style={styles.body}>
-              • {item.handout || 'Handout'}
-            </Text>
-          ))}
-        </View>
-      )}
-
-        {(profile.photos || []).length > 0 && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Photos</Text>
-            <View style={styles.photoGrid}>
-              {(profile.photos || []).map((photo) => {
-                const uri = photoUris[photo.id];
-                if (!uri) return null;
-                return <Image key={photo.id} source={{ uri }} style={styles.photo} />;
-              })}
-            </View>
-          </View>
-        )}
       </ScrollView>
 
       {canEdit && !!profile.qrCode && (
@@ -1109,6 +1537,13 @@ export default function ExhibitorProfileScreen() {
           </View>
         </Modal>
       )}
+
+      <PhotoGalleryModal
+        visible={!!gallery}
+        uris={gallery?.uris || []}
+        initialIndex={gallery?.index || 0}
+        onClose={() => setGallery(null)}
+      />
     </>
   );
 }
@@ -1156,18 +1591,17 @@ const styles = StyleSheet.create({
   },
   statValue: { fontWeight: '900', color: '#111827', fontSize: 16 },
   statLabel: { color: '#6b7280', fontSize: 12 },
-  favoritePill: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#f3f4f6',
+  favoriteHeaderBtn: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
   },
   favoritePillDisabled: { opacity: 0.6 },
-  favoritePillText: { color: '#374151', fontSize: 12, fontWeight: '700' },
   infoPill: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -1183,6 +1617,14 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     backgroundColor: '#fff',
     gap: 6,
+  },
+  previewLabel: {
+    marginTop: 4,
+    color: '#6b7280',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
   cardTitle: { fontWeight: '900', color: '#111827', marginBottom: 2 },
   body: { color: '#111827', lineHeight: 20 },
@@ -1253,6 +1695,77 @@ const styles = StyleSheet.create({
   photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   photo: { width: 92, height: 92, borderRadius: 10, backgroundColor: '#f3f4f6' },
   fieldLabel: { marginTop: 8, color: '#374151', fontWeight: '700', fontSize: 12 },
+  fieldHint: { color: '#6b7280', fontSize: 12, marginTop: 2 },
+  fieldError: { color: '#b91c1c', fontSize: 12, marginTop: 4 },
+  uploadRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 6 },
+  logoUploadPreview: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f9fafb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  logoUploadImg: { width: 64, height: 64 },
+  uploadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#eff6ff',
+  },
+  uploadBtnText: { color: autopackColors.apBlue, fontWeight: '700', fontSize: 12 },
+  removeLink: { color: '#dc2626', fontWeight: '700', fontSize: 12 },
+  assetRow: {
+    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f9fafb',
+  },
+  assetRowText: { flex: 1, color: '#111827', fontSize: 12 },
+  photoEditTile: {
+    width: 92,
+    height: 92,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f3f4f6',
+  },
+  photoEditImg: { width: '100%', height: '100%' },
+  photoEditFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  photoRemoveBtn: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(17,24,39,0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoAddTile: {
+    width: 92,
+    height: 92,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  photoAddText: { color: autopackColors.apBlue, fontWeight: '700', fontSize: 11 },
   input: {
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#d1d5db',
@@ -1263,9 +1776,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   multiInput: { minHeight: 72, textAlignVertical: 'top' },
+  promotionEditor: {
+    marginTop: 8,
+    gap: 8,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#f9fafb',
+  },
+  promotionActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  promotionAcceptBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  promotionAcceptBtnOn: {
+    backgroundColor: '#ecfdf5',
+  },
+  promotionRemoveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 2,
+  },
   rowEditor: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   rowEditorMain: { flex: 1 },
-  rowEditorSecondary: { flex: 1 },
   rowRemoveBtn: {
     width: 36,
     height: 36,

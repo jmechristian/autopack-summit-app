@@ -6,6 +6,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { graphqlAuthClient } from './graphqlClient';
 import { apsPushTokensByUserIdAndUpdatedAt } from '../graphql/queries';
 import { createApsPushToken, updateApsPushToken } from '../graphql/mutations';
+import { isWeb } from './platform';
 import { isNotificationsDeepLink } from './announcementDeepLinks';
 
 type NavigateHandlers = {
@@ -49,6 +50,10 @@ function getExpoProjectIdDebug() {
 }
 
 export async function registerAndUpsertPushToken(): Promise<string | null> {
+  if (isWeb) {
+    return null;
+  }
+
   if (!Device.isDevice) {
     console.log('Push notifications require a physical device.');
     return null;
@@ -120,6 +125,10 @@ export async function registerAndUpsertPushToken(): Promise<string | null> {
 }
 
 export function initPushNotificationHandlers(handlers: NavigateHandlers) {
+  if (isWeb) {
+    return () => {};
+  }
+
   // Show notifications when the app is foregrounded (instead of dropping them silently).
   Notifications.setNotificationHandler({
     handleNotification: async (notification) => {
@@ -199,6 +208,8 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
 }
 
 export async function handleLastNotificationResponse(handlers: NavigateHandlers) {
+  if (isWeb) return;
+
   try {
     const resp = await Notifications.getLastNotificationResponseAsync();
     if (!resp) return;
@@ -239,6 +250,12 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
   } catch {
     // ignore
   }
+}
+
+/** Best-effort OS badge; no-op on web. */
+export function setAppBadgeCount(count: number) {
+  if (isWeb) return;
+  Notifications.setBadgeCountAsync(count).catch(() => {});
 }
 
 

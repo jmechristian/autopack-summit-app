@@ -587,6 +587,255 @@ export const onDeleteApsAppUserNote = /* GraphQL */ `subscription OnDeleteApsApp
   APITypes.OnDeleteApsAppUserNoteSubscriptionVariables,
   APITypes.OnDeleteApsAppUserNoteSubscription
 >;
+export const onCreateApsAppUserExhibitorView = /* GraphQL */ `subscription OnCreateApsAppUserExhibitorView(
+  $filter: ModelSubscriptionApsAppUserExhibitorViewFilterInput
+  $owner: String
+) {
+  onCreateApsAppUserExhibitorView(filter: $filter, owner: $owner) {
+    id
+    owner
+    userProfileId
+    userProfile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      eventId
+      video
+      videoCaption
+      boothNumber
+      qrCode
+      passportQrPayload
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    viewKey
+    createdAt
+    updatedAt
+    aPSExhibitorViewsId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsAppUserExhibitorViewSubscriptionVariables,
+  APITypes.OnCreateApsAppUserExhibitorViewSubscription
+>;
+export const onUpdateApsAppUserExhibitorView = /* GraphQL */ `subscription OnUpdateApsAppUserExhibitorView(
+  $filter: ModelSubscriptionApsAppUserExhibitorViewFilterInput
+  $owner: String
+) {
+  onUpdateApsAppUserExhibitorView(filter: $filter, owner: $owner) {
+    id
+    owner
+    userProfileId
+    userProfile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      eventId
+      video
+      videoCaption
+      boothNumber
+      qrCode
+      passportQrPayload
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    viewKey
+    createdAt
+    updatedAt
+    aPSExhibitorViewsId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsAppUserExhibitorViewSubscriptionVariables,
+  APITypes.OnUpdateApsAppUserExhibitorViewSubscription
+>;
+export const onDeleteApsAppUserExhibitorView = /* GraphQL */ `subscription OnDeleteApsAppUserExhibitorView(
+  $filter: ModelSubscriptionApsAppUserExhibitorViewFilterInput
+  $owner: String
+) {
+  onDeleteApsAppUserExhibitorView(filter: $filter, owner: $owner) {
+    id
+    owner
+    userProfileId
+    userProfile {
+      id
+      userId
+      firstName
+      lastName
+      email
+      phone
+      company
+      jobTitle
+      attendeeType
+      quickTools
+      profilePicture
+      bio
+      linkedin
+      twitter
+      facebook
+      instagram
+      youtube
+      website
+      location
+      resume
+      thinkificId
+      apcProgress
+      speakerId
+      createdAt
+      updatedAt
+      __typename
+    }
+    exhibitorId
+    exhibitor {
+      id
+      companyId
+      sponsorId
+      eventId
+      video
+      videoCaption
+      boothNumber
+      qrCode
+      passportQrPayload
+      visits
+      views
+      likes
+      createdAt
+      updatedAt
+      aPSExhibitorsId
+      __typename
+    }
+    eventId
+    event {
+      id
+      year
+      startDate
+      endDate
+      location
+      address
+      city
+      state
+      zip
+      website
+      createdAt
+      updatedAt
+      aPSAgendaId
+      __typename
+    }
+    viewKey
+    createdAt
+    updatedAt
+    aPSExhibitorViewsId
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsAppUserExhibitorViewSubscriptionVariables,
+  APITypes.OnDeleteApsAppUserExhibitorViewSubscription
+>;
 export const onCreateApsAppUserPassportStamp = /* GraphQL */ `subscription OnCreateApsAppUserPassportStamp(
   $filter: ModelSubscriptionApsAppUserPassportStampFilterInput
   $owner: String
@@ -2627,6 +2876,66 @@ export const onDeleteApsPushToken = /* GraphQL */ `subscription OnDeleteApsPushT
   APITypes.OnDeleteApsPushTokenSubscriptionVariables,
   APITypes.OnDeleteApsPushTokenSubscription
 >;
+export const onCreateApsAppFeedback = /* GraphQL */ `subscription OnCreateApsAppFeedback(
+  $filter: ModelSubscriptionApsAppFeedbackFilterInput
+  $owner: String
+) {
+  onCreateApsAppFeedback(filter: $filter, owner: $owner) {
+    id
+    owner
+    userId
+    eventId
+    message
+    imageKeys
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsAppFeedbackSubscriptionVariables,
+  APITypes.OnCreateApsAppFeedbackSubscription
+>;
+export const onUpdateApsAppFeedback = /* GraphQL */ `subscription OnUpdateApsAppFeedback(
+  $filter: ModelSubscriptionApsAppFeedbackFilterInput
+  $owner: String
+) {
+  onUpdateApsAppFeedback(filter: $filter, owner: $owner) {
+    id
+    owner
+    userId
+    eventId
+    message
+    imageKeys
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsAppFeedbackSubscriptionVariables,
+  APITypes.OnUpdateApsAppFeedbackSubscription
+>;
+export const onDeleteApsAppFeedback = /* GraphQL */ `subscription OnDeleteApsAppFeedback(
+  $filter: ModelSubscriptionApsAppFeedbackFilterInput
+  $owner: String
+) {
+  onDeleteApsAppFeedback(filter: $filter, owner: $owner) {
+    id
+    owner
+    userId
+    eventId
+    message
+    imageKeys
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsAppFeedbackSubscriptionVariables,
+  APITypes.OnDeleteApsAppFeedbackSubscription
+>;
 export const onCreateAPS = /* GraphQL */ `subscription OnCreateAPS($filter: ModelSubscriptionAPSFilterInput) {
   onCreateAPS(filter: $filter) {
     id
@@ -2711,6 +3020,10 @@ export const onCreateAPS = /* GraphQL */ `subscription OnCreateAPS($filter: Mode
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    exhibitorViews {
       nextToken
       __typename
     }
@@ -2815,6 +3128,10 @@ export const onUpdateAPS = /* GraphQL */ `subscription OnUpdateAPS($filter: Mode
       nextToken
       __typename
     }
+    exhibitorViews {
+      nextToken
+      __typename
+    }
     addOns {
       nextToken
       __typename
@@ -2913,6 +3230,10 @@ export const onDeleteAPS = /* GraphQL */ `subscription OnDeleteAPS($filter: Mode
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    exhibitorViews {
       nextToken
       __typename
     }
@@ -4386,6 +4707,10 @@ export const onCreateApsAppUserProfile = /* GraphQL */ `subscription OnCreateAps
       nextToken
       __typename
     }
+    exhibitorViews {
+      nextToken
+      __typename
+    }
     notes {
       nextToken
       __typename
@@ -4493,6 +4818,10 @@ export const onUpdateApsAppUserProfile = /* GraphQL */ `subscription OnUpdateAps
       nextToken
       __typename
     }
+    exhibitorViews {
+      nextToken
+      __typename
+    }
     notes {
       nextToken
       __typename
@@ -4597,6 +4926,10 @@ export const onDeleteApsAppUserProfile = /* GraphQL */ `subscription OnDeleteAps
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    exhibitorViews {
       nextToken
       __typename
     }
@@ -6342,6 +6675,10 @@ export const onCreateApsAppExhibitorProfile = /* GraphQL */ `subscription OnCrea
       nextToken
       __typename
     }
+    viewedByUsers {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSExhibitorsId
@@ -6443,6 +6780,10 @@ export const onUpdateApsAppExhibitorProfile = /* GraphQL */ `subscription OnUpda
       nextToken
       __typename
     }
+    viewedByUsers {
+      nextToken
+      __typename
+    }
     createdAt
     updatedAt
     aPSExhibitorsId
@@ -6541,6 +6882,10 @@ export const onDeleteApsAppExhibitorProfile = /* GraphQL */ `subscription OnDele
       __typename
     }
     passportStamps {
+      nextToken
+      __typename
+    }
+    viewedByUsers {
       nextToken
       __typename
     }

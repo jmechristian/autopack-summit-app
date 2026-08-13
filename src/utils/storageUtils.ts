@@ -187,3 +187,92 @@ export async function uploadResume(fileUri: string): Promise<string> {
   }
 }
 
+/**
+ * Upload a feedback attachment image to S3.
+ * @returns S3 key (path) to store on the feedback record
+ */
+export async function uploadFeedbackImage(fileUri: string): Promise<string> {
+  try {
+    const user = await getCurrentUser();
+    const userId = user.userId;
+    const timestamp = Date.now();
+    const rand = Math.random().toString(36).slice(2, 8);
+    const extension = (fileUri.split('.').pop() || 'jpg').split('?')[0].toLowerCase();
+    const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'].includes(extension)
+      ? extension
+      : 'jpg';
+    const filename = `feedback/${userId}-${timestamp}-${rand}.${safeExt}`;
+
+    const response = await fetch(fileUri);
+    const blob = await response.blob();
+
+    await uploadData({
+      key: filename,
+      data: blob,
+      options: {
+        contentType: blob.type || 'image/jpeg',
+        accessLevel: 'public',
+      },
+    }).result;
+
+    return filename;
+  } catch (error) {
+    console.error('Error uploading feedback image:', error);
+    throw new Error('Failed to upload image. Please try again.');
+  }
+}
+
+const MAX_EXHIBITOR_HANDOUT_SIZE = 15 * 1024 * 1024; // 15MB
+
+/**
+ * Upload an exhibitor logo, photo, or handout to S3.
+ * @returns S3 key (path) to store on the company/exhibitor record
+ */
+export async function uploadExhibitorAsset(params: {
+  fileUri: string;
+  companyId: string;
+  kind: 'logo' | 'photo' | 'handout';
+  mimeType?: string | null;
+  fileName?: string | null;
+}): Promise<string> {
+  try {
+    const companyId = (params.companyId || '').trim();
+    if (!companyId) throw new Error('Missing company id for upload.');
+
+    const response = await fetch(params.fileUri);
+    const blob = await response.blob();
+
+    const fromName = (params.fileName || '').split('.').pop();
+    const fromUri = (params.fileUri.split('.').pop() || '').split('?')[0];
+    const extension = (fromName || fromUri || 'bin').toLowerCase();
+    const timestamp = Date.now();
+    const rand = Math.random().toString(36).slice(2, 8);
+    const filename = `exhibitors/${companyId}/${params.kind}/${timestamp}-${rand}.${extension}`;
+
+    let contentType = params.mimeType || blob.type || undefined;
+    if (params.kind === 'handout') {
+      if (blob.size > MAX_EXHIBITOR_HANDOUT_SIZE) {
+        throw new Error('Handout must be 15MB or smaller.');
+      }
+      contentType = contentType || 'application/pdf';
+    } else {
+      contentType = contentType || 'image/jpeg';
+    }
+
+    await uploadData({
+      key: filename,
+      data: blob,
+      options: {
+        contentType,
+        accessLevel: 'public',
+      },
+    }).result;
+
+    return filename;
+  } catch (error) {
+    console.error('Error uploading exhibitor asset:', error);
+    if (error instanceof Error) throw error;
+    throw new Error('Failed to upload file. Please try again.');
+  }
+}
+

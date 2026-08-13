@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image } from 'expo-image';
 import {
+  Linking,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -8,20 +9,26 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { autopackColors } from '../../theme';
 
 type Props = {
   progress?: number | null;
+  /** Optional override; defaults to Packaging School APC page. */
   onPrimaryPress?: () => void;
   style?: StyleProp<ViewStyle>;
 };
 
 const TOTAL_SEGMENTS = 10;
+const APC_URL = 'https://packagingschool.com/certifications/get-to-know-apc';
 
 function normalizeProgress(progress?: number | null) {
   if (typeof progress !== 'number' || Number.isNaN(progress)) return 0;
   return Math.max(0, Math.min(100, progress));
 }
 
+/**
+ * APC progress callout — clear brand presence without dominating Hub.
+ */
 export function ApcCertificateCard({ progress, onPrimaryPress, style }: Props) {
   const normalized = normalizeProgress(progress);
   const isComplete = normalized >= 100;
@@ -29,7 +36,15 @@ export function ApcCertificateCard({ progress, onPrimaryPress, style }: Props) {
   const filledSegments = isComplete
     ? TOTAL_SEGMENTS
     : Math.max(0, Math.min(TOTAL_SEGMENTS, Math.round((normalized / 100) * TOTAL_SEGMENTS)));
-  const ctaText = hasProgress ? 'Keep Going!' : 'Enroll Now!';
+  const ctaText = hasProgress ? 'Keep Going' : 'Enroll Now';
+
+  function handlePress() {
+    if (onPrimaryPress) {
+      onPrimaryPress();
+      return;
+    }
+    void Linking.openURL(APC_URL);
+  }
 
   return (
     <View style={[styles.card, style]}>
@@ -37,7 +52,7 @@ export function ApcCertificateCard({ progress, onPrimaryPress, style }: Props) {
         <Image
           source={require('../../../assets/images/aps-black.svg')}
           style={styles.logo}
-          contentFit='contain'
+          contentFit="contain"
         />
         <View style={styles.percentPill}>
           <Text style={styles.percentText}>{Math.round(normalized)}%</Text>
@@ -55,18 +70,23 @@ export function ApcCertificateCard({ progress, onPrimaryPress, style }: Props) {
 
       {isComplete ? (
         <View style={styles.completeWrap}>
-          <Text style={styles.completeTitle}>Completed!</Text>
+          <Text style={styles.completeTitle}>Completed</Text>
           <Text style={styles.completeBody}>
             You&apos;re part of the top group of attendees who finished the Automotive Packaging
-            Certificate
+            Certificate.
           </Text>
         </View>
       ) : (
         <>
           <Text style={styles.bodyText}>
-            Build the skills you need to succeed in automotive packaging-100% online
+            Build the skills you need to succeed in automotive packaging — 100% online.
           </Text>
-          <Pressable onPress={onPrimaryPress} style={styles.ctaButton}>
+          <Pressable
+            onPress={handlePress}
+            style={styles.ctaButton}
+            accessibilityRole="link"
+            accessibilityLabel={`${ctaText}. Opens Packaging School APC page.`}
+          >
             <Text style={styles.ctaText}>{ctaText}</Text>
           </Pressable>
         </>
@@ -77,12 +97,12 @@ export function ApcCertificateCard({ progress, onPrimaryPress, style }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#EEE7D1',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#E6A800',
+    backgroundColor: '#FFF9EB',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: autopackColors.apYellow,
     paddingHorizontal: 14,
-    paddingVertical: 20,
+    paddingVertical: 14,
   },
   headerRow: {
     flexDirection: 'row',
@@ -91,84 +111,74 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logo: {
-    width: 146,
-    height: 44,
+    width: 128,
+    height: 38,
   },
   percentPill: {
-    minWidth: 66,
+    minWidth: 48,
     paddingHorizontal: 10,
-    paddingTop: 7,
-    paddingBottom: 5,
-    backgroundColor: '#E6A800',
-    borderRadius: 12,
+    paddingVertical: 5,
+    backgroundColor: autopackColors.apYellow,
+    borderRadius: 999,
     alignItems: 'center',
   },
   percentText: {
     color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 22,
-    lineHeight: 26,
-    fontFamily: 'Oswald-Bold',
+    fontWeight: '800',
+    fontSize: 14,
+    lineHeight: 18,
   },
   segmentsRow: {
-    marginTop: 18,
+    marginTop: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 4,
+    gap: 3,
   },
   segment: {
     flex: 1,
-    height: 10,
+    height: 7,
     borderRadius: 2,
   },
   segmentFilled: {
-    backgroundColor: '#E6A800',
+    backgroundColor: autopackColors.apYellow,
   },
   segmentEmpty: {
     backgroundColor: '#FFFFFF',
   },
   bodyText: {
-    marginTop: 20,
-    color: '#111111',
-    fontSize: 14,
-    lineHeight: 20,
+    marginTop: 12,
+    color: '#374151',
+    fontSize: 13,
+    lineHeight: 18,
   },
   ctaButton: {
-    marginTop: 18,
-    backgroundColor: '#F3F4F6',
+    marginTop: 12,
+    backgroundColor: autopackColors.apYellow,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#9CA3AF',
-    minHeight: 48,
+    minHeight: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 14,
   },
   ctaText: {
-    color: '#111111',
+    color: '#111827',
     fontWeight: '800',
-    fontSize: 18,
-    lineHeight: 24,
-    fontFamily: 'Oswald-Bold',
-    textTransform: 'uppercase',
-    includeFontPadding: true,
-    textAlignVertical: 'center',
+    fontSize: 14,
   },
   completeWrap: {
-    marginTop: 18,
-    alignItems: 'center',
+    marginTop: 12,
   },
   completeTitle: {
-    color: '#111111',
-    fontWeight: '900',
-    fontSize: 33,
-    lineHeight: 35,
-    fontFamily: 'Oswald-Bold',
+    color: '#111827',
+    fontWeight: '800',
+    fontSize: 16,
   },
   completeBody: {
-    marginTop: 6,
-    color: '#111111',
-    fontSize: 17,
-    lineHeight: 22,
-    textAlign: 'center',
+    marginTop: 4,
+    color: '#374151',
+    fontSize: 13,
+    lineHeight: 18,
   },
 });
+
+export default ApcCertificateCard;

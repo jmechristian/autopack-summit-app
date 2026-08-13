@@ -1,13 +1,16 @@
 import { Stack } from 'expo-router';
+import { ContentWidthShell } from '../../../src/components/ContentWidthShell';
 
 export default function HubLayout() {
   return (
+    <ContentWidthShell>
     <Stack>
       <Stack.Screen name='index' options={{ headerShown: false, title: 'Hub' }} />
       <Stack.Screen name='contacts' options={{ title: 'Contacts' }} />
       <Stack.Screen name='notes' options={{ title: 'My Notes' }} />
       <Stack.Screen name='messages' options={{ title: 'Messages' }} />
       <Stack.Screen name='notifications' options={{ title: 'Notifications' }} />
+      <Stack.Screen name='feedback' options={{ title: 'Feedback' }} />
       <Stack.Screen name='requests' options={{ title: 'Requests' }} />
       <Stack.Screen name='requests/[requestId]' options={{ title: 'Request' }} />
       <Stack.Screen name='announcements' options={{ title: 'Announcements' }} />
@@ -28,5 +31,6 @@ export default function HubLayout() {
       <Stack.Screen name='announcements/[id]' options={{ title: 'Announcement' }} />
       <Stack.Screen name='community/[id]' options={{ title: 'Profile' }} />
     </Stack>
+    </ContentWidthShell>
   );
 }

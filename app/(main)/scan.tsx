@@ -1,7 +1,7 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking as RNLinking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../src/theme';
 import * as Linking from 'expo-linking';
@@ -107,16 +107,27 @@ export default function ScanScreen() {
   }
 
   if (!permission.granted) {
+    // Apple 5.1.1(iv): pre-permission UI must use Continue/Next (not "Grant permission")
+    // and must not offer Cancel that delays the system permission dialog.
+    // If the user already denied, direct them to Settings instead.
+    const previouslyDenied = permission.canAskAgain === false;
     return (
       <View style={styles.center}>
-        <Text style={styles.title}>Camera permission required</Text>
-        <Text style={styles.muted}>Enable camera access to scan QR codes.</Text>
-        <Pressable style={styles.primaryBtn} onPress={requestPermission}>
-          <Text style={styles.primaryBtnText}>Grant permission</Text>
-        </Pressable>
-        <Pressable style={styles.secondaryBtn} onPress={() => router.back()}>
-          <Text style={styles.secondaryBtnText}>Cancel</Text>
-        </Pressable>
+        <Text style={styles.title}>Camera access</Text>
+        <Text style={styles.muted}>
+          {previouslyDenied
+            ? 'Camera access is turned off. Open Settings to enable it so you can scan QR codes.'
+            : 'This feature uses the camera to scan attendee QR codes.'}
+        </Text>
+        {previouslyDenied ? (
+          <Pressable style={styles.primaryBtn} onPress={() => void RNLinking.openSettings()}>
+            <Text style={styles.primaryBtnText}>Open Settings</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={styles.primaryBtn} onPress={requestPermission}>
+            <Text style={styles.primaryBtnText}>Continue</Text>
+          </Pressable>
+        )}
       </View>
     );
   }

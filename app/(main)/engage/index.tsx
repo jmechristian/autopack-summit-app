@@ -1,7 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { APS_ID } from '../../../src/config/apsConfig';
 import { apsAppUserPassportStampsByUserProfileIdAndCreatedAt } from '../../../src/graphql/queries';
 import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
@@ -10,6 +17,12 @@ import { ApcCertificateCard } from '../../../src/components/certificate/ApcCerti
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import {
+  toolGridCellWidth,
+  toolGridColumns,
+  useContentFrame,
+  useMainTabScrollPadding,
+} from '../../../src/utils/layout';
 
 type EngageTile = {
   id: string;
@@ -36,6 +49,13 @@ export default function EngageHome() {
   const unread = useEngageStore((s) => s.unread);
   const profile = useCurrentUserProfile();
   const profileId = profile?.id || null;
+  const { frame, inset: contentInset, frameWidth } = useContentFrame(20);
+  const tabScrollPad = useMainTabScrollPadding();
+  const toolsColumns = toolGridColumns(frameWidth);
+  const toolsCellWidth = toolGridCellWidth({
+    containerWidth: frameWidth - contentInset * 2,
+    columns: toolsColumns,
+  });
   const [passportLoading, setPassportLoading] = useState(true);
   const [passportTotal, setPassportTotal] = useState(0);
   const [passportCollected, setPassportCollected] = useState(0);
@@ -157,11 +177,11 @@ export default function EngageHome() {
       style={styles.container}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingTop: 10 },
+        { paddingTop: 24, paddingBottom: tabScrollPad, alignItems: 'center' },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.body}>
+      <View style={[styles.body, frame, { paddingHorizontal: contentInset }]}>
         <Pressable
           style={styles.passportCard}
           onPress={() => router.push('/(main)/hub/passport' as any)}
@@ -194,7 +214,7 @@ export default function EngageHome() {
 
         <View style={styles.toolsGrid}>
           {tiles.map((t) => (
-            <View key={t.id} style={styles.toolsCell}>
+            <View key={t.id} style={{ width: toolsCellWidth }}>
               <IconCard
                 icon={t.icon}
                 label={t.label}
@@ -217,7 +237,6 @@ export default function EngageHome() {
         <ApcCertificateCard
           progress={profile?.apcProgress}
           style={styles.certificateCard}
-          onPrimaryPress={() => router.push('/(main)/profile')}
         />
       </View>
     </ScrollView>
@@ -230,11 +249,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6F1F8',
   },
   scrollContent: {
-    paddingBottom: 24,
+    width: '100%',
   },
   body: {
-    paddingHorizontal: 20,
     paddingVertical: 16,
+    width: '100%',
   },
   certificateCard: {
     marginTop: 16,
@@ -284,11 +303,7 @@ const styles = StyleSheet.create({
   toolsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: 16,
-  },
-  toolsCell: {
-    width: '48%',
+    gap: 12,
   },
   toolsCard: {
     minHeight: 88,

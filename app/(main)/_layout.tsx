@@ -1,6 +1,7 @@
 import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthGuard } from '../../src/components/AuthGuard';
+import { CenteredTabBar } from '../../src/components/CenteredTabBar';
 import { autopackColors } from '../../src/theme';
 import { useEngageStore } from '../../src/store/engageStore';
 
@@ -11,9 +12,11 @@ export default function MainTabs() {
       router.replace(path);
     },
   });
+
   return (
     <AuthGuard>
       <Tabs
+        tabBar={(props) => <CenteredTabBar {...props} />}
         screenOptions={{
           headerShown: false, // use stack headers per-section
           tabBarActiveTintColor: autopackColors.apBlue,

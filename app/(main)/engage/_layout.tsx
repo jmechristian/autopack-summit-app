@@ -1,7 +1,9 @@
 import { Stack } from 'expo-router';
+import { ContentWidthShell } from '../../../src/components/ContentWidthShell';
 
 export default function EngageLayout() {
   return (
+    <ContentWidthShell>
     <Stack>
       <Stack.Screen name='index' options={{ title: 'Engage' }} />
       <Stack.Screen name='announcements/index' options={{ title: 'Announcements' }} />
@@ -16,6 +18,7 @@ export default function EngageLayout() {
       <Stack.Screen name='sponsors/index' options={{ title: 'Sponsors' }} />
       <Stack.Screen name='sponsors/[id]' options={{ title: 'Sponsor' }} />
     </Stack>
+    </ContentWidthShell>
   );
 }
 

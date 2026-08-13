@@ -1,8 +1,10 @@
 import { Stack } from 'expo-router';
+import { ContentWidthShell } from '../../../src/components/ContentWidthShell';
 import { StackBackButton } from '../../../src/components/navigation/StackBackButton';
 
 export default function AgendaLayout() {
   return (
+    <ContentWidthShell>
     <Stack>
       <Stack.Screen name='index' options={{ title: 'Agenda' }} />
       <Stack.Screen
@@ -22,5 +24,6 @@ export default function AgendaLayout() {
         }}
       />
     </Stack>
+    </ContentWidthShell>
   );
 }

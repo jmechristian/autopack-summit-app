@@ -21,6 +21,7 @@ import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { isSessionLive } from '../../../src/utils/sessionLive';
+import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
 
@@ -190,6 +191,8 @@ const deleteFavoriteSession = /* GraphQL */ `
 `;
 
 export default function AgendaList() {
+  const contentInset = useContentInset(16);
+  const tabScrollPad = useMainTabScrollPadding();
   const currentAppUser = useCurrentAppUser();
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { sessionIdsWithNotes } = useNotesPresence();
@@ -509,7 +512,7 @@ export default function AgendaList() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, { marginHorizontal: contentInset }]}>
         <Ionicons name="search" size={18} color="#6B7280" style={styles.searchIcon} />
         <TextInput
           value={search}
@@ -528,7 +531,7 @@ export default function AgendaList() {
       </View>
 
       {!!dayOptions.length && (
-        <View style={styles.dayToggleWrap}>
+        <View style={[styles.dayToggleWrap, { marginHorizontal: contentInset }]}>
           {dayOptions.map((day, idx) => {
             const active = day === selectedDay;
             return (
@@ -553,7 +556,10 @@ export default function AgendaList() {
         data={filtered}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingHorizontal: contentInset, paddingBottom: tabScrollPad },
+        ]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -569,8 +575,8 @@ export default function AgendaList() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  listContent: { padding: 16, paddingTop: 12 },
+  container: { flex: 1, backgroundColor: '#FFFFFF', width: '100%' },
+  listContent: { paddingVertical: 12, width: '100%' },
   center: { flex: 1, padding: 16, alignItems: 'center', justifyContent: 'center' },
   centerText: { marginTop: 10, color: '#4B5563' },
   errorTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
@@ -586,7 +592,6 @@ const styles = StyleSheet.create({
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 16,
     marginTop: 12,
     marginBottom: 8,
     borderRadius: 14,
@@ -599,7 +604,6 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, paddingVertical: 10, color: '#111827' },
   clearBtn: { marginLeft: 8 },
   dayToggleWrap: {
-    marginHorizontal: 16,
     marginBottom: 10,
     flexDirection: 'row',
     gap: 8,

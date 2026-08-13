@@ -14,8 +14,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeEnteringView } from '../../src/components/SafeEnteringView';
 import { autopackColors } from '../../src/theme';
 
 export default function ChangePasswordScreen() {
@@ -156,15 +157,15 @@ export default function ChangePasswordScreen() {
         keyboardDismissMode='on-drag'
         automaticallyAdjustKeyboardInsets
       >
-        <Animated.View entering={FadeInDown.duration(500).delay(50)}>
+        <SafeEnteringView entering={FadeInDown.duration(500).delay(50)}>
           <Text style={styles.title}>Set a new password</Text>
           <Text style={styles.subtitle}>
             This is your first time signing in. Please choose a new password for
             your account.
           </Text>
-        </Animated.View>
+        </SafeEnteringView>
 
-        <Animated.View entering={FadeInDown.duration(500).delay(200)}>
+        <SafeEnteringView entering={FadeInDown.duration(500).delay(200)}>
           <View style={styles.card}>
             <View style={styles.inputContainer}>
               <TextInput
@@ -214,7 +215,7 @@ export default function ChangePasswordScreen() {
               <Text style={styles.backText}>Back to sign in</Text>
             </TouchableOpacity>
           </View>
-        </Animated.View>
+        </SafeEnteringView>
       </ScrollView>
     </KeyboardAvoidingView>
   );

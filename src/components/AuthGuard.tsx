@@ -10,10 +10,11 @@ import {
   initPushNotificationHandlers,
   handleLastNotificationResponse,
   registerAndUpsertPushToken,
+  setAppBadgeCount,
 } from '../utils/pushNotifications';
 import { useEngageStore } from '../store/engageStore';
-import * as Notifications from 'expo-notifications';
 import { resolveAnnouncementDeepLink } from '../utils/announcementDeepLinks';
+import { isWeb } from '../utils/platform';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -48,7 +49,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const routeAnnouncementDeepLink = useCallback(
     (url: string) => {
       markAnnouncementsSeen();
-      Notifications.setBadgeCountAsync(0).catch(() => {});
+      setAppBadgeCount(0);
       const route = resolveAnnouncementDeepLink(url);
       if (route) {
         router.push(route as any);
@@ -111,15 +112,32 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     let cancelled = false;
     const validate = async () => {
-      await runValidation(2);
+      const ok = await runValidation(2);
       if (cancelled) return;
+      if (ok) return;
+
+      const err = useApsStore.getState().authError || '';
+      // Half-cleared sessions (logout race) land here — bounce to login.
+      if (
+        err.includes('No authenticated user') ||
+        err.includes('User email not found')
+      ) {
+        try {
+          await signOut();
+        } catch {
+          // ignore
+        }
+        reset();
+        resetEngageStore();
+        router.replace('/(auth)/login');
+      }
     };
 
     void validate();
     return () => {
       cancelled = true;
     };
-  }, [runValidation]);
+  }, [runValidation, reset, resetEngageStore]);
 
   // Push notifications: once the user is validated, register token + set up tap handling.
   useEffect(() => {
@@ -141,7 +159,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       },
       onAnnouncementId: () => {
         markAnnouncementsSeen();
-        Notifications.setBadgeCountAsync(0).catch(() => {});
+        setAppBadgeCount(0);
         router.push('/(main)/hub/notifications');
       },
       onDeepLink: routeAnnouncementDeepLink,
@@ -162,21 +180,23 @@ export function AuthGuard({ children }: AuthGuardProps) {
         refreshUnreadCounts()
           .then(() => {
             const total = useEngageStore.getState().getEngageBadgeCount();
-            Notifications.setBadgeCountAsync(total).catch(() => {});
+            setAppBadgeCount(total);
           })
           .catch(() => {});
       },
     });
 
-    registerAndUpsertPushToken().catch((e) => {
-      console.error('Push token registration failed:', e);
-    });
+    if (!isWeb) {
+      registerAndUpsertPushToken().catch((e) => {
+        console.error('Push token registration failed:', e);
+      });
+    }
 
     // If app was launched from a notification tap, route immediately.
     handleLastNotificationResponse({
       onAnnouncementId: () => {
         markAnnouncementsSeen();
-        Notifications.setBadgeCountAsync(0).catch(() => {});
+        setAppBadgeCount(0);
         router.push('/(main)/hub/notifications');
       },
       onDeepLink: routeAnnouncementDeepLink,
@@ -197,7 +217,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     refreshUnreadCounts()
       .then(() => {
         const total = useEngageStore.getState().getEngageBadgeCount();
-        Notifications.setBadgeCountAsync(total).catch(() => {});
+        setAppBadgeCount(total);
       })
       .catch(() => {});
   }, [currentAppUser?.id]);
@@ -219,7 +239,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         refreshUnreadCounts()
           .then(() => {
             const total = useEngageStore.getState().getEngageBadgeCount();
-            Notifications.setBadgeCountAsync(total).catch(() => {});
+            setAppBadgeCount(total);
           })
           .catch(() => {});
       }
@@ -230,18 +250,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     pushInitForUserRef.current = null;
-    // Reset local store and navigate immediately to avoid being stuck
-    reset();
-    resetEngageStore();
-    router.dismissAll();
-    router.replace('/(auth)/login');
     try {
+      // Cognito must clear before login mounts — otherwise session restore → Hub.
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
-    } finally {
-      setIsSigningOut(false);
     }
+    reset();
+    resetEngageStore();
+    router.replace('/(auth)/login');
+    setIsSigningOut(false);
   };
   
   // Only block UI during explicit sign-out.

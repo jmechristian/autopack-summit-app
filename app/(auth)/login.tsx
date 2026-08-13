@@ -21,9 +21,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeEnteringView } from '../../src/components/SafeEnteringView';
 import { autopackColors } from '../../src/theme';
+import { isWeb } from '../../src/utils/platform';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -38,6 +40,21 @@ export default function LoginScreen() {
 
   useEffect(() => {
     setLocalError('');
+  }, []);
+
+  // Session restore (esp. web entry Redirect → /login).
+  useEffect(() => {
+    let mounted = true;
+    getCurrentUser()
+      .then(() => {
+        if (mounted) router.replace('/(main)/hub');
+      })
+      .catch(() => {
+        // Stay on login
+      });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleLogin = async () => {
@@ -265,149 +282,248 @@ export default function LoginScreen() {
     }
   };
 
+  const handleForgotPassword = () => {
+    router.push({
+      pathname: '/(auth)/forgot-password',
+      params: email.trim() ? { email: email.trim() } : undefined,
+    });
+  };
+
   return (
-    <ImageBackground
-      source={require('../../assets/images/login-back.png')}
-      style={styles.background}
-      resizeMode='cover'
-    >
+    <View style={styles.root}>
+      <ImageBackground
+        source={require('../../assets/images/login-back.png')}
+        style={styles.background}
+        imageStyle={styles.backgroundImage}
+        resizeMode='cover'
+      />
       <KeyboardAvoidingView
-        style={[styles.container, { paddingTop: insets.top }]}
+        style={[styles.container, !isWeb && { paddingTop: insets.top }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingBottom: insets.bottom + 20 },
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps='always'
-          keyboardDismissMode='on-drag'
-        >
-          <View style={styles.contentView}>
-            {/* Hero text */}
-            <View style={styles.titleContainer}>
-              <Animated.View entering={FadeInDown.duration(600).delay(100)}>
-                <Text style={styles.title}>Welcome to{'\n'}The Summit!</Text>
-                <Text style={styles.subtitle}>
-                  The premier open forum for Automotive Packaging Professionals
-                </Text>
-              </Animated.View>
+        {isWeb ? (
+          <View style={styles.webShell}>
+            <View style={styles.webInner}>
+              <LoginFields
+                email={email}
+                password={password}
+                localError={localError}
+                showPassword={showPassword}
+                isLoading={isLoading}
+                emailInputRef={emailInputRef}
+                passwordInputRef={passwordInputRef}
+                setEmail={setEmail}
+                setPassword={setPassword}
+                setShowPassword={setShowPassword}
+                onLogin={handleLogin}
+                onForgotPassword={handleForgotPassword}
+                web
+              />
             </View>
-
-            {/* Card */}
-            <Animated.View entering={FadeInDown.duration(600).delay(400)}>
-              <View style={styles.card}>
-                {/* Email */}
-                  <Pressable
-                    style={styles.inputContainer}
-                    onPress={() => emailInputRef.current?.focus()}
-                  >
-                    <TextInput
-                      ref={emailInputRef}
-                      style={styles.input}
-                      placeholder='Email'
-                      placeholderTextColor='#9CA3AF'
-                      value={email}
-                      onChangeText={setEmail}
-                      autoCapitalize='none'
-                      keyboardType='email-address'
-                      autoComplete='email'
-                      contextMenuHidden={false}
-                      returnKeyType='next'
-                      onSubmitEditing={() => passwordInputRef.current?.focus()}
-                    />
-                  </Pressable>
-
-                  {/* Password */}
-                  <Pressable
-                    style={styles.inputContainer}
-                    onPress={() => passwordInputRef.current?.focus()}
-                  >
-                    <View style={styles.passwordContainer}>
-                      <TextInput
-                        ref={passwordInputRef}
-                        style={styles.passwordInput}
-                        placeholder='Password'
-                        placeholderTextColor='#9CA3AF'
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={!showPassword}
-                        autoCapitalize='none'
-                        autoComplete='password'
-                        contextMenuHidden={false}
-                        returnKeyType='done'
-                      />
-                      <TouchableOpacity
-                        onPress={() => setShowPassword(!showPassword)}
-                        style={styles.eyeButton}
-                      >
-                        <Ionicons
-                          name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                          size={22}
-                          color='#6B7280'
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </Pressable>
-
-                {/* Error */}
-                {localError ? (
-                  <View style={styles.errorContainer}>
-                    <Ionicons name='alert-circle' size={20} color='#DC2626' />
-                    <Text style={styles.errorText}>{localError}</Text>
-                  </View>
-                ) : null}
-
-                {/* Sign In */}
-                <TouchableOpacity
-                  onPress={handleLogin}
-                  disabled={isLoading}
-                  style={[styles.button, isLoading && styles.buttonDisabled]}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator color='#ffffff' />
-                  ) : (
-                    <Text style={styles.buttonText}>Sign In</Text>
-                  )}
-                </TouchableOpacity>
-
-                {/* Forgot password – wired later */}
-                <TouchableOpacity
-                  style={styles.linkButton}
-                  onPress={() => {
-                    router.push({
-                      pathname: '/(auth)/forgot-password',
-                      params: email.trim() ? { email: email.trim() } : undefined,
-                    });
-                  }}
-                >
-                  <Text style={styles.linkText}>Forgot Password?</Text>
-                </TouchableOpacity>
-
-                {/* Info box */}
-                <View style={styles.infoBox}>
-                  <Text style={styles.infoText}>
-                    This is an invite-only app. If you don&apos;t have an
-                    account, please contact your administrator.
-                  </Text>
-                </View>
-              </View>
-            </Animated.View>
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingBottom: insets.bottom + 20 },
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps='always'
+            keyboardDismissMode='on-drag'
+          >
+            <View style={styles.contentView}>
+              <LoginFields
+                email={email}
+                password={password}
+                localError={localError}
+                showPassword={showPassword}
+                isLoading={isLoading}
+                emailInputRef={emailInputRef}
+                passwordInputRef={passwordInputRef}
+                setEmail={setEmail}
+                setPassword={setPassword}
+                setShowPassword={setShowPassword}
+                onLogin={handleLogin}
+                onForgotPassword={handleForgotPassword}
+                web={false}
+              />
+            </View>
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
+  );
+}
+
+type LoginFieldsProps = {
+  email: string;
+  password: string;
+  localError: string;
+  showPassword: boolean;
+  isLoading: boolean;
+  emailInputRef: React.RefObject<TextInput | null>;
+  passwordInputRef: React.RefObject<TextInput | null>;
+  setEmail: (v: string) => void;
+  setPassword: (v: string) => void;
+  setShowPassword: (v: boolean) => void;
+  onLogin: () => void;
+  onForgotPassword: () => void;
+  web: boolean;
+};
+
+function LoginFields({
+  email,
+  password,
+  localError,
+  showPassword,
+  isLoading,
+  emailInputRef,
+  passwordInputRef,
+  setEmail,
+  setPassword,
+  setShowPassword,
+  onLogin,
+  onForgotPassword,
+  web,
+}: LoginFieldsProps) {
+  return (
+    <>
+      <View style={[styles.titleContainer, web && styles.titleContainerWeb]}>
+        <SafeEnteringView entering={FadeInDown.duration(600).delay(100)}>
+          <Text style={[styles.title, web && styles.titleWeb]}>
+            Welcome to{'\n'}The Summit!
+          </Text>
+          <Text style={[styles.subtitle, web && styles.subtitleWeb]}>
+            The premier open forum for Automotive Packaging Professionals
+          </Text>
+        </SafeEnteringView>
+      </View>
+
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(400)}>
+        <View style={[styles.card, web && styles.cardWeb]}>
+          <Pressable
+            style={styles.inputContainer}
+            onPress={() => emailInputRef.current?.focus()}
+          >
+            <TextInput
+              ref={emailInputRef}
+              style={styles.input}
+              placeholder='Email'
+              placeholderTextColor='#9CA3AF'
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize='none'
+              keyboardType='email-address'
+              autoComplete='email'
+              contextMenuHidden={false}
+              returnKeyType='next'
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
+            />
+          </Pressable>
+
+          <Pressable
+            style={styles.inputContainer}
+            onPress={() => passwordInputRef.current?.focus()}
+          >
+            <View style={styles.passwordContainer}>
+              <TextInput
+                ref={passwordInputRef}
+                style={styles.passwordInput}
+                placeholder='Password'
+                placeholderTextColor='#9CA3AF'
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize='none'
+                autoComplete='password'
+                contextMenuHidden={false}
+                returnKeyType='done'
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeButton}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={22}
+                  color='#6B7280'
+                />
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+
+          {localError ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name='alert-circle' size={20} color='#DC2626' />
+              <Text style={styles.errorText}>{localError}</Text>
+            </View>
+          ) : null}
+
+          <TouchableOpacity
+            onPress={onLogin}
+            disabled={isLoading}
+            accessibilityRole='button'
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+          >
+            {isLoading ? (
+              <ActivityIndicator color='#ffffff' />
+            ) : (
+              <Text style={styles.buttonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.linkButton}
+            accessibilityRole='button'
+            onPress={onForgotPassword}
+          >
+            <Text style={styles.linkText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              This is an invite-only app. If you don&apos;t have an account,
+              please contact your administrator.
+            </Text>
+          </View>
+        </View>
+      </SafeEnteringView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  root: {
     flex: 1,
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   container: {
     flex: 1,
     backgroundColor: 'rgba(30, 58, 138, 0.25)',
+  },
+  webShell: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  webInner: {
+    width: '100%',
+    maxWidth: 480,
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     minHeight: '100%',
@@ -419,6 +535,20 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: 40,
+  },
+  titleContainerWeb: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  titleWeb: {
+    textAlign: 'center',
+  },
+  subtitleWeb: {
+    textAlign: 'center',
+  },
+  cardWeb: {
+    width: '100%',
   },
   title: {
     fontSize: 32,
