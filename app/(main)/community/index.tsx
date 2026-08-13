@@ -2,13 +2,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  FlatList,
+  InteractionManager,
+  Platform,
   Pressable,
-  SectionList,
   StyleSheet,
   Text,
   TextInput,
   View,
-  type SectionListData,
 } from 'react-native';
 import { APP_USER_ROW_HEIGHT, AppUserRow } from '../../../src/components/AppUserRow';
 import { RiveLoader } from '../../../src/components/RiveLoader';
@@ -36,9 +37,13 @@ type CommunityProfile = {
 
 type CommunitySection = { title: string; data: CommunityProfile[] };
 
-/** Integer heights only — fractional hairlines accumulate and thrash sticky headers mid-list. */
+type FlatRow =
+  | { kind: 'header'; key: string; title: string }
+  | { kind: 'user'; key: string; profile: CommunityProfile; showDivider: boolean };
+
+/** Integer heights only — keep getItemLayout exact on Android. */
 const SECTION_HEADER_HEIGHT = 32;
-const SEPARATOR_HEIGHT = 1;
+const DIVIDER_HEIGHT = 1;
 
 function normalizeNamePart(v?: string | null) {
   return (v || '').trim();
@@ -56,38 +61,10 @@ function getSectionKey(p: CommunityProfile) {
   return /[A-Z]/.test(letter) ? letter : '#';
 }
 
-function ItemSeparator() {
-  return <View style={styles.sep} />;
-}
-
-function buildSectionLayout(sections: CommunitySection[]) {
-  // VirtualizedSectionList flattens each section as: [header, ...items, footer].
-  // Footers exist even without renderSectionFooter (render null → height 0).
-  // Getting this wrong makes sticky headers thrash harder the deeper you scroll.
-  const lengths: number[] = [];
-  const offsets: number[] = [];
-  let offset = 0;
-
-  for (const section of sections) {
-    lengths.push(SECTION_HEADER_HEIGHT);
-    offsets.push(offset);
-    offset += SECTION_HEADER_HEIGHT;
-
-    const count = section.data.length;
-    for (let i = 0; i < count; i++) {
-      // Separators render inside the item cell; include them on every non-last row.
-      const length =
-        i < count - 1 ? APP_USER_ROW_HEIGHT + SEPARATOR_HEIGHT : APP_USER_ROW_HEIGHT;
-      lengths.push(length);
-      offsets.push(offset);
-      offset += length;
-    }
-
-    lengths.push(0);
-    offsets.push(offset);
-  }
-
-  return { lengths, offsets };
+function rowHeight(row: FlatRow) {
+  if (row.kind === 'header') return SECTION_HEADER_HEIGHT;
+  // Divider is painted inside the fixed row height (absolute), so layout stays constant.
+  return APP_USER_ROW_HEIGHT;
 }
 
 export default function CommunityIndex() {
@@ -246,18 +223,56 @@ export default function CommunityIndex() {
     return titles.map((title) => ({ title, data: map.get(title)! }));
   }, [filtered]);
 
-  const sectionLayout = useMemo(() => buildSectionLayout(sections), [sections]);
+  // FlatList avoids Android SectionList sticky/footer layout thrash. Letter rows are
+  // normal items; iOS still pins them via stickyHeaderIndices.
+  const flatRows: FlatRow[] = useMemo(() => {
+    const rows: FlatRow[] = [];
+    for (const section of sections) {
+      rows.push({ kind: 'header', key: `h:${section.title}`, title: section.title });
+      section.data.forEach((profile, index) => {
+        rows.push({
+          kind: 'user',
+          key: profile.profileId,
+          profile,
+          showDivider: index < section.data.length - 1,
+        });
+      });
+    }
+    return rows;
+  }, [sections]);
+
+  const stickyHeaderIndices = useMemo(() => {
+    if (Platform.OS !== 'ios') return undefined;
+    const indices: number[] = [];
+    flatRows.forEach((row, index) => {
+      if (row.kind === 'header') indices.push(index);
+    });
+    return indices;
+  }, [flatRows]);
+
+  const flatLayout = useMemo(() => {
+    const lengths: number[] = [];
+    const offsets: number[] = [];
+    let offset = 0;
+    for (const row of flatRows) {
+      const length = rowHeight(row);
+      lengths.push(length);
+      offsets.push(offset);
+      offset += length;
+    }
+    return { lengths, offsets };
+  }, [flatRows]);
 
   const getItemLayout = useCallback(
-    (_data: SectionListData<CommunityProfile, CommunitySection>[] | null, index: number) => ({
-      length: sectionLayout.lengths[index] ?? APP_USER_ROW_HEIGHT,
-      offset: sectionLayout.offsets[index] ?? 0,
+    (_data: ArrayLike<FlatRow> | null | undefined, index: number) => ({
+      length: flatLayout.lengths[index] ?? APP_USER_ROW_HEIGHT,
+      offset: flatLayout.offsets[index] ?? 0,
       index,
     }),
-    [sectionLayout]
+    [flatLayout]
   );
 
-  // Resolve avatars once per profile id — do not depend on uri state (avoids effect loops / mid-scroll thrash).
+  // Resolve avatars once per profile id; flush after interactions so scroll doesn't jank.
   useEffect(() => {
     let cancelled = false;
     const unresolved = profiles.filter(
@@ -271,12 +286,20 @@ export default function CommunityIndex() {
 
     async function loadAvatarUris() {
       const updates: Record<string, string | null> = {};
-      await Promise.all(
-        unresolved.map(async (p) => {
-          updates[p.profileId] = await resolveProfilePictureUri(p.profilePicture);
-        })
-      );
-      if (!cancelled && Object.keys(updates).length) {
+      // Small batches — Android image decode + setState mid-scroll was flickering the list.
+      const chunkSize = Platform.OS === 'android' ? 8 : 24;
+      for (let i = 0; i < unresolved.length; i += chunkSize) {
+        if (cancelled) return;
+        const chunk = unresolved.slice(i, i + chunkSize);
+        await Promise.all(
+          chunk.map(async (p) => {
+            updates[p.profileId] = await resolveProfilePictureUri(p.profilePicture);
+          })
+        );
+        await new Promise<void>((resolve) => {
+          InteractionManager.runAfterInteractions(() => resolve());
+        });
+        if (cancelled) return;
         setProfilePictureUris((prev) => ({ ...prev, ...updates }));
       }
     }
@@ -294,41 +317,45 @@ export default function CommunityIndex() {
     });
   }, []);
 
-  const renderSectionHeader = useCallback(
-    ({ section }: { section: SectionListData<CommunityProfile, CommunitySection> }) => (
-      <View style={[styles.sectionHeader, { paddingHorizontal: contentInset }]}>
-        <Text style={styles.sectionHeaderText}>{section.title}</Text>
-      </View>
-    ),
-    [contentInset]
-  );
-
   const renderItem = useCallback(
-    ({ item }: { item: CommunityProfile }) => {
-      const name = getFullName(item) || '(No name)';
-      const subtitle = item.company || '';
-      const fav = !!favoriteContactIds[item.profileId];
-      const pending = !!pendingContactIds[item.profileId];
-      const isSelf = !!currentProfileId && currentProfileId === item.profileId;
-      const hasNote = profileIdsWithNotes.has(item.profileId);
+    ({ item }: { item: FlatRow }) => {
+      if (item.kind === 'header') {
+        return (
+          <View style={[styles.sectionHeader, { paddingHorizontal: contentInset }]}>
+            <View style={styles.sectionHeaderRule} />
+            <Text style={styles.sectionHeaderText}>{item.title}</Text>
+          </View>
+        );
+      }
+
+      const profile = item.profile;
+      const name = getFullName(profile) || '(No name)';
+      const subtitle = profile.company || '';
+      const fav = !!favoriteContactIds[profile.profileId];
+      const pending = !!pendingContactIds[profile.profileId];
+      const isSelf = !!currentProfileId && currentProfileId === profile.profileId;
+      const hasNote = profileIdsWithNotes.has(profile.profileId);
 
       return (
-        <AppUserRow
-          profileId={item.profileId}
-          userId={item.userId}
-          name={name}
-          subtitle={subtitle}
-          avatarUri={profilePictureUris[item.profileId] ?? null}
-          initials={`${normalizeNamePart(item.firstName).slice(0, 1)}${normalizeNamePart(item.lastName).slice(0, 1)}`.toUpperCase()}
-          isSelf={isSelf}
-          hasNote={hasNote}
-          currentAppUserProfileId={currentProfileId}
-          favorite={fav}
-          pendingFavorite={pending}
-          contactRequestState={contactRequestByUserId.get(item.userId) ?? null}
-          onPressProfile={onPressProfile}
-          style={{ paddingHorizontal: contentInset }}
-        />
+        <View style={styles.userCell}>
+          <AppUserRow
+            profileId={profile.profileId}
+            userId={profile.userId}
+            name={name}
+            subtitle={subtitle}
+            avatarUri={profilePictureUris[profile.profileId] ?? null}
+            initials={`${normalizeNamePart(profile.firstName).slice(0, 1)}${normalizeNamePart(profile.lastName).slice(0, 1)}`.toUpperCase()}
+            isSelf={isSelf}
+            hasNote={hasNote}
+            currentAppUserProfileId={currentProfileId}
+            favorite={fav}
+            pendingFavorite={pending}
+            contactRequestState={contactRequestByUserId.get(profile.userId) ?? null}
+            onPressProfile={onPressProfile}
+            style={{ paddingHorizontal: contentInset }}
+          />
+          {item.showDivider ? <View style={styles.rowDivider} /> : null}
+        </View>
       );
     },
     [
@@ -389,17 +416,17 @@ export default function CommunityIndex() {
           </Pressable>
         </View>
       ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={(item) => item.profileId}
-          stickySectionHeadersEnabled
+        <FlatList
+          data={flatRows}
+          keyExtractor={(item) => item.key}
+          stickyHeaderIndices={stickyHeaderIndices}
           refreshing={refreshing}
           onRefresh={onRefresh}
           getItemLayout={getItemLayout}
           extraData={listExtraData}
           initialNumToRender={16}
-          maxToRenderPerBatch={12}
-          windowSize={7}
+          maxToRenderPerBatch={Platform.OS === 'android' ? 8 : 12}
+          windowSize={Platform.OS === 'android' ? 5 : 7}
           updateCellsBatchingPeriod={50}
           removeClippedSubviews={false}
           contentContainerStyle={{ paddingBottom: tabScrollPad }}
@@ -410,9 +437,7 @@ export default function CommunityIndex() {
               </Text>
             </View>
           }
-          renderSectionHeader={renderSectionHeader}
           renderItem={renderItem}
-          ItemSeparatorComponent={ItemSeparator}
         />
       )}
     </View>
@@ -440,13 +465,29 @@ const styles = StyleSheet.create({
     height: SECTION_HEADER_HEIGHT,
     backgroundColor: '#fff',
     justifyContent: 'center',
-    borderTopWidth: SEPARATOR_HEIGHT,
-    borderTopColor: '#e5e7eb',
+    overflow: 'hidden',
+  },
+  sectionHeaderRule: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: DIVIDER_HEIGHT,
+    backgroundColor: '#e5e7eb',
   },
   sectionHeaderText: { fontWeight: '800', color: '#111827' },
 
-  sep: {
-    height: SEPARATOR_HEIGHT,
+  userCell: {
+    height: APP_USER_ROW_HEIGHT,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  rowDivider: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: DIVIDER_HEIGHT,
     backgroundColor: '#e5e7eb',
   },
 
