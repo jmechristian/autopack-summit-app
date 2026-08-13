@@ -8,8 +8,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "postinstall": "node ./scripts/sync-rive-web-assets.js",
-    "export:web": "node ./scripts/sync-rive-web-assets.js && expo export --platform web",
     "lint": "expo lint",
     "build": {
       "preview": {
