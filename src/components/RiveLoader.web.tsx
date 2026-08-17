@@ -7,6 +7,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { autopackColors } from '../theme';
+import { RiveLoaderHost, useRiveLoaderAcquire } from './RiveLoaderHost';
 
 export type Fit = string;
 
@@ -21,33 +22,58 @@ export interface RiveLoaderProps {
   testID?: string;
 }
 
+function WebPlayback({
+  backgroundColor = autopackColors.apDarkBlue,
+  style,
+  testID,
+}: {
+  backgroundColor?: string;
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
+}) {
+  return (
+    <View style={[styles.container, { backgroundColor }, style]} testID={testID}>
+      <ActivityIndicator size="large" color="#fff" />
+    </View>
+  );
+}
+
+export function RiveLoaderProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <RiveLoaderHost overlay={<WebPlayback />}>
+      {children}
+    </RiveLoaderHost>
+  );
+}
+
 /** Web fallback — rive-react-native is native-only. */
 export function RiveLoader({
   backgroundColor = autopackColors.apDarkBlue,
   style,
-  overlay = false,
+  overlay = true,
   visible = true,
   onReady,
   testID,
 }: RiveLoaderProps) {
+  const acquire = useRiveLoaderAcquire();
+
   useEffect(() => {
     if (visible) onReady?.();
   }, [onReady, visible]);
 
+  useEffect(() => {
+    if (!visible || !overlay || !acquire) return;
+    return acquire();
+  }, [acquire, overlay, visible]);
+
   if (!visible) return null;
 
+  if (overlay && acquire) {
+    return <View style={styles.placeholder} />;
+  }
+
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor },
-        overlay && styles.overlay,
-        style,
-      ]}
-      testID={testID}
-    >
-      <ActivityIndicator size="large" color="#fff" />
-    </View>
+    <WebPlayback backgroundColor={backgroundColor} style={style} testID={testID} />
   );
 }
 
@@ -60,9 +86,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1000,
+  placeholder: {
+    flex: 1,
+    backgroundColor: autopackColors.apDarkBlue,
   },
 });
 

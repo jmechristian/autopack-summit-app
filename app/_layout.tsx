@@ -6,6 +6,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { configureAmplify } from '../src/amplifyConfig';
+import { RiveLoaderProvider } from '../src/components/RiveLoader';
 import { theme } from '../src/theme';
 
 // Keep the splash screen visible while we fetch resources
@@ -34,7 +35,9 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Slot />
+      <RiveLoaderProvider>
+        <Slot />
+      </RiveLoaderProvider>
     </ThemeProvider>
   );
 }
