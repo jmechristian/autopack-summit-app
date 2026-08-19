@@ -5,6 +5,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { apsPushTokensByUserIdAndUpdatedAt } from '../graphql/queries';
 import { deleteApsPushToken } from '../graphql/mutations';
 import { graphqlAuthClient } from './graphqlClient';
+import { drainIndexedList } from './paginateGraphql';
 import { registerAndUpsertPushToken, setAppBadgeCount } from './pushNotifications';
 import { isWeb } from './platform';
 
@@ -114,19 +115,15 @@ export async function disablePushNotifications(): Promise<void> {
 
   try {
     const user = await getCurrentUser();
-    const resp = await graphqlAuthClient.graphql({
+    const items = await drainIndexedList<{ id: string }>({
+      client: graphqlAuthClient,
       query: apsPushTokensByUserIdAndUpdatedAt,
+      field: 'apsPushTokensByUserIdAndUpdatedAt',
       variables: {
         userId: user.userId,
         sortDirection: 'DESC',
-        limit: 50,
       },
     });
-
-    const items =
-      ((resp.data as any)?.apsPushTokensByUserIdAndUpdatedAt?.items || []).filter(
-        (item: { id?: string | null }) => !!item?.id,
-      ) as { id: string }[];
 
     await Promise.all(
       items.map((item) =>

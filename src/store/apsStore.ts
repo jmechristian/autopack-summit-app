@@ -8,7 +8,6 @@ import {
   getAPSWithAddOns,
   getAPSWithAgenda,
   getAPSWithExhibitors,
-  getAPSWithRegistrants,
   getAPSWithSpeakers,
   getRegistrantByEmail,
 } from '../graphql/customQueries';
@@ -21,6 +20,7 @@ import {
 } from '../graphql/queries';
 import { getCurrentUserEmail } from '../utils/authUtils';
 import { graphqlApiKeyClient } from '../utils/graphqlClient';
+import { drainIndexedList } from '../utils/paginateGraphql';
 
 // Types
 type APSBasic = {
@@ -153,70 +153,41 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     const profileId = profile.id;
 
     try {
-      const [affRespRaw, eduRespRaw, intRespRaw] = await Promise.all([
-        graphqlApiKeyClient.graphql({
+      const [affiliates, education, interests] = await Promise.all([
+        drainIndexedList<APITypes.ProfileAffiliate>({
+          client: graphqlApiKeyClient,
           query: profileAffiliatesByProfileId,
-          variables: { profileId, limit: 100 },
+          field: 'profileAffiliatesByProfileId',
+          variables: { profileId },
         }),
-        graphqlApiKeyClient.graphql({
+        drainIndexedList<APITypes.ProfileEducation>({
+          client: graphqlApiKeyClient,
           query: profileEducationsByProfileId,
-          variables: { profileId, limit: 100 },
+          field: 'profileEducationsByProfileId',
+          variables: { profileId },
         }),
-        graphqlApiKeyClient.graphql({
+        drainIndexedList<APITypes.ProfileInterest>({
+          client: graphqlApiKeyClient,
           query: profileInterestsByProfileId,
-          variables: { profileId, limit: 100 },
+          field: 'profileInterestsByProfileId',
+          variables: { profileId },
         }),
       ]);
-
-      // Amplify's generated model types may include required relationship fields not selected
-      // by these queries. Cast via `unknown` (intentional) to avoid brittle type coupling.
-      const affResp = affRespRaw as any;
-      const eduResp = eduRespRaw as any;
-      const intResp = intRespRaw as any;
-
-      const affiliatesData = affResp.data as unknown as {
-        profileAffiliatesByProfileId?: {
-          items?: (APITypes.ProfileAffiliate | null)[];
-        };
-      };
-      const educationData = eduResp.data as unknown as {
-        profileEducationsByProfileId?: {
-          items?: (APITypes.ProfileEducation | null)[];
-        };
-      };
-      const interestsData = intResp.data as unknown as {
-        profileInterestsByProfileId?: {
-          items?: (APITypes.ProfileInterest | null)[];
-        };
-      };
-
-      const affiliates =
-        affiliatesData.profileAffiliatesByProfileId?.items?.filter(
-          (a) => a !== null
-        ) || [];
-      const education =
-        educationData.profileEducationsByProfileId?.items?.filter(
-          (e) => e !== null
-        ) || [];
-      const interests =
-        interestsData.profileInterestsByProfileId?.items?.filter(
-          (i) => i !== null
-        ) || [];
 
       return {
         ...profile,
         affiliates: {
-          items: affiliates as unknown as APITypes.ProfileAffiliate[],
+          items: affiliates.filter(Boolean),
           nextToken: null,
           __typename: 'ModelProfileAffiliateConnection',
         } as any,
         education: {
-          items: education as unknown as APITypes.ProfileEducation[],
+          items: education.filter(Boolean),
           nextToken: null,
           __typename: 'ModelProfileEducationConnection',
         } as any,
         interests: {
-          items: interests as unknown as APITypes.ProfileInterest[],
+          items: interests.filter(Boolean),
           nextToken: null,
           __typename: 'ModelProfileInterestConnection',
         } as any,
@@ -327,18 +298,12 @@ export const useApsStore = create<ApsStore>((set, get) => ({
         );
 
         // Fetch all registrants for this APS and filter client-side
-        const allRegistrantsResponse = (await graphqlApiKeyClient.graphql({
+        const allRegistrants = await drainIndexedList<ApsRegistrant>({
+          client: graphqlApiKeyClient,
           query: apsRegistrantsByApsID,
-          variables: { apsID: apsId, limit: 1000 },
-        })) as any;
-
-        const allData = allRegistrantsResponse.data as {
-          apsRegistrantsByApsID?: {
-            items: ApsRegistrant[];
-          };
-        };
-
-        const allRegistrants = allData.apsRegistrantsByApsID?.items || [];
+          field: 'apsRegistrantsByApsID',
+          variables: { apsID: apsId },
+        });
         console.log('📋 Total registrants in APS:', allRegistrants.length);
 
         // Case-insensitive email match
@@ -676,28 +641,18 @@ export const useApsStore = create<ApsStore>((set, get) => ({
     });
 
     try {
-      const response = (await graphqlApiKeyClient.graphql({
-        query: getAPSWithRegistrants,
-        variables: { id: get().apsId, limit: 1000 },
-      })) as any;
+      const items = await drainIndexedList<ApsRegistrant>({
+        client: graphqlApiKeyClient,
+        query: apsRegistrantsByApsID,
+        field: 'apsRegistrantsByApsID',
+        variables: { apsID: get().apsId },
+      });
 
-      const data = response.data as {
-        getAPS?: { Registrants?: { items: ApsRegistrant[] } };
-      };
-
-      if (data.getAPS?.Registrants?.items) {
-        set({
-          registrants: data.getAPS.Registrants.items,
-          loading: { ...get().loading, registrants: false },
-          error: { ...get().error, registrants: null },
-        });
-      } else {
-        set({
-          registrants: [],
-          loading: { ...get().loading, registrants: false },
-          error: { ...get().error, registrants: null },
-        });
-      }
+      set({
+        registrants: items.filter(Boolean),
+        loading: { ...get().loading, registrants: false },
+        error: { ...get().error, registrants: null },
+      });
     } catch (error: any) {
       console.error('Error loading registrants:', error);
       set({

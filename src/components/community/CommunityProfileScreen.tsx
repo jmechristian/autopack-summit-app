@@ -27,6 +27,7 @@ import { useCommunityStore } from '../../store/communityStore';
 import { useEngageStore } from '../../store/engageStore';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
+import { drainIndexedList } from '../../utils/paginateGraphql';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { NotesSection } from '../notes/NotesSection';
 import { RequestIntroModal } from '../requests/RequestIntroModal';
@@ -256,36 +257,32 @@ export default function CommunityProfileScreen() {
         }
 
         // Hydrate related collections by profileId to preserve current UI sections.
-        const [affResp, eduResp, intResp] = await Promise.all([
-          graphqlApiKeyClient.graphql({
+        const [affiliates, education, interests] = await Promise.all([
+          drainIndexedList<any>({
+            client: graphqlApiKeyClient,
             query: profileAffiliatesByProfileId,
-            variables: { profileId: p.id, limit: 100 },
+            field: 'profileAffiliatesByProfileId',
+            variables: { profileId: p.id },
           }),
-          graphqlApiKeyClient.graphql({
+          drainIndexedList<any>({
+            client: graphqlApiKeyClient,
             query: profileEducationsByProfileId,
-            variables: { profileId: p.id, limit: 100 },
+            field: 'profileEducationsByProfileId',
+            variables: { profileId: p.id },
           }),
-          graphqlApiKeyClient.graphql({
+          drainIndexedList<any>({
+            client: graphqlApiKeyClient,
             query: profileInterestsByProfileId,
-            variables: { profileId: p.id, limit: 100 },
+            field: 'profileInterestsByProfileId',
+            variables: { profileId: p.id },
           }),
         ]);
 
-        const affData = affResp.data as {
-          profileAffiliatesByProfileId?: { items?: Array<any | null> | null };
-        };
-        const eduData = eduResp.data as {
-          profileEducationsByProfileId?: { items?: Array<any | null> | null };
-        };
-        const intData = intResp.data as {
-          profileInterestsByProfileId?: { items?: Array<any | null> | null };
-        };
-
         const hydrated: Profile = {
           ...p,
-          affiliates: { items: (affData.profileAffiliatesByProfileId?.items || []).filter(Boolean) },
-          education: { items: (eduData.profileEducationsByProfileId?.items || []).filter(Boolean) },
-          interests: { items: (intData.profileInterestsByProfileId?.items || []).filter(Boolean) },
+          affiliates: { items: affiliates.filter(Boolean) },
+          education: { items: education.filter(Boolean) },
+          interests: { items: interests.filter(Boolean) },
         };
 
         if (mounted) setProfile(hydrated);

@@ -25,6 +25,7 @@ import {
   graphqlApiKeyClient,
   graphqlAuthClient,
 } from '../../utils/graphqlClient';
+import { drainIndexedList } from '../../utils/paginateGraphql';
 import { RiveLoader } from '../RiveLoader';
 
 type FavoriteKind = 'exhibitor' | 'speaker' | 'sponsor' | 'session' | 'contact';
@@ -275,65 +276,53 @@ export default function FavoritesTool() {
     setError(null);
 
     try {
-      const [exResp, spResp, soResp, seResp, coResp, legacyContactsResp] =
-        await Promise.all([
-          graphqlAuthClient.graphql({
-            query: apsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAt,
-            variables: { userProfileId: currentProfileId, limit: 500 },
-          }),
-          graphqlAuthClient.graphql({
-            query: apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt,
-            variables: { userProfileId: currentProfileId, limit: 500 },
-          }),
-          graphqlAuthClient.graphql({
-            query: apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt,
-            variables: { userProfileId: currentProfileId, limit: 500 },
-          }),
-          graphqlAuthClient.graphql({
-            query: apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt,
-            variables: { userProfileId: currentProfileId, limit: 500 },
-          }),
-          graphqlAuthClient.graphql({
-            query: apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt,
-            variables: { userProfileId: currentProfileId, limit: 500 },
-          }),
-          currentUserId
-            ? graphqlApiKeyClient.graphql({
-                query: apsAppUserContactsByUserId,
-                variables: { userId: currentUserId, limit: 500 },
-              })
-            : Promise.resolve({ data: null as any }),
-        ]);
-
-      const exhibitorFavItems = (
-        ((exResp.data as any)
-          ?.apsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAt?.items ||
-          []) as any[]
-      ).filter(Boolean);
-      const speakerFavItems = (
-        ((spResp.data as any)
-          ?.apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt?.items ||
-          []) as any[]
-      ).filter(Boolean);
-      const sponsorFavItems = (
-        ((soResp.data as any)
-          ?.apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt?.items ||
-          []) as any[]
-      ).filter(Boolean);
-      const sessionFavItems = (
-        ((seResp.data as any)
-          ?.apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?.items ||
-          []) as any[]
-      ).filter(Boolean);
-      const contactFavItems = (
-        ((coResp.data as any)
-          ?.apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt?.items ||
-          []) as any[]
-      ).filter(Boolean);
-      const legacyContactItems = (
-        ((legacyContactsResp.data as any)?.apsAppUserContactsByUserId?.items ||
-          []) as any[]
-      ).filter(Boolean);
+      const [
+        exhibitorFavItems,
+        speakerFavItems,
+        sponsorFavItems,
+        sessionFavItems,
+        contactFavItems,
+        legacyContactItems,
+      ] = await Promise.all([
+        drainIndexedList<any>({
+          client: graphqlAuthClient,
+          query: apsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAt,
+          field: 'apsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAt',
+          variables: { userProfileId: currentProfileId },
+        }),
+        drainIndexedList<any>({
+          client: graphqlAuthClient,
+          query: apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt,
+          field: 'apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt',
+          variables: { userProfileId: currentProfileId },
+        }),
+        drainIndexedList<any>({
+          client: graphqlAuthClient,
+          query: apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt,
+          field: 'apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt',
+          variables: { userProfileId: currentProfileId },
+        }),
+        drainIndexedList<any>({
+          client: graphqlAuthClient,
+          query: apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt,
+          field: 'apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt',
+          variables: { userProfileId: currentProfileId },
+        }),
+        drainIndexedList<any>({
+          client: graphqlAuthClient,
+          query: apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt,
+          field: 'apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt',
+          variables: { userProfileId: currentProfileId },
+        }),
+        currentUserId
+          ? drainIndexedList<any>({
+              client: graphqlApiKeyClient,
+              query: apsAppUserContactsByUserId,
+              field: 'apsAppUserContactsByUserId',
+              variables: { userId: currentUserId },
+            })
+          : Promise.resolve([]),
+      ]);
 
       const exhibitorFavoriteRecordByEntityId = new Map<string, string>();
       const speakerFavoriteRecordByEntityId = new Map<string, string>();

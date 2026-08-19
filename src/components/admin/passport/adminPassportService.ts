@@ -1,8 +1,24 @@
 import { APS_ID } from '../../../config/apsConfig';
 import { apsAppUserPassportStampsByEventIdAndCreatedAt } from '../../../graphql/queries';
-import { getAPSWithExhibitors, getAppUserByRegistrantId } from '../../../graphql/customQueries';
-import { graphqlAuthClient } from '../../../utils/graphqlClient';
+import { getAppUserByRegistrantId } from '../../../graphql/customQueries';
+import { graphqlAuthClient, graphqlApiKeyClient } from '../../../utils/graphqlClient';
+import { drainIndexedList } from '../../../utils/paginateGraphql';
 import { listAdminRegistrants } from '../registrants/adminRegistrantsService';
+
+const exhibitorsByEventWithCompany = /* GraphQL */ `
+  query AdminPassportExhibitorsByEvent($eventId: ID!, $limit: Int, $nextToken: String) {
+    apsAppExhibitorProfilesByEventId(eventId: $eventId, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        boothNumber
+        company {
+          name
+        }
+      }
+      nextToken
+    }
+  }
+`;
 
 export type AdminPassportRegistrantRow = {
   registrantId: string;
@@ -74,14 +90,19 @@ async function listProfileIdsByRegistrantId(registrantIds: string[]) {
 
 async function listExhibitors(eventId: string) {
   try {
-    const resp = await graphqlAuthClient.graphql({
-      query: getAPSWithExhibitors,
-      variables: { id: eventId, eventId },
+    const items = await drainIndexedList<{
+      id?: string | null;
+      boothNumber?: string | null;
+      company?: { name?: string | null } | null;
+    }>({
+      client: graphqlApiKeyClient,
+      query: exhibitorsByEventWithCompany,
+      field: 'apsAppExhibitorProfilesByEventId',
+      variables: { eventId },
     });
-    const items = (resp as any)?.data?.apsAppExhibitorProfilesByEventId?.items || [];
     return items
-      .filter((item: any) => !!item?.id)
-      .map((item: any) => ({
+      .filter((item) => !!item?.id)
+      .map((item) => ({
         exhibitorId: String(item.id),
         companyName: String(item?.company?.name || 'Unnamed Company'),
         boothNumber: String(item?.boothNumber || '—'),
@@ -92,26 +113,22 @@ async function listExhibitors(eventId: string) {
 }
 
 async function listStamps(eventId: string) {
-  let nextToken: string | null | undefined = null;
+  const items = await drainIndexedList<Stamp & { userProfileId?: string; exhibitorId?: string; scannedAt?: string | null }>({
+    client: graphqlAuthClient,
+    query: apsAppUserPassportStampsByEventIdAndCreatedAt,
+    field: 'apsAppUserPassportStampsByEventIdAndCreatedAt',
+    variables: { eventId },
+  });
   const stamps: Stamp[] = [];
-  do {
-    const resp = await graphqlAuthClient.graphql({
-      query: apsAppUserPassportStampsByEventIdAndCreatedAt,
-      variables: { eventId, limit: 1000, nextToken },
+  for (const item of items) {
+    if (!item?.id || !item?.userProfileId || !item?.exhibitorId) continue;
+    stamps.push({
+      id: String(item.id),
+      userProfileId: String(item.userProfileId),
+      exhibitorId: String(item.exhibitorId),
+      scannedAt: item.scannedAt ?? null,
     });
-    const data = (resp as any)?.data?.apsAppUserPassportStampsByEventIdAndCreatedAt;
-    const items = data?.items || [];
-    for (const item of items) {
-      if (!item?.id || !item?.userProfileId || !item?.exhibitorId) continue;
-      stamps.push({
-        id: String(item.id),
-        userProfileId: String(item.userProfileId),
-        exhibitorId: String(item.exhibitorId),
-        scannedAt: item.scannedAt ?? null,
-      });
-    }
-    nextToken = data?.nextToken;
-  } while (nextToken);
+  }
   return stamps;
 }
 

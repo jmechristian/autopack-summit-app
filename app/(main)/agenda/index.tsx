@@ -15,6 +15,7 @@ import { autopackColors } from '../../../src/theme';
 import { APS_ID } from '../../../src/config/apsConfig';
 import { apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt } from '../../../src/graphql/queries';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import { drainIndexedList } from '../../../src/utils/paginateGraphql';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
@@ -278,17 +279,14 @@ export default function AgendaList() {
       return;
     }
     try {
-      const resp = await graphqlAuthClient.graphql({
+      const items = await drainIndexedList<{ id?: string | null; sessionId?: string | null }>({
+        client: graphqlAuthClient,
         query: apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt,
-        variables: { userProfileId: currentProfileId, limit: 1000 },
+        field: 'apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt',
+        variables: { userProfileId: currentProfileId },
       });
-      const data = resp.data as {
-        apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?: {
-          items?: ({ id?: string | null; sessionId?: string | null } | null)[] | null;
-        } | null;
-      };
       const next: Record<string, string> = {};
-      for (const item of data.apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?.items || []) {
+      for (const item of items) {
         if (!item?.id || !item.sessionId) continue;
         if (!next[item.sessionId]) next[item.sessionId] = item.id;
       }

@@ -13,6 +13,7 @@ import {
 import { APS_ID } from '../../config/apsConfig';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
+import { drainIndexedList } from '../../utils/paginateGraphql';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
 import {
@@ -151,13 +152,13 @@ export default function SpeakersTool({ detailBasePath }: SpeakersToolProps) {
       return;
     }
     try {
-      const resp = await graphqlAuthClient.graphql({
+      const items = await drainIndexedList<any>({
+        client: graphqlAuthClient,
         query: apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt,
-        variables: { userProfileId: currentProfileId, limit: 1000 },
+        field: 'apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt',
+        variables: { userProfileId: currentProfileId },
       });
-      const data = resp.data as any;
       const next: Record<string, string> = {};
-      const items: Array<any> = data?.apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt?.items || [];
       for (const item of items) {
         if (!item?.id || !item?.speakerId) continue;
         if (!next[item.speakerId]) next[item.speakerId] = item.id;

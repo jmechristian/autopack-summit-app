@@ -19,8 +19,6 @@ import {
   getApsAdminAnnouncement,
   getApsAppUser,
   apsContactRequestsByRequestKey,
-  apsContactRequestsByRequestedByUserIdAndCreatedAt,
-  apsContactRequestsByStatusAndUpdatedAt,
   getApsContactRequest,
   getApsDmThread,
   apsDmParticipantStatesByUserIdAndLastMessageAt,
@@ -42,6 +40,12 @@ import {
   getAnnouncementDisplayAt,
   isAnnouncementVisibleToAttendees,
 } from '../components/admin/announcements/adminAnnouncementsService';
+import {
+  fetchOwnedContactRequestRows,
+  invalidateOwnedContactRequestCache,
+  otherUserIdFromRequest,
+} from '../utils/contactRequestQueries';
+import { drainIndexedList } from '../utils/paginateGraphql';
 
 type Announcement = {
   id: string;
@@ -822,18 +826,16 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       error: { ...get().error, announcements: null },
     });
     try {
-      const resp = await graphqlAuthClient.graphql({
+      const raw = await drainIndexedList<Announcement>({
+        client: graphqlAuthClient,
         query: apsAdminAnnouncementsByEventIdAndCreatedAt,
+        field: 'apsAdminAnnouncementsByEventIdAndCreatedAt',
         variables: {
           eventId: APS_ID,
           sortDirection: 'DESC',
-          limit: 50,
         },
       });
-      const data = resp.data as {
-        apsAdminAnnouncementsByEventIdAndCreatedAt?: { items?: Array<Announcement | null> };
-      };
-      const items = (data.apsAdminAnnouncementsByEventIdAndCreatedAt?.items || [])
+      const items = raw
         .filter((x): x is Announcement => !!x?.id)
         .filter((x) => isAnnouncementVisibleToAttendees(x))
         .map((x) => ({
@@ -896,50 +898,25 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     });
     try {
       const mySub = await getMySub();
-      const resp = await graphqlAuthClient.graphql({
-        query: apsContactRequestsByStatusAndUpdatedAt,
-        variables: {
-          status: 'PENDING',
-          sortDirection: 'DESC',
-          limit: 100,
-        },
-      });
-      const data = resp.data as {
-        apsContactRequestsByStatusAndUpdatedAt?: {
-          items?: Array<{
-            id?: string | null;
-            requestKey?: string | null;
-            owners?: string[] | null;
-            requestedByUserId?: string | null;
-            createdAt?: string | null;
-            userAId?: string | null;
-            userBId?: string | null;
-            introMessage?: string | null;
-            introSentAt?: string | null;
-            introDeliveredAt?: string | null;
-          } | null>;
-        };
-      };
-
-      const raw = data.apsContactRequestsByStatusAndUpdatedAt?.items || [];
+      const raw = await fetchOwnedContactRequestRows(mySub);
       const incoming = raw
-        .filter((r) => r?.id && r?.owners?.includes(mySub) && r?.requestedByUserId !== mySub)
+        .filter((r) => r.id && r.status === 'PENDING' && r.requestedByUserId !== mySub)
         .map((r) => {
           const fromUserId =
-            r?.requestedByUserId || (r?.userAId === mySub ? r?.userBId : r?.userAId) || '';
+            r.requestedByUserId || (r.userAId === mySub ? r.userBId : r.userAId) || '';
           return {
-            id: r!.id as string,
-            requestKey: (r?.requestKey || '') as string,
+            id: r.id as string,
+            requestKey: (r.requestKey || '') as string,
             fromUserId,
             fromLabel: fromUserId,
-            createdAt: (r?.createdAt || nowIso()) as string,
-            introMessage: r?.introMessage || null,
-            introSentAt: r?.introSentAt || null,
-            introDeliveredAt: r?.introDeliveredAt || null,
+            createdAt: (r.createdAt || nowIso()) as string,
+            introMessage: r.introMessage || null,
+            introSentAt: r.introSentAt || null,
+            introDeliveredAt: r.introDeliveredAt || null,
           } satisfies IncomingRequestItem;
-        });
+        })
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
-      // Resolve labels via public profile lookup (API key models).
       const labeled = await Promise.all(
         incoming.map(async (r) => ({ ...r, fromLabel: await profileLabel(r.fromUserId) }))
       );
@@ -961,68 +938,31 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
   async loadSentRequests() {
     try {
       const mySub = await getMySub();
-      // Use the same index as incoming requests (status=PENDING). This avoids any
-      // auth/index edge cases on the requestedByUserId GSI, while still returning
-      // only records where I’m an owner.
-      const resp = await graphqlAuthClient.graphql({
-        query: apsContactRequestsByStatusAndUpdatedAt,
-        variables: {
-          status: 'PENDING',
-          sortDirection: 'DESC',
-          limit: 100,
-        },
-      });
-      const data = resp.data as {
-        apsContactRequestsByStatusAndUpdatedAt?: {
-          items?: Array<{
-            id?: string | null;
-            requestKey?: string | null;
-            owners?: string[] | null;
-            requestedByUserId?: string | null;
-            status?: string | null;
-            createdAt?: string | null;
-            userAId?: string | null;
-            userBId?: string | null;
-            introMessage?: string | null;
-            introSentAt?: string | null;
-          } | null>;
-        };
-      };
-
-      const raw = data.apsContactRequestsByStatusAndUpdatedAt?.items || [];
+      const raw = await fetchOwnedContactRequestRows(mySub);
       const sent = raw
-        .filter(
-          (r) =>
-            r?.id &&
-            r?.status === 'PENDING' &&
-            Array.isArray(r.owners) &&
-            r.owners.includes(mySub) &&
-            r.requestedByUserId === mySub
-        )
+        .filter((r) => r.id && r.status === 'PENDING' && r.requestedByUserId === mySub)
         .map((r) => {
-          const toUserId =
-            (r?.owners || []).find((x) => x && x !== mySub) ||
-            (r?.userAId === mySub ? r?.userBId : r?.userAId) ||
-            '';
+          const toUserId = otherUserIdFromRequest(r, mySub);
           return {
-            id: r!.id as string,
-            requestKey: (r?.requestKey || '') as string,
+            id: r.id as string,
+            requestKey: (r.requestKey || '') as string,
             toUserId: String(toUserId),
             toLabel: String(toUserId),
-            createdAt: (r?.createdAt || nowIso()) as string,
-            introMessage: r?.introMessage || null,
-            introSentAt: r?.introSentAt || null,
+            createdAt: (r.createdAt || nowIso()) as string,
+            introMessage: r.introMessage || null,
+            introSentAt: r.introSentAt || null,
           } satisfies SentRequestItem;
         })
-        .filter((r) => !!r.toUserId);
+        .filter((r) => !!r.toUserId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
       const labeled = await Promise.all(
         sent.map(async (r) => ({ ...r, toLabel: await profileLabel(r.toUserId) }))
       );
 
       set({ sentRequests: labeled });
-    } catch {
-      // best-effort; ignore
+    } catch (e) {
+      console.error('Failed to load sent requests:', e);
     }
   },
 
@@ -1068,6 +1008,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     if (!otherUserId) {
       throw new Error('Request participants are invalid');
     }
+    invalidateOwnedContactRequestCache();
     await get().loadIncomingRequests();
     setAppBadgeCount(get().getEngageBadgeCount());
     return {
@@ -1081,6 +1022,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       query: updateApsContactRequest,
       variables: { input: { id, status: 'DECLINED', declinedAt: nowIso() } },
     });
+    invalidateOwnedContactRequestCache();
     await get().loadIncomingRequests();
     setAppBadgeCount(get().getEngageBadgeCount());
   },
@@ -1091,13 +1033,50 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     const requestKey = requestKeyFor(eventId, a, b);
     const cleanedIntro = (introMessage || '').trim();
 
+    const rememberOutgoingPending = (params: {
+      requestId: string;
+      status?: string | null;
+      requestedByUserId?: string | null;
+      introMessage?: string | null;
+      introSentAt?: string | null;
+    }) => {
+      invalidateOwnedContactRequestCache();
+      if ((params.status || 'PENDING') !== 'PENDING') return;
+      if (params.requestedByUserId && params.requestedByUserId !== mySub) return;
+      if (get().sentRequests.some((x) => x.id === params.requestId)) return;
+      const item: SentRequestItem = {
+        id: params.requestId,
+        requestKey,
+        toUserId: otherUserId,
+        toLabel: otherUserId,
+        createdAt: nowIso(),
+        introMessage: params.introMessage || cleanedIntro || null,
+        introSentAt: params.introSentAt || (cleanedIntro ? nowIso() : null),
+      };
+      set({ sentRequests: [item, ...get().sentRequests] });
+      void profileLabel(item.toUserId).then((label) => {
+        const list = get().sentRequests;
+        const ix = list.findIndex((x) => x.id === item.id);
+        if (ix < 0) return;
+        const next = list.slice();
+        next[ix] = { ...next[ix], toLabel: label };
+        set({ sentRequests: next });
+      });
+    };
+
     const resp = await graphqlAuthClient.graphql({
       query: apsContactRequestsByRequestKey,
       variables: { requestKey, limit: 1 },
     });
     const data = resp.data as {
       apsContactRequestsByRequestKey?: {
-        items?: Array<{ id?: string | null; status?: string | null; introMessage?: string | null } | null>;
+        items?: Array<{
+          id?: string | null;
+          status?: string | null;
+          introMessage?: string | null;
+          introSentAt?: string | null;
+          requestedByUserId?: string | null;
+        } | null>;
       };
     };
     const existing = data.apsContactRequestsByRequestKey?.items?.find((x) => x?.id);
@@ -1119,6 +1098,13 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           // best effort: if update races we still return existing request
         }
       }
+      rememberOutgoingPending({
+        requestId: existing.id,
+        status: existing.status,
+        requestedByUserId: existing.requestedByUserId,
+        introMessage: existing.introMessage,
+        introSentAt: existing.introSentAt,
+      });
       return { status: existing.status || 'PENDING', requestId: existing.id, requestKey };
     }
 
@@ -1148,8 +1134,18 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       const created = (createResp.data as any)?.createApsContactRequest as {
         id?: string;
         status?: string;
+        introMessage?: string | null;
+        introSentAt?: string | null;
+        requestedByUserId?: string | null;
       };
       if (!created?.id) throw new Error('Failed to create request');
+      rememberOutgoingPending({
+        requestId: created.id,
+        status: created.status || 'PENDING',
+        requestedByUserId: created.requestedByUserId || mySub,
+        introMessage: created.introMessage,
+        introSentAt: created.introSentAt,
+      });
       return { status: created.status || 'PENDING', requestId: created.id, requestKey };
     } catch {
       // Race-safe fallback: if another device created it first, re-query and return it.
@@ -1159,11 +1155,24 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       });
       const againData = again.data as {
         apsContactRequestsByRequestKey?: {
-          items?: Array<{ id?: string | null; status?: string | null } | null>;
+          items?: Array<{
+            id?: string | null;
+            status?: string | null;
+            introMessage?: string | null;
+            introSentAt?: string | null;
+            requestedByUserId?: string | null;
+          } | null>;
         };
       };
       const found = againData.apsContactRequestsByRequestKey?.items?.find((x) => x?.id);
       if (!found?.id) throw new Error('Failed to create request');
+      rememberOutgoingPending({
+        requestId: found.id,
+        status: found.status,
+        requestedByUserId: found.requestedByUserId,
+        introMessage: found.introMessage,
+        introSentAt: found.introSentAt,
+      });
       return { status: found.status || 'PENDING', requestId: found.id, requestKey };
     }
   },
@@ -1188,6 +1197,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       variables: { input: { id: request.id } },
     });
 
+    invalidateOwnedContactRequestCache();
     await Promise.allSettled([get().loadIncomingRequests(), get().loadSentRequests()]);
     setAppBadgeCount(get().getEngageBadgeCount());
   },
@@ -1307,38 +1317,24 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     });
     try {
       const mySub = await getMySub();
-      const resp = await graphqlAuthClient.graphql({
+      const states = await drainIndexedList<{
+        id?: string | null;
+        threadId: string;
+        unreadCount?: number | null;
+        lastMessageAt?: string | null;
+      }>({
+        client: graphqlAuthClient,
         query: apsDmParticipantStatesByUserIdAndLastMessageAt,
+        field: 'apsDmParticipantStatesByUserIdAndLastMessageAt',
         variables: {
           userId: mySub,
           sortDirection: 'DESC',
-          limit: 50,
         },
       });
-      const data = resp.data as {
-        apsDmParticipantStatesByUserIdAndLastMessageAt?: {
-          items?: Array<{
-            id?: string | null;
-            threadId: string;
-            unreadCount?: number | null;
-            lastMessageAt?: string | null;
-          } | null>;
-        };
-      };
-      const states =
-        data.apsDmParticipantStatesByUserIdAndLastMessageAt?.items?.filter(
-          (
-            x
-          ): x is {
-            id?: string | null;
-            threadId: string;
-            unreadCount?: number | null;
-            lastMessageAt?: string | null;
-          } => !!x?.threadId
-        ) || [];
+      const validStates = states.filter((x) => !!x?.threadId);
 
       const items = await Promise.all(
-        states.map(async (s) => {
+        validStates.map(async (s) => {
           let title = 'Conversation';
           let preview = '';
           let avatarKey: string | null = null;
@@ -1367,7 +1363,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
           };
         })
       );
-      const filteredItems = items.filter((item): item is InboxItem => !!item?.threadId);
+      const filteredItems = items.filter((item) => !!item?.threadId) as InboxItem[];
 
       set({
         inbox: filteredItems,
@@ -1376,7 +1372,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
 
       // unread messages badge only counts validated one-to-one threads.
       const allowedThreadIds = new Set(filteredItems.map((item) => item.threadId));
-      const unreadMessages = states.reduce(
+      const unreadMessages = validStates.reduce(
         (acc, s) => (allowedThreadIds.has(s.threadId) ? acc + (s.unreadCount || 0) : acc),
         0
       );
@@ -1398,27 +1394,22 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     try {
       const mySub = await getMySub();
       await validateThreadForUser(threadId, mySub);
-      const resp = await graphqlAuthClient.graphql({
+      const raw = await drainIndexedList<{
+        id?: string | null;
+        threadId?: string | null;
+        senderUserId?: string | null;
+        body?: string | null;
+        createdAt?: string | null;
+      }>({
+        client: graphqlAuthClient,
         query: apsDmMessagesByThreadIdAndCreatedAt,
+        field: 'apsDmMessagesByThreadIdAndCreatedAt',
         variables: {
           threadId,
           sortDirection: 'DESC',
-          limit: 100,
         },
       });
-      const data = resp.data as {
-        apsDmMessagesByThreadIdAndCreatedAt?: {
-          items?: Array<{
-            id?: string | null;
-            threadId?: string | null;
-            senderUserId?: string | null;
-            body?: string | null;
-            createdAt?: string | null;
-          } | null>;
-        };
-      };
-      const items =
-        data.apsDmMessagesByThreadIdAndCreatedAt?.items?.filter((m) => m?.id && m?.createdAt) || [];
+      const items = raw.filter((m) => m?.id && m?.createdAt);
       const mapped: ChatMessage[] = items.map((m) => ({
         id: m!.id as string,
         threadId,

@@ -4,11 +4,12 @@ import { FlatList, StyleSheet, Text } from 'react-native';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { type NotificationKind } from '../notifications/notificationThemes';
 import { NotificationCard } from '../notifications/NotificationCard';
-import { apsAppUserProfilesByUserId, apsContactRequestsByStatusAndUpdatedAt } from '../../graphql/queries';
+import { apsAppUserProfilesByUserId } from '../../graphql/queries';
 import { useEngageStore } from '../../store/engageStore';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
-import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
+import { graphqlApiKeyClient } from '../../utils/graphqlClient';
+import { fetchOwnedContactRequestRows } from '../../utils/contactRequestQueries';
 
 type NotificationRow = {
   id: string;
@@ -91,68 +92,40 @@ export default function NotificationsTool() {
     try {
       const me = await getCurrentUser();
       const mySub = me.userId;
+      const owned = await fetchOwnedContactRequestRows(mySub);
 
-      const [pendingResp, acceptedResp] = await Promise.all([
-        graphqlAuthClient.graphql({
-          query: apsContactRequestsByStatusAndUpdatedAt,
-          variables: { status: 'PENDING', sortDirection: 'DESC', limit: 200 },
-        }),
-        graphqlAuthClient.graphql({
-          query: apsContactRequestsByStatusAndUpdatedAt,
-          variables: { status: 'ACCEPTED', sortDirection: 'DESC', limit: 200 },
-        }),
-      ]);
-
-      const pendingData = pendingResp.data as {
-        apsContactRequestsByStatusAndUpdatedAt?: {
-          items?: {
-            id?: string | null;
-            owners?: string[] | null;
-            requestedByUserId?: string | null;
-            createdAt?: string | null;
-          }[] | null;
-        };
-      };
-
-      const acceptedData = acceptedResp.data as {
-        apsContactRequestsByStatusAndUpdatedAt?: {
-          items?: {
-            id?: string | null;
-            owners?: string[] | null;
-            requestedByUserId?: string | null;
-            acceptedAt?: string | null;
-            updatedAt?: string | null;
-          }[] | null;
-        };
-      };
-
-      const pendingRows = (pendingData.apsContactRequestsByStatusAndUpdatedAt?.items || [])
-        .filter((item) => !!item?.id && Array.isArray(item.owners) && item.owners.includes(mySub))
-        .filter((item) => item?.requestedByUserId !== mySub)
+      const pendingRows = owned
+        .filter((item) => item.id && item.status === 'PENDING' && item.requestedByUserId !== mySub)
         .map(async (item) => {
-          const otherUserId = (item?.owners || []).find((id) => id && id !== mySub) || '';
+          const otherUserId =
+            (item.owners || []).find((id) => id && id !== mySub) ||
+            (item.userAId === mySub ? item.userBId : item.userAId) ||
+            '';
           const otherLabel = otherUserId ? await resolveUserLabel(otherUserId) : 'Community Member';
           return {
-            id: `request-pending-${item?.id}`,
-            requestId: String(item?.id),
+            id: `request-pending-${item.id}`,
+            requestId: String(item.id),
             message: `${otherLabel} sent you a contact request`,
-            timestamp: item?.createdAt || new Date().toISOString(),
+            timestamp: item.createdAt || new Date().toISOString(),
           } satisfies RequestHistoryItem;
         });
 
-      const acceptedRows = (acceptedData.apsContactRequestsByStatusAndUpdatedAt?.items || [])
-        .filter((item) => !!item?.id && Array.isArray(item.owners) && item.owners.includes(mySub))
+      const acceptedRows = owned
+        .filter((item) => item.id && item.status === 'ACCEPTED')
         .map(async (item) => {
-          const requestedByMe = item?.requestedByUserId === mySub;
-          const otherUserId = (item?.owners || []).find((id) => id && id !== mySub) || '';
+          const requestedByMe = item.requestedByUserId === mySub;
+          const otherUserId =
+            (item.owners || []).find((id) => id && id !== mySub) ||
+            (item.userAId === mySub ? item.userBId : item.userAId) ||
+            '';
           const otherLabel = otherUserId ? await resolveUserLabel(otherUserId) : 'Community Member';
           return {
-            id: `request-accepted-${item?.id}`,
-            requestId: String(item?.id),
+            id: `request-accepted-${item.id}`,
+            requestId: String(item.id),
             message: requestedByMe
               ? `${otherLabel} accepted your contact request`
               : `You accepted ${otherLabel}'s contact request`,
-            timestamp: item?.acceptedAt || item?.updatedAt || new Date().toISOString(),
+            timestamp: item.acceptedAt || item.updatedAt || new Date().toISOString(),
           } satisfies RequestHistoryItem;
         });
 

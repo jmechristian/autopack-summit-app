@@ -1122,8 +1122,8 @@ type ApsContactRequest
   # unique: e:<eventId>|u:<a>|u:<b> where a/b are sorted Cognito subs
   requestKey: String! @index(name: "byRequestKey")
 
-  userAId: ID! # Cognito sub (sorted)
-  userBId: ID! # Cognito sub (sorted)
+  userAId: ID! @index(name: "byUserAId", sortKeyFields: ["createdAt"]) # Cognito sub (sorted)
+  userBId: ID! @index(name: "byUserBId", sortKeyFields: ["createdAt"]) # Cognito sub (sorted)
   owners: [String!]! # [userAId, userBId] for @auth multi-owner access
   # who initiated this request (must be either userAId or userBId)
   requestedByUserId: ID!

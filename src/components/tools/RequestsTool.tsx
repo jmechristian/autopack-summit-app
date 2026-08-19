@@ -5,12 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEngageStore } from '../../store/engageStore';
 import { APS_ID } from '../../config/apsConfig';
-import { apsAppUserProfilesByUserId, apsContactRequestsByStatusAndUpdatedAt } from '../../graphql/queries';
+import { apsAppUserProfilesByUserId } from '../../graphql/queries';
 import { AppButton } from '../../ui/AppButton';
 import { AppCard } from '../../ui/AppCard';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
-import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
+import { graphqlApiKeyClient } from '../../utils/graphqlClient';
+import { fetchOwnedContactRequestRows } from '../../utils/contactRequestQueries';
 
 type RequestsToolProps = {
   threadBasePath?: string;
@@ -73,35 +74,19 @@ export default function RequestsTool({
     try {
       const me = await getCurrentUser();
       const mySub = me.userId;
-      const resp = await graphqlAuthClient.graphql({
-        query: apsContactRequestsByStatusAndUpdatedAt,
-        variables: {
-          status: 'ACCEPTED',
-          sortDirection: 'DESC',
-          limit: 200,
-        },
-      });
-      const data = resp.data as {
-        apsContactRequestsByStatusAndUpdatedAt?: {
-          items?: {
-            id?: string | null;
-            owners?: string[] | null;
-            requestedByUserId?: string | null;
-            acceptedAt?: string | null;
-            updatedAt?: string | null;
-          }[] | null;
-        };
-      };
-
-      const acceptedItems = (data.apsContactRequestsByStatusAndUpdatedAt?.items || [])
-        .filter((item) => !!item?.id && Array.isArray(item.owners) && item.owners.includes(mySub))
+      const rows = await fetchOwnedContactRequestRows(mySub);
+      const acceptedItems = rows
+        .filter((item) => item.id && item.status === 'ACCEPTED')
         .map((item) => {
-          const requestedByMe = item?.requestedByUserId === mySub;
-          const otherUserId = (item?.owners || []).find((id) => id && id !== mySub) || '';
+          const requestedByMe = item.requestedByUserId === mySub;
+          const otherUserId =
+            (item.owners || []).find((id) => id && id !== mySub) ||
+            (item.userAId === mySub ? item.userBId : item.userAId) ||
+            '';
           return {
-            id: String(item?.id),
+            id: String(item.id),
             otherUserId,
-            acceptedAt: item?.acceptedAt || item?.updatedAt || new Date().toISOString(),
+            acceptedAt: item.acceptedAt || item.updatedAt || new Date().toISOString(),
             direction: requestedByMe ? ('sent' as const) : ('received' as const),
           };
         });

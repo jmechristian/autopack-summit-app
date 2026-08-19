@@ -17,6 +17,7 @@ import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt } from '../../graphql/queries';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
+import { drainIndexedList } from '../../utils/paginateGraphql';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { RiveLoader } from '../RiveLoader';
 
@@ -182,13 +183,14 @@ export default function SponsorsTool({ detailBasePath }: SponsorsToolProps) {
       return;
     }
     try {
-      const resp = await graphqlAuthClient.graphql({
+      const items = await drainIndexedList<any>({
+        client: graphqlAuthClient,
         query: apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt,
-        variables: { userProfileId: currentProfileId, limit: 1000 },
+        field: 'apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt',
+        variables: { userProfileId: currentProfileId },
       });
-      const data = resp.data as any;
       const map: Record<string, string> = {};
-      for (const row of data?.apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt?.items || []) {
+      for (const row of items) {
         if (!row?.id || !row?.sponsorId) continue;
         if (!map[row.sponsorId]) map[row.sponsorId] = row.id;
       }

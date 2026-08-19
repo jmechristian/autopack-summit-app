@@ -18,6 +18,7 @@ import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { autopackColors } from '../../../src/theme';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import { drainIndexedList } from '../../../src/utils/paginateGraphql';
 import { isWeb, platformUnavailableMessage } from '../../../src/utils/platform';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 
@@ -106,40 +107,27 @@ export default function PassportScreen() {
         return;
       }
 
+      const stampRows = await drainIndexedList<{
+        id?: string | null;
+        exhibitorId?: string | null;
+        eventId?: string | null;
+        scannedAt?: string | null;
+      }>({
+        client: graphqlAuthClient,
+        query: apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
+        field: 'apsAppUserPassportStampsByUserProfileIdAndCreatedAt',
+        variables: { userProfileId: profileId },
+      });
       const allStamps: PassportStamp[] = [];
-      let stampNextToken: string | null | undefined = null;
-      do {
-        const resp = await graphqlAuthClient.graphql({
-          query: apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
-          variables: {
-            userProfileId: profileId,
-            filter: { eventId: { eq: APS_ID } },
-            limit: 200,
-            nextToken: stampNextToken,
-          },
+      for (const item of stampRows) {
+        if (!item.id || !item.exhibitorId || item.eventId !== APS_ID) continue;
+        allStamps.push({
+          id: item.id,
+          exhibitorId: item.exhibitorId,
+          eventId: item.eventId,
+          scannedAt: item.scannedAt || null,
         });
-        const data = (resp as any).data as {
-          apsAppUserPassportStampsByUserProfileIdAndCreatedAt?: {
-            items?: ({
-              id?: string | null;
-              exhibitorId?: string | null;
-              eventId?: string | null;
-              scannedAt?: string | null;
-            } | null)[] | null;
-            nextToken?: string | null;
-          };
-        };
-        for (const item of data.apsAppUserPassportStampsByUserProfileIdAndCreatedAt?.items || []) {
-          if (!item?.id || !item.exhibitorId || item.eventId !== APS_ID) continue;
-          allStamps.push({
-            id: item.id,
-            exhibitorId: item.exhibitorId,
-            eventId: item.eventId,
-            scannedAt: item.scannedAt || null,
-          });
-        }
-        stampNextToken = data.apsAppUserPassportStampsByUserProfileIdAndCreatedAt?.nextToken;
-      } while (stampNextToken);
+      }
       setStamps(allStamps);
     } catch (e: any) {
       console.error('Passport load failed:', e);

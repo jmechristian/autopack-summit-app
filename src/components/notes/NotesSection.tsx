@@ -5,6 +5,7 @@ import { AppCard } from '../../ui/AppCard';
 import { AppButton } from '../../ui/AppButton';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { graphqlAuthClient } from '../../utils/graphqlClient';
+import { drainIndexedList } from '../../utils/paginateGraphql';
 import {
   apsAppUserNotesByProfileId,
   apsAppUserNotesBySessionId,
@@ -118,29 +119,29 @@ export function NotesSection(props: { profileId?: string | null; sessionId?: str
     setLoading(true);
     setError(null);
     try {
-      const query = target.kind === 'profile' ? apsAppUserNotesByProfileId : apsAppUserNotesBySessionId;
-      const variables =
+      const items = (
         target.kind === 'profile'
-          ? {
-              profileId: target.id,
-              limit: 100,
-              filter: { userId: { eq: userId } },
-            }
-          : {
-              sessionId: target.id,
-              limit: 100,
-              filter: { userId: { eq: userId } },
-            };
-
-      const resp = await graphqlAuthClient.graphql({ query, variables });
-      const data = resp.data as any;
-      const connection =
-        target.kind === 'profile'
-          ? data?.apsAppUserNotesByProfileId
-          : data?.apsAppUserNotesBySessionId;
-      const items = (connection?.items || [])
+          ? await drainIndexedList<NoteItem>({
+              client: graphqlAuthClient,
+              query: apsAppUserNotesByProfileId,
+              field: 'apsAppUserNotesByProfileId',
+              variables: {
+                profileId: target.id,
+                filter: { userId: { eq: userId } },
+              },
+            })
+          : await drainIndexedList<NoteItem>({
+              client: graphqlAuthClient,
+              query: apsAppUserNotesBySessionId,
+              field: 'apsAppUserNotesBySessionId',
+              variables: {
+                sessionId: target.id,
+                filter: { userId: { eq: userId } },
+              },
+            })
+      )
         .filter(Boolean)
-        .sort((a: NoteItem, b: NoteItem) => (b.createdAt || '').localeCompare(a.createdAt || '')) as NoteItem[];
+        .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
       setNotes(items);
     } catch (e: any) {
       console.error('Load notes failed:', e);

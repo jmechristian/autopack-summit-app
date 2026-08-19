@@ -17,6 +17,7 @@ import { ApcCertificateCard } from '../../../src/components/certificate/ApcCerti
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import { drainIndexedList } from '../../../src/utils/paginateGraphql';
 import {
   toolGridCellWidth,
   toolGridColumns,
@@ -126,28 +127,18 @@ export default function EngageHome() {
 
       const stampIds = new Set<string>();
       if (profileId) {
-        let stampNextToken: string | null | undefined = null;
-        do {
-          const resp = await graphqlAuthClient.graphql({
-            query: apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
-            variables: {
-              userProfileId: profileId,
-              filter: { eventId: { eq: APS_ID } },
-              limit: 200,
-              nextToken: stampNextToken,
-            },
-          });
-          const data = (resp as any).data as {
-            apsAppUserPassportStampsByUserProfileIdAndCreatedAt?: {
-              items?: ({ exhibitorId?: string | null; eventId?: string | null } | null)[] | null;
-              nextToken?: string | null;
-            };
-          };
-          for (const item of data.apsAppUserPassportStampsByUserProfileIdAndCreatedAt?.items || []) {
-            if (item?.eventId === APS_ID && item.exhibitorId) stampIds.add(item.exhibitorId);
-          }
-          stampNextToken = data.apsAppUserPassportStampsByUserProfileIdAndCreatedAt?.nextToken;
-        } while (stampNextToken);
+        const stampRows = await drainIndexedList<{
+          exhibitorId?: string | null;
+          eventId?: string | null;
+        }>({
+          client: graphqlAuthClient,
+          query: apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
+          field: 'apsAppUserPassportStampsByUserProfileIdAndCreatedAt',
+          variables: { userProfileId: profileId },
+        });
+        for (const item of stampRows) {
+          if (item.eventId === APS_ID && item.exhibitorId) stampIds.add(item.exhibitorId);
+        }
       }
 
       setPassportTotal(exhibitorIds.size);

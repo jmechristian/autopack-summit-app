@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { graphqlAuthClient, graphqlClient } from '../../utils/graphqlClient';
+import { drainIndexedList } from '../../utils/paginateGraphql';
 import { apsAppUserNotesByUserId } from '../../graphql/queries';
 import { ui } from '../../ui/tokens';
 import { AppScreen } from '../../ui/AppScreen';
@@ -97,16 +98,14 @@ export default function NotesTool() {
     setLoading(true);
     setError(null);
     try {
-      const resp = await graphqlAuthClient.graphql({
-        query: apsAppUserNotesByUserId,
-        variables: { userId: currentAppUser.id, limit: 200 },
-      });
-      const data = resp.data as {
-        apsAppUserNotesByUserId?: { items?: (NoteRow | null)[] };
-      };
-      const rows = (data.apsAppUserNotesByUserId?.items || []).filter(
-        (x): x is NoteRow => !!x?.id
-      );
+      const rows = (
+        await drainIndexedList<NoteRow>({
+          client: graphqlAuthClient,
+          query: apsAppUserNotesByUserId,
+          field: 'apsAppUserNotesByUserId',
+          variables: { userId: currentAppUser.id },
+        })
+      ).filter((x): x is NoteRow => !!x?.id);
       rows.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
       setNotes(rows);
 
