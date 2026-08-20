@@ -36,6 +36,7 @@ export interface HubHeroRiveProps {
   stateMachineName?: string;
   backgroundColor?: string;
   aspectRatio?: number;
+  fill?: boolean;
   center?: React.ReactNode;
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -122,6 +123,7 @@ export function HubHeroRive({
   stateMachineName,
   backgroundColor = autopackColors.apDarkBlue,
   aspectRatio = 1,
+  fill = false,
   center,
   children,
   style,
@@ -144,7 +146,15 @@ export function HubHeroRive({
   }, [source]);
 
   return (
-    <View style={[styles.wrap, { backgroundColor, aspectRatio }, style]} testID={testID}>
+    <View
+      style={[
+        styles.wrap,
+        { backgroundColor },
+        fill ? styles.wrapFill : { aspectRatio },
+        style,
+      ]}
+      testID={testID}
+    >
       {src && !failed ? (
         <RiveCanvas
           src={src}
@@ -176,6 +186,12 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'hidden',
     position: 'relative',
+  },
+  wrapFill: {
+    flex: 1,
+    alignSelf: 'stretch',
+    height: '100%',
+    minHeight: 0,
   },
   fill: {
     ...StyleSheet.absoluteFillObject,

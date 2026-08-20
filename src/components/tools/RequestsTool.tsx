@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -10,6 +10,7 @@ import { AppButton } from '../../ui/AppButton';
 import { AppCard } from '../../ui/AppCard';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
+import { confirmAction, showAlert } from '../../utils/alert';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { fetchOwnedContactRequestRows } from '../../utils/contactRequestQueries';
 
@@ -205,34 +206,30 @@ export default function RequestsTool({
                     title={cancelingRequestId === item.id ? 'Canceling…' : 'Cancel request'}
                     onPress={() => {
                       const sentItem = item as any;
-                      Alert.alert(
-                        'Cancel request?',
-                        'Are you sure you want to cancel this request?',
-                        [
-                          { text: 'No', style: 'cancel' },
-                          {
-                            text: 'Yes, cancel',
-                            style: 'destructive',
-                            onPress: async () => {
-                              setCancelingRequestId(item.id);
-                              try {
-                                await cancelSentContactRequest({
-                                  eventId: APS_ID,
-                                  otherUserId: sentItem.toUserId,
-                                });
-                                await loadAcceptedRequests();
-                              } catch (e: any) {
-                                Alert.alert(
-                                  'Cancel failed',
-                                  e?.message || 'Unable to cancel request. Please try again.'
-                                );
-                              } finally {
-                                setCancelingRequestId(null);
-                              }
-                            },
-                          },
-                        ]
-                      );
+                      confirmAction({
+                        title: 'Cancel request?',
+                        message: 'Are you sure you want to cancel this request?',
+                        confirmText: 'Yes, cancel',
+                        cancelText: 'No',
+                        destructive: true,
+                        onConfirm: async () => {
+                          setCancelingRequestId(item.id);
+                          try {
+                            await cancelSentContactRequest({
+                              eventId: APS_ID,
+                              otherUserId: sentItem.toUserId,
+                            });
+                            await loadAcceptedRequests();
+                          } catch (e: any) {
+                            showAlert(
+                              'Cancel failed',
+                              e?.message || 'Unable to cancel request. Please try again.'
+                            );
+                          } finally {
+                            setCancelingRequestId(null);
+                          }
+                        },
+                      });
                     }}
                     variant='muted'
                     disabled={cancelingRequestId === item.id}
@@ -252,7 +249,7 @@ export default function RequestsTool({
                     onPress={() => {
                       const acceptedItem = item as any;
                       if (!acceptedItem.otherProfileId) {
-                        Alert.alert('Unavailable', 'Could not open this profile.');
+                        showAlert('Unavailable', 'Could not open this profile.');
                         return;
                       }
                       router.push(`${communityBasePath}/${encodeURIComponent(acceptedItem.otherProfileId)}`);
@@ -265,7 +262,7 @@ export default function RequestsTool({
                     onPress={async () => {
                       const acceptedItem = item as any;
                       if (!acceptedItem.otherUserId) {
-                        Alert.alert('Unavailable', 'Could not determine this user for chat.');
+                        showAlert('Unavailable', 'Could not determine this user for chat.');
                         return;
                       }
                       setOpeningChatUserId(acceptedItem.otherUserId);
@@ -276,7 +273,7 @@ export default function RequestsTool({
                         });
                         router.push(`${threadBasePath}/${threadId}`);
                       } catch (e: any) {
-                        Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+                        showAlert('Unable to start chat', e?.message || 'Please try again.');
                       } finally {
                         setOpeningChatUserId(null);
                       }

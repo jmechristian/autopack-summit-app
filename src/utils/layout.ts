@@ -17,6 +17,9 @@ export const breakpoints = {
 /** Max width for main tab / interior content columns (desktop web). */
 export const MAX_CONTENT_WIDTH = 1000;
 
+/** Centered sign-in / password-reset form column. */
+export const AUTH_FORM_MAX_WIDTH = 520;
+
 /** Two-column Hub shell (wireframe) from tablet width up. */
 export function isHubWideLayout(width: number) {
   return width >= breakpoints.sm;

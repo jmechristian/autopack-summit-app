@@ -39,6 +39,8 @@ export interface HubHeroRiveProps {
   backgroundColor?: string;
   /** Defaults to 1 (square). Pass another ratio for tablet columns. */
   aspectRatio?: number;
+  /** Fill the parent instead of locking a square — used to match Quick Tools height. */
+  fill?: boolean;
   center?: React.ReactNode;
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -55,13 +57,22 @@ export function HubHeroRive({
   stateMachineName,
   backgroundColor = autopackColors.apDarkBlue,
   aspectRatio = 1,
+  fill = false,
   center,
   children,
   style,
   testID,
 }: HubHeroRiveProps) {
   return (
-    <View style={[styles.wrap, { backgroundColor, aspectRatio }, style]} testID={testID}>
+    <View
+      style={[
+        styles.wrap,
+        { backgroundColor },
+        fill ? styles.wrapFill : { aspectRatio },
+        style,
+      ]}
+      testID={testID}
+    >
       {source ? (
         <RiveLayer
           source={source}
@@ -89,6 +100,12 @@ const styles = StyleSheet.create({
   wrap: {
     width: '100%',
     overflow: 'hidden',
+  },
+  wrapFill: {
+    flex: 1,
+    alignSelf: 'stretch',
+    height: '100%',
+    minHeight: 0,
   },
   fill: {
     ...StyleSheet.absoluteFillObject,

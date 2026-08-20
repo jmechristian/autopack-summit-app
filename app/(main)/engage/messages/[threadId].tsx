@@ -1,23 +1,68 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  KeyboardAvoidingView,
+  Keyboard,
+  LayoutAnimation,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
+  type KeyboardEvent,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEngageStore } from '../../../../src/store/engageStore';
 import { autopackColors } from '../../../../src/theme';
+import { isWeb } from '../../../../src/utils/platform';
+
+function useComposerKeyboardInset(tabBarHeight: number) {
+  const { height: windowHeight } = useWindowDimensions();
+  const [inset, setInset] = useState(0);
+
+  useEffect(() => {
+    if (isWeb) return;
+
+    const show = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hide = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const apply = (next: number, duration?: number) => {
+      if (Platform.OS === 'ios' && duration) {
+        LayoutAnimation.configureNext({
+          duration,
+          update: { type: LayoutAnimation.Types.keyboard, duration },
+        });
+      }
+      setInset(next);
+    };
+
+    const onShow = (e: KeyboardEvent) => {
+      // Screen already sits above the tab bar; keyboard height is from the window bottom.
+      const covered = windowHeight - e.endCoordinates.screenY - tabBarHeight;
+      apply(Math.max(0, covered), e.duration);
+    };
+    const onHide = (e: KeyboardEvent) => apply(0, e.duration);
+
+    const showSub = Keyboard.addListener(show, onShow);
+    const hideSub = Keyboard.addListener(hide, onHide);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [windowHeight, tabBarHeight]);
+
+  return inset;
+}
 
 export default function ChatScreen() {
   const { threadId } = useLocalSearchParams<{ threadId: string }>();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = Math.max(useBottomTabBarHeight(), 56);
+  const keyboardInset = useComposerKeyboardInset(tabBarHeight);
   const [text, setText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [inputHeight, setInputHeight] = useState(64);
@@ -85,14 +130,10 @@ export default function ChatScreen() {
       listRef.current?.scrollToEnd({ animated: true });
     }, 40);
     return () => clearTimeout(t);
-  }, [data.length]);
+  }, [data.length, keyboardInset]);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
-      keyboardVerticalOffset={Platform.select({ ios: 72, android: 0 })}
-    >
+    <View style={[styles.container, { paddingBottom: keyboardInset }]}>
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <FlatList
@@ -100,6 +141,7 @@ export default function ChatScreen() {
         data={data}
         keyExtractor={(m) => m.id}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
         contentContainerStyle={{ paddingVertical: 12, paddingBottom: 10 }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
         onLayout={() => listRef.current?.scrollToEnd({ animated: false })}
@@ -117,7 +159,12 @@ export default function ChatScreen() {
         )}
       />
 
-      <View style={[styles.composer, { paddingBottom: Math.max(10, insets.bottom) }]}>
+      <View
+        style={[
+          styles.composer,
+          { paddingBottom: keyboardInset > 0 ? 12 : Math.max(10, insets.bottom) },
+        ]}
+      >
         <TextInput
           value={text}
           onChangeText={setText}
@@ -162,7 +209,7 @@ export default function ChatScreen() {
           )}
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

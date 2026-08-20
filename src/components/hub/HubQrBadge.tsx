@@ -25,12 +25,15 @@ export interface HubQrBadgeProps {
   qrUri?: string | null;
   /** Attendee name rendered under the code, e.g. "Apple Tester". */
   name?: string;
+  /** Pixel width for the QR tile. Defaults to 42% of the hero. */
+  tileWidth?: number;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
 
-function QrPlaceholder() {
+function QrPlaceholder({ tileWidth }: { tileWidth?: number }) {
   const pulse = useSharedValue(0.45);
+  const tileSizeStyle = tileWidth ? { width: tileWidth } : undefined;
 
   useEffect(() => {
     if (isWeb) return;
@@ -43,7 +46,7 @@ function QrPlaceholder() {
 
   if (isWeb) {
     return (
-      <View style={[styles.tile, styles.placeholderTile, { opacity: 0.65 }]}>
+      <View style={[styles.tile, styles.placeholderTile, tileSizeStyle, { opacity: 0.65 }]}>
         <Ionicons name="qr-code-outline" size={36} color="rgba(255,255,255,0.7)" />
         <Text style={styles.placeholderText}>Loading</Text>
       </View>
@@ -51,7 +54,7 @@ function QrPlaceholder() {
   }
 
   return (
-    <Animated.View style={[styles.tile, styles.placeholderTile, animatedStyle]}>
+    <Animated.View style={[styles.tile, styles.placeholderTile, tileSizeStyle, animatedStyle]}>
       <Ionicons name="qr-code-outline" size={36} color="rgba(255,255,255,0.7)" />
       <Text style={styles.placeholderText}>Loading</Text>
     </Animated.View>
@@ -63,7 +66,8 @@ function QrPlaceholder() {
  * Shows a subtle pulsing placeholder until the QR URL is ready, then fades in.
  * Name fades in independently when available.
  */
-export function HubQrBadge({ qrUri, name, style, testID }: HubQrBadgeProps) {
+export function HubQrBadge({ qrUri, name, tileWidth, style, testID }: HubQrBadgeProps) {
+  const tileSizeStyle = tileWidth ? { width: tileWidth } : undefined;
   return (
     <View style={[styles.wrap, style]} testID={testID}>
       {qrUri ? (
@@ -71,7 +75,7 @@ export function HubQrBadge({ qrUri, name, style, testID }: HubQrBadgeProps) {
           key={qrUri}
           entering={FadeIn.duration(FADE_IN_DURATION_MS)}
           exiting={FadeOut.duration(120)}
-          style={styles.tile}
+          style={[styles.tile, tileSizeStyle]}
         >
           <Image
             source={{ uri: qrUri }}
@@ -83,7 +87,7 @@ export function HubQrBadge({ qrUri, name, style, testID }: HubQrBadgeProps) {
           />
         </SafeEnteringView>
       ) : (
-        <QrPlaceholder />
+        <QrPlaceholder tileWidth={tileWidth} />
       )}
 
       {name ? (

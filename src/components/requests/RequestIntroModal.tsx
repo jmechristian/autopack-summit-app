@@ -37,44 +37,55 @@ export function RequestIntroModal({
     }
   }, [visible]);
 
+  const card = (
+    <View style={styles.card}>
+      <Text style={styles.title}>Add an intro message</Text>
+      <Text style={styles.subtitle}>
+        This will send a contact request and message to {recipientName || 'this user'}.
+      </Text>
+
+      <TextInput
+        style={styles.input}
+        multiline
+        value={message}
+        onChangeText={(value) => setMessage(value.slice(0, MAX_INTRO_LENGTH))}
+        placeholder='Say hello and share why you want to connect...'
+        placeholderTextColor={ui.colors.muted}
+        textAlignVertical='top'
+        editable={!loading}
+        autoFocus={Platform.OS !== 'web'}
+      />
+      <Text style={styles.counter}>
+        {message.length}/{MAX_INTRO_LENGTH}
+      </Text>
+
+      <View style={styles.actions}>
+        <AppButton title='Cancel' onPress={onCancel} variant='muted' disabled={loading} />
+        <AppButton
+          title={loading ? 'Sending…' : 'Send request'}
+          onPress={() => onSubmit(message.trim())}
+          disabled={loading || !message.trim()}
+        />
+      </View>
+    </View>
+  );
+
   return (
     <Modal visible={visible} animationType='fade' transparent onRequestClose={onCancel}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.backdrop}
-      >
-        <Pressable style={styles.scrim} onPress={onCancel} />
-        <View style={styles.card}>
-          <Text style={styles.title}>Add an intro message</Text>
-          <Text style={styles.subtitle}>
-            This will send a contact request and message to {recipientName || 'this user'}.
-          </Text>
-
-          <TextInput
-            style={styles.input}
-            multiline
-            value={message}
-            onChangeText={(value) => setMessage(value.slice(0, MAX_INTRO_LENGTH))}
-            placeholder='Say hello and share why you want to connect...'
-            placeholderTextColor={ui.colors.muted}
-            textAlignVertical='top'
-            editable={!loading}
-            autoFocus
-          />
-          <Text style={styles.counter}>
-            {message.length}/{MAX_INTRO_LENGTH}
-          </Text>
-
-          <View style={styles.actions}>
-            <AppButton title='Cancel' onPress={onCancel} variant='muted' disabled={loading} />
-            <AppButton
-              title={loading ? 'Sending…' : 'Send request'}
-              onPress={() => onSubmit(message.trim())}
-              disabled={loading || !message.trim()}
-            />
-          </View>
+      {Platform.OS === 'web' ? (
+        <View style={styles.webRoot}>
+          <Pressable style={styles.scrim} onPress={onCancel} />
+          {card}
         </View>
-      </KeyboardAvoidingView>
+      ) : (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.backdrop}
+        >
+          <Pressable style={styles.scrim} onPress={onCancel} />
+          {card}
+        </KeyboardAvoidingView>
+      )}
     </Modal>
   );
 }
@@ -86,6 +97,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
+  webRoot: {
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    zIndex: 10000,
+  },
   scrim: {
     ...StyleSheet.absoluteFillObject,
   },
@@ -93,6 +115,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 14,
     padding: 16,
+    zIndex: 1,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   title: {
     fontSize: 17,

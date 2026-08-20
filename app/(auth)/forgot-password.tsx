@@ -4,11 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,17 +12,17 @@ import {
   View,
 } from 'react-native';
 import { FadeInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  AuthBrandLockup,
+  AuthScreenShell,
+} from '../../src/components/auth/AuthScreenShell';
 import { SafeEnteringView } from '../../src/components/SafeEnteringView';
 import { autopackColors } from '../../src/theme';
 import { getAuthErrorMessage, getForgotPasswordRequestMessage } from '../../src/utils/authErrors';
-import { MAX_CONTENT_WIDTH } from '../../src/utils/layout';
-import { isWeb } from '../../src/utils/platform';
 
 type Step = 'request' | 'confirm';
 
 export default function ForgotPasswordScreen() {
-  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ email?: string | string[] }>();
   const initialEmail = Array.isArray(params.email) ? params.email[0] : params.email;
 
@@ -120,43 +116,20 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <View style={styles.root}>
-      <ImageBackground
-        source={require('../../assets/images/login-back.png')}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-        resizeMode='cover'
-      />
-      <KeyboardAvoidingView
-        style={[styles.container, { paddingTop: insets.top }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingBottom: insets.bottom + 20 },
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps='always'
-          keyboardDismissMode='on-drag'
-        >
-          <View style={[styles.contentFrame, isWeb && styles.contentFrameWeb]}>
-          <View style={styles.contentView}>
-            <View style={styles.titleContainer}>
-              <SafeEnteringView entering={FadeInDown.duration(600).delay(100)}>
-                <Text style={styles.title}>
-                  {step === 'request' ? 'Forgot\nPassword' : 'Reset\nPassword'}
-                </Text>
-                <Text style={styles.subtitle}>
-                  {step === 'request'
-                    ? 'Enter your email and we will send a verification code.'
-                    : `Enter the code sent to ${deliveryHint || email.trim()} and choose a new password.`}
-                </Text>
-              </SafeEnteringView>
-            </View>
+    <AuthScreenShell>
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(100)}>
+        <AuthBrandLockup
+          title={step === 'request' ? 'Forgot\nPassword' : 'Reset\nPassword'}
+          subtitle={
+            step === 'request'
+              ? 'Enter your email and we will send a verification code.'
+              : `Enter the code sent to ${deliveryHint || email.trim()} and choose a new password.`
+          }
+        />
+      </SafeEnteringView>
 
-            <SafeEnteringView entering={FadeInDown.duration(600).delay(250)}>
-              <View style={styles.card}>
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(250)}>
+        <View style={styles.card}>
                 {step === 'request' ? (
                   <>
                     <Pressable
@@ -326,68 +299,16 @@ export default function ForgotPasswordScreen() {
                 >
                   <Text style={styles.linkText}>Back to sign in</Text>
                 </TouchableOpacity>
-              </View>
-            </SafeEnteringView>
-          </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+        </View>
+      </SafeEnteringView>
+    </AuthScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
-  },
-  backgroundImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'rgba(30, 58, 138, 0.25)',
-  },
-  scrollContent: {
-    minHeight: '100%',
-    width: '100%',
-    alignItems: 'center',
-  },
-  contentFrame: {
-    width: '100%',
-    maxWidth: MAX_CONTENT_WIDTH,
-    alignSelf: 'center',
-  },
-  contentFrameWeb: {
-    paddingHorizontal: 24,
-  },
-  contentView: {
-    padding: 32,
-    paddingHorizontal: 24,
-    flex: 1,
-  },
-  titleContainer: { marginBottom: 32 },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#000',
-    marginBottom: 12,
-    letterSpacing: -0.5,
-    textTransform: 'uppercase',
-  },
-  subtitle: {
-    color: '#71717a',
-    fontSize: 16,
-    lineHeight: 24,
-  },
   card: {
-    marginTop: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderRadius: 20,
     padding: 20,
   },
   inputContainer: {

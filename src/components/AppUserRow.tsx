@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { memo, useState } from 'react';
 import {
-  Alert,
   Image,
   Pressable,
   StyleProp,
@@ -15,6 +14,8 @@ import { APS_ID } from '../config/apsConfig';
 import { useEngageStore } from '../store/engageStore';
 import { useCommunityStore } from '../store/communityStore';
 import { autopackColors } from '../theme';
+import { confirmAction, showAlert } from '../utils/alert';
+import { isWeb } from '../utils/platform';
 import { RequestIntroModal } from './requests/RequestIntroModal';
 
 /** Fixed row height for SectionList getItemLayout / sticky-header stability. */
@@ -110,21 +111,25 @@ function AppUserRowComponent({
       });
       openThread(threadId);
     } catch (e: any) {
-      Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+      showAlert('Unable to start chat', e?.message || 'Please try again.');
     } finally {
       setOpeningChat(false);
     }
   };
 
   const startRequestWithIntro = () => {
-    Alert.alert(
-      'Send contact request?',
-      `This will send a contact request to ${name}.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Continue', onPress: () => setIntroModalVisible(true) },
-      ]
-    );
+    // Intro modal already confirms the send. Native Alert.alert buttons are a
+    // no-op on web, so skip the extra prompt there.
+    if (isWeb) {
+      setIntroModalVisible(true);
+      return;
+    }
+    confirmAction({
+      title: 'Send contact request?',
+      message: `This will send a contact request to ${name}.`,
+      confirmText: 'Continue',
+      onConfirm: () => setIntroModalVisible(true),
+    });
   };
 
   return (
@@ -161,7 +166,7 @@ function AppUserRowComponent({
                 contactId: profileId,
               });
             } catch {
-              Alert.alert('Favorite failed', 'Could not update favorite. Please try again.');
+              showAlert('Favorite failed', 'Could not update favorite. Please try again.');
             }
           }}
           style={styles.iconBtn}
@@ -195,31 +200,27 @@ function AppUserRowComponent({
 
             if (pendingRequestState) {
               if (pendingRequestState === 'sent') {
-                Alert.alert(
-                  'Cancel request?',
-                  'Are you sure you want to cancel this request?',
-                  [
-                    { text: 'No', style: 'cancel' },
-                    {
-                      text: 'Yes, cancel',
-                      style: 'destructive',
-                      onPress: async () => {
-                        try {
-                          await cancelSentContactRequest({
-                            eventId: APS_ID,
-                            otherUserId: userId,
-                          });
-                          Alert.alert('Request canceled', 'Your request has been canceled.');
-                        } catch (e: any) {
-                          Alert.alert(
-                            'Cancel failed',
-                            e?.message || 'Unable to cancel request. Please try again.'
-                          );
-                        }
-                      },
-                    },
-                  ]
-                );
+                confirmAction({
+                  title: 'Cancel request?',
+                  message: 'Are you sure you want to cancel this request?',
+                  confirmText: 'Yes, cancel',
+                  cancelText: 'No',
+                  destructive: true,
+                  onConfirm: async () => {
+                    try {
+                      await cancelSentContactRequest({
+                        eventId: APS_ID,
+                        otherUserId: userId,
+                      });
+                      showAlert('Request canceled', 'Your request has been canceled.');
+                    } catch (e: any) {
+                      showAlert(
+                        'Cancel failed',
+                        e?.message || 'Unable to cancel request. Please try again.'
+                      );
+                    }
+                  },
+                });
                 return;
               }
               router.push('/(main)/engage/requests');
@@ -262,7 +263,7 @@ function AppUserRowComponent({
             });
             setIntroModalVisible(false);
             if (status !== 'ACCEPTED') {
-              Alert.alert('Request sent', `You sent a contact request and message to ${name}.`);
+              showAlert('Request sent', `You sent a contact request and message to ${name}.`);
               return;
             }
             const { threadId } = await ensureDmThreadForAcceptedRequest({
@@ -273,10 +274,10 @@ function AppUserRowComponent({
           } catch (e: any) {
             const msg = (e?.message || '').toLowerCase();
             if (msg.includes('not accepted')) {
-              Alert.alert('Waiting for acceptance', 'You can message once they accept your request.');
+              showAlert('Waiting for acceptance', 'You can message once they accept your request.');
               return;
             }
-            Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+            showAlert('Unable to start chat', e?.message || 'Please try again.');
           } finally {
             setSendingIntroRequest(false);
           }

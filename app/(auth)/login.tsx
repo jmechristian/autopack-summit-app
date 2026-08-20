@@ -10,11 +10,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -22,13 +18,14 @@ import {
   View,
 } from 'react-native';
 import { FadeInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  AuthBrandLockup,
+  AuthScreenShell,
+} from '../../src/components/auth/AuthScreenShell';
 import { SafeEnteringView } from '../../src/components/SafeEnteringView';
 import { autopackColors } from '../../src/theme';
-import { isWeb } from '../../src/utils/platform';
 
 export default function LoginScreen() {
-  const insets = useSafeAreaInsets();
   const emailInputRef = React.useRef<TextInput>(null);
   const passwordInputRef = React.useRef<TextInput>(null);
 
@@ -290,69 +287,22 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.root}>
-      <ImageBackground
-        source={require('../../assets/images/login-back.png')}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-        resizeMode='cover'
+    <AuthScreenShell>
+      <LoginFields
+        email={email}
+        password={password}
+        localError={localError}
+        showPassword={showPassword}
+        isLoading={isLoading}
+        emailInputRef={emailInputRef}
+        passwordInputRef={passwordInputRef}
+        setEmail={setEmail}
+        setPassword={setPassword}
+        setShowPassword={setShowPassword}
+        onLogin={handleLogin}
+        onForgotPassword={handleForgotPassword}
       />
-      <KeyboardAvoidingView
-        style={[styles.container, !isWeb && { paddingTop: insets.top }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        {isWeb ? (
-          <View style={styles.webShell}>
-            <View style={styles.webInner}>
-              <LoginFields
-                email={email}
-                password={password}
-                localError={localError}
-                showPassword={showPassword}
-                isLoading={isLoading}
-                emailInputRef={emailInputRef}
-                passwordInputRef={passwordInputRef}
-                setEmail={setEmail}
-                setPassword={setPassword}
-                setShowPassword={setShowPassword}
-                onLogin={handleLogin}
-                onForgotPassword={handleForgotPassword}
-                web
-              />
-            </View>
-          </View>
-        ) : (
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={[
-              styles.scrollContent,
-              { paddingBottom: insets.bottom + 20 },
-            ]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps='always'
-            keyboardDismissMode='on-drag'
-          >
-            <View style={styles.contentView}>
-              <LoginFields
-                email={email}
-                password={password}
-                localError={localError}
-                showPassword={showPassword}
-                isLoading={isLoading}
-                emailInputRef={emailInputRef}
-                passwordInputRef={passwordInputRef}
-                setEmail={setEmail}
-                setPassword={setPassword}
-                setShowPassword={setShowPassword}
-                onLogin={handleLogin}
-                onForgotPassword={handleForgotPassword}
-                web={false}
-              />
-            </View>
-          </ScrollView>
-        )}
-      </KeyboardAvoidingView>
-    </View>
+    </AuthScreenShell>
   );
 }
 
@@ -369,7 +319,6 @@ type LoginFieldsProps = {
   setShowPassword: (v: boolean) => void;
   onLogin: () => void;
   onForgotPassword: () => void;
-  web: boolean;
 };
 
 function LoginFields({
@@ -385,23 +334,15 @@ function LoginFields({
   setShowPassword,
   onLogin,
   onForgotPassword,
-  web,
 }: LoginFieldsProps) {
   return (
     <>
-      <View style={[styles.titleContainer, web && styles.titleContainerWeb]}>
-        <SafeEnteringView entering={FadeInDown.duration(600).delay(100)}>
-          <Text style={[styles.title, web && styles.titleWeb]}>
-            Welcome to{'\n'}The Summit!
-          </Text>
-          <Text style={[styles.subtitle, web && styles.subtitleWeb]}>
-            The premier open forum for Automotive Packaging Professionals
-          </Text>
-        </SafeEnteringView>
-      </View>
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(100)}>
+        <AuthBrandLockup subtitle='The premier open forum for Automotive Packaging Professionals' />
+      </SafeEnteringView>
 
       <SafeEnteringView entering={FadeInDown.duration(600).delay(400)}>
-        <View style={[styles.card, web && styles.cardWeb]}>
+        <View style={styles.card}>
           <Pressable
             style={styles.inputContainer}
             onPress={() => emailInputRef.current?.focus()}
@@ -494,79 +435,9 @@ function LoginFields({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
-  },
-  backgroundImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'rgba(30, 58, 138, 0.25)',
-  },
-  webShell: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  webInner: {
-    width: '100%',
-    maxWidth: 480,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    minHeight: '100%',
-  },
-  contentView: {
-    padding: 32,
-    paddingHorizontal: 24,
-    flex: 1,
-  },
-  titleContainer: {
-    marginBottom: 40,
-  },
-  titleContainerWeb: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  titleWeb: {
-    textAlign: 'center',
-  },
-  subtitleWeb: {
-    textAlign: 'center',
-  },
-  cardWeb: {
-    width: '100%',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#000',
-    marginBottom: 12,
-    letterSpacing: -0.5,
-    textTransform: 'uppercase',
-  },
-  subtitle: {
-    color: '#71717a',
-    fontSize: 18,
-    lineHeight: 26,
-  },
   card: {
-    marginTop: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderRadius: 20,
     padding: 20,
   },
   inputContainer: {

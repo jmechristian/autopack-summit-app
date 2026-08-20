@@ -28,6 +28,7 @@ import { useEngageStore } from '../../store/engageStore';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { drainIndexedList } from '../../utils/paginateGraphql';
+import { showAlert } from '../../utils/alert';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { NotesSection } from '../notes/NotesSection';
 import { RequestIntroModal } from '../requests/RequestIntroModal';
@@ -333,7 +334,7 @@ export default function CommunityProfileScreen() {
           router.push(`/(main)/engage/messages/${threadId}`);
         } catch (e: any) {
           console.error('Message thread start failed:', e);
-          Alert.alert('Unable to start chat', e?.message || 'Please try again.');
+          showAlert('Unable to start chat', e?.message || 'Please try again.');
         }
         return;
       }
@@ -343,23 +344,11 @@ export default function CommunityProfileScreen() {
         return;
       }
 
-      Alert.alert(
-        'Send contact request?',
-        `This will send a contact request to ${displayName}.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Continue',
-            onPress: () => {
-              setIntroOpensChatWhenAccepted(openChatWhenAccepted);
-              setIntroModalVisible(true);
-            },
-          },
-        ]
-      );
+      // Native Alert.alert buttons do nothing on web — open the intro modal directly.
+      setIntroOpensChatWhenAccepted(openChatWhenAccepted);
+      setIntroModalVisible(true);
     },
     [
-      displayName,
       ensureDmThreadForAcceptedRequest,
       isRequestAccepted,
       isRequestPending,
@@ -398,22 +387,22 @@ export default function CommunityProfileScreen() {
         }
 
         if (status === 'ACCEPTED') {
-          Alert.alert('Accepted', 'Your contact request is accepted.');
+          showAlert('Accepted', 'Your contact request is accepted.');
           return;
         }
 
-        Alert.alert('Request sent', `You sent a contact request and message to ${displayName}.`);
+        showAlert('Request sent', `You sent a contact request and message to ${displayName}.`);
       } catch (e: any) {
         const msg = (e?.message || '').toLowerCase();
         if (msg.includes('not accepted')) {
-          Alert.alert(
+          showAlert(
             'Waiting for acceptance',
             'You can message once they accept your request.'
           );
           return;
         }
         console.error('Contact request flow failed:', e);
-        Alert.alert('Unable to continue', e?.message || 'Please try again.');
+        showAlert('Unable to continue', e?.message || 'Please try again.');
       } finally {
         setRequestActionBusy(false);
       }

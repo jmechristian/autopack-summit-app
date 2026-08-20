@@ -182,7 +182,8 @@ function selectHubSessions(sessions: NextSession[], now: Date) {
     return { sessions: [], headerLabel: 'Coming Up' as const };
   }
 
-  return { sessions: [upcomingSessions[0]], headerLabel: 'Coming Up' as const };
+  // Skip the first two agenda items (e.g. registration / welcome) and start at the 3rd.
+  return { sessions: upcomingSessions.slice(2), headerLabel: 'Coming Up' as const };
 }
 
 function htmlToPlainText(input: string) {
@@ -221,7 +222,15 @@ export default function HubScreen() {
   const currentAppUser = useCurrentAppUser();
   const companyId = currentAppUser?.registrant?.companyId || null;
   const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
+  const [heroBox, setHeroBox] = useState({ width: 0, height: 0 });
+  const [toolsHeight, setToolsHeight] = useState(0);
+  const hubQrTileWidth = useMemo(() => {
+    if (!hubWide || heroBox.width < 8 || heroBox.height < 8) return undefined;
+    const basis = Math.min(heroBox.width, heroBox.height);
+    return Math.round(basis * 0.42);
+  }, [heroBox.height, heroBox.width, hubWide]);
   const [sessionIndex, setSessionIndex] = useState(0);
+  const [pagerWidth, setPagerWidth] = useState(0);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [avatarReady, setAvatarReady] = useState(false);
   const [allSessions, setAllSessions] = useState<NextSession[]>([]);
@@ -478,7 +487,8 @@ export default function HubScreen() {
     () => (passportTotal > 0 ? Math.round((passportCollected / passportTotal) * 100) : 0),
     [passportCollected, passportTotal],
   );
-  const comingUpPageW = hubWide ? wideCols.hero : screenW - contentInset * 2;
+  const comingUpPageW =
+    pagerWidth > 0 ? pagerWidth : hubWide ? wideCols.hero : Math.max(1, screenW - contentInset * 2);
   const progressTranslateX = useMemo(() => {
     const trackW = 120;
     const dotW = 16;
@@ -637,7 +647,14 @@ export default function HubScreen() {
   const heroBlock = (
     <HubHeroRive
       source={HUB_HERO_RIVE}
-      center={<HubQrBadge qrUri={qrCodeUrl} name={fullName} />}
+      fill={hubWide}
+      center={
+        <HubQrBadge
+          qrUri={qrCodeUrl}
+          name={fullName}
+          tileWidth={hubQrTileWidth}
+        />
+      }
       style={hubWide ? styles.heroWide : undefined}
     >
       <View
@@ -762,12 +779,10 @@ export default function HubScreen() {
     nextSessions.length > 0 ? (
       <SafeEnteringView
         entering={FadeInDown.duration(600).delay(160)}
-        style={hubWide ? styles.comingUpFill : undefined}
       >
         <View
           style={[
             styles.comingUpModule,
-            hubWide && styles.comingUpModuleFill,
             nextSessionHeaderLabel === 'Live Now' && styles.comingUpModuleLive,
           ]}
         >
@@ -810,9 +825,11 @@ export default function HubScreen() {
           <RNAnimated.ScrollView
             horizontal
             pagingEnabled
-            style={hubWide ? styles.comingUpPagerFill : undefined}
-            contentContainerStyle={hubWide ? styles.comingUpPagerContentFill : undefined}
             showsHorizontalScrollIndicator={false}
+            onLayout={(e) => {
+              const w = Math.round(e.nativeEvent.layout.width);
+              setPagerWidth((prev) => (prev === w ? prev : w));
+            }}
             onScroll={RNAnimated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
               { useNativeDriver: true },
@@ -834,17 +851,9 @@ export default function HubScreen() {
               return (
                 <View
                   key={s.id}
-                  style={[
-                    { width: comingUpPageW },
-                    hubWide && styles.comingUpPageFill,
-                  ]}
+                  style={{ width: comingUpPageW }}
                 >
-                  <View
-                    style={[
-                      styles.sessionCardWrap,
-                      hubWide && styles.sessionCardWrapFill,
-                    ]}
-                  >
+                  <View style={styles.sessionCardWrap}>
                     <AgendaSessionCard
                       timeLabel={timeLabel}
                       title={s.title}
@@ -853,13 +862,10 @@ export default function HubScreen() {
                       descriptionText={s.descriptionText}
                       speakerNames={s.speakerNames}
                       sponsorNames={s.sponsorNames}
-                      descriptionNumberOfLines={hubWide ? 6 : 5}
+                      descriptionNumberOfLines={5}
                       metaNumberOfLines={1}
                       showViewSessionButton
-                      cardStyle={[
-                        styles.nextSessionCard,
-                        hubWide ? styles.nextSessionCardFill : styles.nextSessionCardPhone,
-                      ]}
+                      cardStyle={styles.nextSessionCard}
                       showPresentationButton={live && !!presentationUrl}
                       onPressPresentation={() => {
                         router.push({
@@ -979,7 +985,7 @@ export default function HubScreen() {
       {hubWide ? (
         <View
           style={[
-            styles.wideRow,
+            styles.wideShell,
             {
               paddingTop: insets.top + 24,
               paddingHorizontal: contentInset,
@@ -987,16 +993,40 @@ export default function HubScreen() {
             },
           ]}
         >
-          <View style={[styles.wideHeroCol, { width: wideCols.hero }]}>
-            {heroBlock}
-            <View style={styles.countdownInStack}>
-              <HubCountdownStrip />
+          <View style={[styles.wideRow, { gap: wideCols.gap }]}>
+            <View
+              style={[
+                styles.wideHeroMatch,
+                { width: wideCols.hero },
+                toolsHeight > 0 ? { height: toolsHeight } : null,
+              ]}
+              onLayout={(e) => {
+                const { width, height } = e.nativeEvent.layout;
+                setHeroBox((prev) =>
+                  prev.width === width && prev.height === height ? prev : { width, height }
+                );
+              }}
+            >
+              {heroBlock}
             </View>
-            {comingUpBlock}
+            <View
+              style={{ width: wideCols.stack }}
+              onLayout={(e) => {
+                const h = Math.round(e.nativeEvent.layout.height);
+                setToolsHeight((prev) => (prev === h ? prev : h));
+              }}
+            >
+              {quickToolsBlock}
+            </View>
           </View>
-          <View style={[styles.wideStack, { width: wideCols.stack }]}>
-            {quickToolsBlock}
-            {sideStackBlock}
+          <View style={[styles.wideRow, { gap: wideCols.gap }]}>
+            <View style={[styles.wideHeroCol, { width: wideCols.hero }]}>
+              <View style={styles.countdownInStack}>
+                <HubCountdownStrip />
+              </View>
+              {comingUpBlock}
+            </View>
+            <View style={[styles.wideStack, { width: wideCols.stack }]}>{sideStackBlock}</View>
           </View>
         </View>
       ) : (
@@ -1177,10 +1207,18 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
+  wideShell: {
+    width: '100%',
+  },
   wideRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
     width: '100%',
+  },
+  wideHeroMatch: {
+    alignSelf: 'stretch',
+    overflow: 'hidden',
+    borderRadius: 16,
   },
   wideHeroCol: {
     gap: 12,
@@ -1460,9 +1498,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
     elevation: 0,
   },
-  nextSessionCardPhone: {
-    height: 320,
-  },
   nextSessionCardFill: {
     flex: 1,
   },
@@ -1494,7 +1529,12 @@ const styles = StyleSheet.create({
   },
   speakerName: { fontWeight: '700', color: ui.colors.text },
   speakerRole: { color: ui.colors.muted, fontSize: 12 },
-  progressWrap: { alignItems: 'center', marginTop: 12, gap: 8 },
+  progressWrap: {
+    alignItems: 'center',
+    marginTop: 10,
+    paddingBottom: 20,
+    gap: 8,
+  },
   progressTrack: {
     width: 120,
     height: 10,
