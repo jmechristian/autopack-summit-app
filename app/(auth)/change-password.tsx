@@ -18,6 +18,7 @@ import { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeEnteringView } from '../../src/components/SafeEnteringView';
 import { autopackColors } from '../../src/theme';
+import { navigateToHub } from '../../src/utils/navigateToHub';
 
 export default function ChangePasswordScreen() {
   const insets = useSafeAreaInsets();
@@ -56,7 +57,7 @@ export default function ChangePasswordScreen() {
       setIsLoading(false);
 
       if (result.isSignedIn) {
-        router.replace('/(main)/hub');
+        navigateToHub();
       } else {
         setError(
           'Password updated, but additional sign-in steps may be required.'

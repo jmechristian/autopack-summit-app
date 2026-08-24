@@ -8,6 +8,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
+  InteractionManager,
   StyleProp,
   StyleSheet,
   View,
@@ -135,6 +136,14 @@ export function HubHeroRive({
     source != null ? resolveAssetUri(source) : PUBLIC_HUB_RIVE
   );
   const [failed, setFailed] = useState(false);
+  const [mountRive, setMountRive] = useState(false);
+
+  useEffect(() => {
+    const handle = InteractionManager.runAfterInteractions(() => {
+      setMountRive(true);
+    });
+    return () => handle.cancel?.();
+  }, []);
 
   useEffect(() => {
     setFailed(false);
@@ -155,7 +164,7 @@ export function HubHeroRive({
       ]}
       testID={testID}
     >
-      {src && !failed ? (
+      {src && !failed && mountRive ? (
         <RiveCanvas
           src={src}
           artboardName={artboardName}

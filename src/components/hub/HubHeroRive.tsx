@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import React, { memo, useEffect, useState } from 'react';
+import { InteractionManager, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import Rive, { Alignment, Fit } from 'rive-react-native';
 import { autopackColors } from '../../theme';
 
@@ -48,8 +48,9 @@ export interface HubHeroRiveProps {
 }
 
 /**
- * Hub hero. Mounts the Rive file immediately so Hub data fetching can
- * run in parallel — do not gate the Hub screen on this animation.
+ * Hub hero. Paints immediately so Hub can load in parallel. Native Rive waits
+ * until the current navigation/keyboard interactions finish — mounting it
+ * mid-transition (login → Hub) can freeze the iOS UI thread.
  */
 export function HubHeroRive({
   source,
@@ -63,6 +64,15 @@ export function HubHeroRive({
   style,
   testID,
 }: HubHeroRiveProps) {
+  const [mountRive, setMountRive] = useState(false);
+
+  useEffect(() => {
+    const handle = InteractionManager.runAfterInteractions(() => {
+      setMountRive(true);
+    });
+    return () => handle.cancel?.();
+  }, []);
+
   return (
     <View
       style={[
@@ -73,7 +83,7 @@ export function HubHeroRive({
       ]}
       testID={testID}
     >
-      {source ? (
+      {source && mountRive ? (
         <RiveLayer
           source={source}
           artboardName={artboardName}

@@ -601,6 +601,10 @@ export const deleteApsRegistrant = /* GraphQL */ `mutation DeleteApsRegistrant(
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -770,6 +774,10 @@ export const createApsAppUser = /* GraphQL */ `mutation CreateApsAppUser(
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -901,6 +909,10 @@ export const deleteApsAppUser = /* GraphQL */ `mutation DeleteApsAppUser(
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -1244,6 +1256,10 @@ export const createApsAppUserNote = /* GraphQL */ `mutation CreateApsAppUserNote
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -1416,6 +1432,10 @@ export const updateApsAppUserNote = /* GraphQL */ `mutation UpdateApsAppUserNote
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -1588,6 +1608,10 @@ export const deleteApsAppUserNote = /* GraphQL */ `mutation DeleteApsAppUserNote
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -5219,6 +5243,10 @@ export const updateRegistrantAddOnRequest = /* GraphQL */ `mutation UpdateRegist
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -5315,6 +5343,10 @@ export const deleteRegistrantAddOnRequest = /* GraphQL */ `mutation DeleteRegist
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -5483,6 +5515,10 @@ export const createApsSeatingChartRegistrant = /* GraphQL */ `mutation CreateAps
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -5573,6 +5609,10 @@ export const updateApsSeatingChartRegistrant = /* GraphQL */ `mutation UpdateAps
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -5663,6 +5703,10 @@ export const deleteApsSeatingChartRegistrant = /* GraphQL */ `mutation DeleteAps
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -6155,6 +6199,57 @@ export const deleteApsAdminAnnouncement = /* GraphQL */ `mutation DeleteApsAdmin
 ` as GeneratedMutation<
   APITypes.DeleteApsAdminAnnouncementMutationVariables,
   APITypes.DeleteApsAdminAnnouncementMutation
+>;
+export const deleteApsEmailCampaign = /* GraphQL */ `mutation DeleteApsEmailCampaign(
+  $input: DeleteApsEmailCampaignInput!
+  $condition: ModelApsEmailCampaignConditionInput
+) {
+  deleteApsEmailCampaign(input: $input, condition: $condition) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsEmailCampaignMutationVariables,
+  APITypes.DeleteApsEmailCampaignMutation
+>;
+export const deleteApsEmailSend = /* GraphQL */ `mutation DeleteApsEmailSend(
+  $input: DeleteApsEmailSendInput!
+  $condition: ModelApsEmailSendConditionInput
+) {
+  deleteApsEmailSend(input: $input, condition: $condition) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteApsEmailSendMutationVariables,
+  APITypes.DeleteApsEmailSendMutation
 >;
 export const createApsUserEngageState = /* GraphQL */ `mutation CreateApsUserEngageState(
   $input: CreateApsUserEngageStateInput!
@@ -6931,6 +7026,10 @@ export const createApsRegistrant = /* GraphQL */ `mutation CreateApsRegistrant(
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -7067,6 +7166,10 @@ export const updateApsRegistrant = /* GraphQL */ `mutation UpdateApsRegistrant(
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -7170,6 +7273,10 @@ export const updateApsAppUser = /* GraphQL */ `mutation UpdateApsAppUser(
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -8832,6 +8939,10 @@ export const createRegistrantAddOnRequest = /* GraphQL */ `mutation CreateRegist
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -8880,6 +8991,108 @@ export const createRegistrantAddOnRequest = /* GraphQL */ `mutation CreateRegist
 ` as GeneratedMutation<
   APITypes.CreateRegistrantAddOnRequestMutationVariables,
   APITypes.CreateRegistrantAddOnRequestMutation
+>;
+export const createApsEmailCampaign = /* GraphQL */ `mutation CreateApsEmailCampaign(
+  $input: CreateApsEmailCampaignInput!
+  $condition: ModelApsEmailCampaignConditionInput
+) {
+  createApsEmailCampaign(input: $input, condition: $condition) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsEmailCampaignMutationVariables,
+  APITypes.CreateApsEmailCampaignMutation
+>;
+export const updateApsEmailCampaign = /* GraphQL */ `mutation UpdateApsEmailCampaign(
+  $input: UpdateApsEmailCampaignInput!
+  $condition: ModelApsEmailCampaignConditionInput
+) {
+  updateApsEmailCampaign(input: $input, condition: $condition) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsEmailCampaignMutationVariables,
+  APITypes.UpdateApsEmailCampaignMutation
+>;
+export const createApsEmailSend = /* GraphQL */ `mutation CreateApsEmailSend(
+  $input: CreateApsEmailSendInput!
+  $condition: ModelApsEmailSendConditionInput
+) {
+  createApsEmailSend(input: $input, condition: $condition) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateApsEmailSendMutationVariables,
+  APITypes.CreateApsEmailSendMutation
+>;
+export const updateApsEmailSend = /* GraphQL */ `mutation UpdateApsEmailSend(
+  $input: UpdateApsEmailSendInput!
+  $condition: ModelApsEmailSendConditionInput
+) {
+  updateApsEmailSend(input: $input, condition: $condition) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateApsEmailSendMutationVariables,
+  APITypes.UpdateApsEmailSendMutation
 >;
 export const createAPSCompanyEvents = /* GraphQL */ `mutation CreateAPSCompanyEvents(
   $input: CreateAPSCompanyEventsInput!

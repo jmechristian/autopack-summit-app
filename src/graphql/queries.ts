@@ -191,6 +191,10 @@ export const getApsAppUserNote = /* GraphQL */ `query GetApsAppUserNote($id: ID!
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -2811,6 +2815,92 @@ export const apsContactRequestsByRequestKey = /* GraphQL */ `query ApsContactReq
   APITypes.ApsContactRequestsByRequestKeyQueryVariables,
   APITypes.ApsContactRequestsByRequestKeyQuery
 >;
+export const apsContactRequestsByUserAIdAndCreatedAt = /* GraphQL */ `query ApsContactRequestsByUserAIdAndCreatedAt(
+  $userAId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsContactRequestFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsContactRequestsByUserAIdAndCreatedAt(
+    userAId: $userAId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      eventId
+      requestKey
+      userAId
+      userBId
+      owners
+      requestedByUserId
+      status
+      introMessage
+      introSentAt
+      introDeliveredAt
+      acceptedAt
+      declinedAt
+      blockedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsContactRequestsByUserAIdAndCreatedAtQueryVariables,
+  APITypes.ApsContactRequestsByUserAIdAndCreatedAtQuery
+>;
+export const apsContactRequestsByUserBIdAndCreatedAt = /* GraphQL */ `query ApsContactRequestsByUserBIdAndCreatedAt(
+  $userBId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsContactRequestFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsContactRequestsByUserBIdAndCreatedAt(
+    userBId: $userBId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      eventId
+      requestKey
+      userAId
+      userBId
+      owners
+      requestedByUserId
+      status
+      introMessage
+      introSentAt
+      introDeliveredAt
+      acceptedAt
+      declinedAt
+      blockedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsContactRequestsByUserBIdAndCreatedAtQueryVariables,
+  APITypes.ApsContactRequestsByUserBIdAndCreatedAtQuery
+>;
 export const apsContactRequestsByRequestedByUserIdAndCreatedAt = /* GraphQL */ `query ApsContactRequestsByRequestedByUserIdAndCreatedAt(
   $requestedByUserId: ID!
   $createdAt: ModelStringKeyConditionInput
@@ -3673,6 +3763,10 @@ export const getApsRegistrant = /* GraphQL */ `query GetApsRegistrant($id: ID!) 
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -3775,6 +3869,10 @@ export const listApsRegistrants = /* GraphQL */ `query ListApsRegistrants(
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -3855,6 +3953,10 @@ export const apsRegistrantsByApsID = /* GraphQL */ `query ApsRegistrantsByApsID(
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -3935,6 +4037,10 @@ export const apsRegistrantsByEmail = /* GraphQL */ `query ApsRegistrantsByEmail(
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -4015,6 +4121,10 @@ export const apsRegistrantsByCompanyId = /* GraphQL */ `query ApsRegistrantsByCo
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -4085,6 +4195,10 @@ export const getApsAppUser = /* GraphQL */ `query GetApsAppUser($id: ID!) {
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -7107,6 +7221,10 @@ export const getRegistrantAddOnRequest = /* GraphQL */ `query GetRegistrantAddOn
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -7343,6 +7461,10 @@ export const getApsSeatingChartRegistrant = /* GraphQL */ `query GetApsSeatingCh
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -7483,6 +7605,236 @@ export const apsSeatingChartRegistrantsByRegistrantID = /* GraphQL */ `query Aps
 ` as GeneratedQuery<
   APITypes.ApsSeatingChartRegistrantsByRegistrantIDQueryVariables,
   APITypes.ApsSeatingChartRegistrantsByRegistrantIDQuery
+>;
+export const getApsEmailCampaign = /* GraphQL */ `query GetApsEmailCampaign($id: ID!) {
+  getApsEmailCampaign(id: $id) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetApsEmailCampaignQueryVariables,
+  APITypes.GetApsEmailCampaignQuery
+>;
+export const listApsEmailCampaigns = /* GraphQL */ `query ListApsEmailCampaigns(
+  $filter: ModelApsEmailCampaignFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listApsEmailCampaigns(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      eventId
+      name
+      templateKey
+      subject
+      audienceStatuses
+      audienceTypes
+      status
+      scheduledAt
+      startedAt
+      completedAt
+      totalRecipients
+      sentCount
+      failedCount
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListApsEmailCampaignsQueryVariables,
+  APITypes.ListApsEmailCampaignsQuery
+>;
+export const apsEmailCampaignsByEventIdAndCreatedAt = /* GraphQL */ `query ApsEmailCampaignsByEventIdAndCreatedAt(
+  $eventId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsEmailCampaignFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsEmailCampaignsByEventIdAndCreatedAt(
+    eventId: $eventId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      eventId
+      name
+      templateKey
+      subject
+      audienceStatuses
+      audienceTypes
+      status
+      scheduledAt
+      startedAt
+      completedAt
+      totalRecipients
+      sentCount
+      failedCount
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsEmailCampaignsByEventIdAndCreatedAtQueryVariables,
+  APITypes.ApsEmailCampaignsByEventIdAndCreatedAtQuery
+>;
+export const apsEmailCampaignsByEventIdAndScheduledAt = /* GraphQL */ `query ApsEmailCampaignsByEventIdAndScheduledAt(
+  $eventId: ID!
+  $scheduledAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsEmailCampaignFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsEmailCampaignsByEventIdAndScheduledAt(
+    eventId: $eventId
+    scheduledAt: $scheduledAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      eventId
+      name
+      templateKey
+      subject
+      audienceStatuses
+      audienceTypes
+      status
+      scheduledAt
+      startedAt
+      completedAt
+      totalRecipients
+      sentCount
+      failedCount
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsEmailCampaignsByEventIdAndScheduledAtQueryVariables,
+  APITypes.ApsEmailCampaignsByEventIdAndScheduledAtQuery
+>;
+export const getApsEmailSend = /* GraphQL */ `query GetApsEmailSend($id: ID!) {
+  getApsEmailSend(id: $id) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetApsEmailSendQueryVariables,
+  APITypes.GetApsEmailSendQuery
+>;
+export const listApsEmailSends = /* GraphQL */ `query ListApsEmailSends(
+  $filter: ModelApsEmailSendFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listApsEmailSends(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      campaignId
+      eventId
+      registrantId
+      email
+      status
+      sesMessageId
+      error
+      sentAt
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListApsEmailSendsQueryVariables,
+  APITypes.ListApsEmailSendsQuery
+>;
+export const apsEmailSendsByCampaignIdAndCreatedAt = /* GraphQL */ `query ApsEmailSendsByCampaignIdAndCreatedAt(
+  $campaignId: ID!
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelApsEmailSendFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  apsEmailSendsByCampaignIdAndCreatedAt(
+    campaignId: $campaignId
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      campaignId
+      eventId
+      registrantId
+      email
+      status
+      sesMessageId
+      error
+      sentAt
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ApsEmailSendsByCampaignIdAndCreatedAtQueryVariables,
+  APITypes.ApsEmailSendsByCampaignIdAndCreatedAtQuery
 >;
 export const getAPSCompanyEvents = /* GraphQL */ `query GetAPSCompanyEvents($id: ID!) {
   getAPSCompanyEvents(id: $id) {

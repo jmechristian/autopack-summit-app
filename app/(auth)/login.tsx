@@ -17,13 +17,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { FadeInDown } from 'react-native-reanimated';
 import {
   AuthBrandLockup,
   AuthScreenShell,
 } from '../../src/components/auth/AuthScreenShell';
-import { SafeEnteringView } from '../../src/components/SafeEnteringView';
 import { autopackColors } from '../../src/theme';
+import { navigateToHub } from '../../src/utils/navigateToHub';
 
 export default function LoginScreen() {
   const emailInputRef = React.useRef<TextInput>(null);
@@ -44,7 +43,7 @@ export default function LoginScreen() {
     let mounted = true;
     getCurrentUser()
       .then(() => {
-        if (mounted) router.replace('/(main)/hub');
+        if (mounted) navigateToHub();
       })
       .catch(() => {
         // Stay on login
@@ -135,7 +134,9 @@ export default function LoginScreen() {
       if (result.isSignedIn) {
         // Normal login success
         setIsLoading(false);
-        router.replace('/(main)/hub');
+        emailInputRef.current?.blur();
+        passwordInputRef.current?.blur();
+        navigateToHub();
         return;
       }
 
@@ -337,12 +338,9 @@ function LoginFields({
 }: LoginFieldsProps) {
   return (
     <>
-      <SafeEnteringView entering={FadeInDown.duration(600).delay(100)}>
-        <AuthBrandLockup subtitle='The premier open forum for Automotive Packaging Professionals' />
-      </SafeEnteringView>
+      <AuthBrandLockup subtitle='The premier open forum for Automotive Packaging Professionals' />
 
-      <SafeEnteringView entering={FadeInDown.duration(600).delay(400)}>
-        <View style={styles.card}>
+      <View style={styles.card}>
           <Pressable
             style={styles.inputContainer}
             onPress={() => emailInputRef.current?.focus()}
@@ -429,7 +427,6 @@ function LoginFields({
             </Text>
           </View>
         </View>
-      </SafeEnteringView>
     </>
   );
 }

@@ -2,9 +2,14 @@ projects:
   autopacksummitapp:
     schemaPath: src/graphql/schema.json
     includes:
-      - src/graphql/**/*.ts
+      - src/graphql/queries.ts
+      - src/graphql/mutations.ts
+      - src/graphql/subscriptions.ts
     excludes:
       - ./amplify/**
+      - src/graphql/customQueries.ts
+      - src/graphql/dmOps.ts
+      - src/graphql/engageState.ts
     extensions:
       amplify:
         codeGenTarget: typescript

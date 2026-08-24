@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Image,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AUTH_FORM_MAX_WIDTH } from '../../utils/layout';
+import { isWeb } from '../../utils/platform';
 
 type AuthScreenShellProps = {
   children: React.ReactNode;
@@ -20,11 +20,12 @@ export function AuthScreenShell({ children }: AuthScreenShellProps) {
   const insets = useSafeAreaInsets();
 
   return (
-    <ImageBackground
-      source={require('../../../assets/images/mobile-bg.png')}
-      style={styles.background}
-      resizeMode='cover'
-    >
+    <View style={styles.root}>
+      <Image
+        source={require('../../../assets/images/mobile-bg.png')}
+        style={[styles.bgImage, isWeb ? ({ objectFit: 'cover' } as object) : null]}
+        resizeMode='cover'
+      />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -45,7 +46,7 @@ export function AuthScreenShell({ children }: AuthScreenShellProps) {
           <View style={styles.frame}>{children}</View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 }
 
@@ -70,9 +71,24 @@ export function AuthBrandLockup({ title, subtitle }: AuthBrandLockupProps) {
 }
 
 const styles = StyleSheet.create({
-  background: {
+  root: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#005892',
+    ...(isWeb
+      ? {
+          height: '100%',
+          minHeight: '100vh' as unknown as number,
+          overflow: 'hidden' as const,
+        }
+      : null),
+  },
+  bgImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
   },
   flex: {
     flex: 1,

@@ -165,6 +165,10 @@ export const onCreateApsAppUserNote = /* GraphQL */ `subscription OnCreateApsApp
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -337,6 +341,10 @@ export const onUpdateApsAppUserNote = /* GraphQL */ `subscription OnUpdateApsApp
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -509,6 +517,10 @@ export const onDeleteApsAppUserNote = /* GraphQL */ `subscription OnDeleteApsApp
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -3585,6 +3597,10 @@ export const onCreateApsRegistrant = /* GraphQL */ `subscription OnCreateApsRegi
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -3720,6 +3736,10 @@ export const onUpdateApsRegistrant = /* GraphQL */ `subscription OnUpdateApsRegi
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -3855,6 +3875,10 @@ export const onDeleteApsRegistrant = /* GraphQL */ `subscription OnDeleteApsRegi
     welcomeEmailSentDate
     welcomeEmailReceived
     welcomeEmailReceivedDate
+    appEmailSent
+    appEmailSentDate
+    appEmailReceived
+    appEmailReceivedDate
     paymentMethod
     paymentLast4
     approvedAt
@@ -3957,6 +3981,10 @@ export const onCreateApsAppUser = /* GraphQL */ `subscription OnCreateApsAppUser
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -4087,6 +4115,10 @@ export const onUpdateApsAppUser = /* GraphQL */ `subscription OnUpdateApsAppUser
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -4217,6 +4249,10 @@ export const onDeleteApsAppUser = /* GraphQL */ `subscription OnDeleteApsAppUser
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -7758,6 +7794,10 @@ export const onCreateRegistrantAddOnRequest = /* GraphQL */ `subscription OnCrea
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -7853,6 +7893,10 @@ export const onUpdateRegistrantAddOnRequest = /* GraphQL */ `subscription OnUpda
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -7948,6 +7992,10 @@ export const onDeleteRegistrantAddOnRequest = /* GraphQL */ `subscription OnDele
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -8112,6 +8160,10 @@ export const onCreateApsSeatingChartRegistrant = /* GraphQL */ `subscription OnC
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -8201,6 +8253,10 @@ export const onUpdateApsSeatingChartRegistrant = /* GraphQL */ `subscription OnU
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -8290,6 +8346,10 @@ export const onDeleteApsSeatingChartRegistrant = /* GraphQL */ `subscription OnD
       welcomeEmailSentDate
       welcomeEmailReceived
       welcomeEmailReceivedDate
+      appEmailSent
+      appEmailSentDate
+      appEmailReceived
+      appEmailReceivedDate
       paymentMethod
       paymentLast4
       approvedAt
@@ -8317,6 +8377,153 @@ export const onDeleteApsSeatingChartRegistrant = /* GraphQL */ `subscription OnD
 ` as GeneratedSubscription<
   APITypes.OnDeleteApsSeatingChartRegistrantSubscriptionVariables,
   APITypes.OnDeleteApsSeatingChartRegistrantSubscription
+>;
+export const onCreateApsEmailCampaign = /* GraphQL */ `subscription OnCreateApsEmailCampaign(
+  $filter: ModelSubscriptionApsEmailCampaignFilterInput
+) {
+  onCreateApsEmailCampaign(filter: $filter) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsEmailCampaignSubscriptionVariables,
+  APITypes.OnCreateApsEmailCampaignSubscription
+>;
+export const onUpdateApsEmailCampaign = /* GraphQL */ `subscription OnUpdateApsEmailCampaign(
+  $filter: ModelSubscriptionApsEmailCampaignFilterInput
+) {
+  onUpdateApsEmailCampaign(filter: $filter) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsEmailCampaignSubscriptionVariables,
+  APITypes.OnUpdateApsEmailCampaignSubscription
+>;
+export const onDeleteApsEmailCampaign = /* GraphQL */ `subscription OnDeleteApsEmailCampaign(
+  $filter: ModelSubscriptionApsEmailCampaignFilterInput
+) {
+  onDeleteApsEmailCampaign(filter: $filter) {
+    id
+    eventId
+    name
+    templateKey
+    subject
+    audienceStatuses
+    audienceTypes
+    status
+    scheduledAt
+    startedAt
+    completedAt
+    totalRecipients
+    sentCount
+    failedCount
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsEmailCampaignSubscriptionVariables,
+  APITypes.OnDeleteApsEmailCampaignSubscription
+>;
+export const onCreateApsEmailSend = /* GraphQL */ `subscription OnCreateApsEmailSend(
+  $filter: ModelSubscriptionApsEmailSendFilterInput
+) {
+  onCreateApsEmailSend(filter: $filter) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateApsEmailSendSubscriptionVariables,
+  APITypes.OnCreateApsEmailSendSubscription
+>;
+export const onUpdateApsEmailSend = /* GraphQL */ `subscription OnUpdateApsEmailSend(
+  $filter: ModelSubscriptionApsEmailSendFilterInput
+) {
+  onUpdateApsEmailSend(filter: $filter) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateApsEmailSendSubscriptionVariables,
+  APITypes.OnUpdateApsEmailSendSubscription
+>;
+export const onDeleteApsEmailSend = /* GraphQL */ `subscription OnDeleteApsEmailSend(
+  $filter: ModelSubscriptionApsEmailSendFilterInput
+) {
+  onDeleteApsEmailSend(filter: $filter) {
+    id
+    campaignId
+    eventId
+    registrantId
+    email
+    status
+    sesMessageId
+    error
+    sentAt
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteApsEmailSendSubscriptionVariables,
+  APITypes.OnDeleteApsEmailSendSubscription
 >;
 export const onCreateAPSCompanyEvents = /* GraphQL */ `subscription OnCreateAPSCompanyEvents(
   $filter: ModelSubscriptionAPSCompanyEventsFilterInput

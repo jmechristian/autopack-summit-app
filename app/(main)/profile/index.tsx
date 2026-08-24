@@ -270,6 +270,20 @@ export default function Profile() {
   const roleCompanyLine = [jobTitle, company].filter(Boolean).join(', ');
   const profileEmail = (profile.email || registrant?.email || '').trim();
   const registrantType = formatRegistrantType(registrant?.attendeeType || null);
+  const registrantId = registrant?.id || appUser.registrantId || null;
+
+  const handleViewRegistrationDashboard = () => {
+    if (!registrantId) {
+      Alert.alert(
+        'Unavailable',
+        'No registration found for this account.'
+      );
+      return;
+    }
+    void Linking.openURL(
+      `https://autopacksummit.com/registrants/${registrantId}`
+    );
+  };
 
   return (
     <KeyboardAvoidingView
@@ -404,6 +418,22 @@ export default function Profile() {
               <Ionicons name='settings-outline' size={20} color='#fff' />
             </View>
             <Text style={styles.actionTileText}>Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionTile,
+              styles.actionTileFull,
+              !registrantId && styles.actionTileDisabled,
+            ]}
+            onPress={handleViewRegistrationDashboard}
+            disabled={!registrantId}
+            accessibilityRole='link'
+            accessibilityLabel='View Registration Dashboard'
+          >
+            <View style={styles.actionIconWrap}>
+              <Ionicons name='open-outline' size={20} color='#fff' />
+            </View>
+            <Text style={styles.actionTileText}>View Registration Dashboard</Text>
           </TouchableOpacity>
         </View>
 

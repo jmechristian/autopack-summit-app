@@ -1,11 +1,9 @@
 import {
   apsContactRequestsByRequestedByUserIdAndCreatedAt,
   apsContactRequestsByStatusAndUpdatedAt,
-} from '../graphql/queries';
-import {
   apsContactRequestsByUserAIdAndCreatedAt,
   apsContactRequestsByUserBIdAndCreatedAt,
-} from '../graphql/contactRequestOps';
+} from '../graphql/queries';
 import { graphqlAuthClient } from './graphqlClient';
 import { drainIndexedList } from './paginateGraphql';
 

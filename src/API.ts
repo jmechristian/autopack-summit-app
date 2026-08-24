@@ -2,6 +2,245 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
+export type AdminThinkificByEmailResult = {
+  __typename: "AdminThinkificByEmailResult",
+  email: string,
+  thinkificUserId?: number | null,
+  apcEnrollments:  Array<AdminThinkificEnrollment >,
+  otherEnrollments:  Array<AdminThinkificEnrollment >,
+};
+
+export type AdminThinkificEnrollment = {
+  __typename: "AdminThinkificEnrollment",
+  enrollmentId?: number | null,
+  courseId?: number | null,
+  courseName?: string | null,
+  percentageCompleted?: number | null,
+  completedAt?: string | null,
+  activatedAt?: string | null,
+};
+
+export type AdminLatestTempCredentialResult = {
+  __typename: "AdminLatestTempCredentialResult",
+  registrantId: string,
+  email: string,
+  tempPassword: string,
+  createdAt: string,
+};
+
+export type ApsTempCredential = {
+  __typename: "ApsTempCredential",
+  id: string,
+  apsID: string,
+  registrantId: string,
+  email: string,
+  tempPasswordCiphertext: string,
+  tempPasswordIv: string,
+  tempPasswordTag: string,
+  expiresAt?: number | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type ModelApsTempCredentialFilterInput = {
+  id?: ModelIDInput | null,
+  apsID?: ModelIDInput | null,
+  registrantId?: ModelIDInput | null,
+  email?: ModelStringInput | null,
+  tempPasswordCiphertext?: ModelStringInput | null,
+  tempPasswordIv?: ModelStringInput | null,
+  tempPasswordTag?: ModelStringInput | null,
+  expiresAt?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsTempCredentialFilterInput | null > | null,
+  or?: Array< ModelApsTempCredentialFilterInput | null > | null,
+  not?: ModelApsTempCredentialFilterInput | null,
+};
+
+export type ModelIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
+};
+
+export enum ModelAttributeTypes {
+  binary = "binary",
+  binarySet = "binarySet",
+  bool = "bool",
+  list = "list",
+  map = "map",
+  number = "number",
+  numberSet = "numberSet",
+  string = "string",
+  stringSet = "stringSet",
+  _null = "_null",
+}
+
+
+export type ModelSizeInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+};
+
+export type ModelStringInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
+};
+
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type ModelApsTempCredentialConnection = {
+  __typename: "ModelApsTempCredentialConnection",
+  items:  Array<ApsTempCredential | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNote = {
+  __typename: "ApsAppUserNote",
+  id: string,
+  owner?: string | null,
+  userId: string,
+  user: ApsAppUser,
+  note?: string | null,
+  sessionId?: string | null,
+  session?: ApsAppSession | null,
+  exhibitorId?: string | null,
+  exhibitor?: ApsAppExhibitorProfile | null,
+  registrantId?: string | null,
+  registrant?: ApsRegistrant | null,
+  profileId?: string | null,
+  profile?: ApsAppUserProfile | null,
+  companyId?: string | null,
+  company?: APSCompany | null,
+  createdAt: string,
+  updatedAt: string,
+  apsAppUserNotesId?: string | null,
+};
+
+export type ApsAppUser = {
+  __typename: "ApsAppUser",
+  id: string,
+  registrantId: string,
+  registrant: ApsRegistrant,
+  photos?: ModelApsAppUserPhotoConnection | null,
+  sessionQuestions?: ModelApsAppSessionQuestionConnection | null,
+  exhibitorDeals?: ModelApsAppExhibitorDealConnection | null,
+  contacts?: ModelApsAppUserContactConnection | null,
+  notes?: ModelApsAppUserNoteConnection | null,
+  leads?: ModelApsAppUserLeadConnection | null,
+  sentDmMessages?: ModelApsDmMessageConnection | null,
+  profileId?: string | null,
+  profile?: ApsAppUserProfile | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ApsRegistrant = {
+  __typename: "ApsRegistrant",
+  id: string,
+  apsID: string,
+  aps: APS,
+  firstName?: string | null,
+  lastName?: string | null,
+  email: string,
+  phone?: string | null,
+  companyId?: string | null,
+  company?: APSCompany | null,
+  jobTitle?: string | null,
+  attendeeType: RegistrantType,
+  termsAccepted?: boolean | null,
+  interests?: Array< string | null > | null,
+  otherInterest?: string | null,
+  buyerQuestion?: string | null,
+  packagingChallenge?: string | null,
+  certification?: string | null,
+  billingAddressFirstName?: string | null,
+  billingAddressLastName?: string | null,
+  billingAddressEmail?: string | null,
+  billingAddressPhone?: string | null,
+  billingAddressStreet?: string | null,
+  billingAddressCity?: string | null,
+  billingAddressState?: string | null,
+  billingAddressZip?: string | null,
+  billingAddressCountry?: string | null,
+  sameAsAttendee?: boolean | null,
+  speakerTopic?: string | null,
+  learningObjectives?: string | null,
+  totalAmount?: number | null,
+  discountCode?: string | null,
+  status: RegistrantStatus,
+  paymentConfirmation?: string | null,
+  registrationEmailSent?: boolean | null,
+  registrationEmailSentDate?: string | null,
+  registrationEmailReceived?: boolean | null,
+  registrationEmailReceivedDate?: string | null,
+  welcomeEmailSent?: boolean | null,
+  welcomeEmailSentDate?: string | null,
+  welcomeEmailReceived?: boolean | null,
+  welcomeEmailReceivedDate?: string | null,
+  appEmailSent?: boolean | null,
+  appEmailSentDate?: string | null,
+  appEmailReceived?: boolean | null,
+  appEmailReceivedDate?: string | null,
+  paymentMethod?: string | null,
+  paymentLast4?: string | null,
+  approvedAt?: string | null,
+  headshot?: string | null,
+  presentation?: string | null,
+  presentationTitle?: string | null,
+  presentationSummary?: string | null,
+  bio?: string | null,
+  invoice?: string | null,
+  seatingChartRegistrant?: ApsSeatingChartRegistrant | null,
+  addOnRequests?: ModelRegistrantAddOnRequestConnection | null,
+  appUserId?: string | null,
+  appUser?: ApsAppUser | null,
+  notes?: ModelApsAppUserNoteConnection | null,
+  qrCode?: string | null,
+  createdAt: string,
+  updatedAt: string,
+  aPSRegistrantsId?: string | null,
+  aPSCompanyRegistrantsId?: string | null,
+  apsRegistrantSeatingChartRegistrantId?: string | null,
+};
+
 export type APS = {
   __typename: "APS",
   id: string,
@@ -116,306 +355,43 @@ export type ApsAppSessionQuestion = {
   apsAppUserSessionQuestionsId?: string | null,
 };
 
-export type ApsAppUser = {
-  __typename: "ApsAppUser",
-  id: string,
-  registrantId: string,
-  registrant: ApsRegistrant,
-  photos?: ModelApsAppUserPhotoConnection | null,
-  sessionQuestions?: ModelApsAppSessionQuestionConnection | null,
-  exhibitorDeals?: ModelApsAppExhibitorDealConnection | null,
-  contacts?: ModelApsAppUserContactConnection | null,
-  notes?: ModelApsAppUserNoteConnection | null,
-  leads?: ModelApsAppUserLeadConnection | null,
-  sentDmMessages?: ModelApsDmMessageConnection | null,
-  profileId?: string | null,
-  profile?: ApsAppUserProfile | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type ApsRegistrant = {
-  __typename: "ApsRegistrant",
-  id: string,
-  apsID: string,
-  aps: APS,
-  firstName?: string | null,
-  lastName?: string | null,
-  email: string,
-  phone?: string | null,
-  companyId?: string | null,
-  company?: APSCompany | null,
-  jobTitle?: string | null,
-  attendeeType: RegistrantType,
-  termsAccepted?: boolean | null,
-  interests?: Array< string | null > | null,
-  otherInterest?: string | null,
-  buyerQuestion?: string | null,
-  packagingChallenge?: string | null,
-  certification?: string | null,
-  billingAddressFirstName?: string | null,
-  billingAddressLastName?: string | null,
-  billingAddressEmail?: string | null,
-  billingAddressPhone?: string | null,
-  billingAddressStreet?: string | null,
-  billingAddressCity?: string | null,
-  billingAddressState?: string | null,
-  billingAddressZip?: string | null,
-  billingAddressCountry?: string | null,
-  sameAsAttendee?: boolean | null,
-  speakerTopic?: string | null,
-  learningObjectives?: string | null,
-  totalAmount?: number | null,
-  discountCode?: string | null,
-  status: RegistrantStatus,
-  paymentConfirmation?: string | null,
-  registrationEmailSent?: boolean | null,
-  registrationEmailSentDate?: string | null,
-  registrationEmailReceived?: boolean | null,
-  registrationEmailReceivedDate?: string | null,
-  welcomeEmailSent?: boolean | null,
-  welcomeEmailSentDate?: string | null,
-  welcomeEmailReceived?: boolean | null,
-  welcomeEmailReceivedDate?: string | null,
-  paymentMethod?: string | null,
-  paymentLast4?: string | null,
-  approvedAt?: string | null,
-  headshot?: string | null,
-  presentation?: string | null,
-  presentationTitle?: string | null,
-  presentationSummary?: string | null,
-  bio?: string | null,
-  invoice?: string | null,
-  seatingChartRegistrant?: ApsSeatingChartRegistrant | null,
-  addOnRequests?: ModelRegistrantAddOnRequestConnection | null,
-  appUserId?: string | null,
-  appUser?: ApsAppUser | null,
-  notes?: ModelApsAppUserNoteConnection | null,
-  qrCode?: string | null,
-  createdAt: string,
-  updatedAt: string,
-  aPSRegistrantsId?: string | null,
-  aPSCompanyRegistrantsId?: string | null,
-  apsRegistrantSeatingChartRegistrantId?: string | null,
-};
-
-export type APSCompany = {
-  __typename: "APSCompany",
-  id: string,
-  name: string,
-  email?: string | null,
-  type?: CompanyType | null,
-  description?: string | null,
-  website?: string | null,
-  phone?: string | null,
-  address?: string | null,
-  city?: string | null,
-  state?: string | null,
-  zip?: string | null,
-  country?: string | null,
-  logo?: string | null,
-  events?: ModelAPSCompanyEventsConnection | null,
-  registrants?: ModelApsRegistrantConnection | null,
-  sponsorId?: string | null,
-  sponsor?: ApsSponsor | null,
-  exhibitorProfileId?: string | null,
-  exhibitorProfile?: ApsAppExhibitorProfile | null,
-  notes?: ModelApsAppUserNoteConnection | null,
-  contacts?: ModelAPSCompanyContactConnection | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export enum CompanyType {
-  OEMTIER1 = "OEMTIER1",
-  SOLUTIONPROVIDER = "SOLUTIONPROVIDER",
-  SPONSOR = "SPONSOR",
-}
-
-
-export type ModelAPSCompanyEventsConnection = {
-  __typename: "ModelAPSCompanyEventsConnection",
-  items:  Array<APSCompanyEvents | null >,
-  nextToken?: string | null,
-};
-
-export type APSCompanyEvents = {
-  __typename: "APSCompanyEvents",
-  id: string,
-  aPSId: string,
-  aPSCompanyId: string,
-  aPS: APS,
-  aPSCompany: APSCompany,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type ModelApsRegistrantConnection = {
-  __typename: "ModelApsRegistrantConnection",
-  items:  Array<ApsRegistrant | null >,
-  nextToken?: string | null,
-};
-
-export type ApsSponsor = {
-  __typename: "ApsSponsor",
-  id: string,
-  companyId: string,
-  company: APSCompany,
-  eventId: string,
-  event: APS,
-  profile?: ApsAppExhibitorProfile | null,
-  sessions?: ModelSessionSponsorsConnection | null,
-  favoriteByUsers?: ModelApsAppUserFavoriteSponsorConnection | null,
-  type?: SponsorType | null,
-  createdAt: string,
-  updatedAt: string,
-  aPSSponsorsId?: string | null,
-  apsSponsorProfileId?: string | null,
-};
-
-export type ApsAppExhibitorProfile = {
-  __typename: "ApsAppExhibitorProfile",
-  id: string,
-  companyId: string,
-  company: APSCompany,
-  sponsorId?: string | null,
-  sponsor?: ApsSponsor | null,
-  eventId: string,
-  event: APS,
-  deals?: ModelApsAppExhibitorDealConnection | null,
-  photos?: ModelApsAppExhibitorPhotoConnection | null,
-  handouts?: ModelApsAppExhibitorHandoutConnection | null,
-  promotions?: ModelApsAppExhibitorPromotionConnection | null,
-  video?: string | null,
-  videoCaption?: string | null,
-  boothNumber?: string | null,
-  qrCode?: string | null,
-  passportQrPayload?: string | null,
-  visits?: number | null,
-  views?: number | null,
-  likes?: number | null,
-  notes?: ModelApsAppUserNoteConnection | null,
-  favoriteByUsers?: ModelApsAppUserFavoriteExhibitorConnection | null,
-  passportStamps?: ModelApsAppUserPassportStampConnection | null,
-  viewedByUsers?: ModelApsAppUserExhibitorViewConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  aPSExhibitorsId?: string | null,
-};
-
-export type ModelApsAppExhibitorDealConnection = {
-  __typename: "ModelApsAppExhibitorDealConnection",
-  items:  Array<ApsAppExhibitorDeal | null >,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorDeal = {
-  __typename: "ApsAppExhibitorDeal",
-  id: string,
-  exhibitorId: string,
-  exhibitor: ApsAppExhibitorProfile,
-  deal?: string | null,
-  link?: string | null,
-  userId?: string | null,
-  user?: ApsAppUser | null,
-  eventId: string,
-  event: APS,
-  createdAt: string,
-  updatedAt: string,
-  aPSExhibitorDealsId?: string | null,
-  apsAppUserExhibitorDealsId?: string | null,
-  apsAppExhibitorProfileDealsId?: string | null,
-};
-
-export type ModelApsAppExhibitorPhotoConnection = {
-  __typename: "ModelApsAppExhibitorPhotoConnection",
-  items:  Array<ApsAppExhibitorPhoto | null >,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorPhoto = {
-  __typename: "ApsAppExhibitorPhoto",
-  id: string,
-  exhibitorId: string,
-  exhibitor: ApsAppExhibitorProfile,
-  photo?: string | null,
-  caption?: string | null,
-  approved?: boolean | null,
-  eventId: string,
-  event: APS,
-  createdAt: string,
-  updatedAt: string,
-  aPSExhibitorPhotosId?: string | null,
-  apsAppExhibitorProfilePhotosId?: string | null,
-};
-
-export type ModelApsAppExhibitorHandoutConnection = {
-  __typename: "ModelApsAppExhibitorHandoutConnection",
-  items:  Array<ApsAppExhibitorHandout | null >,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorHandout = {
-  __typename: "ApsAppExhibitorHandout",
-  id: string,
-  exhibitorId: string,
-  exhibitor: ApsAppExhibitorProfile,
-  handout?: string | null,
-  eventId: string,
-  event: APS,
-  createdAt: string,
-  updatedAt: string,
-  aPSExhibitorHandoutsId?: string | null,
-  apsAppExhibitorProfileHandoutsId?: string | null,
-};
-
-export type ModelApsAppExhibitorPromotionConnection = {
-  __typename: "ModelApsAppExhibitorPromotionConnection",
-  items:  Array<ApsAppExhibitorPromotion | null >,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorPromotion = {
-  __typename: "ApsAppExhibitorPromotion",
-  id: string,
-  exhibitorId: string,
-  exhibitor: ApsAppExhibitorProfile,
-  promotion?: string | null,
-  link?: string | null,
-  eventId: string,
-  event: APS,
-  createdAt: string,
-  updatedAt: string,
-  aPSExhibitorPromotionsId?: string | null,
-  apsAppExhibitorProfilePromotionsId?: string | null,
-};
-
 export type ModelApsAppUserNoteConnection = {
   __typename: "ModelApsAppUserNoteConnection",
   items:  Array<ApsAppUserNote | null >,
   nextToken?: string | null,
 };
 
-export type ApsAppUserNote = {
-  __typename: "ApsAppUserNote",
+export type ModelSessionSpeakersConnection = {
+  __typename: "ModelSessionSpeakersConnection",
+  items:  Array<SessionSpeakers | null >,
+  nextToken?: string | null,
+};
+
+export type SessionSpeakers = {
+  __typename: "SessionSpeakers",
   id: string,
-  owner?: string | null,
-  userId: string,
-  user: ApsAppUser,
-  note?: string | null,
-  sessionId?: string | null,
-  session?: ApsAppSession | null,
-  exhibitorId?: string | null,
-  exhibitor?: ApsAppExhibitorProfile | null,
-  registrantId?: string | null,
-  registrant?: ApsRegistrant | null,
-  profileId?: string | null,
-  profile?: ApsAppUserProfile | null,
-  companyId?: string | null,
-  company?: APSCompany | null,
+  apsAppSessionId: string,
+  aPSSpeakerId: string,
+  apsAppSession: ApsAppSession,
+  aPSSpeaker: APSSpeaker,
   createdAt: string,
   updatedAt: string,
-  apsAppUserNotesId?: string | null,
+};
+
+export type APSSpeaker = {
+  __typename: "APSSpeaker",
+  id: string,
+  presentationTitle?: string | null,
+  presentationSummary?: string | null,
+  profileId: string,
+  profile: ApsAppUserProfile,
+  eventId: string,
+  event: APS,
+  sessions?: ModelSessionSpeakersConnection | null,
+  favoriteByUsers?: ModelApsAppUserFavoriteSpeakerConnection | null,
+  createdAt: string,
+  updatedAt: string,
+  aPSSpeakersId?: string | null,
 };
 
 export type ApsAppUserProfile = {
@@ -590,57 +566,123 @@ export type ApsAppUserFavoriteExhibitor = {
   aPSFavoriteExhibitorsId?: string | null,
 };
 
-export type ModelApsAppUserFavoriteSpeakerConnection = {
-  __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-  items:  Array<ApsAppUserFavoriteSpeaker | null >,
+export type ApsAppExhibitorProfile = {
+  __typename: "ApsAppExhibitorProfile",
+  id: string,
+  companyId: string,
+  company: APSCompany,
+  sponsorId?: string | null,
+  sponsor?: ApsSponsor | null,
+  eventId: string,
+  event: APS,
+  deals?: ModelApsAppExhibitorDealConnection | null,
+  photos?: ModelApsAppExhibitorPhotoConnection | null,
+  handouts?: ModelApsAppExhibitorHandoutConnection | null,
+  promotions?: ModelApsAppExhibitorPromotionConnection | null,
+  video?: string | null,
+  videoCaption?: string | null,
+  boothNumber?: string | null,
+  qrCode?: string | null,
+  passportQrPayload?: string | null,
+  visits?: number | null,
+  views?: number | null,
+  likes?: number | null,
+  notes?: ModelApsAppUserNoteConnection | null,
+  favoriteByUsers?: ModelApsAppUserFavoriteExhibitorConnection | null,
+  passportStamps?: ModelApsAppUserPassportStampConnection | null,
+  viewedByUsers?: ModelApsAppUserExhibitorViewConnection | null,
+  createdAt: string,
+  updatedAt: string,
+  aPSExhibitorsId?: string | null,
+};
+
+export type APSCompany = {
+  __typename: "APSCompany",
+  id: string,
+  name: string,
+  email?: string | null,
+  type?: CompanyType | null,
+  description?: string | null,
+  website?: string | null,
+  phone?: string | null,
+  address?: string | null,
+  city?: string | null,
+  state?: string | null,
+  zip?: string | null,
+  country?: string | null,
+  logo?: string | null,
+  events?: ModelAPSCompanyEventsConnection | null,
+  registrants?: ModelApsRegistrantConnection | null,
+  sponsorId?: string | null,
+  sponsor?: ApsSponsor | null,
+  exhibitorProfileId?: string | null,
+  exhibitorProfile?: ApsAppExhibitorProfile | null,
+  notes?: ModelApsAppUserNoteConnection | null,
+  contacts?: ModelAPSCompanyContactConnection | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export enum CompanyType {
+  OEMTIER1 = "OEMTIER1",
+  SOLUTIONPROVIDER = "SOLUTIONPROVIDER",
+  SPONSOR = "SPONSOR",
+}
+
+
+export type ModelAPSCompanyEventsConnection = {
+  __typename: "ModelAPSCompanyEventsConnection",
+  items:  Array<APSCompanyEvents | null >,
   nextToken?: string | null,
 };
 
-export type ApsAppUserFavoriteSpeaker = {
-  __typename: "ApsAppUserFavoriteSpeaker",
+export type APSCompanyEvents = {
+  __typename: "APSCompanyEvents",
   id: string,
-  owner?: string | null,
-  userProfileId: string,
-  userProfile: ApsAppUserProfile,
-  speakerId: string,
-  speaker: APSSpeaker,
-  eventId: string,
-  event: APS,
-  favoriteKey: string,
+  aPSId: string,
+  aPSCompanyId: string,
+  aPS: APS,
+  aPSCompany: APSCompany,
   createdAt: string,
   updatedAt: string,
-  aPSFavoriteSpeakersId?: string | null,
 };
 
-export type APSSpeaker = {
-  __typename: "APSSpeaker",
-  id: string,
-  presentationTitle?: string | null,
-  presentationSummary?: string | null,
-  profileId: string,
-  profile: ApsAppUserProfile,
-  eventId: string,
-  event: APS,
-  sessions?: ModelSessionSpeakersConnection | null,
-  favoriteByUsers?: ModelApsAppUserFavoriteSpeakerConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  aPSSpeakersId?: string | null,
-};
-
-export type ModelSessionSpeakersConnection = {
-  __typename: "ModelSessionSpeakersConnection",
-  items:  Array<SessionSpeakers | null >,
+export type ModelApsRegistrantConnection = {
+  __typename: "ModelApsRegistrantConnection",
+  items:  Array<ApsRegistrant | null >,
   nextToken?: string | null,
 };
 
-export type SessionSpeakers = {
-  __typename: "SessionSpeakers",
+export type ApsSponsor = {
+  __typename: "ApsSponsor",
+  id: string,
+  companyId: string,
+  company: APSCompany,
+  eventId: string,
+  event: APS,
+  profile?: ApsAppExhibitorProfile | null,
+  sessions?: ModelSessionSponsorsConnection | null,
+  favoriteByUsers?: ModelApsAppUserFavoriteSponsorConnection | null,
+  type?: SponsorType | null,
+  createdAt: string,
+  updatedAt: string,
+  aPSSponsorsId?: string | null,
+  apsSponsorProfileId?: string | null,
+};
+
+export type ModelSessionSponsorsConnection = {
+  __typename: "ModelSessionSponsorsConnection",
+  items:  Array<SessionSponsors | null >,
+  nextToken?: string | null,
+};
+
+export type SessionSponsors = {
+  __typename: "SessionSponsors",
   id: string,
   apsAppSessionId: string,
-  aPSSpeakerId: string,
+  apsSponsorId: string,
   apsAppSession: ApsAppSession,
-  aPSSpeaker: APSSpeaker,
+  apsSponsor: ApsSponsor,
   createdAt: string,
   updatedAt: string,
 };
@@ -667,48 +709,117 @@ export type ApsAppUserFavoriteSponsor = {
   aPSFavoriteSponsorsId?: string | null,
 };
 
-export type ModelApsAppUserFavoriteSessionConnection = {
-  __typename: "ModelApsAppUserFavoriteSessionConnection",
-  items:  Array<ApsAppUserFavoriteSession | null >,
+export enum SponsorType {
+  BOOTH = "BOOTH",
+  TABLE = "TABLE",
+  NONE = "NONE",
+}
+
+
+export type ModelAPSCompanyContactConnection = {
+  __typename: "ModelAPSCompanyContactConnection",
+  items:  Array<APSCompanyContact | null >,
   nextToken?: string | null,
 };
 
-export type ApsAppUserFavoriteSession = {
-  __typename: "ApsAppUserFavoriteSession",
+export type APSCompanyContact = {
+  __typename: "APSCompanyContact",
   id: string,
-  owner?: string | null,
-  userProfileId: string,
-  userProfile: ApsAppUserProfile,
-  sessionId: string,
-  session: ApsAppSession,
-  eventId: string,
-  event: APS,
-  favoriteKey: string,
+  companyId: string,
+  company: APSCompany,
+  name?: string | null,
+  email: string,
+  phone?: string | null,
+  title?: string | null,
   createdAt: string,
   updatedAt: string,
-  aPSFavoriteSessionsId?: string | null,
 };
 
-export type ModelApsAppUserFavoriteContactConnection = {
-  __typename: "ModelApsAppUserFavoriteContactConnection",
-  items:  Array<ApsAppUserFavoriteContact | null >,
+export type ModelApsAppExhibitorDealConnection = {
+  __typename: "ModelApsAppExhibitorDealConnection",
+  items:  Array<ApsAppExhibitorDeal | null >,
   nextToken?: string | null,
 };
 
-export type ApsAppUserFavoriteContact = {
-  __typename: "ApsAppUserFavoriteContact",
+export type ApsAppExhibitorDeal = {
+  __typename: "ApsAppExhibitorDeal",
   id: string,
-  owner?: string | null,
-  userProfileId: string,
-  userProfile: ApsAppUserProfile,
-  contactProfileId: string,
-  contactProfile: ApsAppUserProfile,
+  exhibitorId: string,
+  exhibitor: ApsAppExhibitorProfile,
+  deal?: string | null,
+  link?: string | null,
+  userId?: string | null,
+  user?: ApsAppUser | null,
   eventId: string,
   event: APS,
-  favoriteKey: string,
   createdAt: string,
   updatedAt: string,
-  aPSFavoriteContactsId?: string | null,
+  aPSExhibitorDealsId?: string | null,
+  apsAppUserExhibitorDealsId?: string | null,
+  apsAppExhibitorProfileDealsId?: string | null,
+};
+
+export type ModelApsAppExhibitorPhotoConnection = {
+  __typename: "ModelApsAppExhibitorPhotoConnection",
+  items:  Array<ApsAppExhibitorPhoto | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorPhoto = {
+  __typename: "ApsAppExhibitorPhoto",
+  id: string,
+  exhibitorId: string,
+  exhibitor: ApsAppExhibitorProfile,
+  photo?: string | null,
+  caption?: string | null,
+  approved?: boolean | null,
+  eventId: string,
+  event: APS,
+  createdAt: string,
+  updatedAt: string,
+  aPSExhibitorPhotosId?: string | null,
+  apsAppExhibitorProfilePhotosId?: string | null,
+};
+
+export type ModelApsAppExhibitorHandoutConnection = {
+  __typename: "ModelApsAppExhibitorHandoutConnection",
+  items:  Array<ApsAppExhibitorHandout | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorHandout = {
+  __typename: "ApsAppExhibitorHandout",
+  id: string,
+  exhibitorId: string,
+  exhibitor: ApsAppExhibitorProfile,
+  handout?: string | null,
+  eventId: string,
+  event: APS,
+  createdAt: string,
+  updatedAt: string,
+  aPSExhibitorHandoutsId?: string | null,
+  apsAppExhibitorProfileHandoutsId?: string | null,
+};
+
+export type ModelApsAppExhibitorPromotionConnection = {
+  __typename: "ModelApsAppExhibitorPromotionConnection",
+  items:  Array<ApsAppExhibitorPromotion | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorPromotion = {
+  __typename: "ApsAppExhibitorPromotion",
+  id: string,
+  exhibitorId: string,
+  exhibitor: ApsAppExhibitorProfile,
+  promotion?: string | null,
+  link?: string | null,
+  eventId: string,
+  event: APS,
+  createdAt: string,
+  updatedAt: string,
+  aPSExhibitorPromotionsId?: string | null,
+  apsAppExhibitorProfilePromotionsId?: string | null,
 };
 
 export type ModelApsAppUserPassportStampConnection = {
@@ -756,45 +867,155 @@ export type ApsAppUserExhibitorView = {
   aPSExhibitorViewsId?: string | null,
 };
 
-export type ModelSessionSponsorsConnection = {
-  __typename: "ModelSessionSponsorsConnection",
-  items:  Array<SessionSponsors | null >,
+export type ModelApsAppUserFavoriteSpeakerConnection = {
+  __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+  items:  Array<ApsAppUserFavoriteSpeaker | null >,
   nextToken?: string | null,
 };
 
-export type SessionSponsors = {
-  __typename: "SessionSponsors",
+export type ApsAppUserFavoriteSpeaker = {
+  __typename: "ApsAppUserFavoriteSpeaker",
   id: string,
-  apsAppSessionId: string,
-  apsSponsorId: string,
-  apsAppSession: ApsAppSession,
-  apsSponsor: ApsSponsor,
+  owner?: string | null,
+  userProfileId: string,
+  userProfile: ApsAppUserProfile,
+  speakerId: string,
+  speaker: APSSpeaker,
+  eventId: string,
+  event: APS,
+  favoriteKey: string,
   createdAt: string,
   updatedAt: string,
+  aPSFavoriteSpeakersId?: string | null,
 };
 
-export enum SponsorType {
-  BOOTH = "BOOTH",
-  TABLE = "TABLE",
-  NONE = "NONE",
-}
-
-
-export type ModelAPSCompanyContactConnection = {
-  __typename: "ModelAPSCompanyContactConnection",
-  items:  Array<APSCompanyContact | null >,
+export type ModelApsAppUserFavoriteSessionConnection = {
+  __typename: "ModelApsAppUserFavoriteSessionConnection",
+  items:  Array<ApsAppUserFavoriteSession | null >,
   nextToken?: string | null,
 };
 
-export type APSCompanyContact = {
-  __typename: "APSCompanyContact",
+export type ApsAppUserFavoriteSession = {
+  __typename: "ApsAppUserFavoriteSession",
   id: string,
-  companyId: string,
-  company: APSCompany,
-  name?: string | null,
-  email: string,
-  phone?: string | null,
-  title?: string | null,
+  owner?: string | null,
+  userProfileId: string,
+  userProfile: ApsAppUserProfile,
+  sessionId: string,
+  session: ApsAppSession,
+  eventId: string,
+  event: APS,
+  favoriteKey: string,
+  createdAt: string,
+  updatedAt: string,
+  aPSFavoriteSessionsId?: string | null,
+};
+
+export type ModelApsAppUserFavoriteContactConnection = {
+  __typename: "ModelApsAppUserFavoriteContactConnection",
+  items:  Array<ApsAppUserFavoriteContact | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteContact = {
+  __typename: "ApsAppUserFavoriteContact",
+  id: string,
+  owner?: string | null,
+  userProfileId: string,
+  userProfile: ApsAppUserProfile,
+  contactProfileId: string,
+  contactProfile: ApsAppUserProfile,
+  eventId: string,
+  event: APS,
+  favoriteKey: string,
+  createdAt: string,
+  updatedAt: string,
+  aPSFavoriteContactsId?: string | null,
+};
+
+export type ModelApsSponsorConnection = {
+  __typename: "ModelApsSponsorConnection",
+  items:  Array<ApsSponsor | null >,
+  nextToken?: string | null,
+};
+
+export type ModelAPSSpeakerConnection = {
+  __typename: "ModelAPSSpeakerConnection",
+  items:  Array<APSSpeaker | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsAppUserPhotoConnection = {
+  __typename: "ModelApsAppUserPhotoConnection",
+  items:  Array<ApsAppUserPhoto | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPhoto = {
+  __typename: "ApsAppUserPhoto",
+  id: string,
+  userId?: string | null,
+  user?: ApsAppUser | null,
+  photo?: string | null,
+  caption?: string | null,
+  approved?: boolean | null,
+  eventId: string,
+  event: APS,
+  createdAt: string,
+  updatedAt: string,
+  aPSPhotosId?: string | null,
+  apsAppUserPhotosId?: string | null,
+};
+
+export type ModelApsAppExhibitorProfileConnection = {
+  __typename: "ModelApsAppExhibitorProfileConnection",
+  items:  Array<ApsAppExhibitorProfile | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsAddOnConnection = {
+  __typename: "ModelApsAddOnConnection",
+  items:  Array<ApsAddOn | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAddOn = {
+  __typename: "ApsAddOn",
+  id: string,
+  title: string,
+  description: string,
+  subheadline?: string | null,
+  location: string,
+  date: string,
+  time: string,
+  altLink?: string | null,
+  type?: string | null,
+  limit?: number | null,
+  eventId: string,
+  event: APS,
+  price?: number | null,
+  preferenceSchema?: string | null,
+  registrantRequests?: ModelRegistrantAddOnRequestConnection | null,
+  createdAt: string,
+  updatedAt: string,
+  aPSAddOnsId?: string | null,
+};
+
+export type ModelRegistrantAddOnRequestConnection = {
+  __typename: "ModelRegistrantAddOnRequestConnection",
+  items:  Array<RegistrantAddOnRequest | null >,
+  nextToken?: string | null,
+};
+
+export type RegistrantAddOnRequest = {
+  __typename: "RegistrantAddOnRequest",
+  id: string,
+  registrantId: string,
+  registrant: ApsRegistrant,
+  addOnId: string,
+  addOn: ApsAddOn,
+  status: string,
+  preferences?: string | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -838,69 +1059,6 @@ export type ModelApsSeatingChartRegistrantConnection = {
   __typename: "ModelApsSeatingChartRegistrantConnection",
   items:  Array<ApsSeatingChartRegistrant | null >,
   nextToken?: string | null,
-};
-
-export type ModelRegistrantAddOnRequestConnection = {
-  __typename: "ModelRegistrantAddOnRequestConnection",
-  items:  Array<RegistrantAddOnRequest | null >,
-  nextToken?: string | null,
-};
-
-export type RegistrantAddOnRequest = {
-  __typename: "RegistrantAddOnRequest",
-  id: string,
-  registrantId: string,
-  registrant: ApsRegistrant,
-  addOnId: string,
-  addOn: ApsAddOn,
-  status: string,
-  preferences?: string | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type ApsAddOn = {
-  __typename: "ApsAddOn",
-  id: string,
-  title: string,
-  description: string,
-  subheadline?: string | null,
-  location: string,
-  date: string,
-  time: string,
-  altLink?: string | null,
-  type?: string | null,
-  limit?: number | null,
-  eventId: string,
-  event: APS,
-  price?: number | null,
-  preferenceSchema?: string | null,
-  registrantRequests?: ModelRegistrantAddOnRequestConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  aPSAddOnsId?: string | null,
-};
-
-export type ModelApsAppUserPhotoConnection = {
-  __typename: "ModelApsAppUserPhotoConnection",
-  items:  Array<ApsAppUserPhoto | null >,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPhoto = {
-  __typename: "ApsAppUserPhoto",
-  id: string,
-  userId?: string | null,
-  user?: ApsAppUser | null,
-  photo?: string | null,
-  caption?: string | null,
-  approved?: boolean | null,
-  eventId: string,
-  event: APS,
-  createdAt: string,
-  updatedAt: string,
-  aPSPhotosId?: string | null,
-  apsAppUserPhotosId?: string | null,
 };
 
 export type ModelApsDmMessageConnection = {
@@ -960,55 +1118,217 @@ export type ApsDmParticipantState = {
   updatedAt: string,
 };
 
-export type ModelApsSponsorConnection = {
-  __typename: "ModelApsSponsorConnection",
-  items:  Array<ApsSponsor | null >,
-  nextToken?: string | null,
+export type ModelApsAppUserNoteFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userId?: ModelIDInput | null,
+  note?: ModelStringInput | null,
+  sessionId?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  registrantId?: ModelIDInput | null,
+  profileId?: ModelIDInput | null,
+  companyId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserNoteFilterInput | null > | null,
+  or?: Array< ModelApsAppUserNoteFilterInput | null > | null,
+  not?: ModelApsAppUserNoteFilterInput | null,
+  apsAppUserNotesId?: ModelIDInput | null,
 };
 
-export type ModelAPSSpeakerConnection = {
-  __typename: "ModelAPSSpeakerConnection",
-  items:  Array<APSSpeaker | null >,
-  nextToken?: string | null,
+export type ModelApsAppUserExhibitorViewFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  viewKey?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserExhibitorViewFilterInput | null > | null,
+  or?: Array< ModelApsAppUserExhibitorViewFilterInput | null > | null,
+  not?: ModelApsAppUserExhibitorViewFilterInput | null,
+  aPSExhibitorViewsId?: ModelIDInput | null,
 };
 
-export type ModelApsAppExhibitorProfileConnection = {
-  __typename: "ModelApsAppExhibitorProfileConnection",
-  items:  Array<ApsAppExhibitorProfile | null >,
-  nextToken?: string | null,
+export type ModelApsAppUserPassportStampFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  stampKey?: ModelStringInput | null,
+  scannedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserPassportStampFilterInput | null > | null,
+  or?: Array< ModelApsAppUserPassportStampFilterInput | null > | null,
+  not?: ModelApsAppUserPassportStampFilterInput | null,
+  aPSPassportStampsId?: ModelIDInput | null,
 };
 
-export type ModelApsAddOnConnection = {
-  __typename: "ModelApsAddOnConnection",
-  items:  Array<ApsAddOn | null >,
-  nextToken?: string | null,
+export type ModelApsAppUserFavoriteExhibitorFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  favoriteKey?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserFavoriteExhibitorFilterInput | null > | null,
+  or?: Array< ModelApsAppUserFavoriteExhibitorFilterInput | null > | null,
+  not?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
+  aPSFavoriteExhibitorsId?: ModelIDInput | null,
 };
 
-export type ModelApsAppUserConnection = {
-  __typename: "ModelApsAppUserConnection",
-  items:  Array<ApsAppUser | null >,
-  nextToken?: string | null,
+export type ModelApsAppUserFavoriteSpeakerFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  speakerId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  favoriteKey?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserFavoriteSpeakerFilterInput | null > | null,
+  or?: Array< ModelApsAppUserFavoriteSpeakerFilterInput | null > | null,
+  not?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
+  aPSFavoriteSpeakersId?: ModelIDInput | null,
 };
 
-export type ModelApsAppUserProfileConnection = {
-  __typename: "ModelApsAppUserProfileConnection",
-  items:  Array<ApsAppUserProfile | null >,
-  nextToken?: string | null,
+export type ModelApsAppUserFavoriteSponsorFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  sponsorId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  favoriteKey?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserFavoriteSponsorFilterInput | null > | null,
+  or?: Array< ModelApsAppUserFavoriteSponsorFilterInput | null > | null,
+  not?: ModelApsAppUserFavoriteSponsorFilterInput | null,
+  aPSFavoriteSponsorsId?: ModelIDInput | null,
 };
 
-export type CreateApsDmMessageInput = {
-  id?: string | null,
+export type ModelApsAppUserFavoriteSessionFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  sessionId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  favoriteKey?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserFavoriteSessionFilterInput | null > | null,
+  or?: Array< ModelApsAppUserFavoriteSessionFilterInput | null > | null,
+  not?: ModelApsAppUserFavoriteSessionFilterInput | null,
+  aPSFavoriteSessionsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppUserFavoriteContactFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userProfileId?: ModelIDInput | null,
+  contactProfileId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  favoriteKey?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserFavoriteContactFilterInput | null > | null,
+  or?: Array< ModelApsAppUserFavoriteContactFilterInput | null > | null,
+  not?: ModelApsAppUserFavoriteContactFilterInput | null,
+  aPSFavoriteContactsId?: ModelIDInput | null,
+};
+
+export type ApsContactRequest = {
+  __typename: "ApsContactRequest",
+  id: string,
   eventId: string,
-  threadId: string,
-  senderUserId: string,
+  requestKey: string,
+  userAId: string,
+  userBId: string,
   owners: Array< string >,
-  type?: string | null,
-  body?: string | null,
-  createdAt?: string | null,
-  updatedAt?: string | null,
+  requestedByUserId: string,
+  status: string,
+  introMessage?: string | null,
+  introSentAt?: string | null,
+  introDeliveredAt?: string | null,
+  acceptedAt?: string | null,
+  declinedAt?: string | null,
+  blockedAt?: string | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
-export type ModelApsDmMessageConditionInput = {
+export type ModelApsContactRequestFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  requestKey?: ModelStringInput | null,
+  userAId?: ModelIDInput | null,
+  userBId?: ModelIDInput | null,
+  owners?: ModelStringInput | null,
+  requestedByUserId?: ModelIDInput | null,
+  status?: ModelStringInput | null,
+  introMessage?: ModelStringInput | null,
+  introSentAt?: ModelStringInput | null,
+  introDeliveredAt?: ModelStringInput | null,
+  acceptedAt?: ModelStringInput | null,
+  declinedAt?: ModelStringInput | null,
+  blockedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsContactRequestFilterInput | null > | null,
+  or?: Array< ModelApsContactRequestFilterInput | null > | null,
+  not?: ModelApsContactRequestFilterInput | null,
+};
+
+export type ModelApsContactRequestConnection = {
+  __typename: "ModelApsContactRequestConnection",
+  items:  Array<ApsContactRequest | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsDmThreadFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  dmKey?: ModelStringInput | null,
+  userAId?: ModelIDInput | null,
+  userBId?: ModelIDInput | null,
+  owners?: ModelStringInput | null,
+  lastMessageAt?: ModelStringInput | null,
+  lastMessagePreview?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsDmThreadFilterInput | null > | null,
+  or?: Array< ModelApsDmThreadFilterInput | null > | null,
+  not?: ModelApsDmThreadFilterInput | null,
+};
+
+export type ModelApsDmThreadConnection = {
+  __typename: "ModelApsDmThreadConnection",
+  items:  Array<ApsDmThread | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsDmParticipantStateFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  threadId?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  lastReadAt?: ModelStringInput | null,
+  unreadCount?: ModelIntInput | null,
+  lastMessageAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsDmParticipantStateFilterInput | null > | null,
+  or?: Array< ModelApsDmParticipantStateFilterInput | null > | null,
+  not?: ModelApsDmParticipantStateFilterInput | null,
+};
+
+export type ModelApsDmMessageFilterInput = {
+  id?: ModelIDInput | null,
   eventId?: ModelIDInput | null,
   threadId?: ModelIDInput | null,
   senderUserId?: ModelIDInput | null,
@@ -1017,114 +1337,43 @@ export type ModelApsDmMessageConditionInput = {
   body?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsDmMessageConditionInput | null > | null,
-  or?: Array< ModelApsDmMessageConditionInput | null > | null,
-  not?: ModelApsDmMessageConditionInput | null,
+  and?: Array< ModelApsDmMessageFilterInput | null > | null,
+  or?: Array< ModelApsDmMessageFilterInput | null > | null,
+  not?: ModelApsDmMessageFilterInput | null,
 };
 
-export type ModelIDInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  size?: ModelSizeInput | null,
-};
-
-export enum ModelAttributeTypes {
-  binary = "binary",
-  binarySet = "binarySet",
-  bool = "bool",
-  list = "list",
-  map = "map",
-  number = "number",
-  numberSet = "numberSet",
-  string = "string",
-  stringSet = "stringSet",
-  _null = "_null",
-}
-
-
-export type ModelSizeInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-};
-
-export type ModelStringInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  size?: ModelSizeInput | null,
-};
-
-export type SendModeratedDmMessageInput = {
-  threadId: string,
+export type ApsAdminAnnouncement = {
+  __typename: "ApsAdminAnnouncement",
+  id: string,
+  eventId: string,
+  title?: string | null,
   body: string,
+  deepLink?: string | null,
+  scheduledAt?: string | null,
+  publishedAt?: string | null,
+  createdAt: string,
+  updatedAt: string,
 };
 
-export type ModelSubscriptionApsDmMessageFilterInput = {
-  id?: ModelSubscriptionIDInput | null,
-  eventId?: ModelSubscriptionIDInput | null,
-  threadId?: ModelSubscriptionIDInput | null,
-  senderUserId?: ModelSubscriptionIDInput | null,
-  type?: ModelSubscriptionStringInput | null,
-  body?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionApsDmMessageFilterInput | null > | null,
-  or?: Array< ModelSubscriptionApsDmMessageFilterInput | null > | null,
-  owners?: ModelStringInput | null,
+export type ModelApsAdminAnnouncementFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  title?: ModelStringInput | null,
+  body?: ModelStringInput | null,
+  deepLink?: ModelStringInput | null,
+  scheduledAt?: ModelStringInput | null,
+  publishedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAdminAnnouncementFilterInput | null > | null,
+  or?: Array< ModelApsAdminAnnouncementFilterInput | null > | null,
+  not?: ModelApsAdminAnnouncementFilterInput | null,
 };
 
-export type ModelSubscriptionIDInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  in?: Array< string | null > | null,
-  notIn?: Array< string | null > | null,
-};
-
-export type ModelSubscriptionStringInput = {
-  ne?: string | null,
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  contains?: string | null,
-  notContains?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-  in?: Array< string | null > | null,
-  notIn?: Array< string | null > | null,
+export type ModelApsAdminAnnouncementConnection = {
+  __typename: "ModelApsAdminAnnouncementConnection",
+  items:  Array<ApsAdminAnnouncement | null >,
+  nextToken?: string | null,
 };
 
 export type ApsUserEngageState = {
@@ -1137,22 +1386,861 @@ export type ApsUserEngageState = {
   updatedAt: string,
 };
 
-export type CreateApsUserEngageStateInput = {
-  id?: string | null,
-  eventId: string,
-  userId: string,
-  lastSeenAnnouncementAt?: string | null,
-  createdAt?: string | null,
-  updatedAt?: string | null,
+export type ModelApsUserEngageStateFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  lastSeenAnnouncementAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsUserEngageStateFilterInput | null > | null,
+  or?: Array< ModelApsUserEngageStateFilterInput | null > | null,
+  not?: ModelApsUserEngageStateFilterInput | null,
 };
 
-export type UpdateApsUserEngageStateInput = {
+export type ModelApsUserEngageStateConnection = {
+  __typename: "ModelApsUserEngageStateConnection",
+  items:  Array<ApsUserEngageState | null >,
+  nextToken?: string | null,
+};
+
+export type ApsPushToken = {
+  __typename: "ApsPushToken",
   id: string,
-  eventId?: string | null,
-  userId?: string | null,
-  lastSeenAnnouncementAt?: string | null,
-  createdAt?: string | null,
-  updatedAt?: string | null,
+  userId: string,
+  token: string,
+  platform?: string | null,
+  updatedAt: string,
+  createdAt: string,
+};
+
+export type ModelApsPushTokenFilterInput = {
+  id?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  token?: ModelStringInput | null,
+  platform?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelApsPushTokenFilterInput | null > | null,
+  or?: Array< ModelApsPushTokenFilterInput | null > | null,
+  not?: ModelApsPushTokenFilterInput | null,
+};
+
+export type ModelApsPushTokenConnection = {
+  __typename: "ModelApsPushTokenConnection",
+  items:  Array<ApsPushToken | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAppFeedback = {
+  __typename: "ApsAppFeedback",
+  id: string,
+  owner?: string | null,
+  userId: string,
+  eventId: string,
+  message: string,
+  imageKeys?: Array< string | null > | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelApsAppFeedbackFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  userId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  message?: ModelStringInput | null,
+  imageKeys?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppFeedbackFilterInput | null > | null,
+  or?: Array< ModelApsAppFeedbackFilterInput | null > | null,
+  not?: ModelApsAppFeedbackFilterInput | null,
+};
+
+export type ModelApsAppFeedbackConnection = {
+  __typename: "ModelApsAppFeedbackConnection",
+  items:  Array<ApsAppFeedback | null >,
+  nextToken?: string | null,
+};
+
+export type ModelStringKeyConditionInput = {
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+};
+
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
+
+export type ModelIDKeyConditionInput = {
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+};
+
+export type ModelAPSFilterInput = {
+  id?: ModelIDInput | null,
+  year?: ModelStringInput | null,
+  startDate?: ModelStringInput | null,
+  endDate?: ModelStringInput | null,
+  location?: ModelStringInput | null,
+  address?: ModelStringInput | null,
+  city?: ModelStringInput | null,
+  state?: ModelStringInput | null,
+  zip?: ModelStringInput | null,
+  website?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSFilterInput | null > | null,
+  or?: Array< ModelAPSFilterInput | null > | null,
+  not?: ModelAPSFilterInput | null,
+  aPSAgendaId?: ModelIDInput | null,
+};
+
+export type ModelAPSConnection = {
+  __typename: "ModelAPSConnection",
+  items:  Array<APS | null >,
+  nextToken?: string | null,
+};
+
+export type ModelAPSCodeFilterInput = {
+  id?: ModelIDInput | null,
+  code?: ModelStringInput | null,
+  eventId?: ModelIDInput | null,
+  limit?: ModelIntInput | null,
+  used?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSCodeFilterInput | null > | null,
+  or?: Array< ModelAPSCodeFilterInput | null > | null,
+  not?: ModelAPSCodeFilterInput | null,
+  aPSCodesId?: ModelIDInput | null,
+};
+
+export type APSBoard = {
+  __typename: "APSBoard",
+  id: string,
+  name: string,
+  title?: string | null,
+  bio?: string | null,
+  company: string,
+  email: string,
+  linkedin?: string | null,
+  profilePic?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelAPSBoardFilterInput = {
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  bio?: ModelStringInput | null,
+  company?: ModelStringInput | null,
+  email?: ModelStringInput | null,
+  linkedin?: ModelStringInput | null,
+  profilePic?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSBoardFilterInput | null > | null,
+  or?: Array< ModelAPSBoardFilterInput | null > | null,
+  not?: ModelAPSBoardFilterInput | null,
+};
+
+export type ModelAPSBoardConnection = {
+  __typename: "ModelAPSBoardConnection",
+  items:  Array<APSBoard | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsAgendaFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAgendaFilterInput | null > | null,
+  or?: Array< ModelApsAgendaFilterInput | null > | null,
+  not?: ModelApsAgendaFilterInput | null,
+};
+
+export type ModelApsAgendaConnection = {
+  __typename: "ModelApsAgendaConnection",
+  items:  Array<ApsAgenda | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsRegistrantFilterInput = {
+  id?: ModelIDInput | null,
+  apsID?: ModelIDInput | null,
+  firstName?: ModelStringInput | null,
+  lastName?: ModelStringInput | null,
+  email?: ModelStringInput | null,
+  phone?: ModelStringInput | null,
+  companyId?: ModelIDInput | null,
+  jobTitle?: ModelStringInput | null,
+  attendeeType?: ModelRegistrantTypeInput | null,
+  termsAccepted?: ModelBooleanInput | null,
+  interests?: ModelStringInput | null,
+  otherInterest?: ModelStringInput | null,
+  buyerQuestion?: ModelStringInput | null,
+  packagingChallenge?: ModelStringInput | null,
+  certification?: ModelStringInput | null,
+  billingAddressFirstName?: ModelStringInput | null,
+  billingAddressLastName?: ModelStringInput | null,
+  billingAddressEmail?: ModelStringInput | null,
+  billingAddressPhone?: ModelStringInput | null,
+  billingAddressStreet?: ModelStringInput | null,
+  billingAddressCity?: ModelStringInput | null,
+  billingAddressState?: ModelStringInput | null,
+  billingAddressZip?: ModelStringInput | null,
+  billingAddressCountry?: ModelStringInput | null,
+  sameAsAttendee?: ModelBooleanInput | null,
+  speakerTopic?: ModelStringInput | null,
+  learningObjectives?: ModelStringInput | null,
+  totalAmount?: ModelIntInput | null,
+  discountCode?: ModelStringInput | null,
+  status?: ModelRegistrantStatusInput | null,
+  paymentConfirmation?: ModelStringInput | null,
+  registrationEmailSent?: ModelBooleanInput | null,
+  registrationEmailSentDate?: ModelStringInput | null,
+  registrationEmailReceived?: ModelBooleanInput | null,
+  registrationEmailReceivedDate?: ModelStringInput | null,
+  welcomeEmailSent?: ModelBooleanInput | null,
+  welcomeEmailSentDate?: ModelStringInput | null,
+  welcomeEmailReceived?: ModelBooleanInput | null,
+  welcomeEmailReceivedDate?: ModelStringInput | null,
+  appEmailSent?: ModelBooleanInput | null,
+  appEmailSentDate?: ModelStringInput | null,
+  appEmailReceived?: ModelBooleanInput | null,
+  appEmailReceivedDate?: ModelStringInput | null,
+  paymentMethod?: ModelStringInput | null,
+  paymentLast4?: ModelStringInput | null,
+  approvedAt?: ModelStringInput | null,
+  headshot?: ModelStringInput | null,
+  presentation?: ModelStringInput | null,
+  presentationTitle?: ModelStringInput | null,
+  presentationSummary?: ModelStringInput | null,
+  bio?: ModelStringInput | null,
+  invoice?: ModelStringInput | null,
+  appUserId?: ModelIDInput | null,
+  qrCode?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsRegistrantFilterInput | null > | null,
+  or?: Array< ModelApsRegistrantFilterInput | null > | null,
+  not?: ModelApsRegistrantFilterInput | null,
+  aPSRegistrantsId?: ModelIDInput | null,
+  aPSCompanyRegistrantsId?: ModelIDInput | null,
+  apsRegistrantSeatingChartRegistrantId?: ModelIDInput | null,
+};
+
+export type ModelRegistrantTypeInput = {
+  eq?: RegistrantType | null,
+  ne?: RegistrantType | null,
+};
+
+export type ModelBooleanInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type ModelRegistrantStatusInput = {
+  eq?: RegistrantStatus | null,
+  ne?: RegistrantStatus | null,
+};
+
+export type ModelApsAppUserFilterInput = {
+  id?: ModelIDInput | null,
+  registrantId?: ModelIDInput | null,
+  profileId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserFilterInput | null > | null,
+  or?: Array< ModelApsAppUserFilterInput | null > | null,
+  not?: ModelApsAppUserFilterInput | null,
+};
+
+export type ModelApsAppUserConnection = {
+  __typename: "ModelApsAppUserConnection",
+  items:  Array<ApsAppUser | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsAppUserContactFilterInput = {
+  id?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  favorite?: ModelBooleanInput | null,
+  contactId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserContactFilterInput | null > | null,
+  or?: Array< ModelApsAppUserContactFilterInput | null > | null,
+  not?: ModelApsAppUserContactFilterInput | null,
+  apsAppUserContactsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppUserLeadFilterInput = {
+  id?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  favorite?: ModelBooleanInput | null,
+  contactId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserLeadFilterInput | null > | null,
+  or?: Array< ModelApsAppUserLeadFilterInput | null > | null,
+  not?: ModelApsAppUserLeadFilterInput | null,
+  apsAppUserLeadsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppUserProfileFilterInput = {
+  id?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  firstName?: ModelStringInput | null,
+  lastName?: ModelStringInput | null,
+  email?: ModelStringInput | null,
+  phone?: ModelStringInput | null,
+  company?: ModelStringInput | null,
+  jobTitle?: ModelStringInput | null,
+  attendeeType?: ModelRegistrantTypeInput | null,
+  quickTools?: ModelStringInput | null,
+  profilePicture?: ModelStringInput | null,
+  bio?: ModelStringInput | null,
+  linkedin?: ModelStringInput | null,
+  twitter?: ModelStringInput | null,
+  facebook?: ModelStringInput | null,
+  instagram?: ModelStringInput | null,
+  youtube?: ModelStringInput | null,
+  website?: ModelStringInput | null,
+  location?: ModelStringInput | null,
+  resume?: ModelStringInput | null,
+  thinkificId?: ModelIntInput | null,
+  apcProgress?: ModelFloatInput | null,
+  speakerId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserProfileFilterInput | null > | null,
+  or?: Array< ModelApsAppUserProfileFilterInput | null > | null,
+  not?: ModelApsAppUserProfileFilterInput | null,
+};
+
+export type ModelFloatInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type ModelApsAppUserProfileConnection = {
+  __typename: "ModelApsAppUserProfileConnection",
+  items:  Array<ApsAppUserProfile | null >,
+  nextToken?: string | null,
+};
+
+export type ModelProfileAffiliateFilterInput = {
+  id?: ModelIDInput | null,
+  profileId?: ModelIDInput | null,
+  affiliate?: ModelStringInput | null,
+  role?: ModelStringInput | null,
+  startDate?: ModelStringInput | null,
+  endDate?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelProfileAffiliateFilterInput | null > | null,
+  or?: Array< ModelProfileAffiliateFilterInput | null > | null,
+  not?: ModelProfileAffiliateFilterInput | null,
+  apsAppUserProfileAffiliatesId?: ModelIDInput | null,
+};
+
+export type ModelProfileEducationFilterInput = {
+  id?: ModelIDInput | null,
+  profileId?: ModelIDInput | null,
+  school?: ModelStringInput | null,
+  degree?: ModelStringInput | null,
+  fieldOfStudy?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelProfileEducationFilterInput | null > | null,
+  or?: Array< ModelProfileEducationFilterInput | null > | null,
+  not?: ModelProfileEducationFilterInput | null,
+  apsAppUserProfileEducationId?: ModelIDInput | null,
+};
+
+export type ModelProfileInterestFilterInput = {
+  id?: ModelIDInput | null,
+  profileId?: ModelIDInput | null,
+  interest?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelProfileInterestFilterInput | null > | null,
+  or?: Array< ModelProfileInterestFilterInput | null > | null,
+  not?: ModelProfileInterestFilterInput | null,
+  apsAppUserProfileInterestsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppUserPhotoFilterInput = {
+  id?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  photo?: ModelStringInput | null,
+  caption?: ModelStringInput | null,
+  approved?: ModelBooleanInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppUserPhotoFilterInput | null > | null,
+  or?: Array< ModelApsAppUserPhotoFilterInput | null > | null,
+  not?: ModelApsAppUserPhotoFilterInput | null,
+  aPSPhotosId?: ModelIDInput | null,
+  apsAppUserPhotosId?: ModelIDInput | null,
+};
+
+export type ModelApsAppSessionFilterInput = {
+  id?: ModelIDInput | null,
+  title?: ModelStringInput | null,
+  date?: ModelStringInput | null,
+  startTime?: ModelStringInput | null,
+  endTime?: ModelStringInput | null,
+  location?: ModelStringInput | null,
+  description?: ModelStringInput | null,
+  embedUrl?: ModelStringInput | null,
+  agendaId?: ModelIDInput | null,
+  draft?: ModelBooleanInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppSessionFilterInput | null > | null,
+  or?: Array< ModelApsAppSessionFilterInput | null > | null,
+  not?: ModelApsAppSessionFilterInput | null,
+  apsAgendaItemsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppSessionQuestionFilterInput = {
+  id?: ModelIDInput | null,
+  sessionId?: ModelIDInput | null,
+  question?: ModelStringInput | null,
+  userId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppSessionQuestionFilterInput | null > | null,
+  or?: Array< ModelApsAppSessionQuestionFilterInput | null > | null,
+  not?: ModelApsAppSessionQuestionFilterInput | null,
+  apsAppUserSessionQuestionsId?: ModelIDInput | null,
+};
+
+export type ModelAPSSpeakerFilterInput = {
+  id?: ModelIDInput | null,
+  presentationTitle?: ModelStringInput | null,
+  presentationSummary?: ModelStringInput | null,
+  profileId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSSpeakerFilterInput | null > | null,
+  or?: Array< ModelAPSSpeakerFilterInput | null > | null,
+  not?: ModelAPSSpeakerFilterInput | null,
+  aPSSpeakersId?: ModelIDInput | null,
+};
+
+export type ModelApsSponsorFilterInput = {
+  id?: ModelIDInput | null,
+  companyId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  type?: ModelSponsorTypeInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsSponsorFilterInput | null > | null,
+  or?: Array< ModelApsSponsorFilterInput | null > | null,
+  not?: ModelApsSponsorFilterInput | null,
+  aPSSponsorsId?: ModelIDInput | null,
+  apsSponsorProfileId?: ModelIDInput | null,
+};
+
+export type ModelSponsorTypeInput = {
+  eq?: SponsorType | null,
+  ne?: SponsorType | null,
+};
+
+export type ModelAPSCompanyFilterInput = {
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  email?: ModelStringInput | null,
+  type?: ModelCompanyTypeInput | null,
+  description?: ModelStringInput | null,
+  website?: ModelStringInput | null,
+  phone?: ModelStringInput | null,
+  address?: ModelStringInput | null,
+  city?: ModelStringInput | null,
+  state?: ModelStringInput | null,
+  zip?: ModelStringInput | null,
+  country?: ModelStringInput | null,
+  logo?: ModelStringInput | null,
+  sponsorId?: ModelIDInput | null,
+  exhibitorProfileId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSCompanyFilterInput | null > | null,
+  or?: Array< ModelAPSCompanyFilterInput | null > | null,
+  not?: ModelAPSCompanyFilterInput | null,
+};
+
+export type ModelCompanyTypeInput = {
+  eq?: CompanyType | null,
+  ne?: CompanyType | null,
+};
+
+export type ModelAPSCompanyConnection = {
+  __typename: "ModelAPSCompanyConnection",
+  items:  Array<APSCompany | null >,
+  nextToken?: string | null,
+};
+
+export type ModelAPSCompanyContactFilterInput = {
+  id?: ModelIDInput | null,
+  companyId?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  email?: ModelStringInput | null,
+  phone?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSCompanyContactFilterInput | null > | null,
+  or?: Array< ModelAPSCompanyContactFilterInput | null > | null,
+  not?: ModelAPSCompanyContactFilterInput | null,
+};
+
+export type ModelApsAppExhibitorProfileFilterInput = {
+  id?: ModelIDInput | null,
+  companyId?: ModelIDInput | null,
+  sponsorId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  video?: ModelStringInput | null,
+  videoCaption?: ModelStringInput | null,
+  boothNumber?: ModelStringInput | null,
+  qrCode?: ModelStringInput | null,
+  passportQrPayload?: ModelStringInput | null,
+  visits?: ModelIntInput | null,
+  views?: ModelIntInput | null,
+  likes?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppExhibitorProfileFilterInput | null > | null,
+  or?: Array< ModelApsAppExhibitorProfileFilterInput | null > | null,
+  not?: ModelApsAppExhibitorProfileFilterInput | null,
+  aPSExhibitorsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppExhibitorPromotionFilterInput = {
+  id?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  promotion?: ModelStringInput | null,
+  link?: ModelStringInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppExhibitorPromotionFilterInput | null > | null,
+  or?: Array< ModelApsAppExhibitorPromotionFilterInput | null > | null,
+  not?: ModelApsAppExhibitorPromotionFilterInput | null,
+  aPSExhibitorPromotionsId?: ModelIDInput | null,
+  apsAppExhibitorProfilePromotionsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppExhibitorDealFilterInput = {
+  id?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  deal?: ModelStringInput | null,
+  link?: ModelStringInput | null,
+  userId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppExhibitorDealFilterInput | null > | null,
+  or?: Array< ModelApsAppExhibitorDealFilterInput | null > | null,
+  not?: ModelApsAppExhibitorDealFilterInput | null,
+  aPSExhibitorDealsId?: ModelIDInput | null,
+  apsAppUserExhibitorDealsId?: ModelIDInput | null,
+  apsAppExhibitorProfileDealsId?: ModelIDInput | null,
+};
+
+export type ModelApsAppExhibitorPhotoFilterInput = {
+  id?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  photo?: ModelStringInput | null,
+  caption?: ModelStringInput | null,
+  approved?: ModelBooleanInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppExhibitorPhotoFilterInput | null > | null,
+  or?: Array< ModelApsAppExhibitorPhotoFilterInput | null > | null,
+  not?: ModelApsAppExhibitorPhotoFilterInput | null,
+  aPSExhibitorPhotosId?: ModelIDInput | null,
+  apsAppExhibitorProfilePhotosId?: ModelIDInput | null,
+};
+
+export type ModelApsAppExhibitorHandoutFilterInput = {
+  id?: ModelIDInput | null,
+  exhibitorId?: ModelIDInput | null,
+  handout?: ModelStringInput | null,
+  eventId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAppExhibitorHandoutFilterInput | null > | null,
+  or?: Array< ModelApsAppExhibitorHandoutFilterInput | null > | null,
+  not?: ModelApsAppExhibitorHandoutFilterInput | null,
+  aPSExhibitorHandoutsId?: ModelIDInput | null,
+  apsAppExhibitorProfileHandoutsId?: ModelIDInput | null,
+};
+
+export type ModelApsAddOnFilterInput = {
+  id?: ModelIDInput | null,
+  title?: ModelStringInput | null,
+  description?: ModelStringInput | null,
+  subheadline?: ModelStringInput | null,
+  location?: ModelStringInput | null,
+  date?: ModelStringInput | null,
+  time?: ModelStringInput | null,
+  altLink?: ModelStringInput | null,
+  type?: ModelStringInput | null,
+  limit?: ModelIntInput | null,
+  eventId?: ModelIDInput | null,
+  price?: ModelIntInput | null,
+  preferenceSchema?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAddOnFilterInput | null > | null,
+  or?: Array< ModelApsAddOnFilterInput | null > | null,
+  not?: ModelApsAddOnFilterInput | null,
+  aPSAddOnsId?: ModelIDInput | null,
+};
+
+export type ModelRegistrantAddOnRequestFilterInput = {
+  id?: ModelIDInput | null,
+  registrantId?: ModelIDInput | null,
+  addOnId?: ModelIDInput | null,
+  status?: ModelStringInput | null,
+  preferences?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelRegistrantAddOnRequestFilterInput | null > | null,
+  or?: Array< ModelRegistrantAddOnRequestFilterInput | null > | null,
+  not?: ModelRegistrantAddOnRequestFilterInput | null,
+};
+
+export type ModelApsSeatingChartFilterInput = {
+  id?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsSeatingChartFilterInput | null > | null,
+  or?: Array< ModelApsSeatingChartFilterInput | null > | null,
+  not?: ModelApsSeatingChartFilterInput | null,
+};
+
+export type ModelApsSeatingChartConnection = {
+  __typename: "ModelApsSeatingChartConnection",
+  items:  Array<ApsSeatingChart | null >,
+  nextToken?: string | null,
+};
+
+export type ModelApsSeatingChartRegistrantFilterInput = {
+  id?: ModelIDInput | null,
+  category?: ModelStringInput | null,
+  firstName?: ModelStringInput | null,
+  lastName?: ModelStringInput | null,
+  company?: ModelStringInput | null,
+  email?: ModelStringInput | null,
+  role?: ModelStringInput | null,
+  tableNumber?: ModelIntInput | null,
+  notes?: ModelStringInput | null,
+  seatingChartID?: ModelIDInput | null,
+  registrantID?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsSeatingChartRegistrantFilterInput | null > | null,
+  or?: Array< ModelApsSeatingChartRegistrantFilterInput | null > | null,
+  not?: ModelApsSeatingChartRegistrantFilterInput | null,
+  apsSeatingChartRegistrantsId?: ModelIDInput | null,
+};
+
+export type ApsEmailCampaign = {
+  __typename: "ApsEmailCampaign",
+  id: string,
+  eventId: string,
+  name: string,
+  templateKey: string,
+  subject: string,
+  audienceStatuses?: Array< RegistrantStatus | null > | null,
+  audienceTypes?: Array< RegistrantType | null > | null,
+  status: EmailCampaignStatus,
+  scheduledAt?: string | null,
+  startedAt?: string | null,
+  completedAt?: string | null,
+  totalRecipients?: number | null,
+  sentCount?: number | null,
+  failedCount?: number | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export enum EmailCampaignStatus {
+  DRAFT = "DRAFT",
+  SCHEDULED = "SCHEDULED",
+  SENDING = "SENDING",
+  SENT = "SENT",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+}
+
+
+export type ModelApsEmailCampaignFilterInput = {
+  id?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  templateKey?: ModelStringInput | null,
+  subject?: ModelStringInput | null,
+  audienceStatuses?: ModelRegistrantStatusListInput | null,
+  audienceTypes?: ModelRegistrantTypeListInput | null,
+  status?: ModelEmailCampaignStatusInput | null,
+  scheduledAt?: ModelStringInput | null,
+  startedAt?: ModelStringInput | null,
+  completedAt?: ModelStringInput | null,
+  totalRecipients?: ModelIntInput | null,
+  sentCount?: ModelIntInput | null,
+  failedCount?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsEmailCampaignFilterInput | null > | null,
+  or?: Array< ModelApsEmailCampaignFilterInput | null > | null,
+  not?: ModelApsEmailCampaignFilterInput | null,
+};
+
+export type ModelRegistrantStatusListInput = {
+  eq?: Array< RegistrantStatus | null > | null,
+  ne?: Array< RegistrantStatus | null > | null,
+  contains?: RegistrantStatus | null,
+  notContains?: RegistrantStatus | null,
+};
+
+export type ModelRegistrantTypeListInput = {
+  eq?: Array< RegistrantType | null > | null,
+  ne?: Array< RegistrantType | null > | null,
+  contains?: RegistrantType | null,
+  notContains?: RegistrantType | null,
+};
+
+export type ModelEmailCampaignStatusInput = {
+  eq?: EmailCampaignStatus | null,
+  ne?: EmailCampaignStatus | null,
+};
+
+export type ModelApsEmailCampaignConnection = {
+  __typename: "ModelApsEmailCampaignConnection",
+  items:  Array<ApsEmailCampaign | null >,
+  nextToken?: string | null,
+};
+
+export type ApsEmailSend = {
+  __typename: "ApsEmailSend",
+  id: string,
+  campaignId: string,
+  eventId: string,
+  registrantId: string,
+  email: string,
+  status: EmailSendStatus,
+  sesMessageId?: string | null,
+  error?: string | null,
+  sentAt?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export enum EmailSendStatus {
+  PENDING = "PENDING",
+  SENT = "SENT",
+  FAILED = "FAILED",
+}
+
+
+export type ModelApsEmailSendFilterInput = {
+  id?: ModelIDInput | null,
+  campaignId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  registrantId?: ModelIDInput | null,
+  email?: ModelStringInput | null,
+  status?: ModelEmailSendStatusInput | null,
+  sesMessageId?: ModelStringInput | null,
+  error?: ModelStringInput | null,
+  sentAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsEmailSendFilterInput | null > | null,
+  or?: Array< ModelApsEmailSendFilterInput | null > | null,
+  not?: ModelApsEmailSendFilterInput | null,
+};
+
+export type ModelEmailSendStatusInput = {
+  eq?: EmailSendStatus | null,
+  ne?: EmailSendStatus | null,
+};
+
+export type ModelApsEmailSendConnection = {
+  __typename: "ModelApsEmailSendConnection",
+  items:  Array<ApsEmailSend | null >,
+  nextToken?: string | null,
+};
+
+export type ModelAPSCompanyEventsFilterInput = {
+  id?: ModelIDInput | null,
+  aPSId?: ModelIDInput | null,
+  aPSCompanyId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelAPSCompanyEventsFilterInput | null > | null,
+  or?: Array< ModelAPSCompanyEventsFilterInput | null > | null,
+  not?: ModelAPSCompanyEventsFilterInput | null,
+};
+
+export type ModelSessionSpeakersFilterInput = {
+  id?: ModelIDInput | null,
+  apsAppSessionId?: ModelIDInput | null,
+  aPSSpeakerId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelSessionSpeakersFilterInput | null > | null,
+  or?: Array< ModelSessionSpeakersFilterInput | null > | null,
+  not?: ModelSessionSpeakersFilterInput | null,
+};
+
+export type ModelSessionSponsorsFilterInput = {
+  id?: ModelIDInput | null,
+  apsAppSessionId?: ModelIDInput | null,
+  apsSponsorId?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelSessionSponsorsFilterInput | null > | null,
+  or?: Array< ModelSessionSponsorsFilterInput | null > | null,
+  not?: ModelSessionSponsorsFilterInput | null,
+};
+
+export type SendModeratedDmMessageInput = {
+  threadId: string,
+  body: string,
 };
 
 export type SyncThinkificProgressInput = {
@@ -1286,18 +2374,6 @@ export type ModelAPSCodeConditionInput = {
   aPSCodesId?: ModelIDInput | null,
 };
 
-export type ModelIntInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-};
-
 export type DeleteAPSCodeInput = {
   id: string,
 };
@@ -1368,6 +2444,10 @@ export type ModelApsRegistrantConditionInput = {
   welcomeEmailSentDate?: ModelStringInput | null,
   welcomeEmailReceived?: ModelBooleanInput | null,
   welcomeEmailReceivedDate?: ModelStringInput | null,
+  appEmailSent?: ModelBooleanInput | null,
+  appEmailSentDate?: ModelStringInput | null,
+  appEmailReceived?: ModelBooleanInput | null,
+  appEmailReceivedDate?: ModelStringInput | null,
   paymentMethod?: ModelStringInput | null,
   paymentLast4?: ModelStringInput | null,
   approvedAt?: ModelStringInput | null,
@@ -1387,23 +2467,6 @@ export type ModelApsRegistrantConditionInput = {
   aPSRegistrantsId?: ModelIDInput | null,
   aPSCompanyRegistrantsId?: ModelIDInput | null,
   apsRegistrantSeatingChartRegistrantId?: ModelIDInput | null,
-};
-
-export type ModelRegistrantTypeInput = {
-  eq?: RegistrantType | null,
-  ne?: RegistrantType | null,
-};
-
-export type ModelBooleanInput = {
-  ne?: boolean | null,
-  eq?: boolean | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-};
-
-export type ModelRegistrantStatusInput = {
-  eq?: RegistrantStatus | null,
-  ne?: RegistrantStatus | null,
 };
 
 export type CreateApsTempCredentialInput = {
@@ -1432,20 +2495,6 @@ export type ModelApsTempCredentialConditionInput = {
   and?: Array< ModelApsTempCredentialConditionInput | null > | null,
   or?: Array< ModelApsTempCredentialConditionInput | null > | null,
   not?: ModelApsTempCredentialConditionInput | null,
-};
-
-export type ApsTempCredential = {
-  __typename: "ApsTempCredential",
-  id: string,
-  apsID: string,
-  registrantId: string,
-  email: string,
-  tempPasswordCiphertext: string,
-  tempPasswordIv: string,
-  tempPasswordTag: string,
-  expiresAt?: number | null,
-  createdAt?: string | null,
-  updatedAt?: string | null,
 };
 
 export type UpdateApsTempCredentialInput = {
@@ -1652,18 +2701,6 @@ export type ModelApsAppUserProfileConditionInput = {
   updatedAt?: ModelStringInput | null,
 };
 
-export type ModelFloatInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-};
-
 export type DeleteApsAppUserProfileInput = {
   id: string,
 };
@@ -1837,11 +2874,6 @@ export type ModelApsSponsorConditionInput = {
   apsSponsorProfileId?: ModelIDInput | null,
 };
 
-export type ModelSponsorTypeInput = {
-  eq?: SponsorType | null,
-  ne?: SponsorType | null,
-};
-
 export type UpdateApsSponsorInput = {
   id: string,
   companyId?: string | null,
@@ -1879,11 +2911,6 @@ export type ModelAPSCompanyConditionInput = {
   not?: ModelAPSCompanyConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-};
-
-export type ModelCompanyTypeInput = {
-  eq?: CompanyType | null,
-  ne?: CompanyType | null,
 };
 
 export type CreateAPSCompanyContactInput = {
@@ -2458,26 +3485,6 @@ export type ModelApsContactRequestConditionInput = {
   not?: ModelApsContactRequestConditionInput | null,
 };
 
-export type ApsContactRequest = {
-  __typename: "ApsContactRequest",
-  id: string,
-  eventId: string,
-  requestKey: string,
-  userAId: string,
-  userBId: string,
-  owners: Array< string >,
-  requestedByUserId: string,
-  status: string,
-  introMessage?: string | null,
-  introSentAt?: string | null,
-  introDeliveredAt?: string | null,
-  acceptedAt?: string | null,
-  declinedAt?: string | null,
-  blockedAt?: string | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
 export type UpdateApsContactRequestInput = {
   id: string,
   eventId?: string | null,
@@ -2588,6 +3595,32 @@ export type DeleteApsDmParticipantStateInput = {
   id: string,
 };
 
+export type CreateApsDmMessageInput = {
+  id?: string | null,
+  eventId: string,
+  threadId: string,
+  senderUserId: string,
+  owners: Array< string >,
+  type?: string | null,
+  body?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type ModelApsDmMessageConditionInput = {
+  eventId?: ModelIDInput | null,
+  threadId?: ModelIDInput | null,
+  senderUserId?: ModelIDInput | null,
+  owners?: ModelStringInput | null,
+  type?: ModelStringInput | null,
+  body?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsDmMessageConditionInput | null > | null,
+  or?: Array< ModelApsDmMessageConditionInput | null > | null,
+  not?: ModelApsDmMessageConditionInput | null,
+};
+
 export type UpdateApsDmMessageInput = {
   id: string,
   eventId?: string | null,
@@ -2630,19 +3663,6 @@ export type ModelApsAdminAnnouncementConditionInput = {
   not?: ModelApsAdminAnnouncementConditionInput | null,
 };
 
-export type ApsAdminAnnouncement = {
-  __typename: "ApsAdminAnnouncement",
-  id: string,
-  eventId: string,
-  title?: string | null,
-  body: string,
-  deepLink?: string | null,
-  scheduledAt?: string | null,
-  publishedAt?: string | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
 export type UpdateApsAdminAnnouncementInput = {
   id: string,
   eventId?: string | null,
@@ -2659,6 +3679,60 @@ export type DeleteApsAdminAnnouncementInput = {
   id: string,
 };
 
+export type DeleteApsEmailCampaignInput = {
+  id: string,
+};
+
+export type ModelApsEmailCampaignConditionInput = {
+  eventId?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  templateKey?: ModelStringInput | null,
+  subject?: ModelStringInput | null,
+  audienceStatuses?: ModelRegistrantStatusListInput | null,
+  audienceTypes?: ModelRegistrantTypeListInput | null,
+  status?: ModelEmailCampaignStatusInput | null,
+  scheduledAt?: ModelStringInput | null,
+  startedAt?: ModelStringInput | null,
+  completedAt?: ModelStringInput | null,
+  totalRecipients?: ModelIntInput | null,
+  sentCount?: ModelIntInput | null,
+  failedCount?: ModelIntInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsEmailCampaignConditionInput | null > | null,
+  or?: Array< ModelApsEmailCampaignConditionInput | null > | null,
+  not?: ModelApsEmailCampaignConditionInput | null,
+};
+
+export type DeleteApsEmailSendInput = {
+  id: string,
+};
+
+export type ModelApsEmailSendConditionInput = {
+  campaignId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  registrantId?: ModelIDInput | null,
+  email?: ModelStringInput | null,
+  status?: ModelEmailSendStatusInput | null,
+  sesMessageId?: ModelStringInput | null,
+  error?: ModelStringInput | null,
+  sentAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsEmailSendConditionInput | null > | null,
+  or?: Array< ModelApsEmailSendConditionInput | null > | null,
+  not?: ModelApsEmailSendConditionInput | null,
+};
+
+export type CreateApsUserEngageStateInput = {
+  id?: string | null,
+  eventId: string,
+  userId: string,
+  lastSeenAnnouncementAt?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
 export type ModelApsUserEngageStateConditionInput = {
   eventId?: ModelIDInput | null,
   userId?: ModelIDInput | null,
@@ -2668,6 +3742,15 @@ export type ModelApsUserEngageStateConditionInput = {
   and?: Array< ModelApsUserEngageStateConditionInput | null > | null,
   or?: Array< ModelApsUserEngageStateConditionInput | null > | null,
   not?: ModelApsUserEngageStateConditionInput | null,
+};
+
+export type UpdateApsUserEngageStateInput = {
+  id: string,
+  eventId?: string | null,
+  userId?: string | null,
+  lastSeenAnnouncementAt?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
 };
 
 export type DeleteApsUserEngageStateInput = {
@@ -2692,16 +3775,6 @@ export type ModelApsPushTokenConditionInput = {
   and?: Array< ModelApsPushTokenConditionInput | null > | null,
   or?: Array< ModelApsPushTokenConditionInput | null > | null,
   not?: ModelApsPushTokenConditionInput | null,
-};
-
-export type ApsPushToken = {
-  __typename: "ApsPushToken",
-  id: string,
-  userId: string,
-  token: string,
-  platform?: string | null,
-  updatedAt: string,
-  createdAt: string,
 };
 
 export type UpdateApsPushTokenInput = {
@@ -2739,18 +3812,6 @@ export type ModelApsAppFeedbackConditionInput = {
   and?: Array< ModelApsAppFeedbackConditionInput | null > | null,
   or?: Array< ModelApsAppFeedbackConditionInput | null > | null,
   not?: ModelApsAppFeedbackConditionInput | null,
-};
-
-export type ApsAppFeedback = {
-  __typename: "ApsAppFeedback",
-  id: string,
-  owner?: string | null,
-  userId: string,
-  eventId: string,
-  message: string,
-  imageKeys?: Array< string | null > | null,
-  createdAt: string,
-  updatedAt: string,
 };
 
 export type UpdateApsAppFeedbackInput = {
@@ -2883,20 +3944,6 @@ export type ModelAPSBoardConditionInput = {
   updatedAt?: ModelStringInput | null,
 };
 
-export type APSBoard = {
-  __typename: "APSBoard",
-  id: string,
-  name: string,
-  title?: string | null,
-  bio?: string | null,
-  company: string,
-  email: string,
-  linkedin?: string | null,
-  profilePic?: string | null,
-  createdAt: string,
-  updatedAt: string,
-};
-
 export type UpdateAPSBoardInput = {
   id: string,
   name?: string | null,
@@ -2952,6 +3999,10 @@ export type CreateApsRegistrantInput = {
   welcomeEmailSentDate?: string | null,
   welcomeEmailReceived?: boolean | null,
   welcomeEmailReceivedDate?: string | null,
+  appEmailSent?: boolean | null,
+  appEmailSentDate?: string | null,
+  appEmailReceived?: boolean | null,
+  appEmailReceivedDate?: string | null,
   paymentMethod?: string | null,
   paymentLast4?: string | null,
   approvedAt?: string | null,
@@ -3008,6 +4059,10 @@ export type UpdateApsRegistrantInput = {
   welcomeEmailSentDate?: string | null,
   welcomeEmailReceived?: boolean | null,
   welcomeEmailReceivedDate?: string | null,
+  appEmailSent?: boolean | null,
+  appEmailSentDate?: string | null,
+  appEmailReceived?: boolean | null,
+  appEmailReceivedDate?: string | null,
   paymentMethod?: string | null,
   paymentLast4?: string | null,
   approvedAt?: string | null,
@@ -3387,6 +4442,72 @@ export type CreateRegistrantAddOnRequestInput = {
   preferences?: string | null,
 };
 
+export type CreateApsEmailCampaignInput = {
+  id?: string | null,
+  eventId: string,
+  name: string,
+  templateKey: string,
+  subject: string,
+  audienceStatuses?: Array< RegistrantStatus | null > | null,
+  audienceTypes?: Array< RegistrantType | null > | null,
+  status: EmailCampaignStatus,
+  scheduledAt?: string | null,
+  startedAt?: string | null,
+  completedAt?: string | null,
+  totalRecipients?: number | null,
+  sentCount?: number | null,
+  failedCount?: number | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type UpdateApsEmailCampaignInput = {
+  id: string,
+  eventId?: string | null,
+  name?: string | null,
+  templateKey?: string | null,
+  subject?: string | null,
+  audienceStatuses?: Array< RegistrantStatus | null > | null,
+  audienceTypes?: Array< RegistrantType | null > | null,
+  status?: EmailCampaignStatus | null,
+  scheduledAt?: string | null,
+  startedAt?: string | null,
+  completedAt?: string | null,
+  totalRecipients?: number | null,
+  sentCount?: number | null,
+  failedCount?: number | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type CreateApsEmailSendInput = {
+  id?: string | null,
+  campaignId: string,
+  eventId: string,
+  registrantId: string,
+  email: string,
+  status: EmailSendStatus,
+  sesMessageId?: string | null,
+  error?: string | null,
+  sentAt?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type UpdateApsEmailSendInput = {
+  id: string,
+  campaignId?: string | null,
+  eventId?: string | null,
+  registrantId?: string | null,
+  email?: string | null,
+  status?: EmailSendStatus | null,
+  sesMessageId?: string | null,
+  error?: string | null,
+  sentAt?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
 export type CreateAPSCompanyEventsInput = {
   id?: string | null,
   aPSId: string,
@@ -3397,913 +4518,6 @@ export type UpdateAPSCompanyEventsInput = {
   id: string,
   aPSId?: string | null,
   aPSCompanyId?: string | null,
-};
-
-export type AdminThinkificByEmailResult = {
-  __typename: "AdminThinkificByEmailResult",
-  email: string,
-  thinkificUserId?: number | null,
-  apcEnrollments:  Array<AdminThinkificEnrollment >,
-  otherEnrollments:  Array<AdminThinkificEnrollment >,
-};
-
-export type AdminThinkificEnrollment = {
-  __typename: "AdminThinkificEnrollment",
-  enrollmentId?: number | null,
-  courseId?: number | null,
-  courseName?: string | null,
-  percentageCompleted?: number | null,
-  completedAt?: string | null,
-  activatedAt?: string | null,
-};
-
-export type AdminLatestTempCredentialResult = {
-  __typename: "AdminLatestTempCredentialResult",
-  registrantId: string,
-  email: string,
-  tempPassword: string,
-  createdAt: string,
-};
-
-export type ModelApsTempCredentialFilterInput = {
-  id?: ModelIDInput | null,
-  apsID?: ModelIDInput | null,
-  registrantId?: ModelIDInput | null,
-  email?: ModelStringInput | null,
-  tempPasswordCiphertext?: ModelStringInput | null,
-  tempPasswordIv?: ModelStringInput | null,
-  tempPasswordTag?: ModelStringInput | null,
-  expiresAt?: ModelIntInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsTempCredentialFilterInput | null > | null,
-  or?: Array< ModelApsTempCredentialFilterInput | null > | null,
-  not?: ModelApsTempCredentialFilterInput | null,
-};
-
-export type ModelApsTempCredentialConnection = {
-  __typename: "ModelApsTempCredentialConnection",
-  items:  Array<ApsTempCredential | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsAppUserNoteFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userId?: ModelIDInput | null,
-  note?: ModelStringInput | null,
-  sessionId?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  registrantId?: ModelIDInput | null,
-  profileId?: ModelIDInput | null,
-  companyId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserNoteFilterInput | null > | null,
-  or?: Array< ModelApsAppUserNoteFilterInput | null > | null,
-  not?: ModelApsAppUserNoteFilterInput | null,
-  apsAppUserNotesId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserExhibitorViewFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  viewKey?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserExhibitorViewFilterInput | null > | null,
-  or?: Array< ModelApsAppUserExhibitorViewFilterInput | null > | null,
-  not?: ModelApsAppUserExhibitorViewFilterInput | null,
-  aPSExhibitorViewsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserPassportStampFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  stampKey?: ModelStringInput | null,
-  scannedAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserPassportStampFilterInput | null > | null,
-  or?: Array< ModelApsAppUserPassportStampFilterInput | null > | null,
-  not?: ModelApsAppUserPassportStampFilterInput | null,
-  aPSPassportStampsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserFavoriteExhibitorFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  favoriteKey?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserFavoriteExhibitorFilterInput | null > | null,
-  or?: Array< ModelApsAppUserFavoriteExhibitorFilterInput | null > | null,
-  not?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
-  aPSFavoriteExhibitorsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserFavoriteSpeakerFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  speakerId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  favoriteKey?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserFavoriteSpeakerFilterInput | null > | null,
-  or?: Array< ModelApsAppUserFavoriteSpeakerFilterInput | null > | null,
-  not?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
-  aPSFavoriteSpeakersId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserFavoriteSponsorFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  sponsorId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  favoriteKey?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserFavoriteSponsorFilterInput | null > | null,
-  or?: Array< ModelApsAppUserFavoriteSponsorFilterInput | null > | null,
-  not?: ModelApsAppUserFavoriteSponsorFilterInput | null,
-  aPSFavoriteSponsorsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserFavoriteSessionFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  sessionId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  favoriteKey?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserFavoriteSessionFilterInput | null > | null,
-  or?: Array< ModelApsAppUserFavoriteSessionFilterInput | null > | null,
-  not?: ModelApsAppUserFavoriteSessionFilterInput | null,
-  aPSFavoriteSessionsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserFavoriteContactFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userProfileId?: ModelIDInput | null,
-  contactProfileId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  favoriteKey?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserFavoriteContactFilterInput | null > | null,
-  or?: Array< ModelApsAppUserFavoriteContactFilterInput | null > | null,
-  not?: ModelApsAppUserFavoriteContactFilterInput | null,
-  aPSFavoriteContactsId?: ModelIDInput | null,
-};
-
-export type ModelApsContactRequestFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  requestKey?: ModelStringInput | null,
-  userAId?: ModelIDInput | null,
-  userBId?: ModelIDInput | null,
-  owners?: ModelStringInput | null,
-  requestedByUserId?: ModelIDInput | null,
-  status?: ModelStringInput | null,
-  introMessage?: ModelStringInput | null,
-  introSentAt?: ModelStringInput | null,
-  introDeliveredAt?: ModelStringInput | null,
-  acceptedAt?: ModelStringInput | null,
-  declinedAt?: ModelStringInput | null,
-  blockedAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsContactRequestFilterInput | null > | null,
-  or?: Array< ModelApsContactRequestFilterInput | null > | null,
-  not?: ModelApsContactRequestFilterInput | null,
-};
-
-export type ModelApsContactRequestConnection = {
-  __typename: "ModelApsContactRequestConnection",
-  items:  Array<ApsContactRequest | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsDmThreadFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  dmKey?: ModelStringInput | null,
-  userAId?: ModelIDInput | null,
-  userBId?: ModelIDInput | null,
-  owners?: ModelStringInput | null,
-  lastMessageAt?: ModelStringInput | null,
-  lastMessagePreview?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsDmThreadFilterInput | null > | null,
-  or?: Array< ModelApsDmThreadFilterInput | null > | null,
-  not?: ModelApsDmThreadFilterInput | null,
-};
-
-export type ModelApsDmThreadConnection = {
-  __typename: "ModelApsDmThreadConnection",
-  items:  Array<ApsDmThread | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsDmParticipantStateFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  threadId?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  lastReadAt?: ModelStringInput | null,
-  unreadCount?: ModelIntInput | null,
-  lastMessageAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsDmParticipantStateFilterInput | null > | null,
-  or?: Array< ModelApsDmParticipantStateFilterInput | null > | null,
-  not?: ModelApsDmParticipantStateFilterInput | null,
-};
-
-export type ModelApsDmMessageFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  threadId?: ModelIDInput | null,
-  senderUserId?: ModelIDInput | null,
-  owners?: ModelStringInput | null,
-  type?: ModelStringInput | null,
-  body?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsDmMessageFilterInput | null > | null,
-  or?: Array< ModelApsDmMessageFilterInput | null > | null,
-  not?: ModelApsDmMessageFilterInput | null,
-};
-
-export type ModelApsAdminAnnouncementFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  title?: ModelStringInput | null,
-  body?: ModelStringInput | null,
-  deepLink?: ModelStringInput | null,
-  scheduledAt?: ModelStringInput | null,
-  publishedAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAdminAnnouncementFilterInput | null > | null,
-  or?: Array< ModelApsAdminAnnouncementFilterInput | null > | null,
-  not?: ModelApsAdminAnnouncementFilterInput | null,
-};
-
-export type ModelApsAdminAnnouncementConnection = {
-  __typename: "ModelApsAdminAnnouncementConnection",
-  items:  Array<ApsAdminAnnouncement | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsUserEngageStateFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  lastSeenAnnouncementAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsUserEngageStateFilterInput | null > | null,
-  or?: Array< ModelApsUserEngageStateFilterInput | null > | null,
-  not?: ModelApsUserEngageStateFilterInput | null,
-};
-
-export type ModelApsUserEngageStateConnection = {
-  __typename: "ModelApsUserEngageStateConnection",
-  items:  Array<ApsUserEngageState | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsPushTokenFilterInput = {
-  id?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  token?: ModelStringInput | null,
-  platform?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  and?: Array< ModelApsPushTokenFilterInput | null > | null,
-  or?: Array< ModelApsPushTokenFilterInput | null > | null,
-  not?: ModelApsPushTokenFilterInput | null,
-};
-
-export type ModelApsPushTokenConnection = {
-  __typename: "ModelApsPushTokenConnection",
-  items:  Array<ApsPushToken | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsAppFeedbackFilterInput = {
-  id?: ModelIDInput | null,
-  owner?: ModelStringInput | null,
-  userId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  message?: ModelStringInput | null,
-  imageKeys?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppFeedbackFilterInput | null > | null,
-  or?: Array< ModelApsAppFeedbackFilterInput | null > | null,
-  not?: ModelApsAppFeedbackFilterInput | null,
-};
-
-export type ModelApsAppFeedbackConnection = {
-  __typename: "ModelApsAppFeedbackConnection",
-  items:  Array<ApsAppFeedback | null >,
-  nextToken?: string | null,
-};
-
-export type ModelStringKeyConditionInput = {
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-};
-
-export enum ModelSortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
-}
-
-
-export type ModelIDKeyConditionInput = {
-  eq?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  between?: Array< string | null > | null,
-  beginsWith?: string | null,
-};
-
-export type ModelAPSFilterInput = {
-  id?: ModelIDInput | null,
-  year?: ModelStringInput | null,
-  startDate?: ModelStringInput | null,
-  endDate?: ModelStringInput | null,
-  location?: ModelStringInput | null,
-  address?: ModelStringInput | null,
-  city?: ModelStringInput | null,
-  state?: ModelStringInput | null,
-  zip?: ModelStringInput | null,
-  website?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSFilterInput | null > | null,
-  or?: Array< ModelAPSFilterInput | null > | null,
-  not?: ModelAPSFilterInput | null,
-  aPSAgendaId?: ModelIDInput | null,
-};
-
-export type ModelAPSConnection = {
-  __typename: "ModelAPSConnection",
-  items:  Array<APS | null >,
-  nextToken?: string | null,
-};
-
-export type ModelAPSCodeFilterInput = {
-  id?: ModelIDInput | null,
-  code?: ModelStringInput | null,
-  eventId?: ModelIDInput | null,
-  limit?: ModelIntInput | null,
-  used?: ModelIntInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSCodeFilterInput | null > | null,
-  or?: Array< ModelAPSCodeFilterInput | null > | null,
-  not?: ModelAPSCodeFilterInput | null,
-  aPSCodesId?: ModelIDInput | null,
-};
-
-export type ModelAPSBoardFilterInput = {
-  id?: ModelIDInput | null,
-  name?: ModelStringInput | null,
-  title?: ModelStringInput | null,
-  bio?: ModelStringInput | null,
-  company?: ModelStringInput | null,
-  email?: ModelStringInput | null,
-  linkedin?: ModelStringInput | null,
-  profilePic?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSBoardFilterInput | null > | null,
-  or?: Array< ModelAPSBoardFilterInput | null > | null,
-  not?: ModelAPSBoardFilterInput | null,
-};
-
-export type ModelAPSBoardConnection = {
-  __typename: "ModelAPSBoardConnection",
-  items:  Array<APSBoard | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsAgendaFilterInput = {
-  id?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAgendaFilterInput | null > | null,
-  or?: Array< ModelApsAgendaFilterInput | null > | null,
-  not?: ModelApsAgendaFilterInput | null,
-};
-
-export type ModelApsAgendaConnection = {
-  __typename: "ModelApsAgendaConnection",
-  items:  Array<ApsAgenda | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsRegistrantFilterInput = {
-  id?: ModelIDInput | null,
-  apsID?: ModelIDInput | null,
-  firstName?: ModelStringInput | null,
-  lastName?: ModelStringInput | null,
-  email?: ModelStringInput | null,
-  phone?: ModelStringInput | null,
-  companyId?: ModelIDInput | null,
-  jobTitle?: ModelStringInput | null,
-  attendeeType?: ModelRegistrantTypeInput | null,
-  termsAccepted?: ModelBooleanInput | null,
-  interests?: ModelStringInput | null,
-  otherInterest?: ModelStringInput | null,
-  buyerQuestion?: ModelStringInput | null,
-  packagingChallenge?: ModelStringInput | null,
-  certification?: ModelStringInput | null,
-  billingAddressFirstName?: ModelStringInput | null,
-  billingAddressLastName?: ModelStringInput | null,
-  billingAddressEmail?: ModelStringInput | null,
-  billingAddressPhone?: ModelStringInput | null,
-  billingAddressStreet?: ModelStringInput | null,
-  billingAddressCity?: ModelStringInput | null,
-  billingAddressState?: ModelStringInput | null,
-  billingAddressZip?: ModelStringInput | null,
-  billingAddressCountry?: ModelStringInput | null,
-  sameAsAttendee?: ModelBooleanInput | null,
-  speakerTopic?: ModelStringInput | null,
-  learningObjectives?: ModelStringInput | null,
-  totalAmount?: ModelIntInput | null,
-  discountCode?: ModelStringInput | null,
-  status?: ModelRegistrantStatusInput | null,
-  paymentConfirmation?: ModelStringInput | null,
-  registrationEmailSent?: ModelBooleanInput | null,
-  registrationEmailSentDate?: ModelStringInput | null,
-  registrationEmailReceived?: ModelBooleanInput | null,
-  registrationEmailReceivedDate?: ModelStringInput | null,
-  welcomeEmailSent?: ModelBooleanInput | null,
-  welcomeEmailSentDate?: ModelStringInput | null,
-  welcomeEmailReceived?: ModelBooleanInput | null,
-  welcomeEmailReceivedDate?: ModelStringInput | null,
-  paymentMethod?: ModelStringInput | null,
-  paymentLast4?: ModelStringInput | null,
-  approvedAt?: ModelStringInput | null,
-  headshot?: ModelStringInput | null,
-  presentation?: ModelStringInput | null,
-  presentationTitle?: ModelStringInput | null,
-  presentationSummary?: ModelStringInput | null,
-  bio?: ModelStringInput | null,
-  invoice?: ModelStringInput | null,
-  appUserId?: ModelIDInput | null,
-  qrCode?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsRegistrantFilterInput | null > | null,
-  or?: Array< ModelApsRegistrantFilterInput | null > | null,
-  not?: ModelApsRegistrantFilterInput | null,
-  aPSRegistrantsId?: ModelIDInput | null,
-  aPSCompanyRegistrantsId?: ModelIDInput | null,
-  apsRegistrantSeatingChartRegistrantId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserFilterInput = {
-  id?: ModelIDInput | null,
-  registrantId?: ModelIDInput | null,
-  profileId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserFilterInput | null > | null,
-  or?: Array< ModelApsAppUserFilterInput | null > | null,
-  not?: ModelApsAppUserFilterInput | null,
-};
-
-export type ModelApsAppUserContactFilterInput = {
-  id?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  favorite?: ModelBooleanInput | null,
-  contactId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserContactFilterInput | null > | null,
-  or?: Array< ModelApsAppUserContactFilterInput | null > | null,
-  not?: ModelApsAppUserContactFilterInput | null,
-  apsAppUserContactsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserLeadFilterInput = {
-  id?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  favorite?: ModelBooleanInput | null,
-  contactId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserLeadFilterInput | null > | null,
-  or?: Array< ModelApsAppUserLeadFilterInput | null > | null,
-  not?: ModelApsAppUserLeadFilterInput | null,
-  apsAppUserLeadsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserProfileFilterInput = {
-  id?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  firstName?: ModelStringInput | null,
-  lastName?: ModelStringInput | null,
-  email?: ModelStringInput | null,
-  phone?: ModelStringInput | null,
-  company?: ModelStringInput | null,
-  jobTitle?: ModelStringInput | null,
-  attendeeType?: ModelRegistrantTypeInput | null,
-  quickTools?: ModelStringInput | null,
-  profilePicture?: ModelStringInput | null,
-  bio?: ModelStringInput | null,
-  linkedin?: ModelStringInput | null,
-  twitter?: ModelStringInput | null,
-  facebook?: ModelStringInput | null,
-  instagram?: ModelStringInput | null,
-  youtube?: ModelStringInput | null,
-  website?: ModelStringInput | null,
-  location?: ModelStringInput | null,
-  resume?: ModelStringInput | null,
-  thinkificId?: ModelIntInput | null,
-  apcProgress?: ModelFloatInput | null,
-  speakerId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserProfileFilterInput | null > | null,
-  or?: Array< ModelApsAppUserProfileFilterInput | null > | null,
-  not?: ModelApsAppUserProfileFilterInput | null,
-};
-
-export type ModelProfileAffiliateFilterInput = {
-  id?: ModelIDInput | null,
-  profileId?: ModelIDInput | null,
-  affiliate?: ModelStringInput | null,
-  role?: ModelStringInput | null,
-  startDate?: ModelStringInput | null,
-  endDate?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelProfileAffiliateFilterInput | null > | null,
-  or?: Array< ModelProfileAffiliateFilterInput | null > | null,
-  not?: ModelProfileAffiliateFilterInput | null,
-  apsAppUserProfileAffiliatesId?: ModelIDInput | null,
-};
-
-export type ModelProfileEducationFilterInput = {
-  id?: ModelIDInput | null,
-  profileId?: ModelIDInput | null,
-  school?: ModelStringInput | null,
-  degree?: ModelStringInput | null,
-  fieldOfStudy?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelProfileEducationFilterInput | null > | null,
-  or?: Array< ModelProfileEducationFilterInput | null > | null,
-  not?: ModelProfileEducationFilterInput | null,
-  apsAppUserProfileEducationId?: ModelIDInput | null,
-};
-
-export type ModelProfileInterestFilterInput = {
-  id?: ModelIDInput | null,
-  profileId?: ModelIDInput | null,
-  interest?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelProfileInterestFilterInput | null > | null,
-  or?: Array< ModelProfileInterestFilterInput | null > | null,
-  not?: ModelProfileInterestFilterInput | null,
-  apsAppUserProfileInterestsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppUserPhotoFilterInput = {
-  id?: ModelIDInput | null,
-  userId?: ModelIDInput | null,
-  photo?: ModelStringInput | null,
-  caption?: ModelStringInput | null,
-  approved?: ModelBooleanInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppUserPhotoFilterInput | null > | null,
-  or?: Array< ModelApsAppUserPhotoFilterInput | null > | null,
-  not?: ModelApsAppUserPhotoFilterInput | null,
-  aPSPhotosId?: ModelIDInput | null,
-  apsAppUserPhotosId?: ModelIDInput | null,
-};
-
-export type ModelApsAppSessionFilterInput = {
-  id?: ModelIDInput | null,
-  title?: ModelStringInput | null,
-  date?: ModelStringInput | null,
-  startTime?: ModelStringInput | null,
-  endTime?: ModelStringInput | null,
-  location?: ModelStringInput | null,
-  description?: ModelStringInput | null,
-  embedUrl?: ModelStringInput | null,
-  agendaId?: ModelIDInput | null,
-  draft?: ModelBooleanInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppSessionFilterInput | null > | null,
-  or?: Array< ModelApsAppSessionFilterInput | null > | null,
-  not?: ModelApsAppSessionFilterInput | null,
-  apsAgendaItemsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppSessionQuestionFilterInput = {
-  id?: ModelIDInput | null,
-  sessionId?: ModelIDInput | null,
-  question?: ModelStringInput | null,
-  userId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppSessionQuestionFilterInput | null > | null,
-  or?: Array< ModelApsAppSessionQuestionFilterInput | null > | null,
-  not?: ModelApsAppSessionQuestionFilterInput | null,
-  apsAppUserSessionQuestionsId?: ModelIDInput | null,
-};
-
-export type ModelAPSSpeakerFilterInput = {
-  id?: ModelIDInput | null,
-  presentationTitle?: ModelStringInput | null,
-  presentationSummary?: ModelStringInput | null,
-  profileId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSSpeakerFilterInput | null > | null,
-  or?: Array< ModelAPSSpeakerFilterInput | null > | null,
-  not?: ModelAPSSpeakerFilterInput | null,
-  aPSSpeakersId?: ModelIDInput | null,
-};
-
-export type ModelApsSponsorFilterInput = {
-  id?: ModelIDInput | null,
-  companyId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  type?: ModelSponsorTypeInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsSponsorFilterInput | null > | null,
-  or?: Array< ModelApsSponsorFilterInput | null > | null,
-  not?: ModelApsSponsorFilterInput | null,
-  aPSSponsorsId?: ModelIDInput | null,
-  apsSponsorProfileId?: ModelIDInput | null,
-};
-
-export type ModelAPSCompanyFilterInput = {
-  id?: ModelIDInput | null,
-  name?: ModelStringInput | null,
-  email?: ModelStringInput | null,
-  type?: ModelCompanyTypeInput | null,
-  description?: ModelStringInput | null,
-  website?: ModelStringInput | null,
-  phone?: ModelStringInput | null,
-  address?: ModelStringInput | null,
-  city?: ModelStringInput | null,
-  state?: ModelStringInput | null,
-  zip?: ModelStringInput | null,
-  country?: ModelStringInput | null,
-  logo?: ModelStringInput | null,
-  sponsorId?: ModelIDInput | null,
-  exhibitorProfileId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSCompanyFilterInput | null > | null,
-  or?: Array< ModelAPSCompanyFilterInput | null > | null,
-  not?: ModelAPSCompanyFilterInput | null,
-};
-
-export type ModelAPSCompanyConnection = {
-  __typename: "ModelAPSCompanyConnection",
-  items:  Array<APSCompany | null >,
-  nextToken?: string | null,
-};
-
-export type ModelAPSCompanyContactFilterInput = {
-  id?: ModelIDInput | null,
-  companyId?: ModelIDInput | null,
-  name?: ModelStringInput | null,
-  email?: ModelStringInput | null,
-  phone?: ModelStringInput | null,
-  title?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSCompanyContactFilterInput | null > | null,
-  or?: Array< ModelAPSCompanyContactFilterInput | null > | null,
-  not?: ModelAPSCompanyContactFilterInput | null,
-};
-
-export type ModelApsAppExhibitorProfileFilterInput = {
-  id?: ModelIDInput | null,
-  companyId?: ModelIDInput | null,
-  sponsorId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  video?: ModelStringInput | null,
-  videoCaption?: ModelStringInput | null,
-  boothNumber?: ModelStringInput | null,
-  qrCode?: ModelStringInput | null,
-  passportQrPayload?: ModelStringInput | null,
-  visits?: ModelIntInput | null,
-  views?: ModelIntInput | null,
-  likes?: ModelIntInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppExhibitorProfileFilterInput | null > | null,
-  or?: Array< ModelApsAppExhibitorProfileFilterInput | null > | null,
-  not?: ModelApsAppExhibitorProfileFilterInput | null,
-  aPSExhibitorsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppExhibitorPromotionFilterInput = {
-  id?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  promotion?: ModelStringInput | null,
-  link?: ModelStringInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppExhibitorPromotionFilterInput | null > | null,
-  or?: Array< ModelApsAppExhibitorPromotionFilterInput | null > | null,
-  not?: ModelApsAppExhibitorPromotionFilterInput | null,
-  aPSExhibitorPromotionsId?: ModelIDInput | null,
-  apsAppExhibitorProfilePromotionsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppExhibitorDealFilterInput = {
-  id?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  deal?: ModelStringInput | null,
-  link?: ModelStringInput | null,
-  userId?: ModelIDInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppExhibitorDealFilterInput | null > | null,
-  or?: Array< ModelApsAppExhibitorDealFilterInput | null > | null,
-  not?: ModelApsAppExhibitorDealFilterInput | null,
-  aPSExhibitorDealsId?: ModelIDInput | null,
-  apsAppUserExhibitorDealsId?: ModelIDInput | null,
-  apsAppExhibitorProfileDealsId?: ModelIDInput | null,
-};
-
-export type ModelApsAppExhibitorPhotoFilterInput = {
-  id?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  photo?: ModelStringInput | null,
-  caption?: ModelStringInput | null,
-  approved?: ModelBooleanInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppExhibitorPhotoFilterInput | null > | null,
-  or?: Array< ModelApsAppExhibitorPhotoFilterInput | null > | null,
-  not?: ModelApsAppExhibitorPhotoFilterInput | null,
-  aPSExhibitorPhotosId?: ModelIDInput | null,
-  apsAppExhibitorProfilePhotosId?: ModelIDInput | null,
-};
-
-export type ModelApsAppExhibitorHandoutFilterInput = {
-  id?: ModelIDInput | null,
-  exhibitorId?: ModelIDInput | null,
-  handout?: ModelStringInput | null,
-  eventId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAppExhibitorHandoutFilterInput | null > | null,
-  or?: Array< ModelApsAppExhibitorHandoutFilterInput | null > | null,
-  not?: ModelApsAppExhibitorHandoutFilterInput | null,
-  aPSExhibitorHandoutsId?: ModelIDInput | null,
-  apsAppExhibitorProfileHandoutsId?: ModelIDInput | null,
-};
-
-export type ModelApsAddOnFilterInput = {
-  id?: ModelIDInput | null,
-  title?: ModelStringInput | null,
-  description?: ModelStringInput | null,
-  subheadline?: ModelStringInput | null,
-  location?: ModelStringInput | null,
-  date?: ModelStringInput | null,
-  time?: ModelStringInput | null,
-  altLink?: ModelStringInput | null,
-  type?: ModelStringInput | null,
-  limit?: ModelIntInput | null,
-  eventId?: ModelIDInput | null,
-  price?: ModelIntInput | null,
-  preferenceSchema?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsAddOnFilterInput | null > | null,
-  or?: Array< ModelApsAddOnFilterInput | null > | null,
-  not?: ModelApsAddOnFilterInput | null,
-  aPSAddOnsId?: ModelIDInput | null,
-};
-
-export type ModelRegistrantAddOnRequestFilterInput = {
-  id?: ModelIDInput | null,
-  registrantId?: ModelIDInput | null,
-  addOnId?: ModelIDInput | null,
-  status?: ModelStringInput | null,
-  preferences?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelRegistrantAddOnRequestFilterInput | null > | null,
-  or?: Array< ModelRegistrantAddOnRequestFilterInput | null > | null,
-  not?: ModelRegistrantAddOnRequestFilterInput | null,
-};
-
-export type ModelApsSeatingChartFilterInput = {
-  id?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsSeatingChartFilterInput | null > | null,
-  or?: Array< ModelApsSeatingChartFilterInput | null > | null,
-  not?: ModelApsSeatingChartFilterInput | null,
-};
-
-export type ModelApsSeatingChartConnection = {
-  __typename: "ModelApsSeatingChartConnection",
-  items:  Array<ApsSeatingChart | null >,
-  nextToken?: string | null,
-};
-
-export type ModelApsSeatingChartRegistrantFilterInput = {
-  id?: ModelIDInput | null,
-  category?: ModelStringInput | null,
-  firstName?: ModelStringInput | null,
-  lastName?: ModelStringInput | null,
-  company?: ModelStringInput | null,
-  email?: ModelStringInput | null,
-  role?: ModelStringInput | null,
-  tableNumber?: ModelIntInput | null,
-  notes?: ModelStringInput | null,
-  seatingChartID?: ModelIDInput | null,
-  registrantID?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelApsSeatingChartRegistrantFilterInput | null > | null,
-  or?: Array< ModelApsSeatingChartRegistrantFilterInput | null > | null,
-  not?: ModelApsSeatingChartRegistrantFilterInput | null,
-  apsSeatingChartRegistrantsId?: ModelIDInput | null,
-};
-
-export type ModelAPSCompanyEventsFilterInput = {
-  id?: ModelIDInput | null,
-  aPSId?: ModelIDInput | null,
-  aPSCompanyId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelAPSCompanyEventsFilterInput | null > | null,
-  or?: Array< ModelAPSCompanyEventsFilterInput | null > | null,
-  not?: ModelAPSCompanyEventsFilterInput | null,
-};
-
-export type ModelSessionSpeakersFilterInput = {
-  id?: ModelIDInput | null,
-  apsAppSessionId?: ModelIDInput | null,
-  aPSSpeakerId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelSessionSpeakersFilterInput | null > | null,
-  or?: Array< ModelSessionSpeakersFilterInput | null > | null,
-  not?: ModelSessionSpeakersFilterInput | null,
-};
-
-export type ModelSessionSponsorsFilterInput = {
-  id?: ModelIDInput | null,
-  apsAppSessionId?: ModelIDInput | null,
-  apsSponsorId?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelSessionSponsorsFilterInput | null > | null,
-  or?: Array< ModelSessionSponsorsFilterInput | null > | null,
-  not?: ModelSessionSponsorsFilterInput | null,
 };
 
 export type ModelSubscriptionApsTempCredentialFilterInput = {
@@ -4319,6 +4533,36 @@ export type ModelSubscriptionApsTempCredentialFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionApsTempCredentialFilterInput | null > | null,
   or?: Array< ModelSubscriptionApsTempCredentialFilterInput | null > | null,
+};
+
+export type ModelSubscriptionIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
+};
+
+export type ModelSubscriptionStringInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
 };
 
 export type ModelSubscriptionIntInput = {
@@ -4491,6 +4735,20 @@ export type ModelSubscriptionApsDmParticipantStateFilterInput = {
   userId?: ModelStringInput | null,
 };
 
+export type ModelSubscriptionApsDmMessageFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  eventId?: ModelSubscriptionIDInput | null,
+  threadId?: ModelSubscriptionIDInput | null,
+  senderUserId?: ModelSubscriptionIDInput | null,
+  type?: ModelSubscriptionStringInput | null,
+  body?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionApsDmMessageFilterInput | null > | null,
+  or?: Array< ModelSubscriptionApsDmMessageFilterInput | null > | null,
+  owners?: ModelStringInput | null,
+};
+
 export type ModelSubscriptionApsAdminAnnouncementFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   eventId?: ModelSubscriptionIDInput | null,
@@ -4653,6 +4911,10 @@ export type ModelSubscriptionApsRegistrantFilterInput = {
   welcomeEmailSentDate?: ModelSubscriptionStringInput | null,
   welcomeEmailReceived?: ModelSubscriptionBooleanInput | null,
   welcomeEmailReceivedDate?: ModelSubscriptionStringInput | null,
+  appEmailSent?: ModelSubscriptionBooleanInput | null,
+  appEmailSentDate?: ModelSubscriptionStringInput | null,
+  appEmailReceived?: ModelSubscriptionBooleanInput | null,
+  appEmailReceivedDate?: ModelSubscriptionStringInput | null,
   paymentMethod?: ModelSubscriptionStringInput | null,
   paymentLast4?: ModelSubscriptionStringInput | null,
   approvedAt?: ModelSubscriptionStringInput | null,
@@ -5026,6 +5288,43 @@ export type ModelSubscriptionApsSeatingChartRegistrantFilterInput = {
   or?: Array< ModelSubscriptionApsSeatingChartRegistrantFilterInput | null > | null,
 };
 
+export type ModelSubscriptionApsEmailCampaignFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  eventId?: ModelSubscriptionIDInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  templateKey?: ModelSubscriptionStringInput | null,
+  subject?: ModelSubscriptionStringInput | null,
+  audienceStatuses?: ModelSubscriptionStringInput | null,
+  audienceTypes?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  scheduledAt?: ModelSubscriptionStringInput | null,
+  startedAt?: ModelSubscriptionStringInput | null,
+  completedAt?: ModelSubscriptionStringInput | null,
+  totalRecipients?: ModelSubscriptionIntInput | null,
+  sentCount?: ModelSubscriptionIntInput | null,
+  failedCount?: ModelSubscriptionIntInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionApsEmailCampaignFilterInput | null > | null,
+  or?: Array< ModelSubscriptionApsEmailCampaignFilterInput | null > | null,
+};
+
+export type ModelSubscriptionApsEmailSendFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  campaignId?: ModelSubscriptionIDInput | null,
+  eventId?: ModelSubscriptionIDInput | null,
+  registrantId?: ModelSubscriptionIDInput | null,
+  email?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  sesMessageId?: ModelSubscriptionStringInput | null,
+  error?: ModelSubscriptionStringInput | null,
+  sentAt?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionApsEmailSendFilterInput | null > | null,
+  or?: Array< ModelSubscriptionApsEmailSendFilterInput | null > | null,
+};
+
 export type ModelSubscriptionAPSCompanyEventsFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   aPSId?: ModelSubscriptionIDInput | null,
@@ -5056,26 +5355,3463 @@ export type ModelSubscriptionSessionSponsorsFilterInput = {
   or?: Array< ModelSubscriptionSessionSponsorsFilterInput | null > | null,
 };
 
-export type GetAPSBasicQueryVariables = {
+export type AdminGetThinkificByEmailQueryVariables = {
+  email: string,
+};
+
+export type AdminGetThinkificByEmailQuery = {
+  adminGetThinkificByEmail?:  {
+    __typename: "AdminThinkificByEmailResult",
+    email: string,
+    thinkificUserId?: number | null,
+    apcEnrollments:  Array< {
+      __typename: "AdminThinkificEnrollment",
+      enrollmentId?: number | null,
+      courseId?: number | null,
+      courseName?: string | null,
+      percentageCompleted?: number | null,
+      completedAt?: string | null,
+      activatedAt?: string | null,
+    } >,
+    otherEnrollments:  Array< {
+      __typename: "AdminThinkificEnrollment",
+      enrollmentId?: number | null,
+      courseId?: number | null,
+      courseName?: string | null,
+      percentageCompleted?: number | null,
+      completedAt?: string | null,
+      activatedAt?: string | null,
+    } >,
+  } | null,
+};
+
+export type AdminGetLatestRegistrantTempCredentialQueryVariables = {
+  registrantId: string,
+};
+
+export type AdminGetLatestRegistrantTempCredentialQuery = {
+  adminGetLatestRegistrantTempCredential?:  {
+    __typename: "AdminLatestTempCredentialResult",
+    registrantId: string,
+    email: string,
+    tempPassword: string,
+    createdAt: string,
+  } | null,
+};
+
+export type GetApsTempCredentialQueryVariables = {
   id: string,
 };
 
-export type GetAPSBasicQuery = {
-  getAPS?:  {
-    __typename: "APS",
+export type GetApsTempCredentialQuery = {
+  getApsTempCredential?:  {
+    __typename: "ApsTempCredential",
     id: string,
-    year: string,
+    apsID: string,
+    registrantId: string,
+    email: string,
+    tempPasswordCiphertext: string,
+    tempPasswordIv: string,
+    tempPasswordTag: string,
+    expiresAt?: number | null,
+    createdAt?: string | null,
+    updatedAt?: string | null,
+  } | null,
+};
+
+export type ListApsTempCredentialsQueryVariables = {
+  filter?: ModelApsTempCredentialFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsTempCredentialsQuery = {
+  listApsTempCredentials?:  {
+    __typename: "ModelApsTempCredentialConnection",
+    items:  Array< {
+      __typename: "ApsTempCredential",
+      id: string,
+      apsID: string,
+      registrantId: string,
+      email: string,
+      tempPasswordCiphertext: string,
+      tempPasswordIv: string,
+      tempPasswordTag: string,
+      expiresAt?: number | null,
+      createdAt?: string | null,
+      updatedAt?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserNoteQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserNoteQuery = {
+  getApsAppUserNote?:  {
+    __typename: "ApsAppUserNote",
+    id: string,
+    owner?: string | null,
+    userId: string,
+    user:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    note?: string | null,
+    sessionId?: string | null,
+    session?:  {
+      __typename: "ApsAppSession",
+      id: string,
+      title?: string | null,
+      date?: string | null,
+      startTime?: string | null,
+      endTime?: string | null,
+      location?: string | null,
+      description?: string | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
+    } | null,
+    exhibitorId?: string | null,
+    exhibitor?:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null,
+    registrantId?: string | null,
+    registrant?:  {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    } | null,
+    profileId?: string | null,
+    profile?:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    companyId?: string | null,
+    company?:  {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserNotesId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserNotesQueryVariables = {
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserNotesQuery = {
+  listApsAppUserNotes?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserExhibitorViewQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserExhibitorViewQuery = {
+  getApsAppUserExhibitorView?:  {
+    __typename: "ApsAppUserExhibitorView",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    viewKey: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSExhibitorViewsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserExhibitorViewsQueryVariables = {
+  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserExhibitorViewsQuery = {
+  listApsAppUserExhibitorViews?:  {
+    __typename: "ModelApsAppUserExhibitorViewConnection",
+    items:  Array< {
+      __typename: "ApsAppUserExhibitorView",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      viewKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorViewsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserPassportStampQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserPassportStampQuery = {
+  getApsAppUserPassportStamp?:  {
+    __typename: "ApsAppUserPassportStamp",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    stampKey: string,
+    scannedAt: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSPassportStampsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserPassportStampsQueryVariables = {
+  filter?: ModelApsAppUserPassportStampFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserPassportStampsQuery = {
+  listApsAppUserPassportStamps?:  {
+    __typename: "ModelApsAppUserPassportStampConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPassportStamp",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      stampKey: string,
+      scannedAt: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPassportStampsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserFavoriteExhibitorQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserFavoriteExhibitorQuery = {
+  getApsAppUserFavoriteExhibitor?:  {
+    __typename: "ApsAppUserFavoriteExhibitor",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    favoriteKey: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSFavoriteExhibitorsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserFavoriteExhibitorsQueryVariables = {
+  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserFavoriteExhibitorsQuery = {
+  listApsAppUserFavoriteExhibitors?:  {
+    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteExhibitor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserFavoriteSpeakerQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserFavoriteSpeakerQuery = {
+  getApsAppUserFavoriteSpeaker?:  {
+    __typename: "ApsAppUserFavoriteSpeaker",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    speakerId: string,
+    speaker:  {
+      __typename: "APSSpeaker",
+      id: string,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      profileId: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSSpeakersId?: string | null,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    favoriteKey: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSFavoriteSpeakersId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserFavoriteSpeakersQueryVariables = {
+  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserFavoriteSpeakersQuery = {
+  listApsAppUserFavoriteSpeakers?:  {
+    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSpeaker",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      speakerId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserFavoriteSponsorQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserFavoriteSponsorQuery = {
+  getApsAppUserFavoriteSponsor?:  {
+    __typename: "ApsAppUserFavoriteSponsor",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    sponsorId: string,
+    sponsor:  {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    favoriteKey: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSFavoriteSponsorsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserFavoriteSponsorsQueryVariables = {
+  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserFavoriteSponsorsQuery = {
+  listApsAppUserFavoriteSponsors?:  {
+    __typename: "ModelApsAppUserFavoriteSponsorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSponsor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sponsorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSponsorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserFavoriteSessionQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserFavoriteSessionQuery = {
+  getApsAppUserFavoriteSession?:  {
+    __typename: "ApsAppUserFavoriteSession",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    sessionId: string,
+    session:  {
+      __typename: "ApsAppSession",
+      id: string,
+      title?: string | null,
+      date?: string | null,
+      startTime?: string | null,
+      endTime?: string | null,
+      location?: string | null,
+      description?: string | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    favoriteKey: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSFavoriteSessionsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserFavoriteSessionsQueryVariables = {
+  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserFavoriteSessionsQuery = {
+  listApsAppUserFavoriteSessions?:  {
+    __typename: "ModelApsAppUserFavoriteSessionConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSession",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sessionId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSessionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserFavoriteContactQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserFavoriteContactQuery = {
+  getApsAppUserFavoriteContact?:  {
+    __typename: "ApsAppUserFavoriteContact",
+    id: string,
+    owner?: string | null,
+    userProfileId: string,
+    userProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    contactProfileId: string,
+    contactProfile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    favoriteKey: string,
+    createdAt: string,
+    updatedAt: string,
+    aPSFavoriteContactsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserFavoriteContactsQueryVariables = {
+  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserFavoriteContactsQuery = {
+  listApsAppUserFavoriteContacts?:  {
+    __typename: "ModelApsAppUserFavoriteContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteContact",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      contactProfileId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsContactRequestQueryVariables = {
+  id: string,
+};
+
+export type GetApsContactRequestQuery = {
+  getApsContactRequest?:  {
+    __typename: "ApsContactRequest",
+    id: string,
+    eventId: string,
+    requestKey: string,
+    userAId: string,
+    userBId: string,
+    owners: Array< string >,
+    requestedByUserId: string,
+    status: string,
+    introMessage?: string | null,
+    introSentAt?: string | null,
+    introDeliveredAt?: string | null,
+    acceptedAt?: string | null,
+    declinedAt?: string | null,
+    blockedAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type GetRegistrantByEmailQueryVariables = {
-  apsID: string,
-  email: string,
+export type ListApsContactRequestsQueryVariables = {
+  filter?: ModelApsContactRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type GetRegistrantByEmailQuery = {
+export type ListApsContactRequestsQuery = {
+  listApsContactRequests?:  {
+    __typename: "ModelApsContactRequestConnection",
+    items:  Array< {
+      __typename: "ApsContactRequest",
+      id: string,
+      eventId: string,
+      requestKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      requestedByUserId: string,
+      status: string,
+      introMessage?: string | null,
+      introSentAt?: string | null,
+      introDeliveredAt?: string | null,
+      acceptedAt?: string | null,
+      declinedAt?: string | null,
+      blockedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsDmThreadQueryVariables = {
+  id: string,
+};
+
+export type GetApsDmThreadQuery = {
+  getApsDmThread?:  {
+    __typename: "ApsDmThread",
+    id: string,
+    eventId: string,
+    dmKey: string,
+    userAId: string,
+    userBId: string,
+    owners: Array< string >,
+    participantStates?:  {
+      __typename: "ModelApsDmParticipantStateConnection",
+      nextToken?: string | null,
+    } | null,
+    messages?:  {
+      __typename: "ModelApsDmMessageConnection",
+      nextToken?: string | null,
+    } | null,
+    lastMessageAt?: string | null,
+    lastMessagePreview?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsDmThreadsQueryVariables = {
+  filter?: ModelApsDmThreadFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsDmThreadsQuery = {
+  listApsDmThreads?:  {
+    __typename: "ModelApsDmThreadConnection",
+    items:  Array< {
+      __typename: "ApsDmThread",
+      id: string,
+      eventId: string,
+      dmKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      lastMessageAt?: string | null,
+      lastMessagePreview?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsDmParticipantStateQueryVariables = {
+  id: string,
+};
+
+export type GetApsDmParticipantStateQuery = {
+  getApsDmParticipantState?:  {
+    __typename: "ApsDmParticipantState",
+    id: string,
+    eventId: string,
+    threadId: string,
+    thread:  {
+      __typename: "ApsDmThread",
+      id: string,
+      eventId: string,
+      dmKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      lastMessageAt?: string | null,
+      lastMessagePreview?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    userId: string,
+    lastReadAt?: string | null,
+    unreadCount?: number | null,
+    lastMessageAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsDmParticipantStatesQueryVariables = {
+  filter?: ModelApsDmParticipantStateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsDmParticipantStatesQuery = {
+  listApsDmParticipantStates?:  {
+    __typename: "ModelApsDmParticipantStateConnection",
+    items:  Array< {
+      __typename: "ApsDmParticipantState",
+      id: string,
+      eventId: string,
+      threadId: string,
+      userId: string,
+      lastReadAt?: string | null,
+      unreadCount?: number | null,
+      lastMessageAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsDmMessageQueryVariables = {
+  id: string,
+};
+
+export type GetApsDmMessageQuery = {
+  getApsDmMessage?:  {
+    __typename: "ApsDmMessage",
+    id: string,
+    eventId: string,
+    threadId: string,
+    thread:  {
+      __typename: "ApsDmThread",
+      id: string,
+      eventId: string,
+      dmKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      lastMessageAt?: string | null,
+      lastMessagePreview?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    senderUserId: string,
+    sender:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    owners: Array< string >,
+    type?: string | null,
+    body?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsDmMessagesQueryVariables = {
+  filter?: ModelApsDmMessageFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsDmMessagesQuery = {
+  listApsDmMessages?:  {
+    __typename: "ModelApsDmMessageConnection",
+    items:  Array< {
+      __typename: "ApsDmMessage",
+      id: string,
+      eventId: string,
+      threadId: string,
+      senderUserId: string,
+      owners: Array< string >,
+      type?: string | null,
+      body?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAdminAnnouncementQueryVariables = {
+  id: string,
+};
+
+export type GetApsAdminAnnouncementQuery = {
+  getApsAdminAnnouncement?:  {
+    __typename: "ApsAdminAnnouncement",
+    id: string,
+    eventId: string,
+    title?: string | null,
+    body: string,
+    deepLink?: string | null,
+    scheduledAt?: string | null,
+    publishedAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsAdminAnnouncementsQueryVariables = {
+  filter?: ModelApsAdminAnnouncementFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAdminAnnouncementsQuery = {
+  listApsAdminAnnouncements?:  {
+    __typename: "ModelApsAdminAnnouncementConnection",
+    items:  Array< {
+      __typename: "ApsAdminAnnouncement",
+      id: string,
+      eventId: string,
+      title?: string | null,
+      body: string,
+      deepLink?: string | null,
+      scheduledAt?: string | null,
+      publishedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsUserEngageStateQueryVariables = {
+  id: string,
+};
+
+export type GetApsUserEngageStateQuery = {
+  getApsUserEngageState?:  {
+    __typename: "ApsUserEngageState",
+    id: string,
+    eventId: string,
+    userId: string,
+    lastSeenAnnouncementAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsUserEngageStatesQueryVariables = {
+  filter?: ModelApsUserEngageStateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsUserEngageStatesQuery = {
+  listApsUserEngageStates?:  {
+    __typename: "ModelApsUserEngageStateConnection",
+    items:  Array< {
+      __typename: "ApsUserEngageState",
+      id: string,
+      eventId: string,
+      userId: string,
+      lastSeenAnnouncementAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsPushTokenQueryVariables = {
+  id: string,
+};
+
+export type GetApsPushTokenQuery = {
+  getApsPushToken?:  {
+    __typename: "ApsPushToken",
+    id: string,
+    userId: string,
+    token: string,
+    platform?: string | null,
+    updatedAt: string,
+    createdAt: string,
+  } | null,
+};
+
+export type ListApsPushTokensQueryVariables = {
+  filter?: ModelApsPushTokenFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsPushTokensQuery = {
+  listApsPushTokens?:  {
+    __typename: "ModelApsPushTokenConnection",
+    items:  Array< {
+      __typename: "ApsPushToken",
+      id: string,
+      userId: string,
+      token: string,
+      platform?: string | null,
+      updatedAt: string,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppFeedbackQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppFeedbackQuery = {
+  getApsAppFeedback?:  {
+    __typename: "ApsAppFeedback",
+    id: string,
+    owner?: string | null,
+    userId: string,
+    eventId: string,
+    message: string,
+    imageKeys?: Array< string | null > | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsAppFeedbacksQueryVariables = {
+  filter?: ModelApsAppFeedbackFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppFeedbacksQuery = {
+  listApsAppFeedbacks?:  {
+    __typename: "ModelApsAppFeedbackConnection",
+    items:  Array< {
+      __typename: "ApsAppFeedback",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      eventId: string,
+      message: string,
+      imageKeys?: Array< string | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsTempCredentialsByApsIDAndCreatedAtQueryVariables = {
+  apsID: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsTempCredentialFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsTempCredentialsByApsIDAndCreatedAtQuery = {
+  apsTempCredentialsByApsIDAndCreatedAt?:  {
+    __typename: "ModelApsTempCredentialConnection",
+    items:  Array< {
+      __typename: "ApsTempCredential",
+      id: string,
+      apsID: string,
+      registrantId: string,
+      email: string,
+      tempPasswordCiphertext: string,
+      tempPasswordIv: string,
+      tempPasswordTag: string,
+      expiresAt?: number | null,
+      createdAt?: string | null,
+      updatedAt?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsTempCredentialsByRegistrantIdAndCreatedAtQueryVariables = {
+  registrantId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsTempCredentialFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsTempCredentialsByRegistrantIdAndCreatedAtQuery = {
+  apsTempCredentialsByRegistrantIdAndCreatedAt?:  {
+    __typename: "ModelApsTempCredentialConnection",
+    items:  Array< {
+      __typename: "ApsTempCredential",
+      id: string,
+      apsID: string,
+      registrantId: string,
+      email: string,
+      tempPasswordCiphertext: string,
+      tempPasswordIv: string,
+      tempPasswordTag: string,
+      expiresAt?: number | null,
+      createdAt?: string | null,
+      updatedAt?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserNotesByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNotesByUserIdQuery = {
+  apsAppUserNotesByUserId?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserNotesBySessionIdQueryVariables = {
+  sessionId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNotesBySessionIdQuery = {
+  apsAppUserNotesBySessionId?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserNotesByExhibitorIdQueryVariables = {
+  exhibitorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNotesByExhibitorIdQuery = {
+  apsAppUserNotesByExhibitorId?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserNotesByRegistrantIdQueryVariables = {
+  registrantId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNotesByRegistrantIdQuery = {
+  apsAppUserNotesByRegistrantId?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserNotesByProfileIdQueryVariables = {
+  profileId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNotesByProfileIdQuery = {
+  apsAppUserNotesByProfileId?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserNotesByCompanyIdQueryVariables = {
+  companyId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserNoteFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserNotesByCompanyIdQuery = {
+  apsAppUserNotesByCompanyId?:  {
+    __typename: "ModelApsAppUserNoteConnection",
+    items:  Array< {
+      __typename: "ApsAppUserNote",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      note?: string | null,
+      sessionId?: string | null,
+      exhibitorId?: string | null,
+      registrantId?: string | null,
+      profileId?: string | null,
+      companyId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserNotesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserExhibitorViewsByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserExhibitorViewConnection",
+    items:  Array< {
+      __typename: "ApsAppUserExhibitorView",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      viewKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorViewsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAtQueryVariables = {
+  exhibitorId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAtQuery = {
+  apsAppUserExhibitorViewsByExhibitorIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserExhibitorViewConnection",
+    items:  Array< {
+      __typename: "ApsAppUserExhibitorView",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      viewKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorViewsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserExhibitorViewsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserExhibitorViewsByEventIdAndCreatedAtQuery = {
+  apsAppUserExhibitorViewsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserExhibitorViewConnection",
+    items:  Array< {
+      __typename: "ApsAppUserExhibitorView",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      viewKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorViewsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserExhibitorViewsByViewKeyQueryVariables = {
+  viewKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserExhibitorViewsByViewKeyQuery = {
+  apsAppUserExhibitorViewsByViewKey?:  {
+    __typename: "ModelApsAppUserExhibitorViewConnection",
+    items:  Array< {
+      __typename: "ApsAppUserExhibitorView",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      viewKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorViewsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserPassportStampsByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserPassportStampFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPassportStampsByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserPassportStampsByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserPassportStampConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPassportStamp",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      stampKey: string,
+      scannedAt: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPassportStampsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserPassportStampsByExhibitorIdAndCreatedAtQueryVariables = {
+  exhibitorId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserPassportStampFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPassportStampsByExhibitorIdAndCreatedAtQuery = {
+  apsAppUserPassportStampsByExhibitorIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserPassportStampConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPassportStamp",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      stampKey: string,
+      scannedAt: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPassportStampsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserPassportStampsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserPassportStampFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPassportStampsByEventIdAndCreatedAtQuery = {
+  apsAppUserPassportStampsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserPassportStampConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPassportStamp",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      stampKey: string,
+      scannedAt: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPassportStampsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserPassportStampsByStampKeyQueryVariables = {
+  stampKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserPassportStampFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPassportStampsByStampKeyQuery = {
+  apsAppUserPassportStampsByStampKey?:  {
+    __typename: "ModelApsAppUserPassportStampConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPassportStamp",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      stampKey: string,
+      scannedAt: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPassportStampsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteExhibitor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByExhibitorIdAndCreatedAtQueryVariables = {
+  exhibitorId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByExhibitorIdAndCreatedAtQuery = {
+  apsAppUserFavoriteExhibitorsByExhibitorIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteExhibitor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByEventIdAndCreatedAtQuery = {
+  apsAppUserFavoriteExhibitorsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteExhibitor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByFavoriteKeyQueryVariables = {
+  favoriteKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteExhibitorsByFavoriteKeyQuery = {
+  apsAppUserFavoriteExhibitorsByFavoriteKey?:  {
+    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteExhibitor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      exhibitorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSpeaker",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      speakerId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSpeakersBySpeakerIdAndCreatedAtQueryVariables = {
+  speakerId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSpeakersBySpeakerIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSpeakersBySpeakerIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSpeaker",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      speakerId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSpeakersByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSpeakersByEventIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSpeakersByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSpeaker",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      speakerId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSpeakersByFavoriteKeyQueryVariables = {
+  favoriteKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSpeakersByFavoriteKeyQuery = {
+  apsAppUserFavoriteSpeakersByFavoriteKey?:  {
+    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSpeaker",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      speakerId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSponsorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSponsor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sponsorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSponsorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSponsorsBySponsorIdAndCreatedAtQueryVariables = {
+  sponsorId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSponsorsBySponsorIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSponsorsBySponsorIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSponsorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSponsor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sponsorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSponsorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSponsorsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSponsorsByEventIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSponsorsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSponsorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSponsor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sponsorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSponsorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSponsorsByFavoriteKeyQueryVariables = {
+  favoriteKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSponsorsByFavoriteKeyQuery = {
+  apsAppUserFavoriteSponsorsByFavoriteKey?:  {
+    __typename: "ModelApsAppUserFavoriteSponsorConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSponsor",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sponsorId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSponsorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSessionsByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSessionsByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSessionConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSession",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sessionId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSessionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSessionsBySessionIdAndCreatedAtQueryVariables = {
+  sessionId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSessionsBySessionIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSessionsBySessionIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSessionConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSession",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sessionId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSessionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSessionsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSessionsByEventIdAndCreatedAtQuery = {
+  apsAppUserFavoriteSessionsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteSessionConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSession",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sessionId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSessionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteSessionsByFavoriteKeyQueryVariables = {
+  favoriteKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteSessionsByFavoriteKeyQuery = {
+  apsAppUserFavoriteSessionsByFavoriteKey?:  {
+    __typename: "ModelApsAppUserFavoriteSessionConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteSession",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      sessionId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteSessionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteContactsByUserProfileIdAndCreatedAtQueryVariables = {
+  userProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteContactsByUserProfileIdAndCreatedAtQuery = {
+  apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteContact",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      contactProfileId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteContactsByContactProfileIdAndCreatedAtQueryVariables = {
+  contactProfileId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteContactsByContactProfileIdAndCreatedAtQuery = {
+  apsAppUserFavoriteContactsByContactProfileIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteContact",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      contactProfileId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteContactsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteContactsByEventIdAndCreatedAtQuery = {
+  apsAppUserFavoriteContactsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppUserFavoriteContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteContact",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      contactProfileId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserFavoriteContactsByFavoriteKeyQueryVariables = {
+  favoriteKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserFavoriteContactsByFavoriteKeyQuery = {
+  apsAppUserFavoriteContactsByFavoriteKey?:  {
+    __typename: "ModelApsAppUserFavoriteContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserFavoriteContact",
+      id: string,
+      owner?: string | null,
+      userProfileId: string,
+      contactProfileId: string,
+      eventId: string,
+      favoriteKey: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSFavoriteContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsContactRequestsByRequestKeyQueryVariables = {
+  requestKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsContactRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsContactRequestsByRequestKeyQuery = {
+  apsContactRequestsByRequestKey?:  {
+    __typename: "ModelApsContactRequestConnection",
+    items:  Array< {
+      __typename: "ApsContactRequest",
+      id: string,
+      eventId: string,
+      requestKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      requestedByUserId: string,
+      status: string,
+      introMessage?: string | null,
+      introSentAt?: string | null,
+      introDeliveredAt?: string | null,
+      acceptedAt?: string | null,
+      declinedAt?: string | null,
+      blockedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsContactRequestsByUserAIdAndCreatedAtQueryVariables = {
+  userAId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsContactRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsContactRequestsByUserAIdAndCreatedAtQuery = {
+  apsContactRequestsByUserAIdAndCreatedAt?:  {
+    __typename: "ModelApsContactRequestConnection",
+    items:  Array< {
+      __typename: "ApsContactRequest",
+      id: string,
+      eventId: string,
+      requestKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      requestedByUserId: string,
+      status: string,
+      introMessage?: string | null,
+      introSentAt?: string | null,
+      introDeliveredAt?: string | null,
+      acceptedAt?: string | null,
+      declinedAt?: string | null,
+      blockedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsContactRequestsByUserBIdAndCreatedAtQueryVariables = {
+  userBId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsContactRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsContactRequestsByUserBIdAndCreatedAtQuery = {
+  apsContactRequestsByUserBIdAndCreatedAt?:  {
+    __typename: "ModelApsContactRequestConnection",
+    items:  Array< {
+      __typename: "ApsContactRequest",
+      id: string,
+      eventId: string,
+      requestKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      requestedByUserId: string,
+      status: string,
+      introMessage?: string | null,
+      introSentAt?: string | null,
+      introDeliveredAt?: string | null,
+      acceptedAt?: string | null,
+      declinedAt?: string | null,
+      blockedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsContactRequestsByRequestedByUserIdAndCreatedAtQueryVariables = {
+  requestedByUserId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsContactRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsContactRequestsByRequestedByUserIdAndCreatedAtQuery = {
+  apsContactRequestsByRequestedByUserIdAndCreatedAt?:  {
+    __typename: "ModelApsContactRequestConnection",
+    items:  Array< {
+      __typename: "ApsContactRequest",
+      id: string,
+      eventId: string,
+      requestKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      requestedByUserId: string,
+      status: string,
+      introMessage?: string | null,
+      introSentAt?: string | null,
+      introDeliveredAt?: string | null,
+      acceptedAt?: string | null,
+      declinedAt?: string | null,
+      blockedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsContactRequestsByStatusAndUpdatedAtQueryVariables = {
+  status: string,
+  updatedAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsContactRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsContactRequestsByStatusAndUpdatedAtQuery = {
+  apsContactRequestsByStatusAndUpdatedAt?:  {
+    __typename: "ModelApsContactRequestConnection",
+    items:  Array< {
+      __typename: "ApsContactRequest",
+      id: string,
+      eventId: string,
+      requestKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      requestedByUserId: string,
+      status: string,
+      introMessage?: string | null,
+      introSentAt?: string | null,
+      introDeliveredAt?: string | null,
+      acceptedAt?: string | null,
+      declinedAt?: string | null,
+      blockedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsDmThreadsByDmKeyQueryVariables = {
+  dmKey: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsDmThreadFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsDmThreadsByDmKeyQuery = {
+  apsDmThreadsByDmKey?:  {
+    __typename: "ModelApsDmThreadConnection",
+    items:  Array< {
+      __typename: "ApsDmThread",
+      id: string,
+      eventId: string,
+      dmKey: string,
+      userAId: string,
+      userBId: string,
+      owners: Array< string >,
+      lastMessageAt?: string | null,
+      lastMessagePreview?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsDmParticipantStatesByThreadIdAndUserIdQueryVariables = {
+  threadId: string,
+  userId?: ModelIDKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsDmParticipantStateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsDmParticipantStatesByThreadIdAndUserIdQuery = {
+  apsDmParticipantStatesByThreadIdAndUserId?:  {
+    __typename: "ModelApsDmParticipantStateConnection",
+    items:  Array< {
+      __typename: "ApsDmParticipantState",
+      id: string,
+      eventId: string,
+      threadId: string,
+      userId: string,
+      lastReadAt?: string | null,
+      unreadCount?: number | null,
+      lastMessageAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsDmParticipantStatesByUserIdAndLastMessageAtQueryVariables = {
+  userId: string,
+  lastMessageAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsDmParticipantStateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsDmParticipantStatesByUserIdAndLastMessageAtQuery = {
+  apsDmParticipantStatesByUserIdAndLastMessageAt?:  {
+    __typename: "ModelApsDmParticipantStateConnection",
+    items:  Array< {
+      __typename: "ApsDmParticipantState",
+      id: string,
+      eventId: string,
+      threadId: string,
+      userId: string,
+      lastReadAt?: string | null,
+      unreadCount?: number | null,
+      lastMessageAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsDmMessagesByThreadIdAndCreatedAtQueryVariables = {
+  threadId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsDmMessageFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsDmMessagesByThreadIdAndCreatedAtQuery = {
+  apsDmMessagesByThreadIdAndCreatedAt?:  {
+    __typename: "ModelApsDmMessageConnection",
+    items:  Array< {
+      __typename: "ApsDmMessage",
+      id: string,
+      eventId: string,
+      threadId: string,
+      senderUserId: string,
+      owners: Array< string >,
+      type?: string | null,
+      body?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsDmMessagesBySenderUserIdAndCreatedAtQueryVariables = {
+  senderUserId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsDmMessageFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsDmMessagesBySenderUserIdAndCreatedAtQuery = {
+  apsDmMessagesBySenderUserIdAndCreatedAt?:  {
+    __typename: "ModelApsDmMessageConnection",
+    items:  Array< {
+      __typename: "ApsDmMessage",
+      id: string,
+      eventId: string,
+      threadId: string,
+      senderUserId: string,
+      owners: Array< string >,
+      type?: string | null,
+      body?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAdminAnnouncementsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAdminAnnouncementFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAdminAnnouncementsByEventIdAndCreatedAtQuery = {
+  apsAdminAnnouncementsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAdminAnnouncementConnection",
+    items:  Array< {
+      __typename: "ApsAdminAnnouncement",
+      id: string,
+      eventId: string,
+      title?: string | null,
+      body: string,
+      deepLink?: string | null,
+      scheduledAt?: string | null,
+      publishedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAdminAnnouncementsByEventIdAndScheduledAtQueryVariables = {
+  eventId: string,
+  scheduledAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAdminAnnouncementFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAdminAnnouncementsByEventIdAndScheduledAtQuery = {
+  apsAdminAnnouncementsByEventIdAndScheduledAt?:  {
+    __typename: "ModelApsAdminAnnouncementConnection",
+    items:  Array< {
+      __typename: "ApsAdminAnnouncement",
+      id: string,
+      eventId: string,
+      title?: string | null,
+      body: string,
+      deepLink?: string | null,
+      scheduledAt?: string | null,
+      publishedAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsPushTokensByUserIdAndUpdatedAtQueryVariables = {
+  userId: string,
+  updatedAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsPushTokenFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsPushTokensByUserIdAndUpdatedAtQuery = {
+  apsPushTokensByUserIdAndUpdatedAt?:  {
+    __typename: "ModelApsPushTokenConnection",
+    items:  Array< {
+      __typename: "ApsPushToken",
+      id: string,
+      userId: string,
+      token: string,
+      platform?: string | null,
+      updatedAt: string,
+      createdAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppFeedbacksByUserIdAndCreatedAtQueryVariables = {
+  userId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppFeedbackFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppFeedbacksByUserIdAndCreatedAtQuery = {
+  apsAppFeedbacksByUserIdAndCreatedAt?:  {
+    __typename: "ModelApsAppFeedbackConnection",
+    items:  Array< {
+      __typename: "ApsAppFeedback",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      eventId: string,
+      message: string,
+      imageKeys?: Array< string | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppFeedbacksByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppFeedbackFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppFeedbacksByEventIdAndCreatedAtQuery = {
+  apsAppFeedbacksByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAppFeedbackConnection",
+    items:  Array< {
+      __typename: "ApsAppFeedback",
+      id: string,
+      owner?: string | null,
+      userId: string,
+      eventId: string,
+      message: string,
+      imageKeys?: Array< string | null > | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAPSQueryVariables = {
+  id: string,
+};
+
+export type GetAPSQuery = {
+  getAPS?:  {
+    __typename: "APS",
+    id: string,
+    year: string,
+    codes?:  {
+      __typename: "ModelAPSCodeConnection",
+      nextToken?: string | null,
+    } | null,
+    agenda?:  {
+      __typename: "ApsAgenda",
+      id: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    startDate?: string | null,
+    endDate?: string | null,
+    location?: string | null,
+    address?: string | null,
+    city?: string | null,
+    state?: string | null,
+    zip?: string | null,
+    website?: string | null,
+    Registrants?:  {
+      __typename: "ModelApsRegistrantConnection",
+      nextToken?: string | null,
+    } | null,
+    Sponsors?:  {
+      __typename: "ModelApsSponsorConnection",
+      nextToken?: string | null,
+    } | null,
+    Speakers?:  {
+      __typename: "ModelAPSSpeakerConnection",
+      nextToken?: string | null,
+    } | null,
+    companies?:  {
+      __typename: "ModelAPSCompanyEventsConnection",
+      nextToken?: string | null,
+    } | null,
+    photos?:  {
+      __typename: "ModelApsAppUserPhotoConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitors?:  {
+      __typename: "ModelApsAppExhibitorProfileConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorPromotions?:  {
+      __typename: "ModelApsAppExhibitorPromotionConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorDeals?:  {
+      __typename: "ModelApsAppExhibitorDealConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorPhotos?:  {
+      __typename: "ModelApsAppExhibitorPhotoConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorHandouts?:  {
+      __typename: "ModelApsAppExhibitorHandoutConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteExhibitors?:  {
+      __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteSpeakers?:  {
+      __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteSponsors?:  {
+      __typename: "ModelApsAppUserFavoriteSponsorConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteSessions?:  {
+      __typename: "ModelApsAppUserFavoriteSessionConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteContacts?:  {
+      __typename: "ModelApsAppUserFavoriteContactConnection",
+      nextToken?: string | null,
+    } | null,
+    passportStamps?:  {
+      __typename: "ModelApsAppUserPassportStampConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorViews?:  {
+      __typename: "ModelApsAppUserExhibitorViewConnection",
+      nextToken?: string | null,
+    } | null,
+    addOns?:  {
+      __typename: "ModelApsAddOnConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+    aPSAgendaId?: string | null,
+  } | null,
+};
+
+export type ListAPSQueryVariables = {
+  filter?: ModelAPSFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSQuery = {
+  listAPS?:  {
+    __typename: "ModelAPSConnection",
+    items:  Array< {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAPSCodeQueryVariables = {
+  id: string,
+};
+
+export type GetAPSCodeQuery = {
+  getAPSCode?:  {
+    __typename: "APSCode",
+    id: string,
+    code: string,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    limit?: number | null,
+    used: number,
+    createdAt: string,
+    updatedAt: string,
+    aPSCodesId?: string | null,
+  } | null,
+};
+
+export type ListAPSCodesQueryVariables = {
+  filter?: ModelAPSCodeFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSCodesQuery = {
+  listAPSCodes?:  {
+    __typename: "ModelAPSCodeConnection",
+    items:  Array< {
+      __typename: "APSCode",
+      id: string,
+      code: string,
+      eventId: string,
+      limit?: number | null,
+      used: number,
+      createdAt: string,
+      updatedAt: string,
+      aPSCodesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type APSCodesByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAPSCodeFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type APSCodesByEventIdQuery = {
+  aPSCodesByEventId?:  {
+    __typename: "ModelAPSCodeConnection",
+    items:  Array< {
+      __typename: "APSCode",
+      id: string,
+      code: string,
+      eventId: string,
+      limit?: number | null,
+      used: number,
+      createdAt: string,
+      updatedAt: string,
+      aPSCodesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAPSBoardQueryVariables = {
+  id: string,
+};
+
+export type GetAPSBoardQuery = {
+  getAPSBoard?:  {
+    __typename: "APSBoard",
+    id: string,
+    name: string,
+    title?: string | null,
+    bio?: string | null,
+    company: string,
+    email: string,
+    linkedin?: string | null,
+    profilePic?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListAPSBoardsQueryVariables = {
+  filter?: ModelAPSBoardFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSBoardsQuery = {
+  listAPSBoards?:  {
+    __typename: "ModelAPSBoardConnection",
+    items:  Array< {
+      __typename: "APSBoard",
+      id: string,
+      name: string,
+      title?: string | null,
+      bio?: string | null,
+      company: string,
+      email: string,
+      linkedin?: string | null,
+      profilePic?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAgendaQueryVariables = {
+  id: string,
+};
+
+export type GetApsAgendaQuery = {
+  getApsAgenda?:  {
+    __typename: "ApsAgenda",
+    id: string,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    items?:  {
+      __typename: "ModelApsAppSessionConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsAgendaQueryVariables = {
+  filter?: ModelApsAgendaFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAgendaQuery = {
+  listApsAgenda?:  {
+    __typename: "ModelApsAgendaConnection",
+    items:  Array< {
+      __typename: "ApsAgenda",
+      id: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAgendaByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAgendaFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAgendaByEventIdQuery = {
+  apsAgendaByEventId?:  {
+    __typename: "ModelApsAgendaConnection",
+    items:  Array< {
+      __typename: "ApsAgenda",
+      id: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsRegistrantQueryVariables = {
+  id: string,
+};
+
+export type GetApsRegistrantQuery = {
+  getApsRegistrant?:  {
+    __typename: "ApsRegistrant",
+    id: string,
+    apsID: string,
+    aps:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    firstName?: string | null,
+    lastName?: string | null,
+    email: string,
+    phone?: string | null,
+    companyId?: string | null,
+    company?:  {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    jobTitle?: string | null,
+    attendeeType: RegistrantType,
+    termsAccepted?: boolean | null,
+    interests?: Array< string | null > | null,
+    otherInterest?: string | null,
+    buyerQuestion?: string | null,
+    packagingChallenge?: string | null,
+    certification?: string | null,
+    billingAddressFirstName?: string | null,
+    billingAddressLastName?: string | null,
+    billingAddressEmail?: string | null,
+    billingAddressPhone?: string | null,
+    billingAddressStreet?: string | null,
+    billingAddressCity?: string | null,
+    billingAddressState?: string | null,
+    billingAddressZip?: string | null,
+    billingAddressCountry?: string | null,
+    sameAsAttendee?: boolean | null,
+    speakerTopic?: string | null,
+    learningObjectives?: string | null,
+    totalAmount?: number | null,
+    discountCode?: string | null,
+    status: RegistrantStatus,
+    paymentConfirmation?: string | null,
+    registrationEmailSent?: boolean | null,
+    registrationEmailSentDate?: string | null,
+    registrationEmailReceived?: boolean | null,
+    registrationEmailReceivedDate?: string | null,
+    welcomeEmailSent?: boolean | null,
+    welcomeEmailSentDate?: string | null,
+    welcomeEmailReceived?: boolean | null,
+    welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
+    paymentMethod?: string | null,
+    paymentLast4?: string | null,
+    approvedAt?: string | null,
+    headshot?: string | null,
+    presentation?: string | null,
+    presentationTitle?: string | null,
+    presentationSummary?: string | null,
+    bio?: string | null,
+    invoice?: string | null,
+    seatingChartRegistrant?:  {
+      __typename: "ApsSeatingChartRegistrant",
+      id: string,
+      category?: string | null,
+      firstName?: string | null,
+      lastName?: string | null,
+      company?: string | null,
+      email?: string | null,
+      role?: string | null,
+      tableNumber?: number | null,
+      notes?: string | null,
+      seatingChartID: string,
+      registrantID: string,
+      createdAt: string,
+      updatedAt: string,
+      apsSeatingChartRegistrantsId?: string | null,
+    } | null,
+    addOnRequests?:  {
+      __typename: "ModelRegistrantAddOnRequestConnection",
+      nextToken?: string | null,
+    } | null,
+    appUserId?: string | null,
+    appUser?:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    notes?:  {
+      __typename: "ModelApsAppUserNoteConnection",
+      nextToken?: string | null,
+    } | null,
+    qrCode?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    aPSRegistrantsId?: string | null,
+    aPSCompanyRegistrantsId?: string | null,
+    apsRegistrantSeatingChartRegistrantId?: string | null,
+  } | null,
+};
+
+export type ListApsRegistrantsQueryVariables = {
+  filter?: ModelApsRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsRegistrantsQuery = {
+  listApsRegistrants?:  {
+    __typename: "ModelApsRegistrantConnection",
+    items:  Array< {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsRegistrantsByApsIDQueryVariables = {
+  apsID: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsRegistrantsByApsIDQuery = {
   apsRegistrantsByApsID?:  {
     __typename: "ModelApsRegistrantConnection",
     items:  Array< {
@@ -5087,263 +8823,364 @@ export type GetRegistrantByEmailQuery = {
       email: string,
       phone?: string | null,
       companyId?: string | null,
-      company?:  {
-        __typename: "APSCompany",
-        id: string,
-        name: string,
-        email?: string | null,
-        type?: CompanyType | null,
-        description?: string | null,
-        website?: string | null,
-        phone?: string | null,
-        logo?: string | null,
-      } | null,
       jobTitle?: string | null,
       attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
       interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
       status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
       headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
       bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
       qrCode?: string | null,
       createdAt: string,
       updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
     } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type GetAppUserByRegistrantIdQueryVariables = {
-  registrantId: string,
+export type ApsRegistrantsByEmailQueryVariables = {
+  email: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type GetAppUserByRegistrantIdQuery = {
-  apsAppUsersByRegistrantId?:  {
+export type ApsRegistrantsByEmailQuery = {
+  apsRegistrantsByEmail?:  {
+    __typename: "ModelApsRegistrantConnection",
+    items:  Array< {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsRegistrantsByCompanyIdQueryVariables = {
+  companyId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsRegistrantsByCompanyIdQuery = {
+  apsRegistrantsByCompanyId?:  {
+    __typename: "ModelApsRegistrantConnection",
+    items:  Array< {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserQuery = {
+  getApsAppUser?:  {
+    __typename: "ApsAppUser",
+    id: string,
+    registrantId: string,
+    registrant:  {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    },
+    photos?:  {
+      __typename: "ModelApsAppUserPhotoConnection",
+      nextToken?: string | null,
+    } | null,
+    sessionQuestions?:  {
+      __typename: "ModelApsAppSessionQuestionConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorDeals?:  {
+      __typename: "ModelApsAppExhibitorDealConnection",
+      nextToken?: string | null,
+    } | null,
+    contacts?:  {
+      __typename: "ModelApsAppUserContactConnection",
+      nextToken?: string | null,
+    } | null,
+    notes?:  {
+      __typename: "ModelApsAppUserNoteConnection",
+      nextToken?: string | null,
+    } | null,
+    leads?:  {
+      __typename: "ModelApsAppUserLeadConnection",
+      nextToken?: string | null,
+    } | null,
+    sentDmMessages?:  {
+      __typename: "ModelApsDmMessageConnection",
+      nextToken?: string | null,
+    } | null,
+    profileId?: string | null,
+    profile?:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsAppUsersQueryVariables = {
+  filter?: ModelApsAppUserFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUsersQuery = {
+  listApsAppUsers?:  {
     __typename: "ModelApsAppUserConnection",
     items:  Array< {
       __typename: "ApsAppUser",
       id: string,
       registrantId: string,
-      registrant:  {
-        __typename: "ApsRegistrant",
-        id: string,
-        apsID: string,
-        firstName?: string | null,
-        lastName?: string | null,
-        email: string,
-        phone?: string | null,
-        companyId?: string | null,
-        company?:  {
-          __typename: "APSCompany",
-          id: string,
-          name: string,
-          email?: string | null,
-          type?: CompanyType | null,
-          description?: string | null,
-          website?: string | null,
-          phone?: string | null,
-          logo?: string | null,
-        } | null,
-        jobTitle?: string | null,
-        attendeeType: RegistrantType,
-        interests?: Array< string | null > | null,
-        status: RegistrantStatus,
-        headshot?: string | null,
-        bio?: string | null,
-        qrCode?: string | null,
-      },
-      profile?:  {
-        __typename: "ApsAppUserProfile",
-        id: string,
-        userId: string,
-        firstName?: string | null,
-        lastName?: string | null,
-        email?: string | null,
-        phone?: string | null,
-        company?: string | null,
-        jobTitle?: string | null,
-        attendeeType?: RegistrantType | null,
-        profilePicture?: string | null,
-        bio?: string | null,
-        linkedin?: string | null,
-        twitter?: string | null,
-        facebook?: string | null,
-        instagram?: string | null,
-        youtube?: string | null,
-        website?: Array< string | null > | null,
-        location?: string | null,
-        resume?: string | null,
-        thinkificId?: number | null,
-        apcProgress?: number | null,
-        affiliates?:  {
-          __typename: "ModelProfileAffiliateConnection",
-          items:  Array< {
-            __typename: "ProfileAffiliate",
-            id: string,
-            affiliate?: string | null,
-            role?: string | null,
-            startDate?: string | null,
-            endDate?: string | null,
-          } | null >,
-        } | null,
-        education?:  {
-          __typename: "ModelProfileEducationConnection",
-          items:  Array< {
-            __typename: "ProfileEducation",
-            id: string,
-            school?: string | null,
-            degree?: string | null,
-            fieldOfStudy?: string | null,
-          } | null >,
-        } | null,
-        interests?:  {
-          __typename: "ModelProfileInterestConnection",
-          items:  Array< {
-            __typename: "ProfileInterest",
-            id: string,
-            interest?: string | null,
-          } | null >,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-      } | null,
-      photos?:  {
-        __typename: "ModelApsAppUserPhotoConnection",
-        items:  Array< {
-          __typename: "ApsAppUserPhoto",
-          id: string,
-          photo?: string | null,
-          caption?: string | null,
-          approved?: boolean | null,
-          eventId: string,
-        } | null >,
-      } | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-  } | null,
-};
-
-export type GetAPSWithAgendaQueryVariables = {
-  id: string,
-};
-
-export type GetAPSWithAgendaQuery = {
-  getAPS?:  {
-    __typename: "APS",
-    id: string,
-    year: string,
-    agenda?:  {
-      __typename: "ApsAgenda",
-      id: string,
-      eventId: string,
-      items?:  {
-        __typename: "ModelApsAppSessionConnection",
-        items:  Array< {
-          __typename: "ApsAppSession",
-          id: string,
-          session?: string | null,
-          date?: string | null,
-          time?: string | null,
-          location?: string | null,
-          sessionQuestions?:  {
-            __typename: "ModelApsAppSessionQuestionConnection",
-            items:  Array< {
-              __typename: "ApsAppSessionQuestion",
-              id: string,
-              question?: string | null,
-              userId: string,
-              createdAt: string,
-            } | null >,
-          } | null,
-          createdAt: string,
-          updatedAt: string,
-        } | null >,
-        nextToken?: string | null,
-      } | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type GetAPSWithRegistrantsQueryVariables = {
-  id: string,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type GetAPSWithRegistrantsQuery = {
-  getAPS?:  {
-    __typename: "APS",
-    id: string,
-    year: string,
-    Registrants?:  {
-      __typename: "ModelApsRegistrantConnection",
-      items:  Array< {
-        __typename: "ApsRegistrant",
-        id: string,
-        apsID: string,
-        firstName?: string | null,
-        lastName?: string | null,
-        email: string,
-        phone?: string | null,
-        companyId?: string | null,
-        company?:  {
-          __typename: "APSCompany",
-          id: string,
-          name: string,
-          email?: string | null,
-          type?: CompanyType | null,
-          logo?: string | null,
-        } | null,
-        jobTitle?: string | null,
-        attendeeType: RegistrantType,
-        interests?: Array< string | null > | null,
-        status: RegistrantStatus,
-        headshot?: string | null,
-        bio?: string | null,
-        qrCode?: string | null,
-      } | null >,
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type GetAPSWithSpeakersQueryVariables = {
-  id: string,
-  eventId: string,
-};
-
-export type GetAPSWithSpeakersQuery = {
-  getAPS?:  {
-    __typename: "APS",
-    id: string,
-    year: string,
-  } | null,
-  aPSSpeakersByEventId?:  {
-    __typename: "ModelAPSSpeakerConnection",
-    items:  Array< {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      profile:  {
-        __typename: "ApsAppUserProfile",
-        id: string,
-        firstName?: string | null,
-        lastName?: string | null,
-        email?: string | null,
-        company?: string | null,
-        jobTitle?: string | null,
-        profilePicture?: string | null,
-        bio?: string | null,
-        linkedin?: string | null,
-      },
-      eventId: string,
+      profileId?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5351,13 +9188,1017 @@ export type GetAPSWithSpeakersQuery = {
   } | null,
 };
 
-export type ApsAppSessionsByAgendaIdWithRelationsQueryVariables = {
-  agendaId: string,
+export type ApsAppUsersByRegistrantIdQueryVariables = {
+  registrantId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
-export type ApsAppSessionsByAgendaIdWithRelationsQuery = {
+export type ApsAppUsersByRegistrantIdQuery = {
+  apsAppUsersByRegistrantId?:  {
+    __typename: "ModelApsAppUserConnection",
+    items:  Array< {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserContactQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserContactQuery = {
+  getApsAppUserContact?:  {
+    __typename: "ApsAppUserContact",
+    id: string,
+    userId: string,
+    user:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    favorite?: boolean | null,
+    contact:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    contactId: string,
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserContactsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserContactsQueryVariables = {
+  filter?: ModelApsAppUserContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserContactsQuery = {
+  listApsAppUserContacts?:  {
+    __typename: "ModelApsAppUserContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserContact",
+      id: string,
+      userId: string,
+      favorite?: boolean | null,
+      contactId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserContactsByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserContactsByUserIdQuery = {
+  apsAppUserContactsByUserId?:  {
+    __typename: "ModelApsAppUserContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserContact",
+      id: string,
+      userId: string,
+      favorite?: boolean | null,
+      contactId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserContactsByContactIdQueryVariables = {
+  contactId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserContactsByContactIdQuery = {
+  apsAppUserContactsByContactId?:  {
+    __typename: "ModelApsAppUserContactConnection",
+    items:  Array< {
+      __typename: "ApsAppUserContact",
+      id: string,
+      userId: string,
+      favorite?: boolean | null,
+      contactId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserContactsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserLeadQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserLeadQuery = {
+  getApsAppUserLead?:  {
+    __typename: "ApsAppUserLead",
+    id: string,
+    userId: string,
+    user:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    favorite?: boolean | null,
+    contact:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    contactId: string,
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserLeadsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserLeadsQueryVariables = {
+  filter?: ModelApsAppUserLeadFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserLeadsQuery = {
+  listApsAppUserLeads?:  {
+    __typename: "ModelApsAppUserLeadConnection",
+    items:  Array< {
+      __typename: "ApsAppUserLead",
+      id: string,
+      userId: string,
+      favorite?: boolean | null,
+      contactId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserLeadsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserLeadsByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserLeadFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserLeadsByUserIdQuery = {
+  apsAppUserLeadsByUserId?:  {
+    __typename: "ModelApsAppUserLeadConnection",
+    items:  Array< {
+      __typename: "ApsAppUserLead",
+      id: string,
+      userId: string,
+      favorite?: boolean | null,
+      contactId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserLeadsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserLeadsByContactIdQueryVariables = {
+  contactId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserLeadFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserLeadsByContactIdQuery = {
+  apsAppUserLeadsByContactId?:  {
+    __typename: "ModelApsAppUserLeadConnection",
+    items:  Array< {
+      __typename: "ApsAppUserLead",
+      id: string,
+      userId: string,
+      favorite?: boolean | null,
+      contactId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserLeadsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserProfileQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserProfileQuery = {
+  getApsAppUserProfile?:  {
+    __typename: "ApsAppUserProfile",
+    id: string,
+    userId: string,
+    user:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    firstName?: string | null,
+    lastName?: string | null,
+    email?: string | null,
+    phone?: string | null,
+    company?: string | null,
+    jobTitle?: string | null,
+    attendeeType?: RegistrantType | null,
+    quickTools?: Array< string | null > | null,
+    affiliates?:  {
+      __typename: "ModelProfileAffiliateConnection",
+      nextToken?: string | null,
+    } | null,
+    profilePicture?: string | null,
+    bio?: string | null,
+    linkedin?: string | null,
+    twitter?: string | null,
+    facebook?: string | null,
+    instagram?: string | null,
+    youtube?: string | null,
+    website?: Array< string | null > | null,
+    location?: string | null,
+    education?:  {
+      __typename: "ModelProfileEducationConnection",
+      nextToken?: string | null,
+    } | null,
+    interests?:  {
+      __typename: "ModelProfileInterestConnection",
+      nextToken?: string | null,
+    } | null,
+    resume?: string | null,
+    thinkificId?: number | null,
+    apcProgress?: number | null,
+    contacts?:  {
+      __typename: "ModelApsAppUserContactConnection",
+      nextToken?: string | null,
+    } | null,
+    leads?:  {
+      __typename: "ModelApsAppUserLeadConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteExhibitors?:  {
+      __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteSpeakers?:  {
+      __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteSponsors?:  {
+      __typename: "ModelApsAppUserFavoriteSponsorConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteSessions?:  {
+      __typename: "ModelApsAppUserFavoriteSessionConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteContacts?:  {
+      __typename: "ModelApsAppUserFavoriteContactConnection",
+      nextToken?: string | null,
+    } | null,
+    favoritedByProfiles?:  {
+      __typename: "ModelApsAppUserFavoriteContactConnection",
+      nextToken?: string | null,
+    } | null,
+    passportStamps?:  {
+      __typename: "ModelApsAppUserPassportStampConnection",
+      nextToken?: string | null,
+    } | null,
+    exhibitorViews?:  {
+      __typename: "ModelApsAppUserExhibitorViewConnection",
+      nextToken?: string | null,
+    } | null,
+    notes?:  {
+      __typename: "ModelApsAppUserNoteConnection",
+      nextToken?: string | null,
+    } | null,
+    speakerId?: string | null,
+    speaker?:  {
+      __typename: "APSSpeaker",
+      id: string,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      profileId: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSSpeakersId?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsAppUserProfilesQueryVariables = {
+  filter?: ModelApsAppUserProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserProfilesQuery = {
+  listApsAppUserProfiles?:  {
+    __typename: "ModelApsAppUserProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserProfilesByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserProfilesByUserIdQuery = {
+  apsAppUserProfilesByUserId?:  {
+    __typename: "ModelApsAppUserProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserProfilesBySpeakerIdQueryVariables = {
+  speakerId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserProfilesBySpeakerIdQuery = {
+  apsAppUserProfilesBySpeakerId?:  {
+    __typename: "ModelApsAppUserProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetProfileAffiliateQueryVariables = {
+  id: string,
+};
+
+export type GetProfileAffiliateQuery = {
+  getProfileAffiliate?:  {
+    __typename: "ProfileAffiliate",
+    id: string,
+    profileId: string,
+    profile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    affiliate?: string | null,
+    role?: string | null,
+    startDate?: string | null,
+    endDate?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserProfileAffiliatesId?: string | null,
+  } | null,
+};
+
+export type ListProfileAffiliatesQueryVariables = {
+  filter?: ModelProfileAffiliateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListProfileAffiliatesQuery = {
+  listProfileAffiliates?:  {
+    __typename: "ModelProfileAffiliateConnection",
+    items:  Array< {
+      __typename: "ProfileAffiliate",
+      id: string,
+      profileId: string,
+      affiliate?: string | null,
+      role?: string | null,
+      startDate?: string | null,
+      endDate?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserProfileAffiliatesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ProfileAffiliatesByProfileIdQueryVariables = {
+  profileId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelProfileAffiliateFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ProfileAffiliatesByProfileIdQuery = {
+  profileAffiliatesByProfileId?:  {
+    __typename: "ModelProfileAffiliateConnection",
+    items:  Array< {
+      __typename: "ProfileAffiliate",
+      id: string,
+      profileId: string,
+      affiliate?: string | null,
+      role?: string | null,
+      startDate?: string | null,
+      endDate?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserProfileAffiliatesId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetProfileEducationQueryVariables = {
+  id: string,
+};
+
+export type GetProfileEducationQuery = {
+  getProfileEducation?:  {
+    __typename: "ProfileEducation",
+    id: string,
+    profileId: string,
+    profile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    school?: string | null,
+    degree?: string | null,
+    fieldOfStudy?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserProfileEducationId?: string | null,
+  } | null,
+};
+
+export type ListProfileEducationsQueryVariables = {
+  filter?: ModelProfileEducationFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListProfileEducationsQuery = {
+  listProfileEducations?:  {
+    __typename: "ModelProfileEducationConnection",
+    items:  Array< {
+      __typename: "ProfileEducation",
+      id: string,
+      profileId: string,
+      school?: string | null,
+      degree?: string | null,
+      fieldOfStudy?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserProfileEducationId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ProfileEducationsByProfileIdQueryVariables = {
+  profileId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelProfileEducationFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ProfileEducationsByProfileIdQuery = {
+  profileEducationsByProfileId?:  {
+    __typename: "ModelProfileEducationConnection",
+    items:  Array< {
+      __typename: "ProfileEducation",
+      id: string,
+      profileId: string,
+      school?: string | null,
+      degree?: string | null,
+      fieldOfStudy?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserProfileEducationId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetProfileInterestQueryVariables = {
+  id: string,
+};
+
+export type GetProfileInterestQuery = {
+  getProfileInterest?:  {
+    __typename: "ProfileInterest",
+    id: string,
+    profileId: string,
+    profile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    interest?: string | null,
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserProfileInterestsId?: string | null,
+  } | null,
+};
+
+export type ListProfileInterestsQueryVariables = {
+  filter?: ModelProfileInterestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListProfileInterestsQuery = {
+  listProfileInterests?:  {
+    __typename: "ModelProfileInterestConnection",
+    items:  Array< {
+      __typename: "ProfileInterest",
+      id: string,
+      profileId: string,
+      interest?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserProfileInterestsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ProfileInterestsByProfileIdQueryVariables = {
+  profileId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelProfileInterestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ProfileInterestsByProfileIdQuery = {
+  profileInterestsByProfileId?:  {
+    __typename: "ModelProfileInterestConnection",
+    items:  Array< {
+      __typename: "ProfileInterest",
+      id: string,
+      profileId: string,
+      interest?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserProfileInterestsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppUserPhotoQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppUserPhotoQuery = {
+  getApsAppUserPhoto?:  {
+    __typename: "ApsAppUserPhoto",
+    id: string,
+    userId?: string | null,
+    user?:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    photo?: string | null,
+    caption?: string | null,
+    approved?: boolean | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+    aPSPhotosId?: string | null,
+    apsAppUserPhotosId?: string | null,
+  } | null,
+};
+
+export type ListApsAppUserPhotosQueryVariables = {
+  filter?: ModelApsAppUserPhotoFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppUserPhotosQuery = {
+  listApsAppUserPhotos?:  {
+    __typename: "ModelApsAppUserPhotoConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPhoto",
+      id: string,
+      userId?: string | null,
+      photo?: string | null,
+      caption?: string | null,
+      approved?: boolean | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPhotosId?: string | null,
+      apsAppUserPhotosId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserPhotosByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserPhotoFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPhotosByUserIdQuery = {
+  apsAppUserPhotosByUserId?:  {
+    __typename: "ModelApsAppUserPhotoConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPhoto",
+      id: string,
+      userId?: string | null,
+      photo?: string | null,
+      caption?: string | null,
+      approved?: boolean | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPhotosId?: string | null,
+      apsAppUserPhotosId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppUserPhotosByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppUserPhotoFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppUserPhotosByEventIdQuery = {
+  apsAppUserPhotosByEventId?:  {
+    __typename: "ModelApsAppUserPhotoConnection",
+    items:  Array< {
+      __typename: "ApsAppUserPhoto",
+      id: string,
+      userId?: string | null,
+      photo?: string | null,
+      caption?: string | null,
+      approved?: boolean | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSPhotosId?: string | null,
+      apsAppUserPhotosId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppSessionQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppSessionQuery = {
+  getApsAppSession?:  {
+    __typename: "ApsAppSession",
+    id: string,
+    title?: string | null,
+    date?: string | null,
+    startTime?: string | null,
+    endTime?: string | null,
+    location?: string | null,
+    description?: string | null,
+    embedUrl?: string | null,
+    agendaId?: string | null,
+    agenda?:  {
+      __typename: "ApsAgenda",
+      id: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    sessionQuestions?:  {
+      __typename: "ModelApsAppSessionQuestionConnection",
+      nextToken?: string | null,
+    } | null,
+    notes?:  {
+      __typename: "ModelApsAppUserNoteConnection",
+      nextToken?: string | null,
+    } | null,
+    speakers?:  {
+      __typename: "ModelSessionSpeakersConnection",
+      nextToken?: string | null,
+    } | null,
+    sponsors?:  {
+      __typename: "ModelSessionSponsorsConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteByUsers?:  {
+      __typename: "ModelApsAppUserFavoriteSessionConnection",
+      nextToken?: string | null,
+    } | null,
+    draft?: boolean | null,
+    createdAt: string,
+    updatedAt: string,
+    apsAgendaItemsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppSessionsQueryVariables = {
+  filter?: ModelApsAppSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppSessionsQuery = {
+  listApsAppSessions?:  {
+    __typename: "ModelApsAppSessionConnection",
+    items:  Array< {
+      __typename: "ApsAppSession",
+      id: string,
+      title?: string | null,
+      date?: string | null,
+      startTime?: string | null,
+      endTime?: string | null,
+      location?: string | null,
+      description?: string | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppSessionsByAgendaIdQueryVariables = {
+  agendaId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppSessionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppSessionsByAgendaIdQuery = {
   apsAppSessionsByAgendaId?:  {
     __typename: "ModelApsAppSessionConnection",
     items:  Array< {
@@ -5367,188 +10208,534 @@ export type ApsAppSessionsByAgendaIdWithRelationsQuery = {
       date?: string | null,
       startTime?: string | null,
       endTime?: string | null,
-      embedUrl?: string | null,
       location?: string | null,
       description?: string | null,
-      speakers?:  {
-        __typename: "ModelSessionSpeakersConnection",
-        items:  Array< {
-          __typename: "SessionSpeakers",
-          id: string,
-          aPSSpeaker:  {
-            __typename: "APSSpeaker",
-            id: string,
-            presentationTitle?: string | null,
-            presentationSummary?: string | null,
-            profileId: string,
-            profile:  {
-              __typename: "ApsAppUserProfile",
-              id: string,
-              firstName?: string | null,
-              lastName?: string | null,
-              company?: string | null,
-              jobTitle?: string | null,
-              profilePicture?: string | null,
-            },
-          },
-        } | null >,
-        nextToken?: string | null,
-      } | null,
-      sponsors?:  {
-        __typename: "ModelSessionSponsorsConnection",
-        items:  Array< {
-          __typename: "SessionSponsors",
-          id: string,
-          apsSponsor:  {
-            __typename: "ApsSponsor",
-            id: string,
-            company:  {
-              __typename: "APSCompany",
-              id: string,
-              name: string,
-              logo?: string | null,
-            },
-          },
-        } | null >,
-        nextToken?: string | null,
-      } | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
 };
 
-export type GetApsAppSessionWithRelationsQueryVariables = {
+export type GetApsAppSessionQuestionQueryVariables = {
   id: string,
 };
 
-export type GetApsAppSessionWithRelationsQuery = {
-  getApsAppSession?:  {
-    __typename: "ApsAppSession",
+export type GetApsAppSessionQuestionQuery = {
+  getApsAppSessionQuestion?:  {
+    __typename: "ApsAppSessionQuestion",
     id: string,
-    title?: string | null,
-    date?: string | null,
-    startTime?: string | null,
-    endTime?: string | null,
-    embedUrl?: string | null,
-    location?: string | null,
-    description?: string | null,
-    speakers?:  {
-      __typename: "ModelSessionSpeakersConnection",
-      items:  Array< {
-        __typename: "SessionSpeakers",
-        id: string,
-        aPSSpeaker:  {
-          __typename: "APSSpeaker",
-          id: string,
-          presentationTitle?: string | null,
-          presentationSummary?: string | null,
-          profileId: string,
-          profile:  {
-            __typename: "ApsAppUserProfile",
-            id: string,
-            firstName?: string | null,
-            lastName?: string | null,
-            company?: string | null,
-            jobTitle?: string | null,
-            profilePicture?: string | null,
-          },
-        },
-      } | null >,
-      nextToken?: string | null,
-    } | null,
-    sponsors?:  {
-      __typename: "ModelSessionSponsorsConnection",
-      items:  Array< {
-        __typename: "SessionSponsors",
-        id: string,
-        apsSponsor:  {
-          __typename: "ApsSponsor",
-          id: string,
-          company:  {
-            __typename: "APSCompany",
-            id: string,
-            name: string,
-            logo?: string | null,
-          },
-        },
-      } | null >,
-      nextToken?: string | null,
-    } | null,
+    sessionId: string,
+    session:  {
+      __typename: "ApsAppSession",
+      id: string,
+      title?: string | null,
+      date?: string | null,
+      startTime?: string | null,
+      endTime?: string | null,
+      location?: string | null,
+      description?: string | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
+    },
+    question?: string | null,
+    userId: string,
+    user:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
+    apsAppUserSessionQuestionsId?: string | null,
   } | null,
 };
 
-export type GetAPSWithExhibitorsQueryVariables = {
-  id: string,
-  eventId: string,
+export type ListApsAppSessionQuestionsQueryVariables = {
+  filter?: ModelApsAppSessionQuestionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type GetAPSWithExhibitorsQuery = {
-  getAPS?:  {
-    __typename: "APS",
-    id: string,
-    year: string,
-  } | null,
-  apsAppExhibitorProfilesByEventId?:  {
-    __typename: "ModelApsAppExhibitorProfileConnection",
+export type ListApsAppSessionQuestionsQuery = {
+  listApsAppSessionQuestions?:  {
+    __typename: "ModelApsAppSessionQuestionConnection",
     items:  Array< {
+      __typename: "ApsAppSessionQuestion",
+      id: string,
+      sessionId: string,
+      question?: string | null,
+      userId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserSessionQuestionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppSessionQuestionsBySessionIdQueryVariables = {
+  sessionId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppSessionQuestionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppSessionQuestionsBySessionIdQuery = {
+  apsAppSessionQuestionsBySessionId?:  {
+    __typename: "ModelApsAppSessionQuestionConnection",
+    items:  Array< {
+      __typename: "ApsAppSessionQuestion",
+      id: string,
+      sessionId: string,
+      question?: string | null,
+      userId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserSessionQuestionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppSessionQuestionsByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppSessionQuestionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppSessionQuestionsByUserIdQuery = {
+  apsAppSessionQuestionsByUserId?:  {
+    __typename: "ModelApsAppSessionQuestionConnection",
+    items:  Array< {
+      __typename: "ApsAppSessionQuestion",
+      id: string,
+      sessionId: string,
+      question?: string | null,
+      userId: string,
+      createdAt: string,
+      updatedAt: string,
+      apsAppUserSessionQuestionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAPSSpeakerQueryVariables = {
+  id: string,
+};
+
+export type GetAPSSpeakerQuery = {
+  getAPSSpeaker?:  {
+    __typename: "APSSpeaker",
+    id: string,
+    presentationTitle?: string | null,
+    presentationSummary?: string | null,
+    profileId: string,
+    profile:  {
+      __typename: "ApsAppUserProfile",
+      id: string,
+      userId: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email?: string | null,
+      phone?: string | null,
+      company?: string | null,
+      jobTitle?: string | null,
+      attendeeType?: RegistrantType | null,
+      quickTools?: Array< string | null > | null,
+      profilePicture?: string | null,
+      bio?: string | null,
+      linkedin?: string | null,
+      twitter?: string | null,
+      facebook?: string | null,
+      instagram?: string | null,
+      youtube?: string | null,
+      website?: Array< string | null > | null,
+      location?: string | null,
+      resume?: string | null,
+      thinkificId?: number | null,
+      apcProgress?: number | null,
+      speakerId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    sessions?:  {
+      __typename: "ModelSessionSpeakersConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteByUsers?:  {
+      __typename: "ModelApsAppUserFavoriteSpeakerConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+    aPSSpeakersId?: string | null,
+  } | null,
+};
+
+export type ListAPSSpeakersQueryVariables = {
+  filter?: ModelAPSSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSSpeakersQuery = {
+  listAPSSpeakers?:  {
+    __typename: "ModelAPSSpeakerConnection",
+    items:  Array< {
+      __typename: "APSSpeaker",
+      id: string,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      profileId: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type APSSpeakersByProfileIdAndEventIdQueryVariables = {
+  profileId: string,
+  eventId?: ModelIDKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAPSSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type APSSpeakersByProfileIdAndEventIdQuery = {
+  aPSSpeakersByProfileIdAndEventId?:  {
+    __typename: "ModelAPSSpeakerConnection",
+    items:  Array< {
+      __typename: "APSSpeaker",
+      id: string,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      profileId: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type APSSpeakersByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAPSSpeakerFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type APSSpeakersByEventIdQuery = {
+  aPSSpeakersByEventId?:  {
+    __typename: "ModelAPSSpeakerConnection",
+    items:  Array< {
+      __typename: "APSSpeaker",
+      id: string,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      profileId: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSSpeakersId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsSponsorQueryVariables = {
+  id: string,
+};
+
+export type GetApsSponsorQuery = {
+  getApsSponsor?:  {
+    __typename: "ApsSponsor",
+    id: string,
+    companyId: string,
+    company:  {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    profile?:  {
       __typename: "ApsAppExhibitorProfile",
       id: string,
       companyId: string,
-      company:  {
-        __typename: "APSCompany",
-        id: string,
-        name: string,
-        email?: string | null,
-        type?: CompanyType | null,
-        description?: string | null,
-        website?: string | null,
-        phone?: string | null,
-        logo?: string | null,
-      },
       sponsorId?: string | null,
       eventId: string,
-      deals?:  {
-        __typename: "ModelApsAppExhibitorDealConnection",
-        items:  Array< {
-          __typename: "ApsAppExhibitorDeal",
-          id: string,
-          deal?: string | null,
-          link?: string | null,
-        } | null >,
-      } | null,
-      photos?:  {
-        __typename: "ModelApsAppExhibitorPhotoConnection",
-        items:  Array< {
-          __typename: "ApsAppExhibitorPhoto",
-          id: string,
-          photo?: string | null,
-          caption?: string | null,
-          approved?: boolean | null,
-        } | null >,
-      } | null,
-      handouts?:  {
-        __typename: "ModelApsAppExhibitorHandoutConnection",
-        items:  Array< {
-          __typename: "ApsAppExhibitorHandout",
-          id: string,
-          handout?: string | null,
-        } | null >,
-      } | null,
-      promotions?:  {
-        __typename: "ModelApsAppExhibitorPromotionConnection",
-        items:  Array< {
-          __typename: "ApsAppExhibitorPromotion",
-          id: string,
-          promotion?: string | null,
-          link?: string | null,
-        } | null >,
-      } | null,
       video?: string | null,
       videoCaption?: string | null,
       boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
       visits?: number | null,
       views?: number | null,
       likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null,
+    sessions?:  {
+      __typename: "ModelSessionSponsorsConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteByUsers?:  {
+      __typename: "ModelApsAppUserFavoriteSponsorConnection",
+      nextToken?: string | null,
+    } | null,
+    type?: SponsorType | null,
+    createdAt: string,
+    updatedAt: string,
+    aPSSponsorsId?: string | null,
+    apsSponsorProfileId?: string | null,
+  } | null,
+};
+
+export type ListApsSponsorsQueryVariables = {
+  filter?: ModelApsSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsSponsorsQuery = {
+  listApsSponsors?:  {
+    __typename: "ModelApsSponsorConnection",
+    items:  Array< {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsSponsorsByCompanyIdQueryVariables = {
+  companyId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsSponsorsByCompanyIdQuery = {
+  apsSponsorsByCompanyId?:  {
+    __typename: "ModelApsSponsorConnection",
+    items:  Array< {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsSponsorsByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsSponsorFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsSponsorsByEventIdQuery = {
+  apsSponsorsByEventId?:  {
+    __typename: "ModelApsSponsorConnection",
+    items:  Array< {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAPSCompanyQueryVariables = {
+  id: string,
+};
+
+export type GetAPSCompanyQuery = {
+  getAPSCompany?:  {
+    __typename: "APSCompany",
+    id: string,
+    name: string,
+    email?: string | null,
+    type?: CompanyType | null,
+    description?: string | null,
+    website?: string | null,
+    phone?: string | null,
+    address?: string | null,
+    city?: string | null,
+    state?: string | null,
+    zip?: string | null,
+    country?: string | null,
+    logo?: string | null,
+    events?:  {
+      __typename: "ModelAPSCompanyEventsConnection",
+      nextToken?: string | null,
+    } | null,
+    registrants?:  {
+      __typename: "ModelApsRegistrantConnection",
+      nextToken?: string | null,
+    } | null,
+    sponsorId?: string | null,
+    sponsor?:  {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    } | null,
+    exhibitorProfileId?: string | null,
+    exhibitorProfile?:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null,
+    notes?:  {
+      __typename: "ModelApsAppUserNoteConnection",
+      nextToken?: string | null,
+    } | null,
+    contacts?:  {
+      __typename: "ModelAPSCompanyContactConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListAPSCompaniesQueryVariables = {
+  filter?: ModelAPSCompanyFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSCompaniesQuery = {
+  listAPSCompanies?:  {
+    __typename: "ModelAPSCompanyConnection",
+    items:  Array< {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -5556,17 +10743,1022 @@ export type GetAPSWithExhibitorsQuery = {
   } | null,
 };
 
-export type GetAPSWithAddOnsQueryVariables = {
+export type GetAPSCompanyContactQueryVariables = {
   id: string,
-  eventId: string,
 };
 
-export type GetAPSWithAddOnsQuery = {
-  getAPS?:  {
-    __typename: "APS",
+export type GetAPSCompanyContactQuery = {
+  getAPSCompanyContact?:  {
+    __typename: "APSCompanyContact",
     id: string,
-    year: string,
+    companyId: string,
+    company:  {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    name?: string | null,
+    email: string,
+    phone?: string | null,
+    title?: string | null,
+    createdAt: string,
+    updatedAt: string,
   } | null,
+};
+
+export type ListAPSCompanyContactsQueryVariables = {
+  filter?: ModelAPSCompanyContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSCompanyContactsQuery = {
+  listAPSCompanyContacts?:  {
+    __typename: "ModelAPSCompanyContactConnection",
+    items:  Array< {
+      __typename: "APSCompanyContact",
+      id: string,
+      companyId: string,
+      name?: string | null,
+      email: string,
+      phone?: string | null,
+      title?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type APSCompanyContactsByCompanyIdAndCreatedAtQueryVariables = {
+  companyId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAPSCompanyContactFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type APSCompanyContactsByCompanyIdAndCreatedAtQuery = {
+  aPSCompanyContactsByCompanyIdAndCreatedAt?:  {
+    __typename: "ModelAPSCompanyContactConnection",
+    items:  Array< {
+      __typename: "APSCompanyContact",
+      id: string,
+      companyId: string,
+      name?: string | null,
+      email: string,
+      phone?: string | null,
+      title?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppExhibitorProfileQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppExhibitorProfileQuery = {
+  getApsAppExhibitorProfile?:  {
+    __typename: "ApsAppExhibitorProfile",
+    id: string,
+    companyId: string,
+    company:  {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
+    sponsorId?: string | null,
+    sponsor?:  {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    } | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    deals?:  {
+      __typename: "ModelApsAppExhibitorDealConnection",
+      nextToken?: string | null,
+    } | null,
+    photos?:  {
+      __typename: "ModelApsAppExhibitorPhotoConnection",
+      nextToken?: string | null,
+    } | null,
+    handouts?:  {
+      __typename: "ModelApsAppExhibitorHandoutConnection",
+      nextToken?: string | null,
+    } | null,
+    promotions?:  {
+      __typename: "ModelApsAppExhibitorPromotionConnection",
+      nextToken?: string | null,
+    } | null,
+    video?: string | null,
+    videoCaption?: string | null,
+    boothNumber?: string | null,
+    qrCode?: string | null,
+    passportQrPayload?: string | null,
+    visits?: number | null,
+    views?: number | null,
+    likes?: number | null,
+    notes?:  {
+      __typename: "ModelApsAppUserNoteConnection",
+      nextToken?: string | null,
+    } | null,
+    favoriteByUsers?:  {
+      __typename: "ModelApsAppUserFavoriteExhibitorConnection",
+      nextToken?: string | null,
+    } | null,
+    passportStamps?:  {
+      __typename: "ModelApsAppUserPassportStampConnection",
+      nextToken?: string | null,
+    } | null,
+    viewedByUsers?:  {
+      __typename: "ModelApsAppUserExhibitorViewConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+    aPSExhibitorsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppExhibitorProfilesQueryVariables = {
+  filter?: ModelApsAppExhibitorProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppExhibitorProfilesQuery = {
+  listApsAppExhibitorProfiles?:  {
+    __typename: "ModelApsAppExhibitorProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorProfilesByCompanyIdQueryVariables = {
+  companyId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorProfilesByCompanyIdQuery = {
+  apsAppExhibitorProfilesByCompanyId?:  {
+    __typename: "ModelApsAppExhibitorProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorProfilesBySponsorIdQueryVariables = {
+  sponsorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorProfilesBySponsorIdQuery = {
+  apsAppExhibitorProfilesBySponsorId?:  {
+    __typename: "ModelApsAppExhibitorProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorProfilesByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorProfilesByEventIdQuery = {
+  apsAppExhibitorProfilesByEventId?:  {
+    __typename: "ModelApsAppExhibitorProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorProfilesByPassportQrPayloadQueryVariables = {
+  passportQrPayload: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorProfileFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorProfilesByPassportQrPayloadQuery = {
+  apsAppExhibitorProfilesByPassportQrPayload?:  {
+    __typename: "ModelApsAppExhibitorProfileConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppExhibitorPromotionQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppExhibitorPromotionQuery = {
+  getApsAppExhibitorPromotion?:  {
+    __typename: "ApsAppExhibitorPromotion",
+    id: string,
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    promotion?: string | null,
+    link?: string | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+    aPSExhibitorPromotionsId?: string | null,
+    apsAppExhibitorProfilePromotionsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppExhibitorPromotionsQueryVariables = {
+  filter?: ModelApsAppExhibitorPromotionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppExhibitorPromotionsQuery = {
+  listApsAppExhibitorPromotions?:  {
+    __typename: "ModelApsAppExhibitorPromotionConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorPromotion",
+      id: string,
+      exhibitorId: string,
+      promotion?: string | null,
+      link?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorPromotionsId?: string | null,
+      apsAppExhibitorProfilePromotionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorPromotionsByExhibitorIdQueryVariables = {
+  exhibitorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorPromotionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorPromotionsByExhibitorIdQuery = {
+  apsAppExhibitorPromotionsByExhibitorId?:  {
+    __typename: "ModelApsAppExhibitorPromotionConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorPromotion",
+      id: string,
+      exhibitorId: string,
+      promotion?: string | null,
+      link?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorPromotionsId?: string | null,
+      apsAppExhibitorProfilePromotionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorPromotionsByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorPromotionFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorPromotionsByEventIdQuery = {
+  apsAppExhibitorPromotionsByEventId?:  {
+    __typename: "ModelApsAppExhibitorPromotionConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorPromotion",
+      id: string,
+      exhibitorId: string,
+      promotion?: string | null,
+      link?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorPromotionsId?: string | null,
+      apsAppExhibitorProfilePromotionsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppExhibitorDealQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppExhibitorDealQuery = {
+  getApsAppExhibitorDeal?:  {
+    __typename: "ApsAppExhibitorDeal",
+    id: string,
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    deal?: string | null,
+    link?: string | null,
+    userId?: string | null,
+    user?:  {
+      __typename: "ApsAppUser",
+      id: string,
+      registrantId: string,
+      profileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+    aPSExhibitorDealsId?: string | null,
+    apsAppUserExhibitorDealsId?: string | null,
+    apsAppExhibitorProfileDealsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppExhibitorDealsQueryVariables = {
+  filter?: ModelApsAppExhibitorDealFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppExhibitorDealsQuery = {
+  listApsAppExhibitorDeals?:  {
+    __typename: "ModelApsAppExhibitorDealConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorDeal",
+      id: string,
+      exhibitorId: string,
+      deal?: string | null,
+      link?: string | null,
+      userId?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorDealsId?: string | null,
+      apsAppUserExhibitorDealsId?: string | null,
+      apsAppExhibitorProfileDealsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorDealsByExhibitorIdQueryVariables = {
+  exhibitorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorDealFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorDealsByExhibitorIdQuery = {
+  apsAppExhibitorDealsByExhibitorId?:  {
+    __typename: "ModelApsAppExhibitorDealConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorDeal",
+      id: string,
+      exhibitorId: string,
+      deal?: string | null,
+      link?: string | null,
+      userId?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorDealsId?: string | null,
+      apsAppUserExhibitorDealsId?: string | null,
+      apsAppExhibitorProfileDealsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorDealsByUserIdQueryVariables = {
+  userId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorDealFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorDealsByUserIdQuery = {
+  apsAppExhibitorDealsByUserId?:  {
+    __typename: "ModelApsAppExhibitorDealConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorDeal",
+      id: string,
+      exhibitorId: string,
+      deal?: string | null,
+      link?: string | null,
+      userId?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorDealsId?: string | null,
+      apsAppUserExhibitorDealsId?: string | null,
+      apsAppExhibitorProfileDealsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorDealsByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorDealFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorDealsByEventIdQuery = {
+  apsAppExhibitorDealsByEventId?:  {
+    __typename: "ModelApsAppExhibitorDealConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorDeal",
+      id: string,
+      exhibitorId: string,
+      deal?: string | null,
+      link?: string | null,
+      userId?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorDealsId?: string | null,
+      apsAppUserExhibitorDealsId?: string | null,
+      apsAppExhibitorProfileDealsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppExhibitorPhotoQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppExhibitorPhotoQuery = {
+  getApsAppExhibitorPhoto?:  {
+    __typename: "ApsAppExhibitorPhoto",
+    id: string,
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    photo?: string | null,
+    caption?: string | null,
+    approved?: boolean | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+    aPSExhibitorPhotosId?: string | null,
+    apsAppExhibitorProfilePhotosId?: string | null,
+  } | null,
+};
+
+export type ListApsAppExhibitorPhotosQueryVariables = {
+  filter?: ModelApsAppExhibitorPhotoFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppExhibitorPhotosQuery = {
+  listApsAppExhibitorPhotos?:  {
+    __typename: "ModelApsAppExhibitorPhotoConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorPhoto",
+      id: string,
+      exhibitorId: string,
+      photo?: string | null,
+      caption?: string | null,
+      approved?: boolean | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorPhotosId?: string | null,
+      apsAppExhibitorProfilePhotosId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorPhotosByExhibitorIdQueryVariables = {
+  exhibitorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorPhotoFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorPhotosByExhibitorIdQuery = {
+  apsAppExhibitorPhotosByExhibitorId?:  {
+    __typename: "ModelApsAppExhibitorPhotoConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorPhoto",
+      id: string,
+      exhibitorId: string,
+      photo?: string | null,
+      caption?: string | null,
+      approved?: boolean | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorPhotosId?: string | null,
+      apsAppExhibitorProfilePhotosId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorPhotosByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorPhotoFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorPhotosByEventIdQuery = {
+  apsAppExhibitorPhotosByEventId?:  {
+    __typename: "ModelApsAppExhibitorPhotoConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorPhoto",
+      id: string,
+      exhibitorId: string,
+      photo?: string | null,
+      caption?: string | null,
+      approved?: boolean | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorPhotosId?: string | null,
+      apsAppExhibitorProfilePhotosId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAppExhibitorHandoutQueryVariables = {
+  id: string,
+};
+
+export type GetApsAppExhibitorHandoutQuery = {
+  getApsAppExhibitorHandout?:  {
+    __typename: "ApsAppExhibitorHandout",
+    id: string,
+    exhibitorId: string,
+    exhibitor:  {
+      __typename: "ApsAppExhibitorProfile",
+      id: string,
+      companyId: string,
+      sponsorId?: string | null,
+      eventId: string,
+      video?: string | null,
+      videoCaption?: string | null,
+      boothNumber?: string | null,
+      qrCode?: string | null,
+      passportQrPayload?: string | null,
+      visits?: number | null,
+      views?: number | null,
+      likes?: number | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorsId?: string | null,
+    },
+    handout?: string | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+    aPSExhibitorHandoutsId?: string | null,
+    apsAppExhibitorProfileHandoutsId?: string | null,
+  } | null,
+};
+
+export type ListApsAppExhibitorHandoutsQueryVariables = {
+  filter?: ModelApsAppExhibitorHandoutFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAppExhibitorHandoutsQuery = {
+  listApsAppExhibitorHandouts?:  {
+    __typename: "ModelApsAppExhibitorHandoutConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorHandout",
+      id: string,
+      exhibitorId: string,
+      handout?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorHandoutsId?: string | null,
+      apsAppExhibitorProfileHandoutsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorHandoutsByExhibitorIdQueryVariables = {
+  exhibitorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorHandoutFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorHandoutsByExhibitorIdQuery = {
+  apsAppExhibitorHandoutsByExhibitorId?:  {
+    __typename: "ModelApsAppExhibitorHandoutConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorHandout",
+      id: string,
+      exhibitorId: string,
+      handout?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorHandoutsId?: string | null,
+      apsAppExhibitorProfileHandoutsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAppExhibitorHandoutsByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAppExhibitorHandoutFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAppExhibitorHandoutsByEventIdQuery = {
+  apsAppExhibitorHandoutsByEventId?:  {
+    __typename: "ModelApsAppExhibitorHandoutConnection",
+    items:  Array< {
+      __typename: "ApsAppExhibitorHandout",
+      id: string,
+      exhibitorId: string,
+      handout?: string | null,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSExhibitorHandoutsId?: string | null,
+      apsAppExhibitorProfileHandoutsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAddOnQueryVariables = {
+  id: string,
+};
+
+export type GetApsAddOnQuery = {
+  getApsAddOn?:  {
+    __typename: "ApsAddOn",
+    id: string,
+    title: string,
+    description: string,
+    subheadline?: string | null,
+    location: string,
+    date: string,
+    time: string,
+    altLink?: string | null,
+    type?: string | null,
+    limit?: number | null,
+    eventId: string,
+    event:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    price?: number | null,
+    preferenceSchema?: string | null,
+    registrantRequests?:  {
+      __typename: "ModelRegistrantAddOnRequestConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+    aPSAddOnsId?: string | null,
+  } | null,
+};
+
+export type ListApsAddOnsQueryVariables = {
+  filter?: ModelApsAddOnFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAddOnsQuery = {
+  listApsAddOns?:  {
+    __typename: "ModelApsAddOnConnection",
+    items:  Array< {
+      __typename: "ApsAddOn",
+      id: string,
+      title: string,
+      description: string,
+      subheadline?: string | null,
+      location: string,
+      date: string,
+      time: string,
+      altLink?: string | null,
+      type?: string | null,
+      limit?: number | null,
+      eventId: string,
+      price?: number | null,
+      preferenceSchema?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAddOnsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAddOnsByEventIdQueryVariables = {
+  eventId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAddOnFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAddOnsByEventIdQuery = {
   apsAddOnsByEventId?:  {
     __typename: "ModelApsAddOnConnection",
     items:  Array< {
@@ -5582,277 +11774,948 @@ export type GetAPSWithAddOnsQuery = {
       type?: string | null,
       limit?: number | null,
       eventId: string,
+      price?: number | null,
+      preferenceSchema?: string | null,
       createdAt: string,
       updatedAt: string,
+      aPSAddOnsId?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
 };
 
-export type ListApsAppUsersWithProfilesQueryVariables = {
+export type GetRegistrantAddOnRequestQueryVariables = {
+  id: string,
+};
+
+export type GetRegistrantAddOnRequestQuery = {
+  getRegistrantAddOnRequest?:  {
+    __typename: "RegistrantAddOnRequest",
+    id: string,
+    registrantId: string,
+    registrant:  {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    },
+    addOnId: string,
+    addOn:  {
+      __typename: "ApsAddOn",
+      id: string,
+      title: string,
+      description: string,
+      subheadline?: string | null,
+      location: string,
+      date: string,
+      time: string,
+      altLink?: string | null,
+      type?: string | null,
+      limit?: number | null,
+      eventId: string,
+      price?: number | null,
+      preferenceSchema?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAddOnsId?: string | null,
+    },
+    status: string,
+    preferences?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListRegistrantAddOnRequestsQueryVariables = {
+  filter?: ModelRegistrantAddOnRequestFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
-export type ListApsAppUsersWithProfilesQuery = {
-  listApsAppUsers?:  {
-    __typename: "ModelApsAppUserConnection",
+export type ListRegistrantAddOnRequestsQuery = {
+  listRegistrantAddOnRequests?:  {
+    __typename: "ModelRegistrantAddOnRequestConnection",
     items:  Array< {
-      __typename: "ApsAppUser",
+      __typename: "RegistrantAddOnRequest",
       id: string,
-      registrant:  {
-        __typename: "ApsRegistrant",
-        id: string,
-        status: RegistrantStatus,
-      },
-      profile?:  {
-        __typename: "ApsAppUserProfile",
-        firstName?: string | null,
-        id: string,
-        lastName?: string | null,
-        email?: string | null,
-        company?: string | null,
-        jobTitle?: string | null,
-        profilePicture?: string | null,
-        location?: string | null,
-        userId: string,
-      } | null,
+      registrantId: string,
+      addOnId: string,
+      status: string,
+      preferences?: string | null,
+      createdAt: string,
+      updatedAt: string,
     } | null >,
     nextToken?: string | null,
   } | null,
 };
 
-export type GetCommunityProfileByUserIdQueryVariables = {
-  userId: string,
+export type RegistrantAddOnRequestsByRegistrantIdQueryVariables = {
+  registrantId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelRegistrantAddOnRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type GetCommunityProfileByUserIdQuery = {
-  apsAppUserProfilesByUserId?:  {
-    __typename: "ModelApsAppUserProfileConnection",
+export type RegistrantAddOnRequestsByRegistrantIdQuery = {
+  registrantAddOnRequestsByRegistrantId?:  {
+    __typename: "ModelRegistrantAddOnRequestConnection",
     items:  Array< {
-      __typename: "ApsAppUserProfile",
+      __typename: "RegistrantAddOnRequest",
       id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      affiliates?:  {
-        __typename: "ModelProfileAffiliateConnection",
-        items:  Array< {
-          __typename: "ProfileAffiliate",
-          id: string,
-          affiliate?: string | null,
-          role?: string | null,
-          startDate?: string | null,
-          endDate?: string | null,
-          createdAt: string,
-        } | null >,
-      } | null,
-      education?:  {
-        __typename: "ModelProfileEducationConnection",
-        items:  Array< {
-          __typename: "ProfileEducation",
-          id: string,
-          school?: string | null,
-          degree?: string | null,
-          fieldOfStudy?: string | null,
-          createdAt: string,
-        } | null >,
-      } | null,
-      interests?:  {
-        __typename: "ModelProfileInterestConnection",
-        items:  Array< {
-          __typename: "ProfileInterest",
-          id: string,
-          interest?: string | null,
-          createdAt: string,
-        } | null >,
-      } | null,
+      registrantId: string,
+      addOnId: string,
+      status: string,
+      preferences?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type GetCommunityProfileByProfileIdQueryVariables = {
+export type RegistrantAddOnRequestsByAddOnIdQueryVariables = {
+  addOnId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelRegistrantAddOnRequestFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type RegistrantAddOnRequestsByAddOnIdQuery = {
+  registrantAddOnRequestsByAddOnId?:  {
+    __typename: "ModelRegistrantAddOnRequestConnection",
+    items:  Array< {
+      __typename: "RegistrantAddOnRequest",
+      id: string,
+      registrantId: string,
+      addOnId: string,
+      status: string,
+      preferences?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsSeatingChartQueryVariables = {
   id: string,
 };
 
-export type GetCommunityProfileByProfileIdQuery = {
-  getApsAppUserProfile?:  {
-    __typename: "ApsAppUserProfile",
+export type GetApsSeatingChartQuery = {
+  getApsSeatingChart?:  {
+    __typename: "ApsSeatingChart",
     id: string,
-    userId: string,
+    registrants?:  {
+      __typename: "ModelApsSeatingChartRegistrantConnection",
+      nextToken?: string | null,
+    } | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsSeatingChartsQueryVariables = {
+  filter?: ModelApsSeatingChartFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsSeatingChartsQuery = {
+  listApsSeatingCharts?:  {
+    __typename: "ModelApsSeatingChartConnection",
+    items:  Array< {
+      __typename: "ApsSeatingChart",
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsSeatingChartRegistrantQueryVariables = {
+  id: string,
+};
+
+export type GetApsSeatingChartRegistrantQuery = {
+  getApsSeatingChartRegistrant?:  {
+    __typename: "ApsSeatingChartRegistrant",
+    id: string,
+    category?: string | null,
     firstName?: string | null,
     lastName?: string | null,
-    email?: string | null,
-    phone?: string | null,
     company?: string | null,
-    jobTitle?: string | null,
-    attendeeType?: RegistrantType | null,
-    profilePicture?: string | null,
-    bio?: string | null,
-    linkedin?: string | null,
-    twitter?: string | null,
-    facebook?: string | null,
-    instagram?: string | null,
-    youtube?: string | null,
-    website?: Array< string | null > | null,
-    location?: string | null,
-    resume?: string | null,
-    affiliates?:  {
-      __typename: "ModelProfileAffiliateConnection",
-      items:  Array< {
-        __typename: "ProfileAffiliate",
-        id: string,
-        affiliate?: string | null,
-        role?: string | null,
-        startDate?: string | null,
-        endDate?: string | null,
-        createdAt: string,
-      } | null >,
-    } | null,
-    education?:  {
-      __typename: "ModelProfileEducationConnection",
-      items:  Array< {
-        __typename: "ProfileEducation",
-        id: string,
-        school?: string | null,
-        degree?: string | null,
-        fieldOfStudy?: string | null,
-        createdAt: string,
-      } | null >,
-    } | null,
-    interests?:  {
-      __typename: "ModelProfileInterestConnection",
-      items:  Array< {
-        __typename: "ProfileInterest",
-        id: string,
-        interest?: string | null,
-        createdAt: string,
-      } | null >,
-    } | null,
+    email?: string | null,
+    role?: string | null,
+    tableNumber?: number | null,
+    notes?: string | null,
+    seatingChartID: string,
+    seatingChart:  {
+      __typename: "ApsSeatingChart",
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    registrantID: string,
+    registrant:  {
+      __typename: "ApsRegistrant",
+      id: string,
+      apsID: string,
+      firstName?: string | null,
+      lastName?: string | null,
+      email: string,
+      phone?: string | null,
+      companyId?: string | null,
+      jobTitle?: string | null,
+      attendeeType: RegistrantType,
+      termsAccepted?: boolean | null,
+      interests?: Array< string | null > | null,
+      otherInterest?: string | null,
+      buyerQuestion?: string | null,
+      packagingChallenge?: string | null,
+      certification?: string | null,
+      billingAddressFirstName?: string | null,
+      billingAddressLastName?: string | null,
+      billingAddressEmail?: string | null,
+      billingAddressPhone?: string | null,
+      billingAddressStreet?: string | null,
+      billingAddressCity?: string | null,
+      billingAddressState?: string | null,
+      billingAddressZip?: string | null,
+      billingAddressCountry?: string | null,
+      sameAsAttendee?: boolean | null,
+      speakerTopic?: string | null,
+      learningObjectives?: string | null,
+      totalAmount?: number | null,
+      discountCode?: string | null,
+      status: RegistrantStatus,
+      paymentConfirmation?: string | null,
+      registrationEmailSent?: boolean | null,
+      registrationEmailSentDate?: string | null,
+      registrationEmailReceived?: boolean | null,
+      registrationEmailReceivedDate?: string | null,
+      welcomeEmailSent?: boolean | null,
+      welcomeEmailSentDate?: string | null,
+      welcomeEmailReceived?: boolean | null,
+      welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
+      paymentMethod?: string | null,
+      paymentLast4?: string | null,
+      approvedAt?: string | null,
+      headshot?: string | null,
+      presentation?: string | null,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      bio?: string | null,
+      invoice?: string | null,
+      appUserId?: string | null,
+      qrCode?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSRegistrantsId?: string | null,
+      aPSCompanyRegistrantsId?: string | null,
+      apsRegistrantSeatingChartRegistrantId?: string | null,
+    },
     createdAt: string,
     updatedAt: string,
+    apsSeatingChartRegistrantsId?: string | null,
   } | null,
 };
 
-export type CreateApsDmMessageMinimalMutationVariables = {
-  input: CreateApsDmMessageInput,
-  condition?: ModelApsDmMessageConditionInput | null,
+export type ListApsSeatingChartRegistrantsQueryVariables = {
+  filter?: ModelApsSeatingChartRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type CreateApsDmMessageMinimalMutation = {
-  createApsDmMessage?:  {
-    __typename: "ApsDmMessage",
-    id: string,
-    eventId: string,
-    threadId: string,
-    senderUserId: string,
-    owners: Array< string >,
-    type?: string | null,
-    body?: string | null,
-    createdAt: string,
-    updatedAt: string,
+export type ListApsSeatingChartRegistrantsQuery = {
+  listApsSeatingChartRegistrants?:  {
+    __typename: "ModelApsSeatingChartRegistrantConnection",
+    items:  Array< {
+      __typename: "ApsSeatingChartRegistrant",
+      id: string,
+      category?: string | null,
+      firstName?: string | null,
+      lastName?: string | null,
+      company?: string | null,
+      email?: string | null,
+      role?: string | null,
+      tableNumber?: number | null,
+      notes?: string | null,
+      seatingChartID: string,
+      registrantID: string,
+      createdAt: string,
+      updatedAt: string,
+      apsSeatingChartRegistrantsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type SendModeratedDmMessageManualMutationVariables = {
-  input: SendModeratedDmMessageInput,
+export type ApsSeatingChartRegistrantsBySeatingChartIDQueryVariables = {
+  seatingChartID: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsSeatingChartRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type SendModeratedDmMessageManualMutation = {
-  sendModeratedDmMessage?:  {
-    __typename: "ApsDmMessage",
-    id: string,
-    eventId: string,
-    threadId: string,
-    senderUserId: string,
-    owners: Array< string >,
-    type?: string | null,
-    body?: string | null,
-    createdAt: string,
-    updatedAt: string,
+export type ApsSeatingChartRegistrantsBySeatingChartIDQuery = {
+  apsSeatingChartRegistrantsBySeatingChartID?:  {
+    __typename: "ModelApsSeatingChartRegistrantConnection",
+    items:  Array< {
+      __typename: "ApsSeatingChartRegistrant",
+      id: string,
+      category?: string | null,
+      firstName?: string | null,
+      lastName?: string | null,
+      company?: string | null,
+      email?: string | null,
+      role?: string | null,
+      tableNumber?: number | null,
+      notes?: string | null,
+      seatingChartID: string,
+      registrantID: string,
+      createdAt: string,
+      updatedAt: string,
+      apsSeatingChartRegistrantsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type OnCreateApsDmMessageMinimalSubscriptionVariables = {
-  filter?: ModelSubscriptionApsDmMessageFilterInput | null,
+export type ApsSeatingChartRegistrantsByRegistrantIDQueryVariables = {
+  registrantID: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsSeatingChartRegistrantFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type OnCreateApsDmMessageMinimalSubscription = {
-  onCreateApsDmMessage?:  {
-    __typename: "ApsDmMessage",
-    id: string,
-    eventId: string,
-    threadId: string,
-    senderUserId: string,
-    owners: Array< string >,
-    type?: string | null,
-    body?: string | null,
-    createdAt: string,
-    updatedAt: string,
+export type ApsSeatingChartRegistrantsByRegistrantIDQuery = {
+  apsSeatingChartRegistrantsByRegistrantID?:  {
+    __typename: "ModelApsSeatingChartRegistrantConnection",
+    items:  Array< {
+      __typename: "ApsSeatingChartRegistrant",
+      id: string,
+      category?: string | null,
+      firstName?: string | null,
+      lastName?: string | null,
+      company?: string | null,
+      email?: string | null,
+      role?: string | null,
+      tableNumber?: number | null,
+      notes?: string | null,
+      seatingChartID: string,
+      registrantID: string,
+      createdAt: string,
+      updatedAt: string,
+      apsSeatingChartRegistrantsId?: string | null,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
-export type GetApsUserEngageStateManualQueryVariables = {
+export type GetApsEmailCampaignQueryVariables = {
   id: string,
 };
 
-export type GetApsUserEngageStateManualQuery = {
-  getApsUserEngageState?:  {
-    __typename: "ApsUserEngageState",
+export type GetApsEmailCampaignQuery = {
+  getApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
     id: string,
     eventId: string,
-    userId: string,
-    lastSeenAnnouncementAt?: string | null,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type CreateApsUserEngageStateManualMutationVariables = {
-  input: CreateApsUserEngageStateInput,
+export type ListApsEmailCampaignsQueryVariables = {
+  filter?: ModelApsEmailCampaignFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type CreateApsUserEngageStateManualMutation = {
-  createApsUserEngageState?:  {
-    __typename: "ApsUserEngageState",
+export type ListApsEmailCampaignsQuery = {
+  listApsEmailCampaigns?:  {
+    __typename: "ModelApsEmailCampaignConnection",
+    items:  Array< {
+      __typename: "ApsEmailCampaign",
+      id: string,
+      eventId: string,
+      name: string,
+      templateKey: string,
+      subject: string,
+      audienceStatuses?: Array< RegistrantStatus | null > | null,
+      audienceTypes?: Array< RegistrantType | null > | null,
+      status: EmailCampaignStatus,
+      scheduledAt?: string | null,
+      startedAt?: string | null,
+      completedAt?: string | null,
+      totalRecipients?: number | null,
+      sentCount?: number | null,
+      failedCount?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsEmailCampaignsByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsEmailCampaignFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsEmailCampaignsByEventIdAndCreatedAtQuery = {
+  apsEmailCampaignsByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsEmailCampaignConnection",
+    items:  Array< {
+      __typename: "ApsEmailCampaign",
+      id: string,
+      eventId: string,
+      name: string,
+      templateKey: string,
+      subject: string,
+      audienceStatuses?: Array< RegistrantStatus | null > | null,
+      audienceTypes?: Array< RegistrantType | null > | null,
+      status: EmailCampaignStatus,
+      scheduledAt?: string | null,
+      startedAt?: string | null,
+      completedAt?: string | null,
+      totalRecipients?: number | null,
+      sentCount?: number | null,
+      failedCount?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsEmailCampaignsByEventIdAndScheduledAtQueryVariables = {
+  eventId: string,
+  scheduledAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsEmailCampaignFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsEmailCampaignsByEventIdAndScheduledAtQuery = {
+  apsEmailCampaignsByEventIdAndScheduledAt?:  {
+    __typename: "ModelApsEmailCampaignConnection",
+    items:  Array< {
+      __typename: "ApsEmailCampaign",
+      id: string,
+      eventId: string,
+      name: string,
+      templateKey: string,
+      subject: string,
+      audienceStatuses?: Array< RegistrantStatus | null > | null,
+      audienceTypes?: Array< RegistrantType | null > | null,
+      status: EmailCampaignStatus,
+      scheduledAt?: string | null,
+      startedAt?: string | null,
+      completedAt?: string | null,
+      totalRecipients?: number | null,
+      sentCount?: number | null,
+      failedCount?: number | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsEmailSendQueryVariables = {
+  id: string,
+};
+
+export type GetApsEmailSendQuery = {
+  getApsEmailSend?:  {
+    __typename: "ApsEmailSend",
     id: string,
+    campaignId: string,
     eventId: string,
-    userId: string,
-    lastSeenAnnouncementAt?: string | null,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type UpdateApsUserEngageStateManualMutationVariables = {
-  input: UpdateApsUserEngageStateInput,
+export type ListApsEmailSendsQueryVariables = {
+  filter?: ModelApsEmailSendFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type UpdateApsUserEngageStateManualMutation = {
-  updateApsUserEngageState?:  {
-    __typename: "ApsUserEngageState",
+export type ListApsEmailSendsQuery = {
+  listApsEmailSends?:  {
+    __typename: "ModelApsEmailSendConnection",
+    items:  Array< {
+      __typename: "ApsEmailSend",
+      id: string,
+      campaignId: string,
+      eventId: string,
+      registrantId: string,
+      email: string,
+      status: EmailSendStatus,
+      sesMessageId?: string | null,
+      error?: string | null,
+      sentAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsEmailSendsByCampaignIdAndCreatedAtQueryVariables = {
+  campaignId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsEmailSendFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsEmailSendsByCampaignIdAndCreatedAtQuery = {
+  apsEmailSendsByCampaignIdAndCreatedAt?:  {
+    __typename: "ModelApsEmailSendConnection",
+    items:  Array< {
+      __typename: "ApsEmailSend",
+      id: string,
+      campaignId: string,
+      eventId: string,
+      registrantId: string,
+      email: string,
+      status: EmailSendStatus,
+      sesMessageId?: string | null,
+      error?: string | null,
+      sentAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetAPSCompanyEventsQueryVariables = {
+  id: string,
+};
+
+export type GetAPSCompanyEventsQuery = {
+  getAPSCompanyEvents?:  {
+    __typename: "APSCompanyEvents",
     id: string,
-    eventId: string,
-    userId: string,
-    lastSeenAnnouncementAt?: string | null,
+    aPSId: string,
+    aPSCompanyId: string,
+    aPS:  {
+      __typename: "APS",
+      id: string,
+      year: string,
+      startDate?: string | null,
+      endDate?: string | null,
+      location?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      website?: string | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSAgendaId?: string | null,
+    },
+    aPSCompany:  {
+      __typename: "APSCompany",
+      id: string,
+      name: string,
+      email?: string | null,
+      type?: CompanyType | null,
+      description?: string | null,
+      website?: string | null,
+      phone?: string | null,
+      address?: string | null,
+      city?: string | null,
+      state?: string | null,
+      zip?: string | null,
+      country?: string | null,
+      logo?: string | null,
+      sponsorId?: string | null,
+      exhibitorProfileId?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    },
     createdAt: string,
     updatedAt: string,
+  } | null,
+};
+
+export type ListAPSCompanyEventsQueryVariables = {
+  filter?: ModelAPSCompanyEventsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListAPSCompanyEventsQuery = {
+  listAPSCompanyEvents?:  {
+    __typename: "ModelAPSCompanyEventsConnection",
+    items:  Array< {
+      __typename: "APSCompanyEvents",
+      id: string,
+      aPSId: string,
+      aPSCompanyId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type APSCompanyEventsByAPSIdQueryVariables = {
+  aPSId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAPSCompanyEventsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type APSCompanyEventsByAPSIdQuery = {
+  aPSCompanyEventsByAPSId?:  {
+    __typename: "ModelAPSCompanyEventsConnection",
+    items:  Array< {
+      __typename: "APSCompanyEvents",
+      id: string,
+      aPSId: string,
+      aPSCompanyId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type APSCompanyEventsByAPSCompanyIdQueryVariables = {
+  aPSCompanyId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelAPSCompanyEventsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type APSCompanyEventsByAPSCompanyIdQuery = {
+  aPSCompanyEventsByAPSCompanyId?:  {
+    __typename: "ModelAPSCompanyEventsConnection",
+    items:  Array< {
+      __typename: "APSCompanyEvents",
+      id: string,
+      aPSId: string,
+      aPSCompanyId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetSessionSpeakersQueryVariables = {
+  id: string,
+};
+
+export type GetSessionSpeakersQuery = {
+  getSessionSpeakers?:  {
+    __typename: "SessionSpeakers",
+    id: string,
+    apsAppSessionId: string,
+    aPSSpeakerId: string,
+    apsAppSession:  {
+      __typename: "ApsAppSession",
+      id: string,
+      title?: string | null,
+      date?: string | null,
+      startTime?: string | null,
+      endTime?: string | null,
+      location?: string | null,
+      description?: string | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
+    },
+    aPSSpeaker:  {
+      __typename: "APSSpeaker",
+      id: string,
+      presentationTitle?: string | null,
+      presentationSummary?: string | null,
+      profileId: string,
+      eventId: string,
+      createdAt: string,
+      updatedAt: string,
+      aPSSpeakersId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListSessionSpeakersQueryVariables = {
+  filter?: ModelSessionSpeakersFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListSessionSpeakersQuery = {
+  listSessionSpeakers?:  {
+    __typename: "ModelSessionSpeakersConnection",
+    items:  Array< {
+      __typename: "SessionSpeakers",
+      id: string,
+      apsAppSessionId: string,
+      aPSSpeakerId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type SessionSpeakersByApsAppSessionIdQueryVariables = {
+  apsAppSessionId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelSessionSpeakersFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type SessionSpeakersByApsAppSessionIdQuery = {
+  sessionSpeakersByApsAppSessionId?:  {
+    __typename: "ModelSessionSpeakersConnection",
+    items:  Array< {
+      __typename: "SessionSpeakers",
+      id: string,
+      apsAppSessionId: string,
+      aPSSpeakerId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type SessionSpeakersByAPSSpeakerIdQueryVariables = {
+  aPSSpeakerId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelSessionSpeakersFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type SessionSpeakersByAPSSpeakerIdQuery = {
+  sessionSpeakersByAPSSpeakerId?:  {
+    __typename: "ModelSessionSpeakersConnection",
+    items:  Array< {
+      __typename: "SessionSpeakers",
+      id: string,
+      apsAppSessionId: string,
+      aPSSpeakerId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetSessionSponsorsQueryVariables = {
+  id: string,
+};
+
+export type GetSessionSponsorsQuery = {
+  getSessionSponsors?:  {
+    __typename: "SessionSponsors",
+    id: string,
+    apsAppSessionId: string,
+    apsSponsorId: string,
+    apsAppSession:  {
+      __typename: "ApsAppSession",
+      id: string,
+      title?: string | null,
+      date?: string | null,
+      startTime?: string | null,
+      endTime?: string | null,
+      location?: string | null,
+      description?: string | null,
+      embedUrl?: string | null,
+      agendaId?: string | null,
+      draft?: boolean | null,
+      createdAt: string,
+      updatedAt: string,
+      apsAgendaItemsId?: string | null,
+    },
+    apsSponsor:  {
+      __typename: "ApsSponsor",
+      id: string,
+      companyId: string,
+      eventId: string,
+      type?: SponsorType | null,
+      createdAt: string,
+      updatedAt: string,
+      aPSSponsorsId?: string | null,
+      apsSponsorProfileId?: string | null,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListSessionSponsorsQueryVariables = {
+  filter?: ModelSessionSponsorsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListSessionSponsorsQuery = {
+  listSessionSponsors?:  {
+    __typename: "ModelSessionSponsorsConnection",
+    items:  Array< {
+      __typename: "SessionSponsors",
+      id: string,
+      apsAppSessionId: string,
+      apsSponsorId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type SessionSponsorsByApsAppSessionIdQueryVariables = {
+  apsAppSessionId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelSessionSponsorsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type SessionSponsorsByApsAppSessionIdQuery = {
+  sessionSponsorsByApsAppSessionId?:  {
+    __typename: "ModelSessionSponsorsConnection",
+    items:  Array< {
+      __typename: "SessionSponsors",
+      id: string,
+      apsAppSessionId: string,
+      apsSponsorId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type SessionSponsorsByApsSponsorIdQueryVariables = {
+  apsSponsorId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelSessionSponsorsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type SessionSponsorsByApsSponsorIdQuery = {
+  sessionSponsorsByApsSponsorId?:  {
+    __typename: "ModelSessionSponsorsConnection",
+    items:  Array< {
+      __typename: "SessionSponsors",
+      id: string,
+      apsAppSessionId: string,
+      apsSponsorId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
@@ -6449,6 +13312,10 @@ export type DeleteApsRegistrantMutation = {
     welcomeEmailSentDate?: string | null,
     welcomeEmailReceived?: boolean | null,
     welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
     paymentMethod?: string | null,
     paymentLast4?: string | null,
     approvedAt?: string | null,
@@ -6615,6 +13482,10 @@ export type CreateApsAppUserMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -6745,6 +13616,10 @@ export type DeleteApsAppUserMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -7084,6 +13959,10 @@ export type CreateApsAppUserNoteMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -7255,6 +14134,10 @@ export type UpdateApsAppUserNoteMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -7426,6 +14309,10 @@ export type DeleteApsAppUserNoteMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -11007,6 +17894,10 @@ export type UpdateRegistrantAddOnRequestMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -11102,6 +17993,10 @@ export type DeleteRegistrantAddOnRequestMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -11266,6 +18161,10 @@ export type CreateApsSeatingChartRegistrantMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -11355,6 +18254,10 @@ export type UpdateApsSeatingChartRegistrantMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -11444,6 +18347,10 @@ export type DeleteApsSeatingChartRegistrantMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -11912,6 +18819,55 @@ export type DeleteApsAdminAnnouncementMutation = {
     deepLink?: string | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteApsEmailCampaignMutationVariables = {
+  input: DeleteApsEmailCampaignInput,
+  condition?: ModelApsEmailCampaignConditionInput | null,
+};
+
+export type DeleteApsEmailCampaignMutation = {
+  deleteApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
+    id: string,
+    eventId: string,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteApsEmailSendMutationVariables = {
+  input: DeleteApsEmailSendInput,
+  condition?: ModelApsEmailSendConditionInput | null,
+};
+
+export type DeleteApsEmailSendMutation = {
+  deleteApsEmailSend?:  {
+    __typename: "ApsEmailSend",
+    id: string,
+    campaignId: string,
+    eventId: string,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -12674,6 +19630,10 @@ export type CreateApsRegistrantMutation = {
     welcomeEmailSentDate?: string | null,
     welcomeEmailReceived?: boolean | null,
     welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
     paymentMethod?: string | null,
     paymentLast4?: string | null,
     approvedAt?: string | null,
@@ -12809,6 +19769,10 @@ export type UpdateApsRegistrantMutation = {
     welcomeEmailSentDate?: string | null,
     welcomeEmailReceived?: boolean | null,
     welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
     paymentMethod?: string | null,
     paymentLast4?: string | null,
     approvedAt?: string | null,
@@ -12912,6 +19876,10 @@ export type UpdateApsAppUserMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -14547,6 +21515,10 @@ export type CreateRegistrantAddOnRequestMutation = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -14586,6 +21558,104 @@ export type CreateRegistrantAddOnRequestMutation = {
     },
     status: string,
     preferences?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateApsEmailCampaignMutationVariables = {
+  input: CreateApsEmailCampaignInput,
+  condition?: ModelApsEmailCampaignConditionInput | null,
+};
+
+export type CreateApsEmailCampaignMutation = {
+  createApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
+    id: string,
+    eventId: string,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateApsEmailCampaignMutationVariables = {
+  input: UpdateApsEmailCampaignInput,
+  condition?: ModelApsEmailCampaignConditionInput | null,
+};
+
+export type UpdateApsEmailCampaignMutation = {
+  updateApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
+    id: string,
+    eventId: string,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateApsEmailSendMutationVariables = {
+  input: CreateApsEmailSendInput,
+  condition?: ModelApsEmailSendConditionInput | null,
+};
+
+export type CreateApsEmailSendMutation = {
+  createApsEmailSend?:  {
+    __typename: "ApsEmailSend",
+    id: string,
+    campaignId: string,
+    eventId: string,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateApsEmailSendMutationVariables = {
+  input: UpdateApsEmailSendInput,
+  condition?: ModelApsEmailSendConditionInput | null,
+};
+
+export type UpdateApsEmailSendMutation = {
+  updateApsEmailSend?:  {
+    __typename: "ApsEmailSend",
+    id: string,
+    campaignId: string,
+    eventId: string,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -14692,7058 +21762,6 @@ export type UpdateAPSCompanyEventsMutation = {
     },
     createdAt: string,
     updatedAt: string,
-  } | null,
-};
-
-export type AdminGetThinkificByEmailQueryVariables = {
-  email: string,
-};
-
-export type AdminGetThinkificByEmailQuery = {
-  adminGetThinkificByEmail?:  {
-    __typename: "AdminThinkificByEmailResult",
-    email: string,
-    thinkificUserId?: number | null,
-    apcEnrollments:  Array< {
-      __typename: "AdminThinkificEnrollment",
-      enrollmentId?: number | null,
-      courseId?: number | null,
-      courseName?: string | null,
-      percentageCompleted?: number | null,
-      completedAt?: string | null,
-      activatedAt?: string | null,
-    } >,
-    otherEnrollments:  Array< {
-      __typename: "AdminThinkificEnrollment",
-      enrollmentId?: number | null,
-      courseId?: number | null,
-      courseName?: string | null,
-      percentageCompleted?: number | null,
-      completedAt?: string | null,
-      activatedAt?: string | null,
-    } >,
-  } | null,
-};
-
-export type AdminGetLatestRegistrantTempCredentialQueryVariables = {
-  registrantId: string,
-};
-
-export type AdminGetLatestRegistrantTempCredentialQuery = {
-  adminGetLatestRegistrantTempCredential?:  {
-    __typename: "AdminLatestTempCredentialResult",
-    registrantId: string,
-    email: string,
-    tempPassword: string,
-    createdAt: string,
-  } | null,
-};
-
-export type GetApsTempCredentialQueryVariables = {
-  id: string,
-};
-
-export type GetApsTempCredentialQuery = {
-  getApsTempCredential?:  {
-    __typename: "ApsTempCredential",
-    id: string,
-    apsID: string,
-    registrantId: string,
-    email: string,
-    tempPasswordCiphertext: string,
-    tempPasswordIv: string,
-    tempPasswordTag: string,
-    expiresAt?: number | null,
-    createdAt?: string | null,
-    updatedAt?: string | null,
-  } | null,
-};
-
-export type ListApsTempCredentialsQueryVariables = {
-  filter?: ModelApsTempCredentialFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsTempCredentialsQuery = {
-  listApsTempCredentials?:  {
-    __typename: "ModelApsTempCredentialConnection",
-    items:  Array< {
-      __typename: "ApsTempCredential",
-      id: string,
-      apsID: string,
-      registrantId: string,
-      email: string,
-      tempPasswordCiphertext: string,
-      tempPasswordIv: string,
-      tempPasswordTag: string,
-      expiresAt?: number | null,
-      createdAt?: string | null,
-      updatedAt?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserNoteQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserNoteQuery = {
-  getApsAppUserNote?:  {
-    __typename: "ApsAppUserNote",
-    id: string,
-    owner?: string | null,
-    userId: string,
-    user:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    note?: string | null,
-    sessionId?: string | null,
-    session?:  {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    } | null,
-    exhibitorId?: string | null,
-    exhibitor?:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null,
-    registrantId?: string | null,
-    registrant?:  {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    } | null,
-    profileId?: string | null,
-    profile?:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    companyId?: string | null,
-    company?:  {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserNotesId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserNotesQueryVariables = {
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserNotesQuery = {
-  listApsAppUserNotes?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserExhibitorViewQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserExhibitorViewQuery = {
-  getApsAppUserExhibitorView?:  {
-    __typename: "ApsAppUserExhibitorView",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    viewKey: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSExhibitorViewsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserExhibitorViewsQueryVariables = {
-  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserExhibitorViewsQuery = {
-  listApsAppUserExhibitorViews?:  {
-    __typename: "ModelApsAppUserExhibitorViewConnection",
-    items:  Array< {
-      __typename: "ApsAppUserExhibitorView",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      viewKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorViewsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserPassportStampQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserPassportStampQuery = {
-  getApsAppUserPassportStamp?:  {
-    __typename: "ApsAppUserPassportStamp",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    stampKey: string,
-    scannedAt: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSPassportStampsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserPassportStampsQueryVariables = {
-  filter?: ModelApsAppUserPassportStampFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserPassportStampsQuery = {
-  listApsAppUserPassportStamps?:  {
-    __typename: "ModelApsAppUserPassportStampConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPassportStamp",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      stampKey: string,
-      scannedAt: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPassportStampsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserFavoriteExhibitorQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserFavoriteExhibitorQuery = {
-  getApsAppUserFavoriteExhibitor?:  {
-    __typename: "ApsAppUserFavoriteExhibitor",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    favoriteKey: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSFavoriteExhibitorsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserFavoriteExhibitorsQueryVariables = {
-  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserFavoriteExhibitorsQuery = {
-  listApsAppUserFavoriteExhibitors?:  {
-    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteExhibitor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserFavoriteSpeakerQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserFavoriteSpeakerQuery = {
-  getApsAppUserFavoriteSpeaker?:  {
-    __typename: "ApsAppUserFavoriteSpeaker",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    speakerId: string,
-    speaker:  {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSSpeakersId?: string | null,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    favoriteKey: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSFavoriteSpeakersId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserFavoriteSpeakersQueryVariables = {
-  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserFavoriteSpeakersQuery = {
-  listApsAppUserFavoriteSpeakers?:  {
-    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSpeaker",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      speakerId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserFavoriteSponsorQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserFavoriteSponsorQuery = {
-  getApsAppUserFavoriteSponsor?:  {
-    __typename: "ApsAppUserFavoriteSponsor",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    sponsorId: string,
-    sponsor:  {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    favoriteKey: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSFavoriteSponsorsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserFavoriteSponsorsQueryVariables = {
-  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserFavoriteSponsorsQuery = {
-  listApsAppUserFavoriteSponsors?:  {
-    __typename: "ModelApsAppUserFavoriteSponsorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSponsor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sponsorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSponsorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserFavoriteSessionQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserFavoriteSessionQuery = {
-  getApsAppUserFavoriteSession?:  {
-    __typename: "ApsAppUserFavoriteSession",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    sessionId: string,
-    session:  {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    favoriteKey: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSFavoriteSessionsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserFavoriteSessionsQueryVariables = {
-  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserFavoriteSessionsQuery = {
-  listApsAppUserFavoriteSessions?:  {
-    __typename: "ModelApsAppUserFavoriteSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSession",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sessionId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSessionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserFavoriteContactQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserFavoriteContactQuery = {
-  getApsAppUserFavoriteContact?:  {
-    __typename: "ApsAppUserFavoriteContact",
-    id: string,
-    owner?: string | null,
-    userProfileId: string,
-    userProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    contactProfileId: string,
-    contactProfile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    favoriteKey: string,
-    createdAt: string,
-    updatedAt: string,
-    aPSFavoriteContactsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserFavoriteContactsQueryVariables = {
-  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserFavoriteContactsQuery = {
-  listApsAppUserFavoriteContacts?:  {
-    __typename: "ModelApsAppUserFavoriteContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteContact",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      contactProfileId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsContactRequestQueryVariables = {
-  id: string,
-};
-
-export type GetApsContactRequestQuery = {
-  getApsContactRequest?:  {
-    __typename: "ApsContactRequest",
-    id: string,
-    eventId: string,
-    requestKey: string,
-    userAId: string,
-    userBId: string,
-    owners: Array< string >,
-    requestedByUserId: string,
-    status: string,
-    introMessage?: string | null,
-    introSentAt?: string | null,
-    introDeliveredAt?: string | null,
-    acceptedAt?: string | null,
-    declinedAt?: string | null,
-    blockedAt?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsContactRequestsQueryVariables = {
-  filter?: ModelApsContactRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsContactRequestsQuery = {
-  listApsContactRequests?:  {
-    __typename: "ModelApsContactRequestConnection",
-    items:  Array< {
-      __typename: "ApsContactRequest",
-      id: string,
-      eventId: string,
-      requestKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      requestedByUserId: string,
-      status: string,
-      introMessage?: string | null,
-      introSentAt?: string | null,
-      introDeliveredAt?: string | null,
-      acceptedAt?: string | null,
-      declinedAt?: string | null,
-      blockedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsDmThreadQueryVariables = {
-  id: string,
-};
-
-export type GetApsDmThreadQuery = {
-  getApsDmThread?:  {
-    __typename: "ApsDmThread",
-    id: string,
-    eventId: string,
-    dmKey: string,
-    userAId: string,
-    userBId: string,
-    owners: Array< string >,
-    participantStates?:  {
-      __typename: "ModelApsDmParticipantStateConnection",
-      nextToken?: string | null,
-    } | null,
-    messages?:  {
-      __typename: "ModelApsDmMessageConnection",
-      nextToken?: string | null,
-    } | null,
-    lastMessageAt?: string | null,
-    lastMessagePreview?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsDmThreadsQueryVariables = {
-  filter?: ModelApsDmThreadFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsDmThreadsQuery = {
-  listApsDmThreads?:  {
-    __typename: "ModelApsDmThreadConnection",
-    items:  Array< {
-      __typename: "ApsDmThread",
-      id: string,
-      eventId: string,
-      dmKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      lastMessageAt?: string | null,
-      lastMessagePreview?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsDmParticipantStateQueryVariables = {
-  id: string,
-};
-
-export type GetApsDmParticipantStateQuery = {
-  getApsDmParticipantState?:  {
-    __typename: "ApsDmParticipantState",
-    id: string,
-    eventId: string,
-    threadId: string,
-    thread:  {
-      __typename: "ApsDmThread",
-      id: string,
-      eventId: string,
-      dmKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      lastMessageAt?: string | null,
-      lastMessagePreview?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    userId: string,
-    lastReadAt?: string | null,
-    unreadCount?: number | null,
-    lastMessageAt?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsDmParticipantStatesQueryVariables = {
-  filter?: ModelApsDmParticipantStateFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsDmParticipantStatesQuery = {
-  listApsDmParticipantStates?:  {
-    __typename: "ModelApsDmParticipantStateConnection",
-    items:  Array< {
-      __typename: "ApsDmParticipantState",
-      id: string,
-      eventId: string,
-      threadId: string,
-      userId: string,
-      lastReadAt?: string | null,
-      unreadCount?: number | null,
-      lastMessageAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsDmMessageQueryVariables = {
-  id: string,
-};
-
-export type GetApsDmMessageQuery = {
-  getApsDmMessage?:  {
-    __typename: "ApsDmMessage",
-    id: string,
-    eventId: string,
-    threadId: string,
-    thread:  {
-      __typename: "ApsDmThread",
-      id: string,
-      eventId: string,
-      dmKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      lastMessageAt?: string | null,
-      lastMessagePreview?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    senderUserId: string,
-    sender:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    owners: Array< string >,
-    type?: string | null,
-    body?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsDmMessagesQueryVariables = {
-  filter?: ModelApsDmMessageFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsDmMessagesQuery = {
-  listApsDmMessages?:  {
-    __typename: "ModelApsDmMessageConnection",
-    items:  Array< {
-      __typename: "ApsDmMessage",
-      id: string,
-      eventId: string,
-      threadId: string,
-      senderUserId: string,
-      owners: Array< string >,
-      type?: string | null,
-      body?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAdminAnnouncementQueryVariables = {
-  id: string,
-};
-
-export type GetApsAdminAnnouncementQuery = {
-  getApsAdminAnnouncement?:  {
-    __typename: "ApsAdminAnnouncement",
-    id: string,
-    eventId: string,
-    title?: string | null,
-    body: string,
-    deepLink?: string | null,
-    scheduledAt?: string | null,
-    publishedAt?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsAdminAnnouncementsQueryVariables = {
-  filter?: ModelApsAdminAnnouncementFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAdminAnnouncementsQuery = {
-  listApsAdminAnnouncements?:  {
-    __typename: "ModelApsAdminAnnouncementConnection",
-    items:  Array< {
-      __typename: "ApsAdminAnnouncement",
-      id: string,
-      eventId: string,
-      title?: string | null,
-      body: string,
-      deepLink?: string | null,
-      scheduledAt?: string | null,
-      publishedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsUserEngageStateQueryVariables = {
-  id: string,
-};
-
-export type GetApsUserEngageStateQuery = {
-  getApsUserEngageState?:  {
-    __typename: "ApsUserEngageState",
-    id: string,
-    eventId: string,
-    userId: string,
-    lastSeenAnnouncementAt?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsUserEngageStatesQueryVariables = {
-  filter?: ModelApsUserEngageStateFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsUserEngageStatesQuery = {
-  listApsUserEngageStates?:  {
-    __typename: "ModelApsUserEngageStateConnection",
-    items:  Array< {
-      __typename: "ApsUserEngageState",
-      id: string,
-      eventId: string,
-      userId: string,
-      lastSeenAnnouncementAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsPushTokenQueryVariables = {
-  id: string,
-};
-
-export type GetApsPushTokenQuery = {
-  getApsPushToken?:  {
-    __typename: "ApsPushToken",
-    id: string,
-    userId: string,
-    token: string,
-    platform?: string | null,
-    updatedAt: string,
-    createdAt: string,
-  } | null,
-};
-
-export type ListApsPushTokensQueryVariables = {
-  filter?: ModelApsPushTokenFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsPushTokensQuery = {
-  listApsPushTokens?:  {
-    __typename: "ModelApsPushTokenConnection",
-    items:  Array< {
-      __typename: "ApsPushToken",
-      id: string,
-      userId: string,
-      token: string,
-      platform?: string | null,
-      updatedAt: string,
-      createdAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppFeedbackQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppFeedbackQuery = {
-  getApsAppFeedback?:  {
-    __typename: "ApsAppFeedback",
-    id: string,
-    owner?: string | null,
-    userId: string,
-    eventId: string,
-    message: string,
-    imageKeys?: Array< string | null > | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsAppFeedbacksQueryVariables = {
-  filter?: ModelApsAppFeedbackFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppFeedbacksQuery = {
-  listApsAppFeedbacks?:  {
-    __typename: "ModelApsAppFeedbackConnection",
-    items:  Array< {
-      __typename: "ApsAppFeedback",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      eventId: string,
-      message: string,
-      imageKeys?: Array< string | null > | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsTempCredentialsByApsIDAndCreatedAtQueryVariables = {
-  apsID: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsTempCredentialFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsTempCredentialsByApsIDAndCreatedAtQuery = {
-  apsTempCredentialsByApsIDAndCreatedAt?:  {
-    __typename: "ModelApsTempCredentialConnection",
-    items:  Array< {
-      __typename: "ApsTempCredential",
-      id: string,
-      apsID: string,
-      registrantId: string,
-      email: string,
-      tempPasswordCiphertext: string,
-      tempPasswordIv: string,
-      tempPasswordTag: string,
-      expiresAt?: number | null,
-      createdAt?: string | null,
-      updatedAt?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsTempCredentialsByRegistrantIdAndCreatedAtQueryVariables = {
-  registrantId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsTempCredentialFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsTempCredentialsByRegistrantIdAndCreatedAtQuery = {
-  apsTempCredentialsByRegistrantIdAndCreatedAt?:  {
-    __typename: "ModelApsTempCredentialConnection",
-    items:  Array< {
-      __typename: "ApsTempCredential",
-      id: string,
-      apsID: string,
-      registrantId: string,
-      email: string,
-      tempPasswordCiphertext: string,
-      tempPasswordIv: string,
-      tempPasswordTag: string,
-      expiresAt?: number | null,
-      createdAt?: string | null,
-      updatedAt?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserNotesByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserNotesByUserIdQuery = {
-  apsAppUserNotesByUserId?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserNotesBySessionIdQueryVariables = {
-  sessionId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserNotesBySessionIdQuery = {
-  apsAppUserNotesBySessionId?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserNotesByExhibitorIdQueryVariables = {
-  exhibitorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserNotesByExhibitorIdQuery = {
-  apsAppUserNotesByExhibitorId?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserNotesByRegistrantIdQueryVariables = {
-  registrantId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserNotesByRegistrantIdQuery = {
-  apsAppUserNotesByRegistrantId?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserNotesByProfileIdQueryVariables = {
-  profileId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserNotesByProfileIdQuery = {
-  apsAppUserNotesByProfileId?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserNotesByCompanyIdQueryVariables = {
-  companyId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserNoteFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserNotesByCompanyIdQuery = {
-  apsAppUserNotesByCompanyId?:  {
-    __typename: "ModelApsAppUserNoteConnection",
-    items:  Array< {
-      __typename: "ApsAppUserNote",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      note?: string | null,
-      sessionId?: string | null,
-      exhibitorId?: string | null,
-      registrantId?: string | null,
-      profileId?: string | null,
-      companyId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserNotesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserExhibitorViewsByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserExhibitorViewsByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserExhibitorViewConnection",
-    items:  Array< {
-      __typename: "ApsAppUserExhibitorView",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      viewKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorViewsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAtQueryVariables = {
-  exhibitorId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserExhibitorViewsByExhibitorIdAndCreatedAtQuery = {
-  apsAppUserExhibitorViewsByExhibitorIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserExhibitorViewConnection",
-    items:  Array< {
-      __typename: "ApsAppUserExhibitorView",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      viewKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorViewsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserExhibitorViewsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserExhibitorViewsByEventIdAndCreatedAtQuery = {
-  apsAppUserExhibitorViewsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserExhibitorViewConnection",
-    items:  Array< {
-      __typename: "ApsAppUserExhibitorView",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      viewKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorViewsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserExhibitorViewsByViewKeyQueryVariables = {
-  viewKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserExhibitorViewFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserExhibitorViewsByViewKeyQuery = {
-  apsAppUserExhibitorViewsByViewKey?:  {
-    __typename: "ModelApsAppUserExhibitorViewConnection",
-    items:  Array< {
-      __typename: "ApsAppUserExhibitorView",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      viewKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorViewsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserPassportStampsByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserPassportStampFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPassportStampsByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserPassportStampsByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserPassportStampConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPassportStamp",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      stampKey: string,
-      scannedAt: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPassportStampsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserPassportStampsByExhibitorIdAndCreatedAtQueryVariables = {
-  exhibitorId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserPassportStampFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPassportStampsByExhibitorIdAndCreatedAtQuery = {
-  apsAppUserPassportStampsByExhibitorIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserPassportStampConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPassportStamp",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      stampKey: string,
-      scannedAt: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPassportStampsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserPassportStampsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserPassportStampFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPassportStampsByEventIdAndCreatedAtQuery = {
-  apsAppUserPassportStampsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserPassportStampConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPassportStamp",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      stampKey: string,
-      scannedAt: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPassportStampsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserPassportStampsByStampKeyQueryVariables = {
-  stampKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserPassportStampFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPassportStampsByStampKeyQuery = {
-  apsAppUserPassportStampsByStampKey?:  {
-    __typename: "ModelApsAppUserPassportStampConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPassportStamp",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      stampKey: string,
-      scannedAt: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPassportStampsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserFavoriteExhibitorsByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteExhibitor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByExhibitorIdAndCreatedAtQueryVariables = {
-  exhibitorId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByExhibitorIdAndCreatedAtQuery = {
-  apsAppUserFavoriteExhibitorsByExhibitorIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteExhibitor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByEventIdAndCreatedAtQuery = {
-  apsAppUserFavoriteExhibitorsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteExhibitor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByFavoriteKeyQueryVariables = {
-  favoriteKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteExhibitorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteExhibitorsByFavoriteKeyQuery = {
-  apsAppUserFavoriteExhibitorsByFavoriteKey?:  {
-    __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteExhibitor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      exhibitorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSpeaker",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      speakerId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSpeakersBySpeakerIdAndCreatedAtQueryVariables = {
-  speakerId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSpeakersBySpeakerIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSpeakersBySpeakerIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSpeaker",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      speakerId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSpeakersByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSpeakersByEventIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSpeakersByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSpeaker",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      speakerId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSpeakersByFavoriteKeyQueryVariables = {
-  favoriteKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSpeakersByFavoriteKeyQuery = {
-  apsAppUserFavoriteSpeakersByFavoriteKey?:  {
-    __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSpeaker",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      speakerId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSponsorsByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSponsorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSponsor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sponsorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSponsorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSponsorsBySponsorIdAndCreatedAtQueryVariables = {
-  sponsorId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSponsorsBySponsorIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSponsorsBySponsorIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSponsorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSponsor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sponsorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSponsorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSponsorsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSponsorsByEventIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSponsorsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSponsorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSponsor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sponsorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSponsorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSponsorsByFavoriteKeyQueryVariables = {
-  favoriteKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSponsorsByFavoriteKeyQuery = {
-  apsAppUserFavoriteSponsorsByFavoriteKey?:  {
-    __typename: "ModelApsAppUserFavoriteSponsorConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSponsor",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sponsorId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSponsorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSessionsByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSessionsByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSession",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sessionId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSessionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSessionsBySessionIdAndCreatedAtQueryVariables = {
-  sessionId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSessionsBySessionIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSessionsBySessionIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSession",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sessionId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSessionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSessionsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSessionsByEventIdAndCreatedAtQuery = {
-  apsAppUserFavoriteSessionsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSession",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sessionId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSessionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteSessionsByFavoriteKeyQueryVariables = {
-  favoriteKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteSessionsByFavoriteKeyQuery = {
-  apsAppUserFavoriteSessionsByFavoriteKey?:  {
-    __typename: "ModelApsAppUserFavoriteSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteSession",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      sessionId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteSessionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteContactsByUserProfileIdAndCreatedAtQueryVariables = {
-  userProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteContactsByUserProfileIdAndCreatedAtQuery = {
-  apsAppUserFavoriteContactsByUserProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteContact",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      contactProfileId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteContactsByContactProfileIdAndCreatedAtQueryVariables = {
-  contactProfileId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteContactsByContactProfileIdAndCreatedAtQuery = {
-  apsAppUserFavoriteContactsByContactProfileIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteContact",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      contactProfileId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteContactsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteContactsByEventIdAndCreatedAtQuery = {
-  apsAppUserFavoriteContactsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppUserFavoriteContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteContact",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      contactProfileId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserFavoriteContactsByFavoriteKeyQueryVariables = {
-  favoriteKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFavoriteContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserFavoriteContactsByFavoriteKeyQuery = {
-  apsAppUserFavoriteContactsByFavoriteKey?:  {
-    __typename: "ModelApsAppUserFavoriteContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserFavoriteContact",
-      id: string,
-      owner?: string | null,
-      userProfileId: string,
-      contactProfileId: string,
-      eventId: string,
-      favoriteKey: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSFavoriteContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsContactRequestsByRequestKeyQueryVariables = {
-  requestKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsContactRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsContactRequestsByRequestKeyQuery = {
-  apsContactRequestsByRequestKey?:  {
-    __typename: "ModelApsContactRequestConnection",
-    items:  Array< {
-      __typename: "ApsContactRequest",
-      id: string,
-      eventId: string,
-      requestKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      requestedByUserId: string,
-      status: string,
-      introMessage?: string | null,
-      introSentAt?: string | null,
-      introDeliveredAt?: string | null,
-      acceptedAt?: string | null,
-      declinedAt?: string | null,
-      blockedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsContactRequestsByRequestedByUserIdAndCreatedAtQueryVariables = {
-  requestedByUserId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsContactRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsContactRequestsByRequestedByUserIdAndCreatedAtQuery = {
-  apsContactRequestsByRequestedByUserIdAndCreatedAt?:  {
-    __typename: "ModelApsContactRequestConnection",
-    items:  Array< {
-      __typename: "ApsContactRequest",
-      id: string,
-      eventId: string,
-      requestKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      requestedByUserId: string,
-      status: string,
-      introMessage?: string | null,
-      introSentAt?: string | null,
-      introDeliveredAt?: string | null,
-      acceptedAt?: string | null,
-      declinedAt?: string | null,
-      blockedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsContactRequestsByStatusAndUpdatedAtQueryVariables = {
-  status: string,
-  updatedAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsContactRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsContactRequestsByStatusAndUpdatedAtQuery = {
-  apsContactRequestsByStatusAndUpdatedAt?:  {
-    __typename: "ModelApsContactRequestConnection",
-    items:  Array< {
-      __typename: "ApsContactRequest",
-      id: string,
-      eventId: string,
-      requestKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      requestedByUserId: string,
-      status: string,
-      introMessage?: string | null,
-      introSentAt?: string | null,
-      introDeliveredAt?: string | null,
-      acceptedAt?: string | null,
-      declinedAt?: string | null,
-      blockedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsDmThreadsByDmKeyQueryVariables = {
-  dmKey: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsDmThreadFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsDmThreadsByDmKeyQuery = {
-  apsDmThreadsByDmKey?:  {
-    __typename: "ModelApsDmThreadConnection",
-    items:  Array< {
-      __typename: "ApsDmThread",
-      id: string,
-      eventId: string,
-      dmKey: string,
-      userAId: string,
-      userBId: string,
-      owners: Array< string >,
-      lastMessageAt?: string | null,
-      lastMessagePreview?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsDmParticipantStatesByThreadIdAndUserIdQueryVariables = {
-  threadId: string,
-  userId?: ModelIDKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsDmParticipantStateFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsDmParticipantStatesByThreadIdAndUserIdQuery = {
-  apsDmParticipantStatesByThreadIdAndUserId?:  {
-    __typename: "ModelApsDmParticipantStateConnection",
-    items:  Array< {
-      __typename: "ApsDmParticipantState",
-      id: string,
-      eventId: string,
-      threadId: string,
-      userId: string,
-      lastReadAt?: string | null,
-      unreadCount?: number | null,
-      lastMessageAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsDmParticipantStatesByUserIdAndLastMessageAtQueryVariables = {
-  userId: string,
-  lastMessageAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsDmParticipantStateFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsDmParticipantStatesByUserIdAndLastMessageAtQuery = {
-  apsDmParticipantStatesByUserIdAndLastMessageAt?:  {
-    __typename: "ModelApsDmParticipantStateConnection",
-    items:  Array< {
-      __typename: "ApsDmParticipantState",
-      id: string,
-      eventId: string,
-      threadId: string,
-      userId: string,
-      lastReadAt?: string | null,
-      unreadCount?: number | null,
-      lastMessageAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsDmMessagesByThreadIdAndCreatedAtQueryVariables = {
-  threadId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsDmMessageFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsDmMessagesByThreadIdAndCreatedAtQuery = {
-  apsDmMessagesByThreadIdAndCreatedAt?:  {
-    __typename: "ModelApsDmMessageConnection",
-    items:  Array< {
-      __typename: "ApsDmMessage",
-      id: string,
-      eventId: string,
-      threadId: string,
-      senderUserId: string,
-      owners: Array< string >,
-      type?: string | null,
-      body?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsDmMessagesBySenderUserIdAndCreatedAtQueryVariables = {
-  senderUserId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsDmMessageFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsDmMessagesBySenderUserIdAndCreatedAtQuery = {
-  apsDmMessagesBySenderUserIdAndCreatedAt?:  {
-    __typename: "ModelApsDmMessageConnection",
-    items:  Array< {
-      __typename: "ApsDmMessage",
-      id: string,
-      eventId: string,
-      threadId: string,
-      senderUserId: string,
-      owners: Array< string >,
-      type?: string | null,
-      body?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAdminAnnouncementsByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAdminAnnouncementFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAdminAnnouncementsByEventIdAndCreatedAtQuery = {
-  apsAdminAnnouncementsByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAdminAnnouncementConnection",
-    items:  Array< {
-      __typename: "ApsAdminAnnouncement",
-      id: string,
-      eventId: string,
-      title?: string | null,
-      body: string,
-      deepLink?: string | null,
-      scheduledAt?: string | null,
-      publishedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAdminAnnouncementsByEventIdAndScheduledAtQueryVariables = {
-  eventId: string,
-  scheduledAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAdminAnnouncementFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAdminAnnouncementsByEventIdAndScheduledAtQuery = {
-  apsAdminAnnouncementsByEventIdAndScheduledAt?:  {
-    __typename: "ModelApsAdminAnnouncementConnection",
-    items:  Array< {
-      __typename: "ApsAdminAnnouncement",
-      id: string,
-      eventId: string,
-      title?: string | null,
-      body: string,
-      deepLink?: string | null,
-      scheduledAt?: string | null,
-      publishedAt?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsPushTokensByUserIdAndUpdatedAtQueryVariables = {
-  userId: string,
-  updatedAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsPushTokenFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsPushTokensByUserIdAndUpdatedAtQuery = {
-  apsPushTokensByUserIdAndUpdatedAt?:  {
-    __typename: "ModelApsPushTokenConnection",
-    items:  Array< {
-      __typename: "ApsPushToken",
-      id: string,
-      userId: string,
-      token: string,
-      platform?: string | null,
-      updatedAt: string,
-      createdAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppFeedbacksByUserIdAndCreatedAtQueryVariables = {
-  userId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppFeedbackFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppFeedbacksByUserIdAndCreatedAtQuery = {
-  apsAppFeedbacksByUserIdAndCreatedAt?:  {
-    __typename: "ModelApsAppFeedbackConnection",
-    items:  Array< {
-      __typename: "ApsAppFeedback",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      eventId: string,
-      message: string,
-      imageKeys?: Array< string | null > | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppFeedbacksByEventIdAndCreatedAtQueryVariables = {
-  eventId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppFeedbackFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppFeedbacksByEventIdAndCreatedAtQuery = {
-  apsAppFeedbacksByEventIdAndCreatedAt?:  {
-    __typename: "ModelApsAppFeedbackConnection",
-    items:  Array< {
-      __typename: "ApsAppFeedback",
-      id: string,
-      owner?: string | null,
-      userId: string,
-      eventId: string,
-      message: string,
-      imageKeys?: Array< string | null > | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSQueryVariables = {
-  id: string,
-};
-
-export type GetAPSQuery = {
-  getAPS?:  {
-    __typename: "APS",
-    id: string,
-    year: string,
-    codes?:  {
-      __typename: "ModelAPSCodeConnection",
-      nextToken?: string | null,
-    } | null,
-    agenda?:  {
-      __typename: "ApsAgenda",
-      id: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    startDate?: string | null,
-    endDate?: string | null,
-    location?: string | null,
-    address?: string | null,
-    city?: string | null,
-    state?: string | null,
-    zip?: string | null,
-    website?: string | null,
-    Registrants?:  {
-      __typename: "ModelApsRegistrantConnection",
-      nextToken?: string | null,
-    } | null,
-    Sponsors?:  {
-      __typename: "ModelApsSponsorConnection",
-      nextToken?: string | null,
-    } | null,
-    Speakers?:  {
-      __typename: "ModelAPSSpeakerConnection",
-      nextToken?: string | null,
-    } | null,
-    companies?:  {
-      __typename: "ModelAPSCompanyEventsConnection",
-      nextToken?: string | null,
-    } | null,
-    photos?:  {
-      __typename: "ModelApsAppUserPhotoConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitors?:  {
-      __typename: "ModelApsAppExhibitorProfileConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorPromotions?:  {
-      __typename: "ModelApsAppExhibitorPromotionConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorDeals?:  {
-      __typename: "ModelApsAppExhibitorDealConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorPhotos?:  {
-      __typename: "ModelApsAppExhibitorPhotoConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorHandouts?:  {
-      __typename: "ModelApsAppExhibitorHandoutConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteExhibitors?:  {
-      __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteSpeakers?:  {
-      __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteSponsors?:  {
-      __typename: "ModelApsAppUserFavoriteSponsorConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteSessions?:  {
-      __typename: "ModelApsAppUserFavoriteSessionConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteContacts?:  {
-      __typename: "ModelApsAppUserFavoriteContactConnection",
-      nextToken?: string | null,
-    } | null,
-    passportStamps?:  {
-      __typename: "ModelApsAppUserPassportStampConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorViews?:  {
-      __typename: "ModelApsAppUserExhibitorViewConnection",
-      nextToken?: string | null,
-    } | null,
-    addOns?:  {
-      __typename: "ModelApsAddOnConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-    aPSAgendaId?: string | null,
-  } | null,
-};
-
-export type ListAPSQueryVariables = {
-  filter?: ModelAPSFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSQuery = {
-  listAPS?:  {
-    __typename: "ModelAPSConnection",
-    items:  Array< {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSCodeQueryVariables = {
-  id: string,
-};
-
-export type GetAPSCodeQuery = {
-  getAPSCode?:  {
-    __typename: "APSCode",
-    id: string,
-    code: string,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    limit?: number | null,
-    used: number,
-    createdAt: string,
-    updatedAt: string,
-    aPSCodesId?: string | null,
-  } | null,
-};
-
-export type ListAPSCodesQueryVariables = {
-  filter?: ModelAPSCodeFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSCodesQuery = {
-  listAPSCodes?:  {
-    __typename: "ModelAPSCodeConnection",
-    items:  Array< {
-      __typename: "APSCode",
-      id: string,
-      code: string,
-      eventId: string,
-      limit?: number | null,
-      used: number,
-      createdAt: string,
-      updatedAt: string,
-      aPSCodesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type APSCodesByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelAPSCodeFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type APSCodesByEventIdQuery = {
-  aPSCodesByEventId?:  {
-    __typename: "ModelAPSCodeConnection",
-    items:  Array< {
-      __typename: "APSCode",
-      id: string,
-      code: string,
-      eventId: string,
-      limit?: number | null,
-      used: number,
-      createdAt: string,
-      updatedAt: string,
-      aPSCodesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSBoardQueryVariables = {
-  id: string,
-};
-
-export type GetAPSBoardQuery = {
-  getAPSBoard?:  {
-    __typename: "APSBoard",
-    id: string,
-    name: string,
-    title?: string | null,
-    bio?: string | null,
-    company: string,
-    email: string,
-    linkedin?: string | null,
-    profilePic?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListAPSBoardsQueryVariables = {
-  filter?: ModelAPSBoardFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSBoardsQuery = {
-  listAPSBoards?:  {
-    __typename: "ModelAPSBoardConnection",
-    items:  Array< {
-      __typename: "APSBoard",
-      id: string,
-      name: string,
-      title?: string | null,
-      bio?: string | null,
-      company: string,
-      email: string,
-      linkedin?: string | null,
-      profilePic?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAgendaQueryVariables = {
-  id: string,
-};
-
-export type GetApsAgendaQuery = {
-  getApsAgenda?:  {
-    __typename: "ApsAgenda",
-    id: string,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    items?:  {
-      __typename: "ModelApsAppSessionConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsAgendaQueryVariables = {
-  filter?: ModelApsAgendaFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAgendaQuery = {
-  listApsAgenda?:  {
-    __typename: "ModelApsAgendaConnection",
-    items:  Array< {
-      __typename: "ApsAgenda",
-      id: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAgendaByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAgendaFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAgendaByEventIdQuery = {
-  apsAgendaByEventId?:  {
-    __typename: "ModelApsAgendaConnection",
-    items:  Array< {
-      __typename: "ApsAgenda",
-      id: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsRegistrantQueryVariables = {
-  id: string,
-};
-
-export type GetApsRegistrantQuery = {
-  getApsRegistrant?:  {
-    __typename: "ApsRegistrant",
-    id: string,
-    apsID: string,
-    aps:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    firstName?: string | null,
-    lastName?: string | null,
-    email: string,
-    phone?: string | null,
-    companyId?: string | null,
-    company?:  {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    jobTitle?: string | null,
-    attendeeType: RegistrantType,
-    termsAccepted?: boolean | null,
-    interests?: Array< string | null > | null,
-    otherInterest?: string | null,
-    buyerQuestion?: string | null,
-    packagingChallenge?: string | null,
-    certification?: string | null,
-    billingAddressFirstName?: string | null,
-    billingAddressLastName?: string | null,
-    billingAddressEmail?: string | null,
-    billingAddressPhone?: string | null,
-    billingAddressStreet?: string | null,
-    billingAddressCity?: string | null,
-    billingAddressState?: string | null,
-    billingAddressZip?: string | null,
-    billingAddressCountry?: string | null,
-    sameAsAttendee?: boolean | null,
-    speakerTopic?: string | null,
-    learningObjectives?: string | null,
-    totalAmount?: number | null,
-    discountCode?: string | null,
-    status: RegistrantStatus,
-    paymentConfirmation?: string | null,
-    registrationEmailSent?: boolean | null,
-    registrationEmailSentDate?: string | null,
-    registrationEmailReceived?: boolean | null,
-    registrationEmailReceivedDate?: string | null,
-    welcomeEmailSent?: boolean | null,
-    welcomeEmailSentDate?: string | null,
-    welcomeEmailReceived?: boolean | null,
-    welcomeEmailReceivedDate?: string | null,
-    paymentMethod?: string | null,
-    paymentLast4?: string | null,
-    approvedAt?: string | null,
-    headshot?: string | null,
-    presentation?: string | null,
-    presentationTitle?: string | null,
-    presentationSummary?: string | null,
-    bio?: string | null,
-    invoice?: string | null,
-    seatingChartRegistrant?:  {
-      __typename: "ApsSeatingChartRegistrant",
-      id: string,
-      category?: string | null,
-      firstName?: string | null,
-      lastName?: string | null,
-      company?: string | null,
-      email?: string | null,
-      role?: string | null,
-      tableNumber?: number | null,
-      notes?: string | null,
-      seatingChartID: string,
-      registrantID: string,
-      createdAt: string,
-      updatedAt: string,
-      apsSeatingChartRegistrantsId?: string | null,
-    } | null,
-    addOnRequests?:  {
-      __typename: "ModelRegistrantAddOnRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    appUserId?: string | null,
-    appUser?:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    notes?:  {
-      __typename: "ModelApsAppUserNoteConnection",
-      nextToken?: string | null,
-    } | null,
-    qrCode?: string | null,
-    createdAt: string,
-    updatedAt: string,
-    aPSRegistrantsId?: string | null,
-    aPSCompanyRegistrantsId?: string | null,
-    apsRegistrantSeatingChartRegistrantId?: string | null,
-  } | null,
-};
-
-export type ListApsRegistrantsQueryVariables = {
-  filter?: ModelApsRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsRegistrantsQuery = {
-  listApsRegistrants?:  {
-    __typename: "ModelApsRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsRegistrantsByApsIDQueryVariables = {
-  apsID: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsRegistrantsByApsIDQuery = {
-  apsRegistrantsByApsID?:  {
-    __typename: "ModelApsRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsRegistrantsByEmailQueryVariables = {
-  email: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsRegistrantsByEmailQuery = {
-  apsRegistrantsByEmail?:  {
-    __typename: "ModelApsRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsRegistrantsByCompanyIdQueryVariables = {
-  companyId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsRegistrantsByCompanyIdQuery = {
-  apsRegistrantsByCompanyId?:  {
-    __typename: "ModelApsRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserQuery = {
-  getApsAppUser?:  {
-    __typename: "ApsAppUser",
-    id: string,
-    registrantId: string,
-    registrant:  {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    },
-    photos?:  {
-      __typename: "ModelApsAppUserPhotoConnection",
-      nextToken?: string | null,
-    } | null,
-    sessionQuestions?:  {
-      __typename: "ModelApsAppSessionQuestionConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorDeals?:  {
-      __typename: "ModelApsAppExhibitorDealConnection",
-      nextToken?: string | null,
-    } | null,
-    contacts?:  {
-      __typename: "ModelApsAppUserContactConnection",
-      nextToken?: string | null,
-    } | null,
-    notes?:  {
-      __typename: "ModelApsAppUserNoteConnection",
-      nextToken?: string | null,
-    } | null,
-    leads?:  {
-      __typename: "ModelApsAppUserLeadConnection",
-      nextToken?: string | null,
-    } | null,
-    sentDmMessages?:  {
-      __typename: "ModelApsDmMessageConnection",
-      nextToken?: string | null,
-    } | null,
-    profileId?: string | null,
-    profile?:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsAppUsersQueryVariables = {
-  filter?: ModelApsAppUserFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUsersQuery = {
-  listApsAppUsers?:  {
-    __typename: "ModelApsAppUserConnection",
-    items:  Array< {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUsersByRegistrantIdQueryVariables = {
-  registrantId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUsersByRegistrantIdQuery = {
-  apsAppUsersByRegistrantId?:  {
-    __typename: "ModelApsAppUserConnection",
-    items:  Array< {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserContactQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserContactQuery = {
-  getApsAppUserContact?:  {
-    __typename: "ApsAppUserContact",
-    id: string,
-    userId: string,
-    user:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    favorite?: boolean | null,
-    contact:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    contactId: string,
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserContactsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserContactsQueryVariables = {
-  filter?: ModelApsAppUserContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserContactsQuery = {
-  listApsAppUserContacts?:  {
-    __typename: "ModelApsAppUserContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserContact",
-      id: string,
-      userId: string,
-      favorite?: boolean | null,
-      contactId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserContactsByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserContactsByUserIdQuery = {
-  apsAppUserContactsByUserId?:  {
-    __typename: "ModelApsAppUserContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserContact",
-      id: string,
-      userId: string,
-      favorite?: boolean | null,
-      contactId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserContactsByContactIdQueryVariables = {
-  contactId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserContactsByContactIdQuery = {
-  apsAppUserContactsByContactId?:  {
-    __typename: "ModelApsAppUserContactConnection",
-    items:  Array< {
-      __typename: "ApsAppUserContact",
-      id: string,
-      userId: string,
-      favorite?: boolean | null,
-      contactId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserContactsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserLeadQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserLeadQuery = {
-  getApsAppUserLead?:  {
-    __typename: "ApsAppUserLead",
-    id: string,
-    userId: string,
-    user:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    favorite?: boolean | null,
-    contact:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    contactId: string,
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserLeadsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserLeadsQueryVariables = {
-  filter?: ModelApsAppUserLeadFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserLeadsQuery = {
-  listApsAppUserLeads?:  {
-    __typename: "ModelApsAppUserLeadConnection",
-    items:  Array< {
-      __typename: "ApsAppUserLead",
-      id: string,
-      userId: string,
-      favorite?: boolean | null,
-      contactId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserLeadsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserLeadsByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserLeadFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserLeadsByUserIdQuery = {
-  apsAppUserLeadsByUserId?:  {
-    __typename: "ModelApsAppUserLeadConnection",
-    items:  Array< {
-      __typename: "ApsAppUserLead",
-      id: string,
-      userId: string,
-      favorite?: boolean | null,
-      contactId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserLeadsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserLeadsByContactIdQueryVariables = {
-  contactId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserLeadFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserLeadsByContactIdQuery = {
-  apsAppUserLeadsByContactId?:  {
-    __typename: "ModelApsAppUserLeadConnection",
-    items:  Array< {
-      __typename: "ApsAppUserLead",
-      id: string,
-      userId: string,
-      favorite?: boolean | null,
-      contactId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserLeadsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserProfileQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserProfileQuery = {
-  getApsAppUserProfile?:  {
-    __typename: "ApsAppUserProfile",
-    id: string,
-    userId: string,
-    user:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    firstName?: string | null,
-    lastName?: string | null,
-    email?: string | null,
-    phone?: string | null,
-    company?: string | null,
-    jobTitle?: string | null,
-    attendeeType?: RegistrantType | null,
-    quickTools?: Array< string | null > | null,
-    affiliates?:  {
-      __typename: "ModelProfileAffiliateConnection",
-      nextToken?: string | null,
-    } | null,
-    profilePicture?: string | null,
-    bio?: string | null,
-    linkedin?: string | null,
-    twitter?: string | null,
-    facebook?: string | null,
-    instagram?: string | null,
-    youtube?: string | null,
-    website?: Array< string | null > | null,
-    location?: string | null,
-    education?:  {
-      __typename: "ModelProfileEducationConnection",
-      nextToken?: string | null,
-    } | null,
-    interests?:  {
-      __typename: "ModelProfileInterestConnection",
-      nextToken?: string | null,
-    } | null,
-    resume?: string | null,
-    thinkificId?: number | null,
-    apcProgress?: number | null,
-    contacts?:  {
-      __typename: "ModelApsAppUserContactConnection",
-      nextToken?: string | null,
-    } | null,
-    leads?:  {
-      __typename: "ModelApsAppUserLeadConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteExhibitors?:  {
-      __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteSpeakers?:  {
-      __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteSponsors?:  {
-      __typename: "ModelApsAppUserFavoriteSponsorConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteSessions?:  {
-      __typename: "ModelApsAppUserFavoriteSessionConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteContacts?:  {
-      __typename: "ModelApsAppUserFavoriteContactConnection",
-      nextToken?: string | null,
-    } | null,
-    favoritedByProfiles?:  {
-      __typename: "ModelApsAppUserFavoriteContactConnection",
-      nextToken?: string | null,
-    } | null,
-    passportStamps?:  {
-      __typename: "ModelApsAppUserPassportStampConnection",
-      nextToken?: string | null,
-    } | null,
-    exhibitorViews?:  {
-      __typename: "ModelApsAppUserExhibitorViewConnection",
-      nextToken?: string | null,
-    } | null,
-    notes?:  {
-      __typename: "ModelApsAppUserNoteConnection",
-      nextToken?: string | null,
-    } | null,
-    speakerId?: string | null,
-    speaker?:  {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSSpeakersId?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsAppUserProfilesQueryVariables = {
-  filter?: ModelApsAppUserProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserProfilesQuery = {
-  listApsAppUserProfiles?:  {
-    __typename: "ModelApsAppUserProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserProfilesByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserProfilesByUserIdQuery = {
-  apsAppUserProfilesByUserId?:  {
-    __typename: "ModelApsAppUserProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserProfilesBySpeakerIdQueryVariables = {
-  speakerId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserProfilesBySpeakerIdQuery = {
-  apsAppUserProfilesBySpeakerId?:  {
-    __typename: "ModelApsAppUserProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetProfileAffiliateQueryVariables = {
-  id: string,
-};
-
-export type GetProfileAffiliateQuery = {
-  getProfileAffiliate?:  {
-    __typename: "ProfileAffiliate",
-    id: string,
-    profileId: string,
-    profile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    affiliate?: string | null,
-    role?: string | null,
-    startDate?: string | null,
-    endDate?: string | null,
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserProfileAffiliatesId?: string | null,
-  } | null,
-};
-
-export type ListProfileAffiliatesQueryVariables = {
-  filter?: ModelProfileAffiliateFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListProfileAffiliatesQuery = {
-  listProfileAffiliates?:  {
-    __typename: "ModelProfileAffiliateConnection",
-    items:  Array< {
-      __typename: "ProfileAffiliate",
-      id: string,
-      profileId: string,
-      affiliate?: string | null,
-      role?: string | null,
-      startDate?: string | null,
-      endDate?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserProfileAffiliatesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ProfileAffiliatesByProfileIdQueryVariables = {
-  profileId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelProfileAffiliateFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ProfileAffiliatesByProfileIdQuery = {
-  profileAffiliatesByProfileId?:  {
-    __typename: "ModelProfileAffiliateConnection",
-    items:  Array< {
-      __typename: "ProfileAffiliate",
-      id: string,
-      profileId: string,
-      affiliate?: string | null,
-      role?: string | null,
-      startDate?: string | null,
-      endDate?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserProfileAffiliatesId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetProfileEducationQueryVariables = {
-  id: string,
-};
-
-export type GetProfileEducationQuery = {
-  getProfileEducation?:  {
-    __typename: "ProfileEducation",
-    id: string,
-    profileId: string,
-    profile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    school?: string | null,
-    degree?: string | null,
-    fieldOfStudy?: string | null,
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserProfileEducationId?: string | null,
-  } | null,
-};
-
-export type ListProfileEducationsQueryVariables = {
-  filter?: ModelProfileEducationFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListProfileEducationsQuery = {
-  listProfileEducations?:  {
-    __typename: "ModelProfileEducationConnection",
-    items:  Array< {
-      __typename: "ProfileEducation",
-      id: string,
-      profileId: string,
-      school?: string | null,
-      degree?: string | null,
-      fieldOfStudy?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserProfileEducationId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ProfileEducationsByProfileIdQueryVariables = {
-  profileId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelProfileEducationFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ProfileEducationsByProfileIdQuery = {
-  profileEducationsByProfileId?:  {
-    __typename: "ModelProfileEducationConnection",
-    items:  Array< {
-      __typename: "ProfileEducation",
-      id: string,
-      profileId: string,
-      school?: string | null,
-      degree?: string | null,
-      fieldOfStudy?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserProfileEducationId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetProfileInterestQueryVariables = {
-  id: string,
-};
-
-export type GetProfileInterestQuery = {
-  getProfileInterest?:  {
-    __typename: "ProfileInterest",
-    id: string,
-    profileId: string,
-    profile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    interest?: string | null,
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserProfileInterestsId?: string | null,
-  } | null,
-};
-
-export type ListProfileInterestsQueryVariables = {
-  filter?: ModelProfileInterestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListProfileInterestsQuery = {
-  listProfileInterests?:  {
-    __typename: "ModelProfileInterestConnection",
-    items:  Array< {
-      __typename: "ProfileInterest",
-      id: string,
-      profileId: string,
-      interest?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserProfileInterestsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ProfileInterestsByProfileIdQueryVariables = {
-  profileId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelProfileInterestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ProfileInterestsByProfileIdQuery = {
-  profileInterestsByProfileId?:  {
-    __typename: "ModelProfileInterestConnection",
-    items:  Array< {
-      __typename: "ProfileInterest",
-      id: string,
-      profileId: string,
-      interest?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserProfileInterestsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppUserPhotoQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppUserPhotoQuery = {
-  getApsAppUserPhoto?:  {
-    __typename: "ApsAppUserPhoto",
-    id: string,
-    userId?: string | null,
-    user?:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    photo?: string | null,
-    caption?: string | null,
-    approved?: boolean | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-    aPSPhotosId?: string | null,
-    apsAppUserPhotosId?: string | null,
-  } | null,
-};
-
-export type ListApsAppUserPhotosQueryVariables = {
-  filter?: ModelApsAppUserPhotoFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppUserPhotosQuery = {
-  listApsAppUserPhotos?:  {
-    __typename: "ModelApsAppUserPhotoConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPhoto",
-      id: string,
-      userId?: string | null,
-      photo?: string | null,
-      caption?: string | null,
-      approved?: boolean | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPhotosId?: string | null,
-      apsAppUserPhotosId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserPhotosByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserPhotoFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPhotosByUserIdQuery = {
-  apsAppUserPhotosByUserId?:  {
-    __typename: "ModelApsAppUserPhotoConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPhoto",
-      id: string,
-      userId?: string | null,
-      photo?: string | null,
-      caption?: string | null,
-      approved?: boolean | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPhotosId?: string | null,
-      apsAppUserPhotosId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppUserPhotosByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppUserPhotoFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppUserPhotosByEventIdQuery = {
-  apsAppUserPhotosByEventId?:  {
-    __typename: "ModelApsAppUserPhotoConnection",
-    items:  Array< {
-      __typename: "ApsAppUserPhoto",
-      id: string,
-      userId?: string | null,
-      photo?: string | null,
-      caption?: string | null,
-      approved?: boolean | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSPhotosId?: string | null,
-      apsAppUserPhotosId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppSessionQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppSessionQuery = {
-  getApsAppSession?:  {
-    __typename: "ApsAppSession",
-    id: string,
-    title?: string | null,
-    date?: string | null,
-    startTime?: string | null,
-    endTime?: string | null,
-    location?: string | null,
-    description?: string | null,
-    embedUrl?: string | null,
-    agendaId?: string | null,
-    agenda?:  {
-      __typename: "ApsAgenda",
-      id: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    sessionQuestions?:  {
-      __typename: "ModelApsAppSessionQuestionConnection",
-      nextToken?: string | null,
-    } | null,
-    notes?:  {
-      __typename: "ModelApsAppUserNoteConnection",
-      nextToken?: string | null,
-    } | null,
-    speakers?:  {
-      __typename: "ModelSessionSpeakersConnection",
-      nextToken?: string | null,
-    } | null,
-    sponsors?:  {
-      __typename: "ModelSessionSponsorsConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteByUsers?:  {
-      __typename: "ModelApsAppUserFavoriteSessionConnection",
-      nextToken?: string | null,
-    } | null,
-    draft?: boolean | null,
-    createdAt: string,
-    updatedAt: string,
-    apsAgendaItemsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppSessionsQueryVariables = {
-  filter?: ModelApsAppSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppSessionsQuery = {
-  listApsAppSessions?:  {
-    __typename: "ModelApsAppSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppSessionsByAgendaIdQueryVariables = {
-  agendaId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppSessionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppSessionsByAgendaIdQuery = {
-  apsAppSessionsByAgendaId?:  {
-    __typename: "ModelApsAppSessionConnection",
-    items:  Array< {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppSessionQuestionQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppSessionQuestionQuery = {
-  getApsAppSessionQuestion?:  {
-    __typename: "ApsAppSessionQuestion",
-    id: string,
-    sessionId: string,
-    session:  {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    },
-    question?: string | null,
-    userId: string,
-    user:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    createdAt: string,
-    updatedAt: string,
-    apsAppUserSessionQuestionsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppSessionQuestionsQueryVariables = {
-  filter?: ModelApsAppSessionQuestionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppSessionQuestionsQuery = {
-  listApsAppSessionQuestions?:  {
-    __typename: "ModelApsAppSessionQuestionConnection",
-    items:  Array< {
-      __typename: "ApsAppSessionQuestion",
-      id: string,
-      sessionId: string,
-      question?: string | null,
-      userId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserSessionQuestionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppSessionQuestionsBySessionIdQueryVariables = {
-  sessionId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppSessionQuestionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppSessionQuestionsBySessionIdQuery = {
-  apsAppSessionQuestionsBySessionId?:  {
-    __typename: "ModelApsAppSessionQuestionConnection",
-    items:  Array< {
-      __typename: "ApsAppSessionQuestion",
-      id: string,
-      sessionId: string,
-      question?: string | null,
-      userId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserSessionQuestionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppSessionQuestionsByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppSessionQuestionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppSessionQuestionsByUserIdQuery = {
-  apsAppSessionQuestionsByUserId?:  {
-    __typename: "ModelApsAppSessionQuestionConnection",
-    items:  Array< {
-      __typename: "ApsAppSessionQuestion",
-      id: string,
-      sessionId: string,
-      question?: string | null,
-      userId: string,
-      createdAt: string,
-      updatedAt: string,
-      apsAppUserSessionQuestionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSSpeakerQueryVariables = {
-  id: string,
-};
-
-export type GetAPSSpeakerQuery = {
-  getAPSSpeaker?:  {
-    __typename: "APSSpeaker",
-    id: string,
-    presentationTitle?: string | null,
-    presentationSummary?: string | null,
-    profileId: string,
-    profile:  {
-      __typename: "ApsAppUserProfile",
-      id: string,
-      userId: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email?: string | null,
-      phone?: string | null,
-      company?: string | null,
-      jobTitle?: string | null,
-      attendeeType?: RegistrantType | null,
-      quickTools?: Array< string | null > | null,
-      profilePicture?: string | null,
-      bio?: string | null,
-      linkedin?: string | null,
-      twitter?: string | null,
-      facebook?: string | null,
-      instagram?: string | null,
-      youtube?: string | null,
-      website?: Array< string | null > | null,
-      location?: string | null,
-      resume?: string | null,
-      thinkificId?: number | null,
-      apcProgress?: number | null,
-      speakerId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    sessions?:  {
-      __typename: "ModelSessionSpeakersConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteByUsers?:  {
-      __typename: "ModelApsAppUserFavoriteSpeakerConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-    aPSSpeakersId?: string | null,
-  } | null,
-};
-
-export type ListAPSSpeakersQueryVariables = {
-  filter?: ModelAPSSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSSpeakersQuery = {
-  listAPSSpeakers?:  {
-    __typename: "ModelAPSSpeakerConnection",
-    items:  Array< {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type APSSpeakersByProfileIdAndEventIdQueryVariables = {
-  profileId: string,
-  eventId?: ModelIDKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelAPSSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type APSSpeakersByProfileIdAndEventIdQuery = {
-  aPSSpeakersByProfileIdAndEventId?:  {
-    __typename: "ModelAPSSpeakerConnection",
-    items:  Array< {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type APSSpeakersByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelAPSSpeakerFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type APSSpeakersByEventIdQuery = {
-  aPSSpeakersByEventId?:  {
-    __typename: "ModelAPSSpeakerConnection",
-    items:  Array< {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSSpeakersId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsSponsorQueryVariables = {
-  id: string,
-};
-
-export type GetApsSponsorQuery = {
-  getApsSponsor?:  {
-    __typename: "ApsSponsor",
-    id: string,
-    companyId: string,
-    company:  {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    profile?:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null,
-    sessions?:  {
-      __typename: "ModelSessionSponsorsConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteByUsers?:  {
-      __typename: "ModelApsAppUserFavoriteSponsorConnection",
-      nextToken?: string | null,
-    } | null,
-    type?: SponsorType | null,
-    createdAt: string,
-    updatedAt: string,
-    aPSSponsorsId?: string | null,
-    apsSponsorProfileId?: string | null,
-  } | null,
-};
-
-export type ListApsSponsorsQueryVariables = {
-  filter?: ModelApsSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsSponsorsQuery = {
-  listApsSponsors?:  {
-    __typename: "ModelApsSponsorConnection",
-    items:  Array< {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsSponsorsByCompanyIdQueryVariables = {
-  companyId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsSponsorsByCompanyIdQuery = {
-  apsSponsorsByCompanyId?:  {
-    __typename: "ModelApsSponsorConnection",
-    items:  Array< {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsSponsorsByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsSponsorFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsSponsorsByEventIdQuery = {
-  apsSponsorsByEventId?:  {
-    __typename: "ModelApsSponsorConnection",
-    items:  Array< {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSCompanyQueryVariables = {
-  id: string,
-};
-
-export type GetAPSCompanyQuery = {
-  getAPSCompany?:  {
-    __typename: "APSCompany",
-    id: string,
-    name: string,
-    email?: string | null,
-    type?: CompanyType | null,
-    description?: string | null,
-    website?: string | null,
-    phone?: string | null,
-    address?: string | null,
-    city?: string | null,
-    state?: string | null,
-    zip?: string | null,
-    country?: string | null,
-    logo?: string | null,
-    events?:  {
-      __typename: "ModelAPSCompanyEventsConnection",
-      nextToken?: string | null,
-    } | null,
-    registrants?:  {
-      __typename: "ModelApsRegistrantConnection",
-      nextToken?: string | null,
-    } | null,
-    sponsorId?: string | null,
-    sponsor?:  {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    } | null,
-    exhibitorProfileId?: string | null,
-    exhibitorProfile?:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null,
-    notes?:  {
-      __typename: "ModelApsAppUserNoteConnection",
-      nextToken?: string | null,
-    } | null,
-    contacts?:  {
-      __typename: "ModelAPSCompanyContactConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListAPSCompaniesQueryVariables = {
-  filter?: ModelAPSCompanyFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSCompaniesQuery = {
-  listAPSCompanies?:  {
-    __typename: "ModelAPSCompanyConnection",
-    items:  Array< {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSCompanyContactQueryVariables = {
-  id: string,
-};
-
-export type GetAPSCompanyContactQuery = {
-  getAPSCompanyContact?:  {
-    __typename: "APSCompanyContact",
-    id: string,
-    companyId: string,
-    company:  {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    name?: string | null,
-    email: string,
-    phone?: string | null,
-    title?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListAPSCompanyContactsQueryVariables = {
-  filter?: ModelAPSCompanyContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSCompanyContactsQuery = {
-  listAPSCompanyContacts?:  {
-    __typename: "ModelAPSCompanyContactConnection",
-    items:  Array< {
-      __typename: "APSCompanyContact",
-      id: string,
-      companyId: string,
-      name?: string | null,
-      email: string,
-      phone?: string | null,
-      title?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type APSCompanyContactsByCompanyIdAndCreatedAtQueryVariables = {
-  companyId: string,
-  createdAt?: ModelStringKeyConditionInput | null,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelAPSCompanyContactFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type APSCompanyContactsByCompanyIdAndCreatedAtQuery = {
-  aPSCompanyContactsByCompanyIdAndCreatedAt?:  {
-    __typename: "ModelAPSCompanyContactConnection",
-    items:  Array< {
-      __typename: "APSCompanyContact",
-      id: string,
-      companyId: string,
-      name?: string | null,
-      email: string,
-      phone?: string | null,
-      title?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppExhibitorProfileQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppExhibitorProfileQuery = {
-  getApsAppExhibitorProfile?:  {
-    __typename: "ApsAppExhibitorProfile",
-    id: string,
-    companyId: string,
-    company:  {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    sponsorId?: string | null,
-    sponsor?:  {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    } | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    deals?:  {
-      __typename: "ModelApsAppExhibitorDealConnection",
-      nextToken?: string | null,
-    } | null,
-    photos?:  {
-      __typename: "ModelApsAppExhibitorPhotoConnection",
-      nextToken?: string | null,
-    } | null,
-    handouts?:  {
-      __typename: "ModelApsAppExhibitorHandoutConnection",
-      nextToken?: string | null,
-    } | null,
-    promotions?:  {
-      __typename: "ModelApsAppExhibitorPromotionConnection",
-      nextToken?: string | null,
-    } | null,
-    video?: string | null,
-    videoCaption?: string | null,
-    boothNumber?: string | null,
-    qrCode?: string | null,
-    passportQrPayload?: string | null,
-    visits?: number | null,
-    views?: number | null,
-    likes?: number | null,
-    notes?:  {
-      __typename: "ModelApsAppUserNoteConnection",
-      nextToken?: string | null,
-    } | null,
-    favoriteByUsers?:  {
-      __typename: "ModelApsAppUserFavoriteExhibitorConnection",
-      nextToken?: string | null,
-    } | null,
-    passportStamps?:  {
-      __typename: "ModelApsAppUserPassportStampConnection",
-      nextToken?: string | null,
-    } | null,
-    viewedByUsers?:  {
-      __typename: "ModelApsAppUserExhibitorViewConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-    aPSExhibitorsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppExhibitorProfilesQueryVariables = {
-  filter?: ModelApsAppExhibitorProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppExhibitorProfilesQuery = {
-  listApsAppExhibitorProfiles?:  {
-    __typename: "ModelApsAppExhibitorProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorProfilesByCompanyIdQueryVariables = {
-  companyId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorProfilesByCompanyIdQuery = {
-  apsAppExhibitorProfilesByCompanyId?:  {
-    __typename: "ModelApsAppExhibitorProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorProfilesBySponsorIdQueryVariables = {
-  sponsorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorProfilesBySponsorIdQuery = {
-  apsAppExhibitorProfilesBySponsorId?:  {
-    __typename: "ModelApsAppExhibitorProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorProfilesByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorProfilesByEventIdQuery = {
-  apsAppExhibitorProfilesByEventId?:  {
-    __typename: "ModelApsAppExhibitorProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorProfilesByPassportQrPayloadQueryVariables = {
-  passportQrPayload: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorProfileFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorProfilesByPassportQrPayloadQuery = {
-  apsAppExhibitorProfilesByPassportQrPayload?:  {
-    __typename: "ModelApsAppExhibitorProfileConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppExhibitorPromotionQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppExhibitorPromotionQuery = {
-  getApsAppExhibitorPromotion?:  {
-    __typename: "ApsAppExhibitorPromotion",
-    id: string,
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    promotion?: string | null,
-    link?: string | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-    aPSExhibitorPromotionsId?: string | null,
-    apsAppExhibitorProfilePromotionsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppExhibitorPromotionsQueryVariables = {
-  filter?: ModelApsAppExhibitorPromotionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppExhibitorPromotionsQuery = {
-  listApsAppExhibitorPromotions?:  {
-    __typename: "ModelApsAppExhibitorPromotionConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorPromotion",
-      id: string,
-      exhibitorId: string,
-      promotion?: string | null,
-      link?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorPromotionsId?: string | null,
-      apsAppExhibitorProfilePromotionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorPromotionsByExhibitorIdQueryVariables = {
-  exhibitorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorPromotionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorPromotionsByExhibitorIdQuery = {
-  apsAppExhibitorPromotionsByExhibitorId?:  {
-    __typename: "ModelApsAppExhibitorPromotionConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorPromotion",
-      id: string,
-      exhibitorId: string,
-      promotion?: string | null,
-      link?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorPromotionsId?: string | null,
-      apsAppExhibitorProfilePromotionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorPromotionsByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorPromotionFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorPromotionsByEventIdQuery = {
-  apsAppExhibitorPromotionsByEventId?:  {
-    __typename: "ModelApsAppExhibitorPromotionConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorPromotion",
-      id: string,
-      exhibitorId: string,
-      promotion?: string | null,
-      link?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorPromotionsId?: string | null,
-      apsAppExhibitorProfilePromotionsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppExhibitorDealQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppExhibitorDealQuery = {
-  getApsAppExhibitorDeal?:  {
-    __typename: "ApsAppExhibitorDeal",
-    id: string,
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    deal?: string | null,
-    link?: string | null,
-    userId?: string | null,
-    user?:  {
-      __typename: "ApsAppUser",
-      id: string,
-      registrantId: string,
-      profileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-    aPSExhibitorDealsId?: string | null,
-    apsAppUserExhibitorDealsId?: string | null,
-    apsAppExhibitorProfileDealsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppExhibitorDealsQueryVariables = {
-  filter?: ModelApsAppExhibitorDealFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppExhibitorDealsQuery = {
-  listApsAppExhibitorDeals?:  {
-    __typename: "ModelApsAppExhibitorDealConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorDeal",
-      id: string,
-      exhibitorId: string,
-      deal?: string | null,
-      link?: string | null,
-      userId?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorDealsId?: string | null,
-      apsAppUserExhibitorDealsId?: string | null,
-      apsAppExhibitorProfileDealsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorDealsByExhibitorIdQueryVariables = {
-  exhibitorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorDealFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorDealsByExhibitorIdQuery = {
-  apsAppExhibitorDealsByExhibitorId?:  {
-    __typename: "ModelApsAppExhibitorDealConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorDeal",
-      id: string,
-      exhibitorId: string,
-      deal?: string | null,
-      link?: string | null,
-      userId?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorDealsId?: string | null,
-      apsAppUserExhibitorDealsId?: string | null,
-      apsAppExhibitorProfileDealsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorDealsByUserIdQueryVariables = {
-  userId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorDealFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorDealsByUserIdQuery = {
-  apsAppExhibitorDealsByUserId?:  {
-    __typename: "ModelApsAppExhibitorDealConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorDeal",
-      id: string,
-      exhibitorId: string,
-      deal?: string | null,
-      link?: string | null,
-      userId?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorDealsId?: string | null,
-      apsAppUserExhibitorDealsId?: string | null,
-      apsAppExhibitorProfileDealsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorDealsByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorDealFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorDealsByEventIdQuery = {
-  apsAppExhibitorDealsByEventId?:  {
-    __typename: "ModelApsAppExhibitorDealConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorDeal",
-      id: string,
-      exhibitorId: string,
-      deal?: string | null,
-      link?: string | null,
-      userId?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorDealsId?: string | null,
-      apsAppUserExhibitorDealsId?: string | null,
-      apsAppExhibitorProfileDealsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppExhibitorPhotoQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppExhibitorPhotoQuery = {
-  getApsAppExhibitorPhoto?:  {
-    __typename: "ApsAppExhibitorPhoto",
-    id: string,
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    photo?: string | null,
-    caption?: string | null,
-    approved?: boolean | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-    aPSExhibitorPhotosId?: string | null,
-    apsAppExhibitorProfilePhotosId?: string | null,
-  } | null,
-};
-
-export type ListApsAppExhibitorPhotosQueryVariables = {
-  filter?: ModelApsAppExhibitorPhotoFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppExhibitorPhotosQuery = {
-  listApsAppExhibitorPhotos?:  {
-    __typename: "ModelApsAppExhibitorPhotoConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorPhoto",
-      id: string,
-      exhibitorId: string,
-      photo?: string | null,
-      caption?: string | null,
-      approved?: boolean | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorPhotosId?: string | null,
-      apsAppExhibitorProfilePhotosId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorPhotosByExhibitorIdQueryVariables = {
-  exhibitorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorPhotoFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorPhotosByExhibitorIdQuery = {
-  apsAppExhibitorPhotosByExhibitorId?:  {
-    __typename: "ModelApsAppExhibitorPhotoConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorPhoto",
-      id: string,
-      exhibitorId: string,
-      photo?: string | null,
-      caption?: string | null,
-      approved?: boolean | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorPhotosId?: string | null,
-      apsAppExhibitorProfilePhotosId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorPhotosByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorPhotoFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorPhotosByEventIdQuery = {
-  apsAppExhibitorPhotosByEventId?:  {
-    __typename: "ModelApsAppExhibitorPhotoConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorPhoto",
-      id: string,
-      exhibitorId: string,
-      photo?: string | null,
-      caption?: string | null,
-      approved?: boolean | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorPhotosId?: string | null,
-      apsAppExhibitorProfilePhotosId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAppExhibitorHandoutQueryVariables = {
-  id: string,
-};
-
-export type GetApsAppExhibitorHandoutQuery = {
-  getApsAppExhibitorHandout?:  {
-    __typename: "ApsAppExhibitorHandout",
-    id: string,
-    exhibitorId: string,
-    exhibitor:  {
-      __typename: "ApsAppExhibitorProfile",
-      id: string,
-      companyId: string,
-      sponsorId?: string | null,
-      eventId: string,
-      video?: string | null,
-      videoCaption?: string | null,
-      boothNumber?: string | null,
-      qrCode?: string | null,
-      passportQrPayload?: string | null,
-      visits?: number | null,
-      views?: number | null,
-      likes?: number | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorsId?: string | null,
-    },
-    handout?: string | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-    aPSExhibitorHandoutsId?: string | null,
-    apsAppExhibitorProfileHandoutsId?: string | null,
-  } | null,
-};
-
-export type ListApsAppExhibitorHandoutsQueryVariables = {
-  filter?: ModelApsAppExhibitorHandoutFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAppExhibitorHandoutsQuery = {
-  listApsAppExhibitorHandouts?:  {
-    __typename: "ModelApsAppExhibitorHandoutConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorHandout",
-      id: string,
-      exhibitorId: string,
-      handout?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorHandoutsId?: string | null,
-      apsAppExhibitorProfileHandoutsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorHandoutsByExhibitorIdQueryVariables = {
-  exhibitorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorHandoutFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorHandoutsByExhibitorIdQuery = {
-  apsAppExhibitorHandoutsByExhibitorId?:  {
-    __typename: "ModelApsAppExhibitorHandoutConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorHandout",
-      id: string,
-      exhibitorId: string,
-      handout?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorHandoutsId?: string | null,
-      apsAppExhibitorProfileHandoutsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAppExhibitorHandoutsByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAppExhibitorHandoutFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAppExhibitorHandoutsByEventIdQuery = {
-  apsAppExhibitorHandoutsByEventId?:  {
-    __typename: "ModelApsAppExhibitorHandoutConnection",
-    items:  Array< {
-      __typename: "ApsAppExhibitorHandout",
-      id: string,
-      exhibitorId: string,
-      handout?: string | null,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSExhibitorHandoutsId?: string | null,
-      apsAppExhibitorProfileHandoutsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsAddOnQueryVariables = {
-  id: string,
-};
-
-export type GetApsAddOnQuery = {
-  getApsAddOn?:  {
-    __typename: "ApsAddOn",
-    id: string,
-    title: string,
-    description: string,
-    subheadline?: string | null,
-    location: string,
-    date: string,
-    time: string,
-    altLink?: string | null,
-    type?: string | null,
-    limit?: number | null,
-    eventId: string,
-    event:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    price?: number | null,
-    preferenceSchema?: string | null,
-    registrantRequests?:  {
-      __typename: "ModelRegistrantAddOnRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-    aPSAddOnsId?: string | null,
-  } | null,
-};
-
-export type ListApsAddOnsQueryVariables = {
-  filter?: ModelApsAddOnFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsAddOnsQuery = {
-  listApsAddOns?:  {
-    __typename: "ModelApsAddOnConnection",
-    items:  Array< {
-      __typename: "ApsAddOn",
-      id: string,
-      title: string,
-      description: string,
-      subheadline?: string | null,
-      location: string,
-      date: string,
-      time: string,
-      altLink?: string | null,
-      type?: string | null,
-      limit?: number | null,
-      eventId: string,
-      price?: number | null,
-      preferenceSchema?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAddOnsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsAddOnsByEventIdQueryVariables = {
-  eventId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsAddOnFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsAddOnsByEventIdQuery = {
-  apsAddOnsByEventId?:  {
-    __typename: "ModelApsAddOnConnection",
-    items:  Array< {
-      __typename: "ApsAddOn",
-      id: string,
-      title: string,
-      description: string,
-      subheadline?: string | null,
-      location: string,
-      date: string,
-      time: string,
-      altLink?: string | null,
-      type?: string | null,
-      limit?: number | null,
-      eventId: string,
-      price?: number | null,
-      preferenceSchema?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAddOnsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetRegistrantAddOnRequestQueryVariables = {
-  id: string,
-};
-
-export type GetRegistrantAddOnRequestQuery = {
-  getRegistrantAddOnRequest?:  {
-    __typename: "RegistrantAddOnRequest",
-    id: string,
-    registrantId: string,
-    registrant:  {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    },
-    addOnId: string,
-    addOn:  {
-      __typename: "ApsAddOn",
-      id: string,
-      title: string,
-      description: string,
-      subheadline?: string | null,
-      location: string,
-      date: string,
-      time: string,
-      altLink?: string | null,
-      type?: string | null,
-      limit?: number | null,
-      eventId: string,
-      price?: number | null,
-      preferenceSchema?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAddOnsId?: string | null,
-    },
-    status: string,
-    preferences?: string | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListRegistrantAddOnRequestsQueryVariables = {
-  filter?: ModelRegistrantAddOnRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListRegistrantAddOnRequestsQuery = {
-  listRegistrantAddOnRequests?:  {
-    __typename: "ModelRegistrantAddOnRequestConnection",
-    items:  Array< {
-      __typename: "RegistrantAddOnRequest",
-      id: string,
-      registrantId: string,
-      addOnId: string,
-      status: string,
-      preferences?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type RegistrantAddOnRequestsByRegistrantIdQueryVariables = {
-  registrantId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelRegistrantAddOnRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type RegistrantAddOnRequestsByRegistrantIdQuery = {
-  registrantAddOnRequestsByRegistrantId?:  {
-    __typename: "ModelRegistrantAddOnRequestConnection",
-    items:  Array< {
-      __typename: "RegistrantAddOnRequest",
-      id: string,
-      registrantId: string,
-      addOnId: string,
-      status: string,
-      preferences?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type RegistrantAddOnRequestsByAddOnIdQueryVariables = {
-  addOnId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelRegistrantAddOnRequestFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type RegistrantAddOnRequestsByAddOnIdQuery = {
-  registrantAddOnRequestsByAddOnId?:  {
-    __typename: "ModelRegistrantAddOnRequestConnection",
-    items:  Array< {
-      __typename: "RegistrantAddOnRequest",
-      id: string,
-      registrantId: string,
-      addOnId: string,
-      status: string,
-      preferences?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsSeatingChartQueryVariables = {
-  id: string,
-};
-
-export type GetApsSeatingChartQuery = {
-  getApsSeatingChart?:  {
-    __typename: "ApsSeatingChart",
-    id: string,
-    registrants?:  {
-      __typename: "ModelApsSeatingChartRegistrantConnection",
-      nextToken?: string | null,
-    } | null,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListApsSeatingChartsQueryVariables = {
-  filter?: ModelApsSeatingChartFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsSeatingChartsQuery = {
-  listApsSeatingCharts?:  {
-    __typename: "ModelApsSeatingChartConnection",
-    items:  Array< {
-      __typename: "ApsSeatingChart",
-      id: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetApsSeatingChartRegistrantQueryVariables = {
-  id: string,
-};
-
-export type GetApsSeatingChartRegistrantQuery = {
-  getApsSeatingChartRegistrant?:  {
-    __typename: "ApsSeatingChartRegistrant",
-    id: string,
-    category?: string | null,
-    firstName?: string | null,
-    lastName?: string | null,
-    company?: string | null,
-    email?: string | null,
-    role?: string | null,
-    tableNumber?: number | null,
-    notes?: string | null,
-    seatingChartID: string,
-    seatingChart:  {
-      __typename: "ApsSeatingChart",
-      id: string,
-      createdAt: string,
-      updatedAt: string,
-    },
-    registrantID: string,
-    registrant:  {
-      __typename: "ApsRegistrant",
-      id: string,
-      apsID: string,
-      firstName?: string | null,
-      lastName?: string | null,
-      email: string,
-      phone?: string | null,
-      companyId?: string | null,
-      jobTitle?: string | null,
-      attendeeType: RegistrantType,
-      termsAccepted?: boolean | null,
-      interests?: Array< string | null > | null,
-      otherInterest?: string | null,
-      buyerQuestion?: string | null,
-      packagingChallenge?: string | null,
-      certification?: string | null,
-      billingAddressFirstName?: string | null,
-      billingAddressLastName?: string | null,
-      billingAddressEmail?: string | null,
-      billingAddressPhone?: string | null,
-      billingAddressStreet?: string | null,
-      billingAddressCity?: string | null,
-      billingAddressState?: string | null,
-      billingAddressZip?: string | null,
-      billingAddressCountry?: string | null,
-      sameAsAttendee?: boolean | null,
-      speakerTopic?: string | null,
-      learningObjectives?: string | null,
-      totalAmount?: number | null,
-      discountCode?: string | null,
-      status: RegistrantStatus,
-      paymentConfirmation?: string | null,
-      registrationEmailSent?: boolean | null,
-      registrationEmailSentDate?: string | null,
-      registrationEmailReceived?: boolean | null,
-      registrationEmailReceivedDate?: string | null,
-      welcomeEmailSent?: boolean | null,
-      welcomeEmailSentDate?: string | null,
-      welcomeEmailReceived?: boolean | null,
-      welcomeEmailReceivedDate?: string | null,
-      paymentMethod?: string | null,
-      paymentLast4?: string | null,
-      approvedAt?: string | null,
-      headshot?: string | null,
-      presentation?: string | null,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      bio?: string | null,
-      invoice?: string | null,
-      appUserId?: string | null,
-      qrCode?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSRegistrantsId?: string | null,
-      aPSCompanyRegistrantsId?: string | null,
-      apsRegistrantSeatingChartRegistrantId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-    apsSeatingChartRegistrantsId?: string | null,
-  } | null,
-};
-
-export type ListApsSeatingChartRegistrantsQueryVariables = {
-  filter?: ModelApsSeatingChartRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListApsSeatingChartRegistrantsQuery = {
-  listApsSeatingChartRegistrants?:  {
-    __typename: "ModelApsSeatingChartRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsSeatingChartRegistrant",
-      id: string,
-      category?: string | null,
-      firstName?: string | null,
-      lastName?: string | null,
-      company?: string | null,
-      email?: string | null,
-      role?: string | null,
-      tableNumber?: number | null,
-      notes?: string | null,
-      seatingChartID: string,
-      registrantID: string,
-      createdAt: string,
-      updatedAt: string,
-      apsSeatingChartRegistrantsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsSeatingChartRegistrantsBySeatingChartIDQueryVariables = {
-  seatingChartID: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsSeatingChartRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsSeatingChartRegistrantsBySeatingChartIDQuery = {
-  apsSeatingChartRegistrantsBySeatingChartID?:  {
-    __typename: "ModelApsSeatingChartRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsSeatingChartRegistrant",
-      id: string,
-      category?: string | null,
-      firstName?: string | null,
-      lastName?: string | null,
-      company?: string | null,
-      email?: string | null,
-      role?: string | null,
-      tableNumber?: number | null,
-      notes?: string | null,
-      seatingChartID: string,
-      registrantID: string,
-      createdAt: string,
-      updatedAt: string,
-      apsSeatingChartRegistrantsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ApsSeatingChartRegistrantsByRegistrantIDQueryVariables = {
-  registrantID: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelApsSeatingChartRegistrantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ApsSeatingChartRegistrantsByRegistrantIDQuery = {
-  apsSeatingChartRegistrantsByRegistrantID?:  {
-    __typename: "ModelApsSeatingChartRegistrantConnection",
-    items:  Array< {
-      __typename: "ApsSeatingChartRegistrant",
-      id: string,
-      category?: string | null,
-      firstName?: string | null,
-      lastName?: string | null,
-      company?: string | null,
-      email?: string | null,
-      role?: string | null,
-      tableNumber?: number | null,
-      notes?: string | null,
-      seatingChartID: string,
-      registrantID: string,
-      createdAt: string,
-      updatedAt: string,
-      apsSeatingChartRegistrantsId?: string | null,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetAPSCompanyEventsQueryVariables = {
-  id: string,
-};
-
-export type GetAPSCompanyEventsQuery = {
-  getAPSCompanyEvents?:  {
-    __typename: "APSCompanyEvents",
-    id: string,
-    aPSId: string,
-    aPSCompanyId: string,
-    aPS:  {
-      __typename: "APS",
-      id: string,
-      year: string,
-      startDate?: string | null,
-      endDate?: string | null,
-      location?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      website?: string | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSAgendaId?: string | null,
-    },
-    aPSCompany:  {
-      __typename: "APSCompany",
-      id: string,
-      name: string,
-      email?: string | null,
-      type?: CompanyType | null,
-      description?: string | null,
-      website?: string | null,
-      phone?: string | null,
-      address?: string | null,
-      city?: string | null,
-      state?: string | null,
-      zip?: string | null,
-      country?: string | null,
-      logo?: string | null,
-      sponsorId?: string | null,
-      exhibitorProfileId?: string | null,
-      createdAt: string,
-      updatedAt: string,
-    },
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListAPSCompanyEventsQueryVariables = {
-  filter?: ModelAPSCompanyEventsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListAPSCompanyEventsQuery = {
-  listAPSCompanyEvents?:  {
-    __typename: "ModelAPSCompanyEventsConnection",
-    items:  Array< {
-      __typename: "APSCompanyEvents",
-      id: string,
-      aPSId: string,
-      aPSCompanyId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type APSCompanyEventsByAPSIdQueryVariables = {
-  aPSId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelAPSCompanyEventsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type APSCompanyEventsByAPSIdQuery = {
-  aPSCompanyEventsByAPSId?:  {
-    __typename: "ModelAPSCompanyEventsConnection",
-    items:  Array< {
-      __typename: "APSCompanyEvents",
-      id: string,
-      aPSId: string,
-      aPSCompanyId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type APSCompanyEventsByAPSCompanyIdQueryVariables = {
-  aPSCompanyId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelAPSCompanyEventsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type APSCompanyEventsByAPSCompanyIdQuery = {
-  aPSCompanyEventsByAPSCompanyId?:  {
-    __typename: "ModelAPSCompanyEventsConnection",
-    items:  Array< {
-      __typename: "APSCompanyEvents",
-      id: string,
-      aPSId: string,
-      aPSCompanyId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetSessionSpeakersQueryVariables = {
-  id: string,
-};
-
-export type GetSessionSpeakersQuery = {
-  getSessionSpeakers?:  {
-    __typename: "SessionSpeakers",
-    id: string,
-    apsAppSessionId: string,
-    aPSSpeakerId: string,
-    apsAppSession:  {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    },
-    aPSSpeaker:  {
-      __typename: "APSSpeaker",
-      id: string,
-      presentationTitle?: string | null,
-      presentationSummary?: string | null,
-      profileId: string,
-      eventId: string,
-      createdAt: string,
-      updatedAt: string,
-      aPSSpeakersId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListSessionSpeakersQueryVariables = {
-  filter?: ModelSessionSpeakersFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListSessionSpeakersQuery = {
-  listSessionSpeakers?:  {
-    __typename: "ModelSessionSpeakersConnection",
-    items:  Array< {
-      __typename: "SessionSpeakers",
-      id: string,
-      apsAppSessionId: string,
-      aPSSpeakerId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type SessionSpeakersByApsAppSessionIdQueryVariables = {
-  apsAppSessionId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelSessionSpeakersFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type SessionSpeakersByApsAppSessionIdQuery = {
-  sessionSpeakersByApsAppSessionId?:  {
-    __typename: "ModelSessionSpeakersConnection",
-    items:  Array< {
-      __typename: "SessionSpeakers",
-      id: string,
-      apsAppSessionId: string,
-      aPSSpeakerId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type SessionSpeakersByAPSSpeakerIdQueryVariables = {
-  aPSSpeakerId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelSessionSpeakersFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type SessionSpeakersByAPSSpeakerIdQuery = {
-  sessionSpeakersByAPSSpeakerId?:  {
-    __typename: "ModelSessionSpeakersConnection",
-    items:  Array< {
-      __typename: "SessionSpeakers",
-      id: string,
-      apsAppSessionId: string,
-      aPSSpeakerId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetSessionSponsorsQueryVariables = {
-  id: string,
-};
-
-export type GetSessionSponsorsQuery = {
-  getSessionSponsors?:  {
-    __typename: "SessionSponsors",
-    id: string,
-    apsAppSessionId: string,
-    apsSponsorId: string,
-    apsAppSession:  {
-      __typename: "ApsAppSession",
-      id: string,
-      title?: string | null,
-      date?: string | null,
-      startTime?: string | null,
-      endTime?: string | null,
-      location?: string | null,
-      description?: string | null,
-      embedUrl?: string | null,
-      agendaId?: string | null,
-      draft?: boolean | null,
-      createdAt: string,
-      updatedAt: string,
-      apsAgendaItemsId?: string | null,
-    },
-    apsSponsor:  {
-      __typename: "ApsSponsor",
-      id: string,
-      companyId: string,
-      eventId: string,
-      type?: SponsorType | null,
-      createdAt: string,
-      updatedAt: string,
-      aPSSponsorsId?: string | null,
-      apsSponsorProfileId?: string | null,
-    },
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListSessionSponsorsQueryVariables = {
-  filter?: ModelSessionSponsorsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListSessionSponsorsQuery = {
-  listSessionSponsors?:  {
-    __typename: "ModelSessionSponsorsConnection",
-    items:  Array< {
-      __typename: "SessionSponsors",
-      id: string,
-      apsAppSessionId: string,
-      apsSponsorId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type SessionSponsorsByApsAppSessionIdQueryVariables = {
-  apsAppSessionId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelSessionSponsorsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type SessionSponsorsByApsAppSessionIdQuery = {
-  sessionSponsorsByApsAppSessionId?:  {
-    __typename: "ModelSessionSponsorsConnection",
-    items:  Array< {
-      __typename: "SessionSponsors",
-      id: string,
-      apsAppSessionId: string,
-      apsSponsorId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type SessionSponsorsByApsSponsorIdQueryVariables = {
-  apsSponsorId: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelSessionSponsorsFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type SessionSponsorsByApsSponsorIdQuery = {
-  sessionSponsorsByApsSponsorId?:  {
-    __typename: "ModelSessionSponsorsConnection",
-    items:  Array< {
-      __typename: "SessionSponsors",
-      id: string,
-      apsAppSessionId: string,
-      apsSponsorId: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
   } | null,
 };
 
@@ -21905,6 +21923,10 @@ export type OnCreateApsAppUserNoteSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -22076,6 +22098,10 @@ export type OnUpdateApsAppUserNoteSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -22247,6 +22273,10 @@ export type OnDeleteApsAppUserNoteSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -25288,6 +25318,10 @@ export type OnCreateApsRegistrantSubscription = {
     welcomeEmailSentDate?: string | null,
     welcomeEmailReceived?: boolean | null,
     welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
     paymentMethod?: string | null,
     paymentLast4?: string | null,
     approvedAt?: string | null,
@@ -25422,6 +25456,10 @@ export type OnUpdateApsRegistrantSubscription = {
     welcomeEmailSentDate?: string | null,
     welcomeEmailReceived?: boolean | null,
     welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
     paymentMethod?: string | null,
     paymentLast4?: string | null,
     approvedAt?: string | null,
@@ -25556,6 +25594,10 @@ export type OnDeleteApsRegistrantSubscription = {
     welcomeEmailSentDate?: string | null,
     welcomeEmailReceived?: boolean | null,
     welcomeEmailReceivedDate?: string | null,
+    appEmailSent?: boolean | null,
+    appEmailSentDate?: string | null,
+    appEmailReceived?: boolean | null,
+    appEmailReceivedDate?: string | null,
     paymentMethod?: string | null,
     paymentLast4?: string | null,
     approvedAt?: string | null,
@@ -25658,6 +25700,10 @@ export type OnCreateApsAppUserSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -25787,6 +25833,10 @@ export type OnUpdateApsAppUserSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -25916,6 +25966,10 @@ export type OnDeleteApsAppUserSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29405,6 +29459,10 @@ export type OnCreateRegistrantAddOnRequestSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29499,6 +29557,10 @@ export type OnUpdateRegistrantAddOnRequestSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29593,6 +29655,10 @@ export type OnDeleteRegistrantAddOnRequestSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29753,6 +29819,10 @@ export type OnCreateApsSeatingChartRegistrantSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29841,6 +29911,10 @@ export type OnUpdateApsSeatingChartRegistrantSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29929,6 +30003,10 @@ export type OnDeleteApsSeatingChartRegistrantSubscription = {
       welcomeEmailSentDate?: string | null,
       welcomeEmailReceived?: boolean | null,
       welcomeEmailReceivedDate?: string | null,
+      appEmailSent?: boolean | null,
+      appEmailSentDate?: string | null,
+      appEmailReceived?: boolean | null,
+      appEmailReceivedDate?: string | null,
       paymentMethod?: string | null,
       paymentLast4?: string | null,
       approvedAt?: string | null,
@@ -29949,6 +30027,147 @@ export type OnDeleteApsSeatingChartRegistrantSubscription = {
     createdAt: string,
     updatedAt: string,
     apsSeatingChartRegistrantsId?: string | null,
+  } | null,
+};
+
+export type OnCreateApsEmailCampaignSubscriptionVariables = {
+  filter?: ModelSubscriptionApsEmailCampaignFilterInput | null,
+};
+
+export type OnCreateApsEmailCampaignSubscription = {
+  onCreateApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
+    id: string,
+    eventId: string,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateApsEmailCampaignSubscriptionVariables = {
+  filter?: ModelSubscriptionApsEmailCampaignFilterInput | null,
+};
+
+export type OnUpdateApsEmailCampaignSubscription = {
+  onUpdateApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
+    id: string,
+    eventId: string,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteApsEmailCampaignSubscriptionVariables = {
+  filter?: ModelSubscriptionApsEmailCampaignFilterInput | null,
+};
+
+export type OnDeleteApsEmailCampaignSubscription = {
+  onDeleteApsEmailCampaign?:  {
+    __typename: "ApsEmailCampaign",
+    id: string,
+    eventId: string,
+    name: string,
+    templateKey: string,
+    subject: string,
+    audienceStatuses?: Array< RegistrantStatus | null > | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
+    status: EmailCampaignStatus,
+    scheduledAt?: string | null,
+    startedAt?: string | null,
+    completedAt?: string | null,
+    totalRecipients?: number | null,
+    sentCount?: number | null,
+    failedCount?: number | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateApsEmailSendSubscriptionVariables = {
+  filter?: ModelSubscriptionApsEmailSendFilterInput | null,
+};
+
+export type OnCreateApsEmailSendSubscription = {
+  onCreateApsEmailSend?:  {
+    __typename: "ApsEmailSend",
+    id: string,
+    campaignId: string,
+    eventId: string,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateApsEmailSendSubscriptionVariables = {
+  filter?: ModelSubscriptionApsEmailSendFilterInput | null,
+};
+
+export type OnUpdateApsEmailSendSubscription = {
+  onUpdateApsEmailSend?:  {
+    __typename: "ApsEmailSend",
+    id: string,
+    campaignId: string,
+    eventId: string,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteApsEmailSendSubscriptionVariables = {
+  filter?: ModelSubscriptionApsEmailSendFilterInput | null,
+};
+
+export type OnDeleteApsEmailSendSubscription = {
+  onDeleteApsEmailSend?:  {
+    __typename: "ApsEmailSend",
+    id: string,
+    campaignId: string,
+    eventId: string,
+    registrantId: string,
+    email: string,
+    status: EmailSendStatus,
+    sesMessageId?: string | null,
+    error?: string | null,
+    sentAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
