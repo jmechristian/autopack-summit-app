@@ -31,6 +31,7 @@ import { useEngageStore } from '../../../src/store/engageStore';
 import { autopackColors } from '../../../src/theme';
 import { AffiliationsSection } from '../../../src/components/profile/AffiliationsSection';
 import { EducationSection } from '../../../src/components/profile/EducationSection';
+import { ExpertiseSection } from '../../../src/components/profile/ExpertiseSection';
 import { InterestsSection } from '../../../src/components/profile/InterestsSection';
 import { ui } from '../../../src/ui/tokens';
 import { signOut } from '../../../src/utils/authUtils';
@@ -502,6 +503,7 @@ export default function Profile() {
 
         <AffiliationsSection profile={profile} onUpdate={refreshProfile} />
         <EducationSection profile={profile} onUpdate={refreshProfile} />
+        <ExpertiseSection profile={profile} onUpdate={refreshProfile} />
         <InterestsSection profile={profile} onUpdate={refreshProfile} />
 
         <View style={styles.sectionCard}>

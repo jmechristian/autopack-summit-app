@@ -23,6 +23,7 @@ import { useCurrentAppUser, useCurrentUserProfile } from '../../../src/hooks/use
 import { EditablePersonalInfo } from '../../../src/components/profile/EditablePersonalInfo';
 import { AffiliationsSection } from '../../../src/components/profile/AffiliationsSection';
 import { EducationSection } from '../../../src/components/profile/EducationSection';
+import { ExpertiseSection } from '../../../src/components/profile/ExpertiseSection';
 import { InterestsSection } from '../../../src/components/profile/InterestsSection';
 import { uploadProfilePicture, uploadResume, resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 import { updateProfile, createAffiliate, createEducation } from '../../../src/utils/profileMutations';
@@ -246,6 +247,8 @@ export default function ProfileEdit() {
 
       {/* Education Section */}
       <EducationSection profile={profile} onUpdate={refreshProfile} />
+
+      <ExpertiseSection profile={profile} onUpdate={refreshProfile} />
 
       {/* Interests Section */}
       <InterestsSection profile={profile} onUpdate={refreshProfile} />

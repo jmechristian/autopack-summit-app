@@ -103,6 +103,7 @@ export const getAppUserByRegistrantId = /* GraphQL */ `
           company
           jobTitle
           attendeeType
+          expertise
           profilePicture
           bio
           linkedin
@@ -569,6 +570,7 @@ export const getCommunityProfileByUserId = /* GraphQL */ `
         website
         location
         resume
+        expertise
         affiliates {
           items {
             id
@@ -625,6 +627,7 @@ export const getCommunityProfileByProfileId = /* GraphQL */ `
       website
       location
       resume
+      expertise
       affiliates {
         items {
           id

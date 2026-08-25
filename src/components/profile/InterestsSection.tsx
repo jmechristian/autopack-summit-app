@@ -1,6 +1,6 @@
 // src/components/profile/InterestsSection.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../theme';
 import { createInterest, updateInterest, deleteInterest } from '../../utils/profileMutations';
@@ -86,21 +86,27 @@ export function InterestsSection({ profile, onUpdate }: InterestsSectionProps) {
       {interests.length === 0 ? (
         <Text style={styles.emptyText}>No interest, edit to add</Text>
       ) : (
-        interests.map((interest) => (
-          <View key={interest.id} style={styles.item}>
-            <View style={styles.itemContent}>
-              <Text style={styles.itemTitle}>{interest.interest || 'Untitled'}</Text>
-            </View>
-            <View style={styles.itemActions}>
-              <TouchableOpacity onPress={() => handleEdit(interest)} style={styles.actionButton}>
-                <Ionicons name="pencil" size={20} color={autopackColors.apBlue} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleDelete(interest)} style={styles.actionButton}>
-                <Ionicons name="trash" size={20} color="#E43A00" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))
+        <View style={styles.chipWrap}>
+          {interests.map((interest) => (
+            <Pressable
+              key={interest.id}
+              style={styles.chip}
+              onPress={() => handleEdit(interest)}
+              accessibilityRole="button"
+              accessibilityLabel={`Edit ${interest.interest || 'interest'}`}
+            >
+              <Text style={styles.chipText}>{interest.interest || 'Untitled'}</Text>
+              <Pressable
+                hitSlop={8}
+                onPress={() => handleDelete(interest)}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove ${interest.interest || 'interest'}`}
+              >
+                <Ionicons name="close" size={14} color="#0f766e" />
+              </Pressable>
+            </Pressable>
+          ))}
+        </View>
       )}
 
       <AddInterestModal
@@ -167,34 +173,27 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     fontWeight: '400',
   },
-  item: {
+  chipWrap: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
+    flexWrap: 'wrap',
+    gap: 8,
     paddingHorizontal: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
   },
-  itemContent: {
-    flex: 1,
-  },
-  itemTitle: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  itemActions: {
+  chip: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
+    backgroundColor: '#f0fdfa',
+    borderWidth: 1,
+    borderColor: '#99f6e4',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
   },
-  actionButton: {
-    padding: 6,
-    borderRadius: 10,
-    backgroundColor: '#f3f4f6',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e5e7eb',
+  chipText: {
+    color: '#0f766e',
+    fontSize: 13,
+    fontWeight: '700',
   },
   sectionDivider: {
     height: StyleSheet.hairlineWidth,

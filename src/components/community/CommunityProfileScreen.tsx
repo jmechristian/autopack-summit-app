@@ -16,6 +16,7 @@ import {
 import * as Contacts from 'expo-contacts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { APS_ID } from '../../config/apsConfig';
+import { normalizeExpertiseTags } from '../../constants/expertiseTags';
 import {
   apsAppUserContactsByUserId,
   profileAffiliatesByProfileId,
@@ -58,6 +59,7 @@ const getApsAppUserProfileMinimal = /* GraphQL */ `
       website
       location
       resume
+      expertise
       __typename
     }
   }
@@ -82,6 +84,7 @@ type Profile = {
   website?: string[] | null;
   location?: string | null;
   resume?: string | null;
+  expertise?: Array<string | null> | null;
   affiliates?: { items?: Array<any> | null } | null;
   education?: { items?: Array<any> | null } | null;
   interests?: { items?: Array<any> | null } | null;
@@ -441,6 +444,8 @@ export default function CommunityProfileScreen() {
       .map((i: any) => i.interest)
       .filter(Boolean) || [];
 
+  const expertise = normalizeExpertiseTags(profile.expertise);
+
   const affiliates =
     (profile.affiliates?.items || [])
       .filter(Boolean)
@@ -690,17 +695,42 @@ export default function CommunityProfileScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.sectionHeaderLeft}>
             <View style={styles.sectionIconWrap}>
+              <Ionicons name="ribbon-outline" size={14} color="#1d4ed8" />
+            </View>
+            <Text style={styles.sectionHeaderText}>Area of Expertise</Text>
+          </View>
+        </View>
+        {expertise.length ? (
+          <View style={styles.chipWrap}>
+            {expertise.map((tag) => (
+              <View key={tag} style={styles.chip}>
+                <Text style={styles.chipText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.sectionBodyText}>No areas of expertise provided.</Text>
+        )}
+        <View style={styles.sectionDivider} />
+      </View>
+
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
               <Ionicons name="heart-outline" size={14} color="#1d4ed8" />
             </View>
             <Text style={styles.sectionHeaderText}>Interests</Text>
           </View>
         </View>
         {interests.length ? (
-          interests.map((t: string) => (
-            <Text key={t} style={styles.sectionListItem}>
-              • {t}
-            </Text>
-          ))
+          <View style={styles.chipWrap}>
+            {interests.map((t: string) => (
+              <View key={t} style={styles.interestChip}>
+                <Text style={styles.interestChipText}>{t}</Text>
+              </View>
+            ))}
+          </View>
         ) : (
           <Text style={styles.sectionBodyText}>No interests provided.</Text>
         )}
@@ -843,6 +873,39 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     paddingHorizontal: 4,
     paddingVertical: 2,
+  },
+  chipWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 4,
+    paddingBottom: 4,
+  },
+  chip: {
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  chipText: {
+    color: '#1d4ed8',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  interestChip: {
+    backgroundColor: '#f0fdfa',
+    borderWidth: 1,
+    borderColor: '#99f6e4',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  interestChipText: {
+    color: '#0f766e',
+    fontSize: 13,
+    fontWeight: '700',
   },
   experienceItem: {
     paddingVertical: 10,
