@@ -10,6 +10,7 @@ import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { fetchOwnedContactRequestRows } from '../../utils/contactRequestQueries';
+import { htmlToPlainText } from '../../utils/htmlText';
 
 type NotificationRow = {
   id: string;
@@ -152,7 +153,7 @@ export default function NotificationsTool() {
     const announcementRows: NotificationRow[] = announcements.map((announcement) => {
       const isUnread = !lastSeenAnnouncementAt || announcement.createdAt > lastSeenAnnouncementAt;
       const title = announcement.title?.trim() || 'Announcement';
-      const preview = truncateText(announcement.body || '');
+      const preview = truncateText(htmlToPlainText(announcement.body || ''));
       return {
         id: `announcement-${announcement.id}`,
         kind: 'announcement',

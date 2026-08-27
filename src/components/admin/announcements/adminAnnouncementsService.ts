@@ -1,8 +1,52 @@
 import { Alert } from 'react-native';
+import { RegistrantType } from '../../../API';
 import { APS_ID } from '../../../config/apsConfig';
 import { graphqlAuthClient } from '../../../utils/graphqlClient';
+import { htmlToPlainText, isHtmlBodyEmpty } from '../../../utils/htmlText';
 
 export type AdminAnnouncementStatus = 'published' | 'scheduled' | 'ready';
+
+export const ANNOUNCEMENT_AUDIENCE_OPTIONS: { value: RegistrantType; label: string }[] = [
+  { value: RegistrantType.OEM, label: 'OEM' },
+  { value: RegistrantType.TIER1, label: 'Tier 1' },
+  { value: RegistrantType.SOLUTIONPROVIDER, label: 'Solution Provider' },
+  { value: RegistrantType.SPONSOR, label: 'Sponsor' },
+  { value: RegistrantType.SPEAKER, label: 'Speaker' },
+  { value: RegistrantType.STAFF, label: 'Staff' },
+  { value: RegistrantType.EXHIBITOR, label: 'Exhibitor' },
+];
+
+const AUDIENCE_LABEL_BY_TYPE = Object.fromEntries(
+  ANNOUNCEMENT_AUDIENCE_OPTIONS.map((option) => [option.value, option.label]),
+) as Record<string, string>;
+
+export function normalizeAudienceTypes(value?: Array<string | null> | null): RegistrantType[] {
+  const allowed = new Set<string>(ANNOUNCEMENT_AUDIENCE_OPTIONS.map((option) => option.value));
+  const seen = new Set<string>();
+  const out: RegistrantType[] = [];
+  for (const item of value || []) {
+    const type = String(item || '').trim().toUpperCase();
+    if (!type || !allowed.has(type) || seen.has(type)) continue;
+    seen.add(type);
+    out.push(type as RegistrantType);
+  }
+  return out;
+}
+
+export function formatAudienceTypes(value?: Array<string | null> | null) {
+  const labels = normalizeAudienceTypes(value).map(
+    (type) => AUDIENCE_LABEL_BY_TYPE[type] || type,
+  );
+  if (!labels.length) return 'All registration types';
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+  return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+}
+
+export function formatAnnouncementAudienceSummary(value?: Array<string | null> | null) {
+  const types = normalizeAudienceTypes(value);
+  return types.length ? formatAudienceTypes(types) : 'All registration types';
+}
 
 export type AdminAnnouncementListRow = {
   id: string;
@@ -14,6 +58,11 @@ export type AdminAnnouncementListRow = {
   publishedAt: string | null;
   createdAt: string;
   displayAt: string;
+  audienceTypes: RegistrantType[];
+  audienceLabel: string;
+  sentCount: number;
+  sentAt: string | null;
+  uniqueOpenCount: number;
 };
 
 export type AdminAnnouncementDetail = {
@@ -28,6 +77,11 @@ export type AdminAnnouncementDetail = {
   updatedAt: string;
   status: AdminAnnouncementStatus;
   statusLabel: string;
+  audienceTypes: RegistrantType[];
+  audienceLabel: string;
+  sentCount: number;
+  sentAt: string | null;
+  uniqueOpenCount: number;
 };
 
 type AnnouncementRecord = {
@@ -36,8 +90,11 @@ type AnnouncementRecord = {
   title?: string | null;
   body: string;
   deepLink?: string | null;
+  audienceTypes?: Array<string | null> | null;
   scheduledAt?: string | null;
   publishedAt?: string | null;
+  sentCount?: number | null;
+  sentAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -48,8 +105,11 @@ const announcementFields = `
   title
   body
   deepLink
+  audienceTypes
   scheduledAt
   publishedAt
+  sentCount
+  sentAt
   createdAt
   updatedAt
 `;
@@ -103,6 +163,61 @@ const deleteAdminAnnouncementMutation = /* GraphQL */ `
   mutation DeleteAdminAnnouncement($input: DeleteApsAdminAnnouncementInput!) {
     deleteApsAdminAnnouncement(input: $input) {
       id
+    }
+  }
+`;
+
+const announcementOpensByEventQuery = /* GraphQL */ `
+  query AdminAnnouncementOpensByEvent(
+    $eventId: ID!
+    $limit: Int
+    $nextToken: String
+  ) {
+    apsAnnouncementOpensByEventIdAndCreatedAt(
+      eventId: $eventId
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        announcementId
+        userId
+      }
+      nextToken
+    }
+  }
+`;
+
+const announcementOpensByAnnouncementQuery = /* GraphQL */ `
+  query AdminAnnouncementOpensByAnnouncement(
+    $announcementId: ID!
+    $limit: Int
+    $nextToken: String
+  ) {
+    apsAnnouncementOpensByAnnouncementIdAndCreatedAt(
+      announcementId: $announcementId
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        userId
+      }
+      nextToken
+    }
+  }
+`;
+
+const announcementAudiencePreviewQuery = /* GraphQL */ `
+  query AdminAnnouncementAudiencePreview(
+    $apsID: ID!
+    $limit: Int
+    $nextToken: String
+  ) {
+    apsRegistrantsByApsID(apsID: $apsID, limit: $limit, nextToken: $nextToken) {
+      items {
+        attendeeType
+        appUserId
+      }
+      nextToken
     }
   }
 `;
@@ -186,9 +301,9 @@ async function runAnnouncementGraphql<T>(operation: () => Promise<T>): Promise<T
   }
 }
 
-function toRequiredString(value: string | null | undefined, label: string) {
+function toRequiredHtml(value: string | null | undefined, label: string) {
   const next = String(value || '').trim();
-  if (!next) throw new Error(`${label} is required.`);
+  if (isHtmlBodyEmpty(next)) throw new Error(`${label} is required.`);
   return next;
 }
 
@@ -354,9 +469,13 @@ export function getAnnouncementStatus(record: {
   return { status: 'published', statusLabel: 'Published' };
 }
 
-function mapListRow(record: AnnouncementRecord): AdminAnnouncementListRow {
+function mapListRow(
+  record: AnnouncementRecord,
+  uniqueOpenCount = 0,
+): AdminAnnouncementListRow {
   const { status, statusLabel } = getAnnouncementStatus(record);
-  const bodyPreview = String(record.body || '').trim();
+  const bodyPreview = htmlToPlainText(record.body);
+  const audienceTypes = normalizeAudienceTypes(record.audienceTypes);
   return {
     id: record.id,
     title: String(record.title || '').trim() || 'Untitled announcement',
@@ -367,11 +486,17 @@ function mapListRow(record: AnnouncementRecord): AdminAnnouncementListRow {
     publishedAt: record.publishedAt || null,
     createdAt: record.createdAt,
     displayAt: record.publishedAt || record.scheduledAt || record.createdAt,
+    audienceTypes,
+    audienceLabel: formatAnnouncementAudienceSummary(audienceTypes),
+    sentCount: Number(record.sentCount) || 0,
+    sentAt: record.sentAt || null,
+    uniqueOpenCount,
   };
 }
 
-function mapDetail(record: AnnouncementRecord): AdminAnnouncementDetail {
+function mapDetail(record: AnnouncementRecord, uniqueOpenCount = 0): AdminAnnouncementDetail {
   const { status, statusLabel } = getAnnouncementStatus(record);
+  const audienceTypes = normalizeAudienceTypes(record.audienceTypes);
   return {
     id: record.id,
     eventId: record.eventId,
@@ -384,7 +509,109 @@ function mapDetail(record: AnnouncementRecord): AdminAnnouncementDetail {
     updatedAt: record.updatedAt,
     status,
     statusLabel,
+    audienceTypes,
+    audienceLabel: formatAnnouncementAudienceSummary(audienceTypes),
+    sentCount: Number(record.sentCount) || 0,
+    sentAt: record.sentAt || null,
+    uniqueOpenCount,
   };
+}
+
+async function listUniqueOpenCountsByAnnouncementId(eventId: string = APS_ID) {
+  const usersByAnnouncement = new Map<string, Set<string>>();
+  try {
+    let nextToken: string | null | undefined = null;
+    do {
+      const resp = await runAnnouncementGraphql(() =>
+        graphqlAuthClient.graphql({
+          query: announcementOpensByEventQuery,
+          variables: { eventId, limit: 500, nextToken },
+        }),
+      );
+      const data = (resp as any)?.data?.apsAnnouncementOpensByEventIdAndCreatedAt;
+      for (const item of data?.items || []) {
+        const announcementId = String(item?.announcementId || '').trim();
+        const userId = String(item?.userId || '').trim();
+        if (!announcementId || !userId) continue;
+        if (!usersByAnnouncement.has(announcementId)) {
+          usersByAnnouncement.set(announcementId, new Set());
+        }
+        usersByAnnouncement.get(announcementId)!.add(userId);
+      }
+      nextToken = data?.nextToken;
+    } while (nextToken);
+  } catch {
+    return {} as Record<string, number>;
+  }
+
+  const counts: Record<string, number> = {};
+  for (const [announcementId, users] of usersByAnnouncement.entries()) {
+    counts[announcementId] = users.size;
+  }
+  return counts;
+}
+
+async function countUniqueOpensForAnnouncement(announcementId: string) {
+  try {
+    const users = new Set<string>();
+    let nextToken: string | null | undefined = null;
+    do {
+      const resp = await runAnnouncementGraphql(() =>
+        graphqlAuthClient.graphql({
+          query: announcementOpensByAnnouncementQuery,
+          variables: { announcementId, limit: 500, nextToken },
+        }),
+      );
+      const data = (resp as any)?.data?.apsAnnouncementOpensByAnnouncementIdAndCreatedAt;
+      for (const item of data?.items || []) {
+        const userId = String(item?.userId || '').trim();
+        if (userId) users.add(userId);
+      }
+      nextToken = data?.nextToken;
+    } while (nextToken);
+    return users.size;
+  } catch {
+    return 0;
+  }
+}
+
+export type AnnouncementAudiencePreviewRow = {
+  attendeeType: string | null;
+  hasAppUser: boolean;
+};
+
+export async function loadAnnouncementAudiencePreview(): Promise<AnnouncementAudiencePreviewRow[]> {
+  const rows: AnnouncementAudiencePreviewRow[] = [];
+  let nextToken: string | null | undefined = null;
+  do {
+    const resp = await runAnnouncementGraphql(() =>
+      graphqlAuthClient.graphql({
+        query: announcementAudiencePreviewQuery,
+        variables: { apsID: APS_ID, limit: 500, nextToken },
+      }),
+    );
+    const data = (resp as any)?.data?.apsRegistrantsByApsID;
+    for (const item of data?.items || []) {
+      rows.push({
+        attendeeType: item?.attendeeType ? String(item.attendeeType) : null,
+        hasAppUser: !!item?.appUserId,
+      });
+    }
+    nextToken = data?.nextToken;
+  } while (nextToken);
+  return rows;
+}
+
+export function countAnnouncementAudiencePreview(
+  rows: AnnouncementAudiencePreviewRow[],
+  types: RegistrantType[],
+) {
+  const selected = new Set(normalizeAudienceTypes(types));
+  return rows.filter((row) => {
+    if (!row.hasAppUser) return false;
+    if (!selected.size) return true;
+    return !!row.attendeeType && selected.has(row.attendeeType as RegistrantType);
+  }).length;
 }
 
 async function listAnnouncementRecords(eventId: string = APS_ID) {
@@ -478,8 +705,11 @@ export async function publishDueAdminAnnouncements(eventId: string = APS_ID) {
 }
 
 export async function listAdminAnnouncements(eventId: string = APS_ID) {
-  const rows = await listAnnouncementRecords(eventId);
-  return rows.map(mapListRow);
+  const [rows, openCounts] = await Promise.all([
+    listAnnouncementRecords(eventId),
+    listUniqueOpenCountsByAnnouncementId(eventId),
+  ]);
+  return rows.map((row) => mapListRow(row, openCounts[row.id] || 0));
 }
 
 export async function getAdminAnnouncementDetail(id: string) {
@@ -491,13 +721,15 @@ export async function getAdminAnnouncementDetail(id: string) {
   );
   const record = (resp as any)?.data?.getApsAdminAnnouncement as AnnouncementRecord | null;
   if (!record?.id) throw new Error('Announcement not found.');
-  return mapDetail(record);
+  const uniqueOpenCount = await countUniqueOpensForAnnouncement(record.id);
+  return mapDetail(record, uniqueOpenCount);
 }
 
 type AnnouncementUpsertInput = {
   title?: string | null;
   body?: string | null;
   deepLink?: string | null;
+  audienceTypes?: Array<string | null> | null;
   scheduleEnabled?: boolean;
   scheduleDate?: string;
   scheduleTime?: string;
@@ -507,9 +739,10 @@ function buildAnnouncementWriteInput(
   input: AnnouncementUpsertInput,
   mode: 'create' | 'update',
 ) {
-  const body = toRequiredString(input.body, 'Body');
+  const body = toRequiredHtml(input.body, 'Body');
   const title = toNullableString(input.title);
   const deepLink = toNullableString(input.deepLink);
+  const audienceTypes = normalizeAudienceTypes(input.audienceTypes);
   const now = new Date().toISOString();
   const scheduleEnabled = !!input.scheduleEnabled;
   const scheduledAt = scheduleEnabled
@@ -526,6 +759,7 @@ function buildAnnouncementWriteInput(
       body,
       deepLink,
       scheduledAt,
+      ...(audienceTypes.length ? { audienceTypes } : {}),
     });
   }
 
@@ -534,6 +768,7 @@ function buildAnnouncementWriteInput(
     body,
     deepLink,
     publishedAt: now,
+    ...(audienceTypes.length ? { audienceTypes } : {}),
   });
 }
 
@@ -567,7 +802,7 @@ export async function updateAdminAnnouncement(id: string, input: AnnouncementUps
           input: compactInput({
             id,
             title: toNullableString(input.title),
-            body: toRequiredString(input.body, 'Body'),
+            body: toRequiredHtml(input.body, 'Body'),
             deepLink: toNullableString(input.deepLink),
           }),
         },
@@ -636,10 +871,17 @@ export function getAnnouncementDisplayAt(record: {
   return record.publishedAt || record.scheduledAt || record.createdAt || null;
 }
 
-export function confirmImmediatePublish(onConfirm: () => void | Promise<void>) {
+export function confirmImmediatePublish(
+  onConfirm: () => void | Promise<void>,
+  options?: { audienceTypes?: Array<string | null> | null },
+) {
+  const selected = normalizeAudienceTypes(options?.audienceTypes);
+  const audience = selected.length
+    ? `${formatAudienceTypes(selected)} registrants with notifications enabled`
+    : 'all users with notifications enabled';
   Alert.alert(
     'Publish immediately?',
-    'This will publish the announcement right away and send a push notification to all users with notifications enabled. This cannot be undone.',
+    `This will publish the announcement right away and send a push notification to ${audience}. This cannot be undone.`,
     [
       { text: 'Cancel', style: 'cancel' },
       {

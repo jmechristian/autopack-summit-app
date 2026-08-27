@@ -9,6 +9,7 @@ import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import { LinkedInNameButton } from '../profile/LinkedInNameButton';
 import { apsAppUserFavoriteSpeakersByFavoriteKey } from '../../graphql/queries';
 
 const getSpeakerById = /* GraphQL */ `
@@ -344,7 +345,10 @@ export default function SpeakerProfileScreen() {
         </View>
         <View style={styles.headerText}>
           <Text style={styles.speakerTitle}>{clean(speaker?.presentationTitle) || name}</Text>
-          <Text style={styles.name}>{name}</Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>{name}</Text>
+            <LinkedInNameButton url={speaker?.profile?.linkedin} size={18} />
+          </View>
           {!!subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </View>
         <View>
@@ -444,7 +448,8 @@ const styles = StyleSheet.create({
 
   headerText: { flex: 1, gap: 3 },
   speakerTitle: { fontSize: 18, fontWeight: '900', color: '#111827' },
-  name: { fontWeight: '800', color: '#111827' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
+  name: { fontWeight: '800', color: '#111827', flexShrink: 1 },
   subtitle: { color: '#6b7280' },
 
   favoriteBtn: {

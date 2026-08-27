@@ -59,7 +59,7 @@ export default function AdminAnnouncementsListScreen() {
         <AppCard style={styles.card}>
           <Text style={styles.sectionTitle}>Announcements</Text>
           <Text style={styles.helpText}>
-            Send push notifications to everyone with notifications enabled. Scheduled
+            Send push notifications to everyone, or limit by registration type. Scheduled
             announcements publish automatically in the background at the scheduled time.
           </Text>
           {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -116,6 +116,10 @@ export default function AdminAnnouncementsListScreen() {
                   </View>
                   <Text style={styles.preview} numberOfLines={2}>
                     {row.bodyPreview}
+                  </Text>
+                  <Text style={styles.meta}>Audience: {row.audienceLabel}</Text>
+                  <Text style={styles.meta}>
+                    Sent {row.sentCount} · Opened {row.uniqueOpenCount}
                   </Text>
                   <Text style={styles.meta}>{formatAnnouncementListMeta(row)}</Text>
                 </View>

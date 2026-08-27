@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import RenderHtml from 'react-native-render-html';
 import { NOTIFICATION_THEMES } from '../notifications/notificationThemes';
 import { getApsAppSession } from '../../graphql/queries';
 import { useEngageStore } from '../../store/engageStore';
@@ -15,6 +16,7 @@ import {
 import { formatLocalDateTime } from '../../utils/formatLocalDateTime';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { recordAnnouncementOpen } from '../../utils/announcementOpenTracking';
+import { announcementHtmlTagStyles, toSafeRenderableHtml } from '../../utils/htmlText';
 
 const theme = NOTIFICATION_THEMES.announcement;
 
@@ -32,6 +34,7 @@ function getLinkIcon(destination: AnnouncementDeepLinkDestination): keyof typeof
 
 export default function AnnouncementDetailTool() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { width } = useWindowDimensions();
   const announcement = useEngageStore((s) => (id ? s.announcementById[id] : undefined));
   const loading = useEngageStore((s) => s.loading.announcementDetail);
   const error = useEngageStore((s) => s.error.announcementDetail);
@@ -133,6 +136,7 @@ export default function AnnouncementDetailTool() {
   }
 
   const displayAt = formatLocalDateTime(announcement.createdAt);
+  const bodyHtml = toSafeRenderableHtml(announcement.body);
 
   return (
     <AppScreen padded={false}>
@@ -165,7 +169,17 @@ export default function AnnouncementDetailTool() {
 
             <View style={styles.divider} />
 
-            <Text style={styles.body}>{announcement.body}</Text>
+            {!!bodyHtml && (
+              <RenderHtml
+                contentWidth={Math.max(1, width - 64)}
+                source={{ html: bodyHtml }}
+                baseStyle={styles.body}
+                tagsStyles={{
+                  ...announcementHtmlTagStyles,
+                  a: { color: ui.colors.primary, textDecorationLine: 'underline' },
+                }}
+              />
+            )}
 
             {destination ? (
               <>

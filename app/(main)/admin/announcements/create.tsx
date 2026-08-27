@@ -1,28 +1,67 @@
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { RegistrantType } from '../../../../src/API';
 import { AdminAnnouncementFormLayout } from '../../../../src/components/admin/announcements/AdminAnnouncementFormLayout';
 import {
   confirmImmediatePublish,
+  countAnnouncementAudiencePreview,
   createAdminAnnouncement,
   dateToScheduleFields,
+  formatAudienceTypes,
   getDefaultScheduleDate,
+  loadAnnouncementAudiencePreview,
+  type AnnouncementAudiencePreviewRow,
 } from '../../../../src/components/admin/announcements/adminAnnouncementsService';
+import { AnnouncementAudienceField } from '../../../../src/components/admin/announcements/AnnouncementAudienceField';
 import { AnnouncementDeepLinkField } from '../../../../src/components/admin/announcements/AnnouncementDeepLinkField';
 import { AnnouncementScheduleField } from '../../../../src/components/admin/announcements/AnnouncementScheduleField';
+import { SessionRichTextEditor } from '../../../../src/components/admin/agenda/SessionRichTextEditor';
 import { AppButton } from '../../../../src/ui/AppButton';
 import { AppCard } from '../../../../src/ui/AppCard';
 import { ui } from '../../../../src/ui/tokens';
+
+function publishWarningText(types: RegistrantType[]) {
+  if (!types.length) {
+    return 'Publish now will go live instantly and notify all users with push notifications enabled.';
+  }
+  return `Publish now will go live instantly and notify ${formatAudienceTypes(types)} registrants with push notifications enabled.`;
+}
 
 export default function AdminCreateAnnouncementScreen() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [deepLink, setDeepLink] = useState('');
+  const [audienceTypes, setAudienceTypes] = useState<RegistrantType[]>([]);
+  const [previewRows, setPreviewRows] = useState<AnnouncementAudiencePreviewRow[]>([]);
+  const [previewLoading, setPreviewLoading] = useState(true);
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rows = await loadAnnouncementAudiencePreview();
+        if (!cancelled) setPreviewRows(rows);
+      } catch {
+        if (!cancelled) setPreviewRows([]);
+      } finally {
+        if (!cancelled) setPreviewLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const previewCount = useMemo(
+    () => countAnnouncementAudiencePreview(previewRows, audienceTypes),
+    [audienceTypes, previewRows],
+  );
 
   const clearFormError = () => {
     if (formError) setFormError(null);
@@ -36,6 +75,7 @@ export default function AdminCreateAnnouncementScreen() {
         title,
         body,
         deepLink,
+        audienceTypes,
         scheduleEnabled,
         scheduleDate,
         scheduleTime,
@@ -59,7 +99,7 @@ export default function AdminCreateAnnouncementScreen() {
       return;
     }
 
-    confirmImmediatePublish(runCreate);
+    confirmImmediatePublish(runCreate, { audienceTypes });
   };
 
   const enableSchedule = (enabled: boolean) => {
@@ -77,7 +117,8 @@ export default function AdminCreateAnnouncementScreen() {
       <AppCard style={styles.card}>
         <Text style={styles.sectionTitle}>Create Announcement</Text>
         <Text style={styles.helpText}>
-          Published announcements send a push notification to all users with notifications enabled.
+          Published announcements send a push notification to matching registrants with
+          notifications enabled.
         </Text>
         <TextInput
           value={title}
@@ -89,17 +130,13 @@ export default function AdminCreateAnnouncementScreen() {
           placeholderTextColor={ui.colors.muted}
           style={styles.input}
         />
-        <TextInput
+        <SessionRichTextEditor
           value={body}
-          onChangeText={(value) => {
+          onChange={(value) => {
             setBody(value);
             clearFormError();
           }}
           placeholder='Message body (required)'
-          placeholderTextColor={ui.colors.muted}
-          style={[styles.input, styles.multiline]}
-          multiline
-          textAlignVertical='top'
         />
         <AnnouncementDeepLinkField
           value={deepLink}
@@ -107,6 +144,15 @@ export default function AdminCreateAnnouncementScreen() {
             setDeepLink(value);
             clearFormError();
           }}
+        />
+        <AnnouncementAudienceField
+          value={audienceTypes}
+          onChange={(value) => {
+            setAudienceTypes(value);
+            clearFormError();
+          }}
+          previewCount={previewLoading ? null : previewCount}
+          previewLoading={previewLoading}
         />
 
         <View style={styles.switchRow}>
@@ -123,9 +169,7 @@ export default function AdminCreateAnnouncementScreen() {
 
         {!scheduleEnabled ? (
           <View style={styles.warningBox}>
-            <Text style={styles.warningText}>
-              Publish now will go live instantly and notify all users with push notifications enabled.
-            </Text>
+            <Text style={styles.warningText}>{publishWarningText(audienceTypes)}</Text>
           </View>
         ) : null}
 
@@ -175,7 +219,6 @@ const styles = StyleSheet.create({
     color: ui.colors.text,
     marginTop: 8,
   },
-  multiline: { minHeight: 120 },
   switchRow: {
     marginTop: 14,
     flexDirection: 'row',

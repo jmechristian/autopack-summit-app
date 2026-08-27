@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { autopackColors } from '../../theme';
 import { updateProfile } from '../../utils/profileMutations';
 import * as APITypes from '../../API';
+import { normalizeLinkedInUrl } from './LinkedInNameButton';
 
 interface EditablePersonalInfoProps {
   profile: APITypes.ApsAppUserProfile;
@@ -22,6 +23,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
     phone: profile.phone || '',
     company: profile.company || '',
     jobTitle: profile.jobTitle || '',
+    linkedin: profile.linkedin || '',
     bio: profile.bio || '',
   });
 
@@ -33,6 +35,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
       phone: profile.phone || '',
       company: profile.company || '',
       jobTitle: profile.jobTitle || '',
+      linkedin: profile.linkedin || '',
       bio: profile.bio || '',
     });
   }, [profile]);
@@ -48,6 +51,7 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
         phone: formData.phone.trim() || undefined,
         company: formData.company.trim() || undefined,
         jobTitle: formData.jobTitle.trim() || undefined,
+        linkedin: formData.linkedin.trim() ? normalizeLinkedInUrl(formData.linkedin) : null,
         bio: formData.bio.trim() || undefined,
       });
       setIsEditing(false);
@@ -67,12 +71,18 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
       phone: profile.phone || '',
       company: profile.company || '',
       jobTitle: profile.jobTitle || '',
+      linkedin: profile.linkedin || '',
       bio: profile.bio || '',
     });
     setIsEditing(false);
   };
 
-  const renderField = (label: string, value: string, key: keyof typeof formData) => {
+  const renderField = (
+    label: string,
+    value: string,
+    key: keyof typeof formData,
+    options?: { placeholder?: string; autoCapitalize?: 'none' | 'sentences' | 'words' },
+  ) => {
     if (isEditing) {
       const isBio = key === 'bio';
       return (
@@ -86,6 +96,10 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
           numberOfLines={isBio ? 6 : 1}
           inputStyle={isBio ? styles.textAreaInput : undefined}
           textAlignVertical={isBio ? 'top' : 'center'}
+          placeholder={options?.placeholder}
+          autoCapitalize={options?.autoCapitalize}
+          autoCorrect={key === 'linkedin' ? false : undefined}
+          keyboardType={key === 'linkedin' ? 'url' : undefined}
         />
       );
     }
@@ -135,6 +149,10 @@ export function EditablePersonalInfo({ profile, onUpdate }: EditablePersonalInfo
         {renderField('Phone', formData.phone, 'phone')}
         {renderField('Company', formData.company, 'company')}
         {renderField('Job Title', formData.jobTitle, 'jobTitle')}
+        {renderField('LinkedIn', formData.linkedin, 'linkedin', {
+          placeholder: 'https://www.linkedin.com/in/your-profile',
+          autoCapitalize: 'none',
+        })}
         {renderField('Bio', formData.bio, 'bio')}
       </View>
     </View>

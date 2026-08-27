@@ -33,6 +33,7 @@ import { AffiliationsSection } from '../../../src/components/profile/Affiliation
 import { EducationSection } from '../../../src/components/profile/EducationSection';
 import { ExpertiseSection } from '../../../src/components/profile/ExpertiseSection';
 import { InterestsSection } from '../../../src/components/profile/InterestsSection';
+import { LinkedInNameButton, normalizeLinkedInUrl } from '../../../src/components/profile/LinkedInNameButton';
 import { ui } from '../../../src/ui/tokens';
 import { signOut } from '../../../src/utils/authUtils';
 import { updateProfile } from '../../../src/utils/profileMutations';
@@ -66,6 +67,10 @@ export default function Profile() {
   const [isSavingBio, setIsSavingBio] = useState(false);
   const [bioText, setBioText] = useState('');
   const [bioFeedback, setBioFeedback] = useState<string | null>(null);
+  const [isEditingLinkedin, setIsEditingLinkedin] = useState(false);
+  const [isSavingLinkedin, setIsSavingLinkedin] = useState(false);
+  const [linkedinText, setLinkedinText] = useState('');
+  const [linkedinFeedback, setLinkedinFeedback] = useState<string | null>(null);
   const [resumeFeedback, setResumeFeedback] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -93,6 +98,10 @@ export default function Profile() {
   React.useEffect(() => {
     setBioText(profile?.bio || '');
   }, [profile?.bio]);
+
+  React.useEffect(() => {
+    setLinkedinText(profile?.linkedin || '');
+  }, [profile?.linkedin]);
 
   const formatRegistrantType = (attendeeType?: string | null) => {
     if (!attendeeType) return '';
@@ -180,6 +189,27 @@ export default function Profile() {
       { text: 'Choose from Library', onPress: () => void pickFromLibrary() },
       { text: 'Cancel', style: 'cancel' },
     ]);
+  };
+
+  const handleSaveLinkedin = async () => {
+    setIsSavingLinkedin(true);
+    setLinkedinFeedback(null);
+    try {
+      await updateProfile({
+        id: profile!.id,
+        linkedin: linkedinText.trim() ? normalizeLinkedInUrl(linkedinText) : null,
+      });
+      await refreshProfile();
+      setIsEditingLinkedin(false);
+      setLinkedinFeedback('Saved');
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to save LinkedIn.'
+      );
+    } finally {
+      setIsSavingLinkedin(false);
+    }
   };
 
   const handleSaveBio = async () => {
@@ -336,7 +366,10 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.nameText}>{fullName}</Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.nameText}>{fullName}</Text>
+            <LinkedInNameButton url={profile.linkedin} size={22} />
+          </View>
           {!!roleCompanyLine && (
             <Text style={styles.roleCompanyText}>{roleCompanyLine}</Text>
           )}
@@ -437,6 +470,61 @@ export default function Profile() {
             </View>
             <Text style={styles.actionTileText}>View Registration Dashboard</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionHeaderLeft}>
+              <View style={styles.sectionIconWrap}>
+                <Ionicons name='logo-linkedin' size={14} color='#1d4ed8' />
+              </View>
+              <Text style={[styles.sectionHeaderText, { textTransform: 'none' }]}>LinkedIn</Text>
+            </View>
+            {!isEditingLinkedin ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setIsEditingLinkedin(true);
+                  setLinkedinFeedback(null);
+                }}
+              >
+                <Text style={styles.editLink}>Edit</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.inlineActions}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setLinkedinText(profile.linkedin || '');
+                    setIsEditingLinkedin(false);
+                  }}
+                >
+                  <Text style={styles.cancelLink}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSaveLinkedin} disabled={isSavingLinkedin}>
+                  <Text style={styles.editLink}>
+                    {isSavingLinkedin ? 'Saving...' : 'Save'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+          {isEditingLinkedin ? (
+            <TextInput
+              style={styles.linkedinInput}
+              value={linkedinText}
+              onChangeText={setLinkedinText}
+              placeholder='https://www.linkedin.com/in/your-profile'
+              placeholderTextColor='#9ca3af'
+              autoCapitalize='none'
+              autoCorrect={false}
+              keyboardType='url'
+            />
+          ) : profile.linkedin?.trim() ? (
+            <Text style={styles.linkedinValue}>{profile.linkedin.trim()}</Text>
+          ) : (
+            <Text style={styles.sectionBodyText}>No LinkedIn, edit to add</Text>
+          )}
+          {!!linkedinFeedback && <Text style={styles.savedText}>{linkedinFeedback}</Text>}
+          <View style={styles.sectionDivider} />
         </View>
 
         <View style={styles.sectionCard}>
@@ -678,12 +766,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 4,
+  },
   nameText: {
     fontSize: 22,
     lineHeight: 25,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 4,
   },
   roleCompanyText: {
     fontSize: 14,
@@ -821,6 +915,24 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#111827',
     backgroundColor: '#fff',
+  },
+  linkedinInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 44,
+    fontSize: 15,
+    color: '#111827',
+    backgroundColor: '#fff',
+  },
+  linkedinValue: {
+    color: '#111827',
+    fontSize: 15,
+    lineHeight: 21,
+    paddingHorizontal: 4,
+    paddingVertical: 10,
   },
   lockedBioInput: {
     color: '#4b5563',

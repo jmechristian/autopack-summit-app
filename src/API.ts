@@ -1350,8 +1350,11 @@ export type ApsAdminAnnouncement = {
   title?: string | null,
   body: string,
   deepLink?: string | null,
+  audienceTypes?: Array< RegistrantType | null > | null,
   scheduledAt?: string | null,
   publishedAt?: string | null,
+  sentCount?: number | null,
+  sentAt?: string | null,
   createdAt: string,
   updatedAt: string,
 };
@@ -1362,8 +1365,11 @@ export type ModelApsAdminAnnouncementFilterInput = {
   title?: ModelStringInput | null,
   body?: ModelStringInput | null,
   deepLink?: ModelStringInput | null,
+  audienceTypes?: ModelRegistrantTypeListInput | null,
   scheduledAt?: ModelStringInput | null,
   publishedAt?: ModelStringInput | null,
+  sentCount?: ModelIntInput | null,
+  sentAt?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelApsAdminAnnouncementFilterInput | null > | null,
@@ -1371,9 +1377,46 @@ export type ModelApsAdminAnnouncementFilterInput = {
   not?: ModelApsAdminAnnouncementFilterInput | null,
 };
 
+export type ModelRegistrantTypeListInput = {
+  eq?: Array< RegistrantType | null > | null,
+  ne?: Array< RegistrantType | null > | null,
+  contains?: RegistrantType | null,
+  notContains?: RegistrantType | null,
+};
+
 export type ModelApsAdminAnnouncementConnection = {
   __typename: "ModelApsAdminAnnouncementConnection",
   items:  Array<ApsAdminAnnouncement | null >,
+  nextToken?: string | null,
+};
+
+export type ApsAnnouncementOpen = {
+  __typename: "ApsAnnouncementOpen",
+  id: string,
+  announcementId: string,
+  eventId: string,
+  userId: string,
+  source?: string | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelApsAnnouncementOpenFilterInput = {
+  id?: ModelIDInput | null,
+  announcementId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  source?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAnnouncementOpenFilterInput | null > | null,
+  or?: Array< ModelApsAnnouncementOpenFilterInput | null > | null,
+  not?: ModelApsAnnouncementOpenFilterInput | null,
+};
+
+export type ModelApsAnnouncementOpenConnection = {
+  __typename: "ModelApsAnnouncementOpenConnection",
+  items:  Array<ApsAnnouncementOpen | null >,
   nextToken?: string | null,
 };
 
@@ -2137,13 +2180,6 @@ export type ModelRegistrantStatusListInput = {
   ne?: Array< RegistrantStatus | null > | null,
   contains?: RegistrantStatus | null,
   notContains?: RegistrantStatus | null,
-};
-
-export type ModelRegistrantTypeListInput = {
-  eq?: Array< RegistrantType | null > | null,
-  ne?: Array< RegistrantType | null > | null,
-  contains?: RegistrantType | null,
-  notContains?: RegistrantType | null,
 };
 
 export type ModelEmailCampaignStatusInput = {
@@ -3647,8 +3683,11 @@ export type CreateApsAdminAnnouncementInput = {
   title?: string | null,
   body: string,
   deepLink?: string | null,
+  audienceTypes?: Array< RegistrantType | null > | null,
   scheduledAt?: string | null,
   publishedAt?: string | null,
+  sentCount?: number | null,
+  sentAt?: string | null,
   createdAt?: string | null,
   updatedAt?: string | null,
 };
@@ -3658,8 +3697,11 @@ export type ModelApsAdminAnnouncementConditionInput = {
   title?: ModelStringInput | null,
   body?: ModelStringInput | null,
   deepLink?: ModelStringInput | null,
+  audienceTypes?: ModelRegistrantTypeListInput | null,
   scheduledAt?: ModelStringInput | null,
   publishedAt?: ModelStringInput | null,
+  sentCount?: ModelIntInput | null,
+  sentAt?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelApsAdminAnnouncementConditionInput | null > | null,
@@ -3673,13 +3715,52 @@ export type UpdateApsAdminAnnouncementInput = {
   title?: string | null,
   body?: string | null,
   deepLink?: string | null,
+  audienceTypes?: Array< RegistrantType | null > | null,
   scheduledAt?: string | null,
   publishedAt?: string | null,
+  sentCount?: number | null,
+  sentAt?: string | null,
   createdAt?: string | null,
   updatedAt?: string | null,
 };
 
 export type DeleteApsAdminAnnouncementInput = {
+  id: string,
+};
+
+export type CreateApsAnnouncementOpenInput = {
+  id?: string | null,
+  announcementId: string,
+  eventId: string,
+  userId: string,
+  source?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type ModelApsAnnouncementOpenConditionInput = {
+  announcementId?: ModelIDInput | null,
+  eventId?: ModelIDInput | null,
+  userId?: ModelIDInput | null,
+  source?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelApsAnnouncementOpenConditionInput | null > | null,
+  or?: Array< ModelApsAnnouncementOpenConditionInput | null > | null,
+  not?: ModelApsAnnouncementOpenConditionInput | null,
+};
+
+export type UpdateApsAnnouncementOpenInput = {
+  id: string,
+  announcementId?: string | null,
+  eventId?: string | null,
+  userId?: string | null,
+  source?: string | null,
+  createdAt?: string | null,
+  updatedAt?: string | null,
+};
+
+export type DeleteApsAnnouncementOpenInput = {
   id: string,
 };
 
@@ -4760,12 +4841,27 @@ export type ModelSubscriptionApsAdminAnnouncementFilterInput = {
   title?: ModelSubscriptionStringInput | null,
   body?: ModelSubscriptionStringInput | null,
   deepLink?: ModelSubscriptionStringInput | null,
+  audienceTypes?: ModelSubscriptionStringInput | null,
   scheduledAt?: ModelSubscriptionStringInput | null,
   publishedAt?: ModelSubscriptionStringInput | null,
+  sentCount?: ModelSubscriptionIntInput | null,
+  sentAt?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionApsAdminAnnouncementFilterInput | null > | null,
   or?: Array< ModelSubscriptionApsAdminAnnouncementFilterInput | null > | null,
+};
+
+export type ModelSubscriptionApsAnnouncementOpenFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  announcementId?: ModelSubscriptionIDInput | null,
+  eventId?: ModelSubscriptionIDInput | null,
+  source?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionApsAnnouncementOpenFilterInput | null > | null,
+  or?: Array< ModelSubscriptionApsAnnouncementOpenFilterInput | null > | null,
+  userId?: ModelStringInput | null,
 };
 
 export type ModelSubscriptionApsUserEngageStateFilterInput = {
@@ -6646,8 +6742,11 @@ export type GetApsAdminAnnouncementQuery = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -6669,8 +6768,51 @@ export type ListApsAdminAnnouncementsQuery = {
       title?: string | null,
       body: string,
       deepLink?: string | null,
+      audienceTypes?: Array< RegistrantType | null > | null,
       scheduledAt?: string | null,
       publishedAt?: string | null,
+      sentCount?: number | null,
+      sentAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetApsAnnouncementOpenQueryVariables = {
+  id: string,
+};
+
+export type GetApsAnnouncementOpenQuery = {
+  getApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListApsAnnouncementOpensQueryVariables = {
+  filter?: ModelApsAnnouncementOpenFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListApsAnnouncementOpensQuery = {
+  listApsAnnouncementOpens?:  {
+    __typename: "ModelApsAnnouncementOpenConnection",
+    items:  Array< {
+      __typename: "ApsAnnouncementOpen",
+      id: string,
+      announcementId: string,
+      eventId: string,
+      userId: string,
+      source?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -8148,8 +8290,11 @@ export type ApsAdminAnnouncementsByEventIdAndCreatedAtQuery = {
       title?: string | null,
       body: string,
       deepLink?: string | null,
+      audienceTypes?: Array< RegistrantType | null > | null,
       scheduledAt?: string | null,
       publishedAt?: string | null,
+      sentCount?: number | null,
+      sentAt?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -8176,8 +8321,63 @@ export type ApsAdminAnnouncementsByEventIdAndScheduledAtQuery = {
       title?: string | null,
       body: string,
       deepLink?: string | null,
+      audienceTypes?: Array< RegistrantType | null > | null,
       scheduledAt?: string | null,
       publishedAt?: string | null,
+      sentCount?: number | null,
+      sentAt?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAnnouncementOpensByAnnouncementIdAndCreatedAtQueryVariables = {
+  announcementId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAnnouncementOpenFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAnnouncementOpensByAnnouncementIdAndCreatedAtQuery = {
+  apsAnnouncementOpensByAnnouncementIdAndCreatedAt?:  {
+    __typename: "ModelApsAnnouncementOpenConnection",
+    items:  Array< {
+      __typename: "ApsAnnouncementOpen",
+      id: string,
+      announcementId: string,
+      eventId: string,
+      userId: string,
+      source?: string | null,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ApsAnnouncementOpensByEventIdAndCreatedAtQueryVariables = {
+  eventId: string,
+  createdAt?: ModelStringKeyConditionInput | null,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelApsAnnouncementOpenFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ApsAnnouncementOpensByEventIdAndCreatedAtQuery = {
+  apsAnnouncementOpensByEventIdAndCreatedAt?:  {
+    __typename: "ModelApsAnnouncementOpenConnection",
+    items:  Array< {
+      __typename: "ApsAnnouncementOpen",
+      id: string,
+      announcementId: string,
+      eventId: string,
+      userId: string,
+      source?: string | null,
       createdAt: string,
       updatedAt: string,
     } | null >,
@@ -18843,8 +19043,11 @@ export type CreateApsAdminAnnouncementMutation = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -18863,8 +19066,11 @@ export type UpdateApsAdminAnnouncementMutation = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -18883,8 +19089,65 @@ export type DeleteApsAdminAnnouncementMutation = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateApsAnnouncementOpenMutationVariables = {
+  input: CreateApsAnnouncementOpenInput,
+  condition?: ModelApsAnnouncementOpenConditionInput | null,
+};
+
+export type CreateApsAnnouncementOpenMutation = {
+  createApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateApsAnnouncementOpenMutationVariables = {
+  input: UpdateApsAnnouncementOpenInput,
+  condition?: ModelApsAnnouncementOpenConditionInput | null,
+};
+
+export type UpdateApsAnnouncementOpenMutation = {
+  updateApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteApsAnnouncementOpenMutationVariables = {
+  input: DeleteApsAnnouncementOpenInput,
+  condition?: ModelApsAnnouncementOpenConditionInput | null,
+};
+
+export type DeleteApsAnnouncementOpenMutation = {
+  deleteApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -24554,8 +24817,11 @@ export type OnCreateApsAdminAnnouncementSubscription = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -24573,8 +24839,11 @@ export type OnUpdateApsAdminAnnouncementSubscription = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,
@@ -24592,8 +24861,65 @@ export type OnDeleteApsAdminAnnouncementSubscription = {
     title?: string | null,
     body: string,
     deepLink?: string | null,
+    audienceTypes?: Array< RegistrantType | null > | null,
     scheduledAt?: string | null,
     publishedAt?: string | null,
+    sentCount?: number | null,
+    sentAt?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateApsAnnouncementOpenSubscriptionVariables = {
+  filter?: ModelSubscriptionApsAnnouncementOpenFilterInput | null,
+  userId?: string | null,
+};
+
+export type OnCreateApsAnnouncementOpenSubscription = {
+  onCreateApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateApsAnnouncementOpenSubscriptionVariables = {
+  filter?: ModelSubscriptionApsAnnouncementOpenFilterInput | null,
+  userId?: string | null,
+};
+
+export type OnUpdateApsAnnouncementOpenSubscription = {
+  onUpdateApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteApsAnnouncementOpenSubscriptionVariables = {
+  filter?: ModelSubscriptionApsAnnouncementOpenFilterInput | null,
+  userId?: string | null,
+};
+
+export type OnDeleteApsAnnouncementOpenSubscription = {
+  onDeleteApsAnnouncementOpen?:  {
+    __typename: "ApsAnnouncementOpen",
+    id: string,
+    announcementId: string,
+    eventId: string,
+    userId: string,
+    source?: string | null,
     createdAt: string,
     updatedAt: string,
   } | null,

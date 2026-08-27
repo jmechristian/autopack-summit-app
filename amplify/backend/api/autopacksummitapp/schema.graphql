@@ -1289,6 +1289,8 @@ type ApsAnnouncementOpen
   eventId: ID! @index(name: "byEventCreated", sortKeyFields: ["createdAt"])
   userId: ID!
   source: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }
 
 enum EmailCampaignStatus {

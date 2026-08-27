@@ -41,6 +41,7 @@ export function SessionRichTextEditor({
 
   const applyParagraph = () => applyTag('<p>', '</p>');
   const applyBold = () => applyTag('<strong>', '</strong>');
+  const applyItalic = () => applyTag('<em>', '</em>');
   const applyUnderline = () => applyTag('<u>', '</u>');
   const applyLineBreak = () => applyTag('<br/>', '');
 
@@ -52,6 +53,9 @@ export function SessionRichTextEditor({
         </Pressable>
         <Pressable style={styles.toolBtn} onPress={applyBold}>
           <Text style={styles.toolBtnText}>Bold</Text>
+        </Pressable>
+        <Pressable style={styles.toolBtn} onPress={applyItalic}>
+          <Text style={styles.toolBtnText}>Italic</Text>
         </Pressable>
         <Pressable style={styles.toolBtn} onPress={applyUnderline}>
           <Text style={styles.toolBtnText}>Underline</Text>
@@ -84,6 +88,8 @@ export function SessionRichTextEditor({
               br: { marginBottom: 0 },
               strong: { fontWeight: '700' },
               b: { fontWeight: '700' },
+              em: { fontStyle: 'italic' },
+              i: { fontStyle: 'italic' },
               u: { textDecorationLine: 'underline' },
             }}
           />

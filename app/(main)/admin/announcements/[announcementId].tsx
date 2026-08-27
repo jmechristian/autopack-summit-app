@@ -7,6 +7,7 @@ import {
   confirmImmediatePublish,
   deleteAdminAnnouncement,
   formatAnnouncementDateTime,
+  formatAudienceTypes,
   getAdminAnnouncementDetail,
   publishAdminAnnouncementNow,
   splitScheduleFields,
@@ -16,6 +17,7 @@ import {
 } from '../../../../src/components/admin/announcements/adminAnnouncementsService';
 import { AnnouncementDeepLinkField } from '../../../../src/components/admin/announcements/AnnouncementDeepLinkField';
 import { AnnouncementScheduleField } from '../../../../src/components/admin/announcements/AnnouncementScheduleField';
+import { SessionRichTextEditor } from '../../../../src/components/admin/agenda/SessionRichTextEditor';
 import { AppButton } from '../../../../src/ui/AppButton';
 import { AppCard } from '../../../../src/ui/AppCard';
 import { AppScreen } from '../../../../src/ui/AppScreen';
@@ -100,20 +102,23 @@ export default function AdminAnnouncementDetailScreen() {
   const publishNow = () => {
     if (!detail) return;
 
-    confirmImmediatePublish(async () => {
-      try {
-        setSaving('publish');
-        setFormError(null);
-        await publishAdminAnnouncementNow(detail.id);
-        await load();
-      } catch (e: any) {
-        const message = formatActionError(e, 'Unable to publish announcement.');
-        setFormError(message);
-        Alert.alert('Publish failed', message);
-      } finally {
-        setSaving(null);
-      }
-    });
+    confirmImmediatePublish(
+      async () => {
+        try {
+          setSaving('publish');
+          setFormError(null);
+          await publishAdminAnnouncementNow(detail.id);
+          await load();
+        } catch (e: any) {
+          const message = formatActionError(e, 'Unable to publish announcement.');
+          setFormError(message);
+          Alert.alert('Publish failed', message);
+        } finally {
+          setSaving(null);
+        }
+      },
+      { audienceTypes: detail.audienceTypes },
+    );
   };
 
   const remove = async () => {
@@ -195,6 +200,10 @@ export default function AdminAnnouncementDetailScreen() {
             Scheduled for {formatAnnouncementDateTime(detail.scheduledAt)}
           </Text>
         ) : null}
+        <Text style={styles.meta}>Audience: {detail.audienceLabel}</Text>
+        <Text style={styles.meta}>
+          Sent {detail.sentCount} · Opened {detail.uniqueOpenCount}
+        </Text>
       </AppCard>
 
       <AppCard style={styles.card}>
@@ -209,17 +218,13 @@ export default function AdminAnnouncementDetailScreen() {
           placeholderTextColor={ui.colors.muted}
           style={styles.input}
         />
-        <TextInput
+        <SessionRichTextEditor
           value={body}
-          onChangeText={(value) => {
+          onChange={(value) => {
             setBody(value);
             clearFormError();
           }}
           placeholder='Message body (required)'
-          placeholderTextColor={ui.colors.muted}
-          style={[styles.input, styles.multiline]}
-          multiline
-          textAlignVertical='top'
         />
         <AnnouncementDeepLinkField
           value={deepLink}
@@ -254,8 +259,9 @@ export default function AdminAnnouncementDetailScreen() {
             ) : (
               <View style={styles.warningBox}>
                 <Text style={styles.warningText}>
-                  Publish now will go live instantly and notify all users with push notifications
-                  enabled.
+                  {detail.audienceTypes.length
+                    ? `Publish now will go live instantly and notify ${formatAudienceTypes(detail.audienceTypes)} registrants with push notifications enabled.`
+                    : 'Publish now will go live instantly and notify all users with push notifications enabled.'}
                 </Text>
               </View>
             )}
@@ -324,7 +330,6 @@ const styles = StyleSheet.create({
     color: ui.colors.text,
     marginTop: 8,
   },
-  multiline: { minHeight: 120 },
   switchRow: {
     marginTop: 14,
     flexDirection: 'row',

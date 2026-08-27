@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { NotificationCard } from '../notifications/NotificationCard';
 import { useEngageStore } from '../../store/engageStore';
 import { setAppBadgeCount } from '../../utils/pushNotifications';
+import { htmlToPlainText } from '../../utils/htmlText';
 import { AppScreen } from '../../ui/AppScreen';
 import { ui } from '../../ui/tokens';
 
@@ -38,7 +39,7 @@ export default function AnnouncementsTool({
       announcements.map((announcement) => {
         const isUnread =
           !lastSeenAnnouncementAt || announcement.createdAt > lastSeenAnnouncementAt;
-        const preview = truncateText(announcement.body || '');
+        const preview = truncateText(htmlToPlainText(announcement.body || ''));
 
         return {
           id: announcement.id,

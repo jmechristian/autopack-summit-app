@@ -16,6 +16,7 @@ import {
 import * as Contacts from 'expo-contacts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ExpertiseChips } from '../profile/ExpertisePickerModal';
+import { LinkedInNameButton } from '../profile/LinkedInNameButton';
 import { APS_ID } from '../../config/apsConfig';
 import { normalizeExpertiseTags } from '../../constants/expertiseTags';
 import {
@@ -487,7 +488,10 @@ export default function CommunityProfileScreen() {
         </View>
 
         <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{displayName}</Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>{displayName}</Text>
+            <LinkedInNameButton url={profile.linkedin} size={18} />
+          </View>
           {!!profile.jobTitle && <Text style={styles.muted}>{profile.jobTitle}</Text>}
           {!!profile.company && <Text style={styles.muted}>{profile.company}</Text>}
           {canViewEmail && !!profile.email && (
@@ -770,7 +774,13 @@ const styles = StyleSheet.create({
   },
   avatarImg: { width: 56, height: 56, borderRadius: 999 },
   avatarText: { fontWeight: '900', color: '#111827', fontSize: 18 },
-  name: { fontSize: 18, fontWeight: '900', color: '#111827' },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  name: { fontSize: 18, fontWeight: '900', color: '#111827', flexShrink: 1 },
   emailText: { color: '#1f2937', fontSize: 13, marginTop: 2 },
 
   headerActions: { flexDirection: 'row', gap: 6 },
