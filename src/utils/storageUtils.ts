@@ -50,26 +50,18 @@ export async function uploadProfilePicture(fileUri: string): Promise<string> {
  */
 export async function getProfilePictureUrl(key: string): Promise<string> {
   try {
-    const normalizedKey = normalizeProfilePictureKey(key);
+    const normalizedKey = normalizeAmplifyPublicKey(key);
     if (!normalizedKey) {
       throw new Error('Missing profile picture key');
     }
-    const { getUrl } = await import('aws-amplify/storage');
-    const urlResult = await getUrl({
-      key: normalizedKey,
-      options: {
-        accessLevel: 'public',
-        expiresIn: 3600, // 1 hour expiration
-      },
-    });
-    return urlResult.url.toString();
+    return await getAmplifyPublicUrl(normalizedKey);
   } catch (error) {
     console.error('Error getting profile picture URL:', error);
     throw new Error('Failed to get profile picture URL.');
   }
 }
 
-function normalizeProfilePictureKey(input: string): string {
+function normalizeAmplifyPublicKey(input: string): string {
   let value = (input || '').trim();
   if (!value) return '';
 
@@ -103,6 +95,18 @@ function normalizeProfilePictureKey(input: string): string {
   return value;
 }
 
+async function getAmplifyPublicUrl(key: string, expiresIn = 3600): Promise<string> {
+  const { getUrl } = await import('aws-amplify/storage');
+  const urlResult = await getUrl({
+    key,
+    options: {
+      accessLevel: 'public',
+      expiresIn,
+    },
+  });
+  return urlResult.url.toString();
+}
+
 /**
  * Resolve profile picture reference from DB to a loadable image URI.
  * Handles full URLs, signed URLs, and S3 object keys.
@@ -131,59 +135,71 @@ export async function resolveProfilePictureUri(
 }
 
 /**
- * Upload resume PDF to S3
+ * Upload resume PDF to S3.
+ * Stores the object key (not a signed URL) so the file stays readable.
  * @param fileUri - URI of the PDF file (from expo-document-picker)
- * @returns Promise<string> - Public URL of uploaded PDF
+ * @returns Promise<string> - S3 key (path) of uploaded PDF
  */
 export async function uploadResume(fileUri: string): Promise<string> {
   try {
     const user = await getCurrentUser();
     const userId = user.userId;
-    
-    // Read file to check size
+
     const response = await fetch(fileUri);
     const blob = await response.blob();
-    
-    // Validate file size (10MB limit)
+
     if (blob.size > MAX_RESUME_SIZE) {
       throw new Error('Resume file size exceeds 10MB limit. Please choose a smaller file.');
     }
-    
-    // Validate file type
-    if (blob.type !== 'application/pdf') {
+
+    const mime = String(blob.type || '').toLowerCase();
+    const looksPdf =
+      mime === 'application/pdf' ||
+      mime === 'application/x-pdf' ||
+      fileUri.toLowerCase().split('?')[0].endsWith('.pdf');
+    if (!looksPdf) {
       throw new Error('Only PDF files are allowed for resumes.');
     }
-    
-    // Generate unique filename
+
     const timestamp = Date.now();
     const filename = `resumes/${userId}-${timestamp}.pdf`;
-    
-    // Upload to S3
-    const result = await uploadData({
+
+    await uploadData({
       key: filename,
       data: blob,
       options: {
         contentType: 'application/pdf',
+        contentDisposition: 'inline',
         accessLevel: 'public',
       },
     }).result;
-    
-    // Get the public URL
-    const { getUrl } = await import('aws-amplify/storage');
-    const urlResult = await getUrl({
-      key: filename,
-      options: {
-        accessLevel: 'public',
-      },
-    });
-    
-    return urlResult.url.toString();
+
+    return filename;
   } catch (error) {
     console.error('Error uploading resume:', error);
     if (error instanceof Error) {
       throw error;
     }
     throw new Error('Failed to upload resume. Please try again.');
+  }
+}
+
+/**
+ * Resolve a stored resume key or expired signed URL to a fresh readable URL.
+ */
+export async function resolveResumeUri(storedValue?: string | null): Promise<string | null> {
+  const value = (storedValue || '').trim();
+  if (!value) return null;
+  if (value.startsWith('file://') || value.startsWith('content://')) return value;
+
+  const key = normalizeAmplifyPublicKey(value);
+  if (!key) return null;
+
+  try {
+    return await getAmplifyPublicUrl(key);
+  } catch (error) {
+    console.warn('Unable to resolve resume URI from value:', value, error);
+    return null;
   }
 }
 

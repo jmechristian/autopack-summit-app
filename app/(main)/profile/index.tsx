@@ -39,6 +39,7 @@ import { signOut } from '../../../src/utils/authUtils';
 import { updateProfile } from '../../../src/utils/profileMutations';
 import {
   resolveProfilePictureUri,
+  resolveResumeUri,
   uploadProfilePicture,
   uploadResume,
 } from '../../../src/utils/storageUtils';
@@ -251,10 +252,10 @@ export default function Profile() {
       setUploadingResume(true);
       setResumeFeedback(null);
 
-      const resumeUrl = await uploadResume(result.assets[0].uri);
+      const resumeKey = await uploadResume(result.assets[0].uri);
       await updateProfile({
         id: profile!.id,
-        resume: resumeUrl,
+        resume: resumeKey,
       });
       await refreshProfile();
       setResumeFeedback('Saved');
@@ -268,9 +269,20 @@ export default function Profile() {
     }
   };
 
-  const handleResumeView = () => {
-    if (profile?.resume) {
-      Linking.openURL(profile.resume);
+  const handleResumeView = async () => {
+    if (!profile?.resume) return;
+    try {
+      const uri = await resolveResumeUri(profile.resume);
+      if (!uri) {
+        Alert.alert('Unavailable', 'Could not open this resume.');
+        return;
+      }
+      await Linking.openURL(uri);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Could not open resume.',
+      );
     }
   };
 

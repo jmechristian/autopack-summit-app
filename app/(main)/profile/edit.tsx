@@ -25,7 +25,7 @@ import { AffiliationsSection } from '../../../src/components/profile/Affiliation
 import { EducationSection } from '../../../src/components/profile/EducationSection';
 import { ExpertiseSection } from '../../../src/components/profile/ExpertiseSection';
 import { InterestsSection } from '../../../src/components/profile/InterestsSection';
-import { uploadProfilePicture, uploadResume, resolveProfilePictureUri } from '../../../src/utils/storageUtils';
+import { uploadProfilePicture, uploadResume, resolveProfilePictureUri, resolveResumeUri } from '../../../src/utils/storageUtils';
 import { updateProfile, createAffiliate, createEducation } from '../../../src/utils/profileMutations';
 import { useApsStore } from '../../../src/store/apsStore';
 import { autopackColors } from '../../../src/theme';
@@ -128,10 +128,10 @@ export default function ProfileEdit() {
 
         setUploadingResume(true);
         try {
-          const resumeUrl = await uploadResume(result.assets[0].uri);
+          const resumeKey = await uploadResume(result.assets[0].uri);
           await updateProfile({
             id: profile!.id,
-            resume: resumeUrl,
+            resume: resumeKey,
           });
           await refreshProfile();
           Alert.alert('Success', 'Document uploaded successfully');
@@ -146,9 +146,20 @@ export default function ProfileEdit() {
     }
   };
 
-  const handleResumeView = () => {
-    if (profile?.resume) {
-      Linking.openURL(profile.resume);
+  const handleResumeView = async () => {
+    if (!profile?.resume) return;
+    try {
+      const uri = await resolveResumeUri(profile.resume);
+      if (!uri) {
+        Alert.alert('Unavailable', 'Could not open this document.');
+        return;
+      }
+      await Linking.openURL(uri);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Could not open document.',
+      );
     }
   };
 
@@ -173,19 +184,11 @@ export default function ProfileEdit() {
     };
   }, [profile?.profilePicture]);
 
-  const getResumeUrl = () => {
-    if (!profile?.resume) return null;
-    if (profile.resume.startsWith('http')) {
-      return profile.resume;
-    }
-    return profile.resume;
-  };
-
   if (!appUser || !profile) {
     return <RiveLoader />;
   }
 
-  const resumeUrl = getResumeUrl();
+  const resumeUrl = profile.resume || null;
 
   return (
     <KeyboardAvoidingView

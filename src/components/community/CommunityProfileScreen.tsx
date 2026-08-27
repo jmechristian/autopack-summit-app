@@ -6,6 +6,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -32,7 +33,7 @@ import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
 import { drainIndexedList } from '../../utils/paginateGraphql';
 import { showAlert } from '../../utils/alert';
-import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import { resolveProfilePictureUri, resolveResumeUri } from '../../utils/storageUtils';
 import { NotesSection } from '../notes/NotesSection';
 import { RequestIntroModal } from '../requests/RequestIntroModal';
 import { RiveLoader } from '../RiveLoader';
@@ -424,6 +425,20 @@ export default function CommunityProfileScreen() {
     ]
   );
 
+  const handleResumeView = async () => {
+    if (!profile?.resume) return;
+    try {
+      const uri = await resolveResumeUri(profile.resume);
+      if (!uri) {
+        Alert.alert('Unavailable', 'Could not open this resume.');
+        return;
+      }
+      await Linking.openURL(uri);
+    } catch (e: any) {
+      Alert.alert('Error', e?.message || 'Could not open resume.');
+    }
+  };
+
   if (loading) {
     return <RiveLoader />;
   }
@@ -726,6 +741,26 @@ export default function CommunityProfileScreen() {
         <View style={styles.sectionDivider} />
       </View>
 
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
+              <Ionicons name="document-text-outline" size={14} color="#1d4ed8" />
+            </View>
+            <Text style={styles.sectionHeaderText}>Resume</Text>
+          </View>
+        </View>
+        {profile.resume ? (
+          <Pressable style={styles.resumeAction} onPress={handleResumeView}>
+            <Ionicons name="open-outline" size={16} color={autopackColors.apBlue} />
+            <Text style={styles.resumeActionText}>View uploaded resume</Text>
+          </Pressable>
+        ) : (
+          <Text style={styles.sectionBodyText}>No resume provided.</Text>
+        )}
+        <View style={styles.sectionDivider} />
+      </View>
+
       <NotesSection profileId={profile.id} />
         <RequestIntroModal
           visible={introModalVisible}
@@ -909,6 +944,19 @@ const styles = StyleSheet.create({
     color: '#0f766e',
     fontSize: 13,
     fontWeight: '700',
+  },
+  resumeAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 18,
+    justifyContent: 'center',
+  },
+  resumeActionText: {
+    color: autopackColors.apBlue,
+    fontWeight: '500',
+    fontSize: 15,
   },
   experienceItem: {
     paddingVertical: 10,
