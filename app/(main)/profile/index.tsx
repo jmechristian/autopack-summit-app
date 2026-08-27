@@ -348,6 +348,7 @@ export default function Profile() {
               <Text style={styles.typeBadgeText}>{registrantType}</Text>
             </View>
           )}
+          <ExpertiseSection embedded profile={profile} onUpdate={refreshProfile} />
         </View>
 
         <View style={styles.actionGrid}>
@@ -503,7 +504,6 @@ export default function Profile() {
 
         <AffiliationsSection profile={profile} onUpdate={refreshProfile} />
         <EducationSection profile={profile} onUpdate={refreshProfile} />
-        <ExpertiseSection profile={profile} onUpdate={refreshProfile} />
         <InterestsSection profile={profile} onUpdate={refreshProfile} />
 
         <View style={styles.sectionCard}>

@@ -1,150 +1,137 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import * as Haptics from 'expo-haptics';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
-import { EXPERTISE_TAGS, normalizeExpertiseTags } from '../../constants/expertiseTags';
+import { normalizeExpertiseTags } from '../../constants/expertiseTags';
 import { autopackColors } from '../../theme';
 import { updateProfile } from '../../utils/profileMutations';
 import * as APITypes from '../../API';
+import { ExpertiseChips, ExpertisePickerModal } from './ExpertisePickerModal';
 
 type ExpertiseSectionProps = {
   profile: APITypes.ApsAppUserProfile;
   onUpdate: () => Promise<void>;
+  /** Sit inside the name/photo card instead of a full section. */
+  embedded?: boolean;
 };
 
-export function ExpertiseSection({ profile, onUpdate }: ExpertiseSectionProps) {
-  const selected = useMemo(
+function tapFeedback() {
+  if (Platform.OS === 'web') return;
+  Haptics.selectionAsync().catch(() => {});
+}
+
+export function ExpertiseSection({ profile, onUpdate, embedded = false }: ExpertiseSectionProps) {
+  const saved = useMemo(
     () => normalizeExpertiseTags(profile.expertise),
     [profile.expertise],
   );
-  const [query, setQuery] = useState('');
-  const [focused, setFocused] = useState(false);
+  const [selected, setSelected] = useState(saved);
+  const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const selectedRef = useRef(selected);
+  const persistSeq = useRef(0);
+  selectedRef.current = selected;
 
-  const available = useMemo(() => {
-    const selectedSet = new Set(selected);
-    const q = query.trim().toLowerCase();
-    return EXPERTISE_TAGS.filter((tag) => {
-      if (selectedSet.has(tag)) return false;
-      if (!q) return true;
-      return tag.toLowerCase().includes(q);
-    });
-  }, [query, selected]);
+  useEffect(() => {
+    if (saving) return;
+    setSelected(saved);
+  }, [saved, saving]);
 
   const persist = async (next: string[]) => {
+    const seq = ++persistSeq.current;
     setSaving(true);
     try {
       await updateProfile({
         id: profile.id,
         expertise: next,
       });
+      if (seq !== persistSeq.current) return;
       await onUpdate();
     } catch (error) {
+      if (seq !== persistSeq.current) return;
+      setSelected(saved);
       Alert.alert(
         'Error',
         error instanceof Error ? error.message : 'Failed to update area of expertise',
       );
     } finally {
-      setSaving(false);
+      if (seq === persistSeq.current) setSaving(false);
     }
   };
 
-  const addTag = async (tag: string) => {
-    if (saving || selected.includes(tag)) return;
-    setQuery('');
-    await persist([...selected, tag]);
+  const addTag = (tag: string) => {
+    if (selectedRef.current.includes(tag)) return;
+    tapFeedback();
+    const next = [...selectedRef.current, tag];
+    selectedRef.current = next;
+    setSelected(next);
+    void persist(next);
   };
 
-  const removeTag = async (tag: string) => {
-    if (saving) return;
-    await persist(selected.filter((item) => item !== tag));
+  const removeTag = (tag: string) => {
+    tapFeedback();
+    const next = selectedRef.current.filter((item) => item !== tag);
+    selectedRef.current = next;
+    setSelected(next);
+    void persist(next);
   };
-
-  const showDropdown = focused && available.length > 0;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionHeaderLeft}>
-          <View style={styles.sectionIconWrap}>
-            <Ionicons name="ribbon-outline" size={14} color="#1d4ed8" />
-          </View>
-          <Text style={styles.sectionHeaderText}>Area of Expertise</Text>
+    <View style={[styles.container, embedded && styles.embedded]}>
+      {embedded ? (
+        <View style={styles.embeddedHeader}>
+          <Text style={styles.embeddedLabel}>Area of Expertise</Text>
+          {saving ? <ActivityIndicator size="small" color={autopackColors.apBlue} /> : null}
         </View>
-        {saving ? <ActivityIndicator size="small" color={autopackColors.apBlue} /> : null}
-      </View>
-
-      {selected.length === 0 ? (
-        <Text style={styles.emptyText}>No areas of expertise yet — search and tap to add</Text>
       ) : (
-        <View style={styles.chipWrap}>
-          {selected.map((tag) => (
-            <View key={tag} style={styles.chip}>
-              <Text style={styles.chipText}>{tag}</Text>
-              <Pressable
-                hitSlop={8}
-                disabled={saving}
-                onPress={() => removeTag(tag)}
-                accessibilityRole="button"
-                accessibilityLabel={`Remove ${tag}`}
-              >
-                <Ionicons name="close" size={14} color="#1d4ed8" />
-              </Pressable>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderLeft}>
+            <View style={styles.sectionIconWrap}>
+              <Ionicons name="ribbon-outline" size={14} color="#1d4ed8" />
             </View>
-          ))}
+            <Text style={styles.sectionHeaderText}>Area of Expertise</Text>
+          </View>
+          {saving ? <ActivityIndicator size="small" color={autopackColors.apBlue} /> : null}
         </View>
       )}
 
-      <View style={styles.searchWrap}>
+      {selected.length === 0 ? (
+        <Text style={[styles.emptyText, embedded && styles.embeddedEmpty]}>
+          {embedded
+            ? 'Tap below to add areas of expertise'
+            : 'No areas of expertise yet — tap below to add'}
+        </Text>
+      ) : (
+        <ExpertiseChips tags={selected} onRemove={removeTag} />
+      )}
+
+      <Pressable
+        style={styles.searchWrap}
+        onPress={() => setOpen(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Add area of expertise"
+      >
         <Ionicons name="search" size={16} color="#6b7280" />
-        <TextInput
-          style={styles.searchInput}
-          value={query}
-          onChangeText={setQuery}
-          onFocus={() => setFocused(true)}
-          onBlur={() => {
-            // Delay so a tap on a result still registers.
-            setTimeout(() => setFocused(false), 150);
-          }}
-          placeholder="Search areas of expertise"
-          placeholderTextColor="#9ca3af"
-          autoCorrect={false}
-          autoCapitalize="none"
-          editable={!saving}
-        />
-      </View>
+        <Text style={styles.searchPlaceholder}>Search areas of expertise</Text>
+      </Pressable>
 
-      {showDropdown ? (
-        <ScrollView
-          style={styles.dropdown}
-          keyboardShouldPersistTaps="handled"
-          nestedScrollEnabled
-        >
-          {available.map((tag) => (
-            <Pressable
-              key={tag}
-              style={styles.option}
-              disabled={saving}
-              onPress={() => addTag(tag)}
-            >
-              <Text style={styles.optionText}>{tag}</Text>
-              <Ionicons name="add" size={16} color={autopackColors.apBlue} />
-            </Pressable>
-          ))}
-        </ScrollView>
-      ) : focused && available.length === 0 ? (
-        <Text style={styles.noMatches}>No matching areas of expertise</Text>
-      ) : null}
+      <ExpertisePickerModal
+        visible={open}
+        selected={selected}
+        onSelect={addTag}
+        onClose={() => setOpen(false)}
+        mode="add"
+      />
 
-      <View style={styles.sectionDivider} />
+      {embedded ? null : <View style={styles.sectionDivider} />}
     </View>
   );
 }
@@ -155,6 +142,30 @@ const styles = StyleSheet.create({
     padding: 0,
     marginBottom: 2,
     borderWidth: 0,
+  },
+  embedded: {
+    marginTop: 14,
+    marginBottom: 0,
+    alignSelf: 'stretch',
+    width: '100%',
+  },
+  embeddedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  embeddedLabel: {
+    color: '#6b7280',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    textTransform: 'uppercase',
+  },
+  embeddedEmpty: {
+    paddingVertical: 8,
+    textAlign: 'left',
+    fontSize: 14,
   },
   sectionHeader: {
     paddingHorizontal: 10,
@@ -194,29 +205,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     fontWeight: '400',
   },
-  chipWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    paddingHorizontal: 4,
-    marginBottom: 12,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#eff6ff',
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  chipText: {
-    color: '#1d4ed8',
-    fontSize: 13,
-    fontWeight: '700',
-  },
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -227,42 +215,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
-  searchInput: {
+  searchPlaceholder: {
     flex: 1,
     fontSize: 15,
-    color: '#111827',
-    paddingVertical: 2,
-  },
-  dropdown: {
-    maxHeight: 280,
-    marginHorizontal: 4,
-    marginTop: 6,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 10,
-    backgroundColor: '#fff',
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
-  },
-  optionText: {
-    color: '#111827',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  noMatches: {
-    color: '#6b7280',
-    fontSize: 13,
-    paddingHorizontal: 8,
-    paddingTop: 8,
+    color: '#9ca3af',
   },
   sectionDivider: {
     height: StyleSheet.hairlineWidth,

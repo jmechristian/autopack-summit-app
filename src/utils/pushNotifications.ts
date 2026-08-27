@@ -8,6 +8,7 @@ import { apsPushTokensByUserIdAndUpdatedAt } from '../graphql/queries';
 import { createApsPushToken, updateApsPushToken } from '../graphql/mutations';
 import { isWeb } from './platform';
 import { isNotificationsDeepLink } from './announcementDeepLinks';
+import { recordAnnouncementOpen } from './announcementOpenTracking';
 
 type NavigateHandlers = {
   onAnnouncementId: (announcementId: string) => void;
@@ -20,6 +21,12 @@ type NavigateHandlers = {
   /** Called for any notification received while app is running (good place to refresh counts). */
   onNotificationReceived?: (data: Record<string, any>) => void;
 };
+
+function trackAnnouncementPushOpen(announcementId: unknown) {
+  const id = String(announcementId || '').trim();
+  if (!id) return;
+  void recordAnnouncementOpen({ announcementId: id, source: 'push' });
+}
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -183,6 +190,7 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
     }
 
     if (type === 'announcement') {
+      trackAnnouncementPushOpen(announcementId);
       if (deepLink && handlers.onDeepLink && !isNotificationsDeepLink(String(deepLink))) {
         handlers.onDeepLink(String(deepLink));
         return;
@@ -192,6 +200,7 @@ export function initPushNotificationHandlers(handlers: NavigateHandlers) {
     }
 
     if (announcementId) {
+      trackAnnouncementPushOpen(announcementId);
       handlers.onAnnouncementId(String(announcementId));
       return;
     }
@@ -232,6 +241,7 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
     }
 
     if (type === 'announcement') {
+      trackAnnouncementPushOpen(announcementId);
       if (deepLink && handlers.onDeepLink && !isNotificationsDeepLink(String(deepLink))) {
         handlers.onDeepLink(String(deepLink));
         return;
@@ -241,6 +251,7 @@ export async function handleLastNotificationResponse(handlers: NavigateHandlers)
     }
 
     if (announcementId) {
+      trackAnnouncementPushOpen(announcementId);
       handlers.onAnnouncementId(String(announcementId));
       return;
     }

@@ -242,13 +242,13 @@ export default function ProfileEdit() {
       {/* Personal Info Section */}
       <EditablePersonalInfo profile={profile} onUpdate={refreshProfile} />
 
+      <ExpertiseSection profile={profile} onUpdate={refreshProfile} />
+
       {/* Experience Section */}
       <AffiliationsSection profile={profile} onUpdate={refreshProfile} />
 
       {/* Education Section */}
       <EducationSection profile={profile} onUpdate={refreshProfile} />
-
-      <ExpertiseSection profile={profile} onUpdate={refreshProfile} />
 
       {/* Interests Section */}
       <InterestsSection profile={profile} onUpdate={refreshProfile} />

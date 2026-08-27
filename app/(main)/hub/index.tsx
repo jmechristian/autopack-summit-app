@@ -49,6 +49,10 @@ import {
   isSessionLive,
   isSessionUpcoming,
 } from '../../../src/utils/sessionLive';
+import {
+  formatAgendaDateLabel,
+  formatAgendaTimeRange,
+} from '../../../src/utils/formatAgendaTime';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
@@ -141,22 +145,11 @@ function normalizeText(v?: string | null) {
 }
 
 function formatTimeRange(start?: string | null, end?: string | null) {
-  const s = normalizeText(start);
-  const e = normalizeText(end);
-  if (s && e) return `${s} - ${e}`;
-  return s || '';
+  return formatAgendaTimeRange(start, end);
 }
 
 function formatSessionDateLabel(date?: string | null) {
-  const raw = normalizeText(date);
-  if (!raw) return '';
-  const parsed = new Date(`${raw}T12:00:00`);
-  if (Number.isNaN(parsed.getTime())) return raw;
-  return parsed.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatAgendaDateLabel(date);
 }
 
 function resolvePresentationUrl(embedUrl?: string | null) {
@@ -917,10 +910,6 @@ export default function HubScreen() {
 
   const sideStackBlock = (
     <>
-      <SafeEnteringView entering={FadeInDown.duration(600).delay(180)}>
-        <HubSponsorBlock />
-      </SafeEnteringView>
-
       <Pressable style={styles.passportCard} onPress={() => router.push('/(main)/hub/passport' as any)}>
         <View style={styles.passportHeaderRow}>
           <View style={styles.passportIconWrap}>
@@ -947,6 +936,10 @@ export default function HubScreen() {
           </>
         )}
       </Pressable>
+
+      <SafeEnteringView entering={FadeInDown.duration(600).delay(180)}>
+        <HubSponsorBlock />
+      </SafeEnteringView>
 
       <SafeEnteringView entering={FadeInDown.duration(600).delay(280)}>
         <ApcCertificateCard progress={profile?.apcProgress} />

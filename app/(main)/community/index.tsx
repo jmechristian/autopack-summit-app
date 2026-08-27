@@ -12,7 +12,12 @@ import {
   View,
 } from 'react-native';
 import { APP_USER_ROW_HEIGHT, AppUserRow } from '../../../src/components/AppUserRow';
+import {
+  ExpertiseChips,
+  ExpertisePickerModal,
+} from '../../../src/components/profile/ExpertisePickerModal';
 import { RiveLoader } from '../../../src/components/RiveLoader';
+import { normalizeExpertiseTags } from '../../../src/constants/expertiseTags';
 import { listApsAppUserProfiles } from '../../../src/graphql/queries';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
@@ -33,6 +38,7 @@ type CommunityProfile = {
   profilePicture?: string | null;
   location?: string | null;
   email?: string | null;
+  expertise: string[];
 };
 
 type CommunitySection = { title: string; data: CommunityProfile[] };
@@ -74,6 +80,8 @@ export default function CommunityIndex() {
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { profileIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
+  const [expertiseFilter, setExpertiseFilter] = useState<string[]>([]);
+  const [expertisePickerOpen, setExpertisePickerOpen] = useState(false);
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
   const [profilePictureUris, setProfilePictureUris] = useState<Record<string, string | null>>({});
   const avatarRequestedRef = useRef<Set<string>>(new Set());
@@ -139,6 +147,7 @@ export default function CommunityIndex() {
               profilePicture?: string | null;
               location?: string | null;
               email?: string | null;
+              expertise?: Array<string | null> | null;
             } | null>;
             nextToken?: string | null;
           };
@@ -157,6 +166,7 @@ export default function CommunityIndex() {
             profilePicture: item.profilePicture,
             location: item.location,
             email: item.email,
+            expertise: normalizeExpertiseTags(item.expertise),
           });
         }
         nextToken = data.listApsAppUserProfiles?.nextToken;
@@ -197,14 +207,23 @@ export default function CommunityIndex() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return profiles;
+    const tags = expertiseFilter;
+    if (!q && !tags.length) return profiles;
     return profiles.filter((p) => {
+      if (tags.length && !tags.some((tag) => p.expertise.includes(tag))) return false;
+      if (!q) return true;
       const fullName = getFullName(p).toLowerCase();
       const company = (p.company || '').toLowerCase();
       const title = (p.jobTitle || '').toLowerCase();
       return fullName.includes(q) || company.includes(q) || title.includes(q);
     });
-  }, [profiles, search]);
+  }, [profiles, search, expertiseFilter]);
+
+  const toggleExpertiseFilter = useCallback((tag: string) => {
+    setExpertiseFilter((prev) =>
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
+    );
+  }, []);
 
   const sections: CommunitySection[] = useMemo(() => {
     const map = new Map<string, CommunityProfile[]>();
@@ -393,19 +412,74 @@ export default function CommunityIndex() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.searchWrap, { marginHorizontal: contentInset }]}>
-        <Ionicons name='search' size={18} color='#6b7280' />
-        <TextInput
-          value={search}
-          onChangeText={setSearch}
-          placeholder='Search by name, company, or title'
-          placeholderTextColor='#9ca3af'
-          style={styles.searchInput}
-          autoCapitalize='none'
-          autoCorrect={false}
-          clearButtonMode='while-editing'
-        />
+      <View style={[styles.searchRow, { marginHorizontal: contentInset }]}>
+        <View style={styles.searchWrap}>
+          <Ionicons name='search' size={18} color='#6b7280' />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder='Search by name, company, or title'
+            placeholderTextColor='#9ca3af'
+            style={styles.searchInput}
+            autoCapitalize='none'
+            autoCorrect={false}
+            clearButtonMode='while-editing'
+          />
+        </View>
+        <Pressable
+          onPress={() => setExpertisePickerOpen(true)}
+          style={({ pressed }) => [
+            styles.filterBtn,
+            expertiseFilter.length ? styles.filterBtnActive : null,
+            pressed && styles.filterBtnPressed,
+          ]}
+          accessibilityRole='button'
+          accessibilityLabel='Filter by area of expertise'
+        >
+          <Ionicons
+            name={expertiseFilter.length ? 'filter' : 'filter-outline'}
+            size={22}
+            color={expertiseFilter.length ? '#fff' : '#4b5563'}
+          />
+          {expertiseFilter.length ? (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{expertiseFilter.length}</Text>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
+
+      {expertiseFilter.length ? (
+        <View style={[styles.filterBar, { marginHorizontal: contentInset }]}>
+          <ExpertiseChips
+            tags={expertiseFilter}
+            onRemove={toggleExpertiseFilter}
+            maxVisible={3}
+            onPressMore={() => setExpertisePickerOpen(true)}
+          />
+          <View style={styles.filterMeta}>
+            <Text style={styles.filterMetaText}>
+              {filtered.length} {filtered.length === 1 ? 'person' : 'people'} with matching expertise
+            </Text>
+            <Pressable
+              onPress={() => setExpertiseFilter([])}
+              hitSlop={8}
+              accessibilityRole='button'
+              accessibilityLabel='Clear expertise filter'
+            >
+              <Text style={styles.clearFilterText}>Clear</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
+
+      <ExpertisePickerModal
+        visible={expertisePickerOpen}
+        selected={expertiseFilter}
+        onSelect={toggleExpertiseFilter}
+        onClose={() => setExpertisePickerOpen(false)}
+        mode='filter'
+      />
 
       {error ? (
         <View style={[styles.errorBox, { paddingHorizontal: contentInset }]}>
@@ -433,7 +507,9 @@ export default function CommunityIndex() {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.muted}>
-                {search.trim() ? 'No matches.' : 'No community members found.'}
+                {search.trim() || expertiseFilter.length
+                  ? 'No matches.'
+                  : 'No community members found.'}
               </Text>
             </View>
           }
@@ -449,17 +525,80 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   muted: { color: '#6b7280' },
 
-  searchWrap: {
+  searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginVertical: 12,
+  },
+  searchWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 12,
     backgroundColor: '#f3f4f6',
   },
   searchInput: { flex: 1, fontSize: 16, color: '#111827' },
+  filterBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  filterBtnActive: {
+    backgroundColor: autopackColors.apBlue,
+  },
+  filterBtnPressed: {
+    opacity: 0.85,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: autopackColors.apYellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  filterBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  filterBar: {
+    marginBottom: 8,
+  },
+  filterMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginTop: -4,
+    marginBottom: 4,
+  },
+  filterMetaText: {
+    color: '#6b7280',
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 12,
+  },
+  clearFilterText: {
+    color: autopackColors.apBlue,
+    fontSize: 13,
+    fontWeight: '700',
+  },
 
   sectionHeader: {
     height: SECTION_HEADER_HEIGHT,

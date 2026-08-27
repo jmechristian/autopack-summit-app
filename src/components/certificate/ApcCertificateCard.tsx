@@ -98,8 +98,8 @@ export function ApcCertificateCard({ progress, onPrimaryPress, style }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFF9EB',
-    borderRadius: 14,
-    borderWidth: 1,
+    borderRadius: 16,
+    borderWidth: 1.5,
     borderColor: autopackColors.apYellow,
     paddingHorizontal: 14,
     paddingVertical: 14,

@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import * as Contacts from 'expo-contacts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ExpertiseChips } from '../profile/ExpertisePickerModal';
 import { APS_ID } from '../../config/apsConfig';
 import { normalizeExpertiseTags } from '../../constants/expertiseTags';
 import {
@@ -472,7 +473,8 @@ export default function CommunityProfileScreen() {
         keyboardDismissMode='on-drag'
         automaticallyAdjustKeyboardInsets
       >
-      <View style={styles.headerRow}>
+      <View style={styles.headerBlock}>
+        <View style={styles.headerRow}>
         <View style={styles.avatar}>
           {avatarUri ? (
             <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
@@ -540,6 +542,12 @@ export default function CommunityProfileScreen() {
             />
           </Pressable>
         </View>
+        </View>
+        {expertise.length ? (
+          <View style={styles.headerExpertise}>
+            <ExpertiseChips tags={expertise} />
+          </View>
+        ) : null}
       </View>
 
       {!isSelf && (
@@ -695,29 +703,6 @@ export default function CommunityProfileScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.sectionHeaderLeft}>
             <View style={styles.sectionIconWrap}>
-              <Ionicons name="ribbon-outline" size={14} color="#1d4ed8" />
-            </View>
-            <Text style={styles.sectionHeaderText}>Area of Expertise</Text>
-          </View>
-        </View>
-        {expertise.length ? (
-          <View style={styles.chipWrap}>
-            {expertise.map((tag) => (
-              <View key={tag} style={styles.chip}>
-                <Text style={styles.chipText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <Text style={styles.sectionBodyText}>No areas of expertise provided.</Text>
-        )}
-        <View style={styles.sectionDivider} />
-      </View>
-
-      <View style={styles.sectionCard}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionHeaderLeft}>
-            <View style={styles.sectionIconWrap}>
               <Ionicons name="heart-outline" size={14} color="#1d4ed8" />
             </View>
             <Text style={styles.sectionHeaderText}>Interests</Text>
@@ -757,15 +742,23 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '800', color: '#111827' },
   muted: { color: '#6b7280' },
 
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  headerBlock: {
     padding: 12,
     borderRadius: 14,
     backgroundColor: '#f9fafb',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#e5e7eb',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerExpertise: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e5e7eb',
   },
   avatar: {
     width: 56,

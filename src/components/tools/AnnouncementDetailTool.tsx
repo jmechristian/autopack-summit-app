@@ -14,6 +14,7 @@ import {
 } from '../../utils/announcementDeepLinks';
 import { formatLocalDateTime } from '../../utils/formatLocalDateTime';
 import { graphqlApiKeyClient } from '../../utils/graphqlClient';
+import { recordAnnouncementOpen } from '../../utils/announcementOpenTracking';
 
 const theme = NOTIFICATION_THEMES.announcement;
 
@@ -45,7 +46,10 @@ export default function AnnouncementDetailTool() {
   const [linkMeta, setLinkMeta] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) void loadAnnouncement(id);
+    if (id) {
+      void loadAnnouncement(id);
+      void recordAnnouncementOpen({ announcementId: id, source: 'in-app' });
+    }
   }, [id, loadAnnouncement]);
 
   useEffect(() => {
