@@ -46,6 +46,7 @@ import {
   otherUserIdFromRequest,
 } from '../utils/contactRequestQueries';
 import { drainIndexedList } from '../utils/paginateGraphql';
+import { refreshLeaderboardInBackground } from '../services/refreshLeaderboard';
 
 type Announcement = {
   id: string;
@@ -1011,6 +1012,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     invalidateOwnedContactRequestCache();
     await get().loadIncomingRequests();
     setAppBadgeCount(get().getEngageBadgeCount());
+    refreshLeaderboardInBackground();
     return {
       otherUserId: String(otherUserId),
       introMessage: request.introMessage || null,
@@ -1146,6 +1148,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         introMessage: created.introMessage,
         introSentAt: created.introSentAt,
       });
+      refreshLeaderboardInBackground();
       return { status: created.status || 'PENDING', requestId: created.id, requestKey };
     } catch {
       // Race-safe fallback: if another device created it first, re-query and return it.
@@ -1446,6 +1449,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
         },
       },
     });
+    refreshLeaderboardInBackground();
 
     // Update thread preview (best effort)
     try {

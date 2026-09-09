@@ -23,6 +23,7 @@ import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionC
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { isSessionLive } from '../../../src/utils/sessionLive';
 import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
+import { refreshLeaderboardInBackground } from '../../../src/services/refreshLeaderboard';
 
 const AGENDA_ID = '83afcde3-7ff3-464a-b116-69e244a39dfd';
 
@@ -353,6 +354,7 @@ export default function AgendaList() {
             return { ...prev, [sessionId]: createdId };
           });
         }
+        refreshLeaderboardInBackground();
       } catch {
         setFavoriteRecordIdBySessionId((prev) => {
           const copy = { ...prev };

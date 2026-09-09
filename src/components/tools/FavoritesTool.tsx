@@ -27,6 +27,7 @@ import {
 } from '../../utils/graphqlClient';
 import { drainIndexedList } from '../../utils/paginateGraphql';
 import { RiveLoader } from '../RiveLoader';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 type FavoriteKind = 'exhibitor' | 'speaker' | 'sponsor' | 'session' | 'contact';
 
@@ -688,6 +689,7 @@ export default function FavoritesTool() {
         }
       }
       setRows((prev) => prev.filter((r) => r.id !== item.id));
+      if (item.kind !== 'contact') refreshLeaderboardInBackground();
     } catch (e: any) {
       setError(e?.message || 'Failed removing favorite');
     } finally {

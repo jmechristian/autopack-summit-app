@@ -25,6 +25,7 @@ import { RiveLoader } from '../../../src/components/RiveLoader';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { isSessionLive } from '../../../src/utils/sessionLive';
 import { useContentInset } from '../../../src/utils/layout';
+import { refreshLeaderboardInBackground } from '../../../src/services/refreshLeaderboard';
 
 type Speaker = {
   id: string;
@@ -319,6 +320,7 @@ export default function AgendaDetails() {
         };
         setFavoriteRecordId(data.createApsAppUserFavoriteSession?.id || null);
       }
+      refreshLeaderboardInBackground();
     } finally {
       setFavoriteBusy(false);
     }

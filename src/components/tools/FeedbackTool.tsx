@@ -24,6 +24,7 @@ import { AppButton } from '../../ui/AppButton';
 import { ui } from '../../ui/tokens';
 import { graphqlAuthClient } from '../../utils/graphqlClient';
 import { uploadFeedbackImage } from '../../utils/storageUtils';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 const MAX_IMAGES = 6;
 const MAX_MESSAGE = 2000;
@@ -117,6 +118,7 @@ export default function FeedbackTool() {
         },
       });
 
+      refreshLeaderboardInBackground();
       Alert.alert('Thanks!', 'Your feedback was submitted.', [
         { text: 'OK', onPress: () => router.back() },
       ]);

@@ -62,9 +62,7 @@
         "owner": "the-packaging-school"
       }
     },
-    "runtimeVersion": {
-      "policy": "fingerprint"
-    },
+    "runtimeVersion": "62a3115b2364f40985cb992cfa2e8de15c8681db",
     "updates": {
       "url": "https://u.expo.dev/dcb27779-4cbd-4b16-bd99-16f6d9da08d2"
     }

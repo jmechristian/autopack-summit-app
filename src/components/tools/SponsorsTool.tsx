@@ -20,6 +20,7 @@ import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClien
 import { drainIndexedList } from '../../utils/paginateGraphql';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { RiveLoader } from '../RiveLoader';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 type SponsorsToolProps = {
   detailBasePath: '/(main)/engage/sponsors' | '/(main)/hub/sponsors';
@@ -309,6 +310,7 @@ export default function SponsorsTool({ detailBasePath }: SponsorsToolProps) {
             await loadFavorites();
           }
         }
+        refreshLeaderboardInBackground();
       } catch {
         await loadFavorites();
       } finally {

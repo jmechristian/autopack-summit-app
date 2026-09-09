@@ -34,6 +34,8 @@ export async function recordAnnouncementOpen(params: {
         },
       },
     });
+    const { refreshLeaderboardInBackground } = await import('../services/refreshLeaderboard');
+    refreshLeaderboardInBackground();
   } catch {
     // Schema may not be live yet, or this user already opened it.
   }

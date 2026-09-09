@@ -15,6 +15,7 @@ type AdminSection = {
     | 'agenda-sessions'
     | 'add-ons'
     | 'passport'
+    | 'leaderboard'
     | 'seating-chart'
     | 'announcements';
   title: string;
@@ -29,6 +30,7 @@ const sections: AdminSection[] = [
   { key: 'agenda-sessions', title: 'Agenda / Sessions', icon: 'calendar-outline' },
   { key: 'add-ons', title: 'Add-ons', icon: 'add-circle-outline' },
   { key: 'passport', title: 'Passport', icon: 'book-outline' },
+  { key: 'leaderboard', title: 'Leaderboard', icon: 'trophy-outline' },
   { key: 'seating-chart', title: 'Seating Chart', icon: 'grid-outline' },
   { key: 'announcements', title: 'Announcements', icon: 'megaphone-outline' },
 ];

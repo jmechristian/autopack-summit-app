@@ -13,6 +13,7 @@ import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { autopackColors } from '../../../src/theme';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
+import { refreshLeaderboardInBackground } from '../../../src/services/refreshLeaderboard';
 
 type ScanState = 'scanning' | 'processing' | 'success' | 'failure';
 
@@ -176,6 +177,7 @@ export default function PassportScanScreen() {
 
           // Unique booth scan → bump exhibitor visits (same uniqueness as stamp).
           if (stampCreated) {
+            refreshLeaderboardInBackground();
             try {
               await graphqlApiKeyClient.graphql({
                 query: updateExhibitorVisits,

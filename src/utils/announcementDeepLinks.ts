@@ -7,6 +7,8 @@ export const APP_ANNOUNCEMENT_SCREENS = [
   { id: 'agenda', label: 'Agenda', path: '/(main)/agenda' },
   { id: 'engage', label: 'Engage', path: '/(main)/engage' },
   { id: 'community', label: 'Community', path: '/(main)/community' },
+  { id: 'leaderboard', label: 'Leaderboard', path: '/(main)/hub/leaderboard' },
+  { id: 'points', label: 'How points work', path: '/(main)/hub/points' },
 ] as const;
 
 export type AppAnnouncementScreenId = (typeof APP_ANNOUNCEMENT_SCREENS)[number]['id'];

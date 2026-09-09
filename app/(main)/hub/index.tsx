@@ -1,7 +1,7 @@
 // app/(main)/hub/index.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -55,6 +55,8 @@ import {
 } from '../../../src/utils/formatAgendaTime';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
+import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
+import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
 import { HubHeroRive } from '../../../src/components/hub/HubHeroRive';
 import { HubCountdownStrip } from '../../../src/components/hub/HubCountdownStrip';
@@ -105,7 +107,6 @@ const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'qr', icon: 'qr-code', label: 'My QR Code', route: '/(main)/hub/qr' },
   { id: 'exhibitor-profile', icon: 'construct', label: 'Exhibitor Profile', route: '/(main)/hub/exhibitor-profile' },
   { id: 'lead-capture', icon: 'scan', label: 'Capture Contact', route: '/(main)/hub/capture' },
-  { id: 'leaderboard', icon: 'trophy', label: 'Leaderboard', comingSoon: true },
   { id: 'favorites', icon: 'star', label: 'Favorites', route: '/(main)/hub/favorites' },
   { id: 'exhibitors', icon: 'business', label: 'Exhibitors', route: '/(main)/hub/exhibitors' },
   { id: 'sponsors', icon: 'ribbon', label: 'Sponsors', route: '/(main)/hub/sponsors' },
@@ -215,6 +216,7 @@ export default function HubScreen() {
   const currentAppUser = useCurrentAppUser();
   const companyId = currentAppUser?.registrant?.companyId || null;
   const engageBadge = useEngageStore((s) => s.getEngageBadgeCount());
+  const refreshLeaderboard = useLeaderboardStore((s) => s.refresh);
   const [heroBox, setHeroBox] = useState({ width: 0, height: 0 });
   const [toolsHeight, setToolsHeight] = useState(0);
   const hubQrTileWidth = useMemo(() => {
@@ -266,6 +268,7 @@ export default function HubScreen() {
             const deduped: string[] = [];
             for (const id of parsed) {
               if (typeof id !== 'string') continue;
+              if (id === 'leaderboard') continue;
               if (!map.has(id)) continue;
               if (deduped.includes(id)) continue;
               deduped.push(id);
@@ -398,6 +401,17 @@ export default function HubScreen() {
   useEffect(() => {
     loadPassportProgress();
   }, [loadPassportProgress]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshLeaderboard({ includeMyScore: false });
+    }, [refreshLeaderboard]),
+  );
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    void refreshLeaderboard({ includeMyScore: false });
+  }, [profile?.id, refreshLeaderboard]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1017,6 +1031,7 @@ export default function HubScreen() {
               <View style={styles.countdownInStack}>
                 <HubCountdownStrip />
               </View>
+              <LeaderboardCallout style={styles.leaderboardCallout} />
               {comingUpBlock}
             </View>
             <View style={[styles.wideStack, { width: wideCols.stack }]}>{sideStackBlock}</View>
@@ -1028,6 +1043,7 @@ export default function HubScreen() {
           <HubCountdownStrip />
           <View style={[styles.body, { paddingHorizontal: contentInset }]}>
             {quickToolsBlock}
+            <LeaderboardCallout style={styles.leaderboardCallout} />
             {comingUpBlock}
             {sideStackBlock}
           </View>
@@ -1292,6 +1308,7 @@ const styles = StyleSheet.create({
   bellBadge: { position: 'absolute', top: -2, right: -2 },
 
   body: { paddingVertical: 16, gap: 12 },
+  leaderboardCallout: { marginBottom: 0 },
   editLink: {
     color: autopackColors.apBlue,
     fontSize: 13,

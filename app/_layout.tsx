@@ -6,6 +6,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { configureAmplify } from '../src/amplifyConfig';
+import { PointsToastHost } from '../src/components/leaderboard/PointsToastHost';
 import { RiveLoaderProvider } from '../src/components/RiveLoader';
 import { theme } from '../src/theme';
 
@@ -37,6 +38,7 @@ export default function RootLayout() {
     <ThemeProvider theme={theme}>
       <RiveLoaderProvider>
         <Slot />
+        <PointsToastHost />
       </RiveLoaderProvider>
     </ThemeProvider>
   );

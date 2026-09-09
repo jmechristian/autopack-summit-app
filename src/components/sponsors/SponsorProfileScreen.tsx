@@ -11,6 +11,7 @@ import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { autopackColors } from '../../theme';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 const getSponsorById = /* GraphQL */ `
   query GetSponsorById($id: ID!) {
@@ -231,6 +232,7 @@ export default function SponsorProfileScreen() {
         const data = resp.data as any;
         setFavoriteRecordId(data?.createApsAppUserFavoriteSponsor?.id || null);
       }
+      refreshLeaderboardInBackground();
     } finally {
       setFavoriteBusy(false);
     }

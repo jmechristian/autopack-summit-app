@@ -47,6 +47,10 @@ export default function AdminLayout() {
             options={{ title: 'Passport', headerBackVisible: false, headerLeft: adminBackButton }}
           />
           <Stack.Screen
+            name='leaderboard'
+            options={{ title: 'Leaderboard', headerBackVisible: false, headerLeft: adminBackButton }}
+          />
+          <Stack.Screen
             name='seating-chart'
             options={{ title: 'Seating Chart', headerBackVisible: false, headerLeft: adminBackButton }}
           />

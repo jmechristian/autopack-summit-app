@@ -14,6 +14,8 @@ import { apsAppUserPassportStampsByUserProfileIdAndCreatedAt } from '../../../sr
 import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { useEngageStore } from '../../../src/store/engageStore';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
+import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
+import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
@@ -48,6 +50,7 @@ const passportExhibitorsByEvent = /* GraphQL */ `
 
 export default function EngageHome() {
   const unread = useEngageStore((s) => s.unread);
+  const refreshLeaderboard = useLeaderboardStore((s) => s.refresh);
   const profile = useCurrentUserProfile();
   const profileId = profile?.id || null;
   const { frame, inset: contentInset, frameWidth } = useContentFrame(20);
@@ -155,7 +158,8 @@ export default function EngageHome() {
   useFocusEffect(
     useCallback(() => {
       loadPassportProgress();
-    }, [loadPassportProgress]),
+      void refreshLeaderboard({ includeMyScore: false });
+    }, [loadPassportProgress, refreshLeaderboard]),
   );
 
   const passportPercent = useMemo(
@@ -173,6 +177,8 @@ export default function EngageHome() {
       showsVerticalScrollIndicator={false}
     >
       <View style={[styles.body, frame, { paddingHorizontal: contentInset }]}>
+        <LeaderboardCallout />
+
         <Pressable
           style={styles.passportCard}
           onPress={() => router.push('/(main)/hub/passport' as any)}

@@ -15,6 +15,7 @@ import {
   updateApsAppUserNote,
   deleteApsAppUserNote,
 } from '../../graphql/mutations';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 type NoteItem = {
   id: string;
@@ -174,6 +175,7 @@ export function NotesSection(props: { profileId?: string | null; sessionId?: str
       });
       setDraft('');
       setRefreshKey((k) => k + 1);
+      refreshLeaderboardInBackground();
     } catch (e: any) {
       console.error('Create note failed:', e);
       Alert.alert('Note failed', e?.message || 'Could not save note. Please try again.');
@@ -228,6 +230,7 @@ export function NotesSection(props: { profileId?: string | null; sessionId?: str
               });
               if (editingId === noteId) onCancelEdit();
               setRefreshKey((k) => k + 1);
+              refreshLeaderboardInBackground();
             } catch (e: any) {
               console.error('Delete note failed:', e);
               Alert.alert('Delete failed', e?.message || 'Could not delete note.');

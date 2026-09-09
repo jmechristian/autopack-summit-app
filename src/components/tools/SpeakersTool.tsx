@@ -20,6 +20,7 @@ import {
   apsAppUserFavoriteSpeakersByUserProfileIdAndCreatedAt,
 } from '../../graphql/queries';
 import { RiveLoader } from '../RiveLoader';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 type SpeakersToolProps = {
   detailBasePath: '/(main)/engage/speakers' | '/(main)/hub/speakers';
@@ -243,6 +244,7 @@ export default function SpeakersTool({ detailBasePath }: SpeakersToolProps) {
             await loadFavorites();
           }
         }
+        refreshLeaderboardInBackground();
       } catch {
         await loadFavorites();
       } finally {

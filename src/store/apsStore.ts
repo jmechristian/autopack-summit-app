@@ -21,6 +21,7 @@ import {
 import { getCurrentUserEmail } from '../utils/authUtils';
 import { graphqlApiKeyClient } from '../utils/graphqlClient';
 import { drainIndexedList } from '../utils/paginateGraphql';
+import { refreshLeaderboardInBackground } from '../services/refreshLeaderboard';
 
 // Types
 type APSBasic = {
@@ -882,6 +883,7 @@ export const useApsStore = create<ApsStore>((set, get) => ({
           loading: { ...get().loading, currentAppUser: false },
           error: { ...get().error, currentAppUser: null },
         });
+        refreshLeaderboardInBackground();
       }
     } catch (error) {
       console.error('Error refreshing profile:', error);

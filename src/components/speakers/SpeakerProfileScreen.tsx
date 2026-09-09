@@ -11,6 +11,7 @@ import { graphqlApiKeyClient, graphqlAuthClient } from '../../utils/graphqlClien
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { LinkedInNameButton } from '../profile/LinkedInNameButton';
 import { apsAppUserFavoriteSpeakersByFavoriteKey } from '../../graphql/queries';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 const getSpeakerById = /* GraphQL */ `
   query GetSpeakerById($id: ID!) {
@@ -278,6 +279,7 @@ export default function SpeakerProfileScreen() {
         const createdId = data?.createApsAppUserFavoriteSpeaker?.id || null;
         setFavoriteRecordId(createdId);
       }
+      refreshLeaderboardInBackground();
     } catch {
       // Re-sync best-effort.
       setFavoriteRecordId(null);

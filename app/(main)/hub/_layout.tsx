@@ -18,6 +18,7 @@ export default function HubLayout() {
       <Stack.Screen name='capture' options={{ title: 'Capture Contact' }} />
       <Stack.Screen name='exhibitor-profile' options={{ title: 'Exhibitor Profile' }} />
       <Stack.Screen name='leaderboard' options={{ title: 'Leaderboard' }} />
+      <Stack.Screen name='points' options={{ title: 'How points work' }} />
       <Stack.Screen name='passport' options={{ title: 'Passport Challenge' }} />
       <Stack.Screen name='passport-scan' options={{ headerShown: false, title: 'Scan Passport QR' }} />
       <Stack.Screen name='favorites' options={{ title: 'Favorites' }} />

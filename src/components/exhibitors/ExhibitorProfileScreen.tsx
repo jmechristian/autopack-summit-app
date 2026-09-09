@@ -29,6 +29,7 @@ import { isAllowedVideoUrl, parseVideoEmbed } from '../../utils/videoEmbed';
 import { RiveLoader } from '../RiveLoader';
 import { ExhibitorVideoEmbed } from './ExhibitorVideoEmbed';
 import { PhotoGalleryModal } from './PhotoGalleryModal';
+import { refreshLeaderboardInBackground } from '../../services/refreshLeaderboard';
 
 const MAX_HANDOUTS = 1;
 const MAX_PHOTOS = 12;
@@ -609,6 +610,7 @@ export default function ExhibitorProfileScreen() {
         if (!cancelled) {
           setViewsCount(nextViews);
           setProfile((prev) => (prev ? { ...prev, views: nextViews } : prev));
+          refreshLeaderboardInBackground();
         }
       } catch {
         // Silent — view tracking should never block the profile screen.
@@ -705,6 +707,7 @@ export default function ExhibitorProfileScreen() {
           variables: { input: { id: profile.id, likes: nextLikes } },
         });
       }
+      refreshLeaderboardInBackground();
     } catch (e: any) {
       Alert.alert('Unable to update favorite', e?.message || 'Please try again.');
     } finally {
