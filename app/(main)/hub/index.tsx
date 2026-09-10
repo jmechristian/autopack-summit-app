@@ -56,6 +56,7 @@ import {
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
+import { RisingStarCallout } from '../../../src/components/risingStars/RisingStarCallout';
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
 import { HubHeroRive } from '../../../src/components/hub/HubHeroRive';
@@ -951,6 +952,8 @@ export default function HubScreen() {
         )}
       </Pressable>
 
+      <RisingStarCallout style={styles.risingStarCallout} />
+
       <SafeEnteringView entering={FadeInDown.duration(600).delay(180)}>
         <HubSponsorBlock />
       </SafeEnteringView>
@@ -1031,8 +1034,8 @@ export default function HubScreen() {
               <View style={styles.countdownInStack}>
                 <HubCountdownStrip />
               </View>
-              <LeaderboardCallout style={styles.leaderboardCallout} />
               {comingUpBlock}
+              <LeaderboardCallout style={styles.leaderboardCallout} />
             </View>
             <View style={[styles.wideStack, { width: wideCols.stack }]}>{sideStackBlock}</View>
           </View>
@@ -1043,8 +1046,8 @@ export default function HubScreen() {
           <HubCountdownStrip />
           <View style={[styles.body, { paddingHorizontal: contentInset }]}>
             {quickToolsBlock}
-            <LeaderboardCallout style={styles.leaderboardCallout} />
             {comingUpBlock}
+            <LeaderboardCallout style={styles.leaderboardCallout} />
             {sideStackBlock}
           </View>
         </>
@@ -1309,6 +1312,7 @@ const styles = StyleSheet.create({
 
   body: { paddingVertical: 16, gap: 12 },
   leaderboardCallout: { marginBottom: 0 },
+  risingStarCallout: { marginBottom: 0 },
   editLink: {
     color: autopackColors.apBlue,
     fontSize: 13,

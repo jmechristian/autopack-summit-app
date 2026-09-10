@@ -9,6 +9,7 @@ export const APP_ANNOUNCEMENT_SCREENS = [
   { id: 'community', label: 'Community', path: '/(main)/community' },
   { id: 'leaderboard', label: 'Leaderboard', path: '/(main)/hub/leaderboard' },
   { id: 'points', label: 'How points work', path: '/(main)/hub/points' },
+  { id: 'rising-stars', label: 'Rising Stars', path: '/(main)/hub/rising-stars' },
 ] as const;
 
 export type AppAnnouncementScreenId = (typeof APP_ANNOUNCEMENT_SCREENS)[number]['id'];

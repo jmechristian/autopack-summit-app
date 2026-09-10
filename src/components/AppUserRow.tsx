@@ -17,6 +17,7 @@ import { autopackColors } from '../theme';
 import { confirmAction, showAlert } from '../utils/alert';
 import { isWeb } from '../utils/platform';
 import { RequestIntroModal } from './requests/RequestIntroModal';
+import { RisingStarMark } from './risingStars/RisingStarMark';
 
 /** Fixed row height for SectionList getItemLayout / sticky-header stability. */
 export const APP_USER_ROW_HEIGHT = 64;
@@ -30,6 +31,7 @@ type Props = {
   initials?: string;
   isSelf: boolean;
   hasNote: boolean;
+  risingStarYear?: number | null;
   // Contact (favorite/contact-list) state
   currentAppUserProfileId?: string | null;
   favorite: boolean;
@@ -67,6 +69,7 @@ function AppUserRowComponent({
   initials,
   isSelf,
   hasNote,
+  risingStarYear,
   currentAppUserProfileId,
   favorite,
   pendingFavorite,
@@ -144,9 +147,12 @@ function AppUserRowComponent({
         </View>
 
         <View style={styles.textWrap}>
-          <Text style={styles.name} numberOfLines={1}>
-            {name}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.name} numberOfLines={1}>
+              {name}
+            </Text>
+            {risingStarYear ? <RisingStarMark /> : null}
+          </View>
           <Text style={styles.subtitle} numberOfLines={1}>
             {subtitle || ' '}
           </Text>
@@ -309,7 +315,8 @@ const styles = StyleSheet.create({
   avatarText: { fontWeight: '800', color: '#111827' },
 
   textWrap: { flex: 1, justifyContent: 'center' },
-  name: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  name: { flexShrink: 1, fontSize: 16, fontWeight: '700', color: '#111827' },
   subtitle: { marginTop: 2, fontSize: 13, color: '#6b7280', height: 16 },
 
   actions: { flexDirection: 'row', alignItems: 'center', gap: 6, marginLeft: 8 },

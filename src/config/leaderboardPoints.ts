@@ -3,13 +3,13 @@ export const LEADERBOARD_VISIBLE_LIMIT = 50;
 export const CONNECTION_MILESTONES = [
   { id: 'connection_5', threshold: 5, points: 50, label: 'Connect with 5 people' },
   { id: 'connection_10', threshold: 10, points: 50, label: 'Connect with 10 people' },
-  { id: 'connection_25', threshold: 25, points: 100, label: 'Connect with 25 people' },
-  { id: 'connection_50', threshold: 50, points: 150, label: 'Connect with 50 people' },
-  { id: 'connection_100', threshold: 100, points: 250, label: 'Connect with 100 people' },
+  { id: 'connection_25', threshold: 25, points: 80, label: 'Connect with 25 people' },
+  { id: 'connection_50', threshold: 50, points: 80, label: 'Connect with 50 people' },
+  { id: 'connection_100', threshold: 100, points: 60, label: 'Connect with 100 people' },
 ] as const;
 
-export const PASSPORT_POINTS_PER_STAMP = 5;
-export const FEEDBACK_POINTS = [50, 25, 25] as const;
+export const PASSPORT_POINTS_PER_STAMP = 4;
+export const FEEDBACK_POINTS = [25, 15, 15] as const;
 
 export type AwardCategoryId = 'profile' | 'networking' | 'passport' | 'explore' | 'feedback';
 
@@ -169,22 +169,22 @@ function nextHintFor(facts: LeaderboardFacts, awards: EvaluatedAward[]): string 
 export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScore {
   const awards: EvaluatedAward[] = [];
 
-  pushOnce(awards, once('profile_photo', 'profile', 'Add a profile photo', 40, PROFILE_EDIT), facts.hasPhoto);
-  pushOnce(awards, once('profile_bio', 'profile', 'Write a short bio', 25, PROFILE_EDIT), facts.hasBio);
-  pushOnce(awards, once('profile_linkedin', 'profile', 'Add your LinkedIn', 25, PROFILE_EDIT), facts.hasLinkedIn);
-  pushOnce(awards, once('profile_phone', 'profile', 'Add a phone number', 15, PROFILE_EDIT), facts.hasPhone);
-  pushOnce(awards, once('profile_job', 'profile', 'Add your job title', 15, PROFILE_EDIT), facts.hasJobTitle);
-  pushOnce(awards, once('profile_expertise', 'profile', 'Add an expertise tag', 20, PROFILE_EDIT), facts.hasExpertise);
+  pushOnce(awards, once('profile_photo', 'profile', 'Add a profile photo', 25, PROFILE_EDIT), facts.hasPhoto);
+  pushOnce(awards, once('profile_bio', 'profile', 'Write a short bio', 20, PROFILE_EDIT), facts.hasBio);
+  pushOnce(awards, once('profile_linkedin', 'profile', 'Add your LinkedIn', 20, PROFILE_EDIT), facts.hasLinkedIn);
+  pushOnce(awards, once('profile_phone', 'profile', 'Add a phone number', 10, PROFILE_EDIT), facts.hasPhone);
+  pushOnce(awards, once('profile_job', 'profile', 'Add your job title', 10, PROFILE_EDIT), facts.hasJobTitle);
+  pushOnce(awards, once('profile_expertise', 'profile', 'Add an expertise tag', 15, PROFILE_EDIT), facts.hasExpertise);
   awards.push({
     id: 'profile_expertise_3',
     category: 'profile',
     label: 'Add 3 areas of expertise',
     href: PROFILE_EDIT,
     kind: 'milestone',
-    points: 25,
+    points: 20,
     threshold: 3,
     earned: facts.expertiseCount >= 3,
-    pointsEarned: facts.expertiseCount >= 3 ? 25 : 0,
+    pointsEarned: facts.expertiseCount >= 3 ? 20 : 0,
     progress: {
       current: Math.min(facts.expertiseCount, 3),
       target: 3,
@@ -192,10 +192,10 @@ export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScor
     detail: `${facts.expertiseCount} of 3 areas`,
   });
 
-  pushOnce(awards, once('profile_affiliation', 'profile', 'Add an affiliation', 15, PROFILE_EDIT), facts.hasAffiliation);
-  pushOnce(awards, once('profile_education', 'profile', 'Add education', 15, PROFILE_EDIT), facts.hasEducation);
-  pushOnce(awards, once('profile_interest', 'profile', 'Add an interest', 15, PROFILE_EDIT), facts.hasInterest);
-  pushOnce(awards, once('profile_resume', 'profile', 'Upload a resume', 25, PROFILE_EDIT), facts.hasResume);
+  pushOnce(awards, once('profile_affiliation', 'profile', 'Add an affiliation', 10, PROFILE_EDIT), facts.hasAffiliation);
+  pushOnce(awards, once('profile_education', 'profile', 'Add education', 10, PROFILE_EDIT), facts.hasEducation);
+  pushOnce(awards, once('profile_interest', 'profile', 'Add an interest', 10, PROFILE_EDIT), facts.hasInterest);
+  pushOnce(awards, once('profile_resume', 'profile', 'Upload a resume', 15, PROFILE_EDIT), facts.hasResume);
 
   const profileComplete =
     facts.hasPhoto &&
@@ -206,17 +206,16 @@ export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScor
     facts.hasExpertise &&
     facts.hasAffiliation &&
     facts.hasEducation &&
-    facts.hasInterest &&
-    facts.hasResume;
+    facts.hasInterest;
   pushOnce(
     awards,
-    once('profile_complete', 'profile', 'Complete all profile details', 75, PROFILE_EDIT),
+    once('profile_complete', 'profile', 'Complete your profile', 80, PROFILE_EDIT),
     profileComplete,
   );
 
   pushOnce(
     awards,
-    once('connection_first', 'networking', 'Make your first connection', 20, COMMUNITY),
+    once('connection_first', 'networking', 'Make your first connection', 25, COMMUNITY),
     facts.acceptedConnections >= 1,
   );
   for (const milestone of CONNECTION_MILESTONES) {
@@ -240,7 +239,7 @@ export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScor
   }
   pushOnce(
     awards,
-    once('request_send_5', 'networking', 'Send 5 contact requests', 20, COMMUNITY),
+    once('request_send_5', 'networking', 'Send 5 contact requests', 25, COMMUNITY),
     facts.sentRequests >= 5,
   );
 
@@ -259,18 +258,18 @@ export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScor
   });
   pushOnce(
     awards,
-    once('passport_complete', 'passport', 'Complete the Passport Challenge', 100, PASSPORT),
+    once('passport_complete', 'passport', 'Complete the Passport Challenge', 50, PASSPORT),
     facts.stampTotal > 0 && facts.stamps >= facts.stampTotal,
   );
 
   pushOnce(
     awards,
-    once('favorite_session_first', 'explore', 'Favorite a session', 15, AGENDA),
+    once('favorite_session_first', 'explore', 'Favorite a session', 10, AGENDA),
     facts.favoriteSessions >= 1,
   );
   pushOnce(
     awards,
-    once('favorite_session_5', 'explore', 'Favorite 5 sessions', 25, AGENDA),
+    once('favorite_session_5', 'explore', 'Favorite 5 sessions', 20, AGENDA),
     facts.favoriteSessions >= 5,
   );
   pushOnce(
@@ -278,11 +277,37 @@ export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScor
     once('favorite_exhibitor', 'explore', 'Favorite an exhibitor', 10, EXHIBITORS),
     facts.favoriteExhibitors >= 1,
   );
+  awards.push({
+    id: 'favorite_exhibitor_5',
+    category: 'explore',
+    label: 'Favorite 5 exhibitors',
+    href: EXHIBITORS,
+    kind: 'milestone',
+    points: 20,
+    threshold: 5,
+    earned: facts.favoriteExhibitors >= 5,
+    pointsEarned: facts.favoriteExhibitors >= 5 ? 20 : 0,
+    progress: { current: Math.min(facts.favoriteExhibitors, 5), target: 5 },
+    detail: `${facts.favoriteExhibitors} of 5 exhibitors`,
+  });
   pushOnce(
     awards,
     once('favorite_speaker', 'explore', 'Favorite a speaker', 10, SPEAKERS),
     facts.favoriteSpeakers >= 1,
   );
+  awards.push({
+    id: 'favorite_speaker_3',
+    category: 'explore',
+    label: 'Favorite 3 speakers',
+    href: SPEAKERS,
+    kind: 'milestone',
+    points: 15,
+    threshold: 3,
+    earned: facts.favoriteSpeakers >= 3,
+    pointsEarned: facts.favoriteSpeakers >= 3 ? 15 : 0,
+    progress: { current: Math.min(facts.favoriteSpeakers, 3), target: 3 },
+    detail: `${facts.favoriteSpeakers} of 3 speakers`,
+  });
   pushOnce(
     awards,
     once('favorite_sponsor', 'explore', 'Favorite a sponsor', 10, SPONSORS),
@@ -290,25 +315,51 @@ export function evaluateLeaderboardScore(facts: LeaderboardFacts): EvaluatedScor
   );
   pushOnce(
     awards,
-    once('note_session', 'explore', 'Write a session note', 20, AGENDA),
+    once('note_session', 'explore', 'Write a session note', 15, AGENDA),
     facts.sessionNotes >= 1,
   );
+  awards.push({
+    id: 'note_session_5',
+    category: 'explore',
+    label: 'Write 5 session notes',
+    href: AGENDA,
+    kind: 'milestone',
+    points: 20,
+    threshold: 5,
+    earned: facts.sessionNotes >= 5,
+    pointsEarned: facts.sessionNotes >= 5 ? 20 : 0,
+    progress: { current: Math.min(facts.sessionNotes, 5), target: 5 },
+    detail: `${facts.sessionNotes} of 5 session notes`,
+  });
   pushOnce(
     awards,
-    once('note_contact', 'explore', 'Write a contact note', 20, COMMUNITY),
+    once('note_contact', 'explore', 'Write a contact note', 15, COMMUNITY),
     facts.contactNotes >= 1,
   );
+  awards.push({
+    id: 'note_contact_5',
+    category: 'explore',
+    label: 'Write 5 contact notes',
+    href: COMMUNITY,
+    kind: 'milestone',
+    points: 20,
+    threshold: 5,
+    earned: facts.contactNotes >= 5,
+    pointsEarned: facts.contactNotes >= 5 ? 20 : 0,
+    progress: { current: Math.min(facts.contactNotes, 5), target: 5 },
+    detail: `${facts.contactNotes} of 5 contact notes`,
+  });
   pushOnce(
     awards,
-    once('exhibitor_views_10', 'explore', 'Visit 10 exhibitor profiles', 25, EXHIBITORS),
+    once('exhibitor_views_10', 'explore', 'Visit 10 exhibitor profiles', 10, EXHIBITORS),
     facts.exhibitorViews >= 10,
   );
   pushOnce(
     awards,
-    once('announcements_3', 'explore', 'Open 3 announcements', 15, ANNOUNCEMENTS),
+    once('announcements_3', 'explore', 'Open 3 announcements', 10, ANNOUNCEMENTS),
     facts.announcementOpens >= 3,
   );
-  pushOnce(awards, once('first_dm', 'explore', 'Send your first message', 15, MESSAGES), facts.sentDms >= 1);
+  pushOnce(awards, once('first_dm', 'explore', 'Send your first message', 10, MESSAGES), facts.sentDms >= 1);
 
   FEEDBACK_POINTS.forEach((points, index) => {
     const n = index + 1;

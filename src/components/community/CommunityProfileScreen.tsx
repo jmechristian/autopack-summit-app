@@ -37,6 +37,8 @@ import { resolveProfilePictureUri, resolveResumeUri } from '../../utils/storageU
 import { NotesSection } from '../notes/NotesSection';
 import { RequestIntroModal } from '../requests/RequestIntroModal';
 import { RiveLoader } from '../RiveLoader';
+import { RisingStarBadge } from '../risingStars/RisingStarBadge';
+import { getProfileRisingStarYear } from '../../services/risingStars';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` can include fields that now depend on USER_POOLS-only models (notes),
@@ -145,6 +147,7 @@ export default function CommunityProfileScreen() {
   const [requestActionBusy, setRequestActionBusy] = useState(false);
   const [introModalVisible, setIntroModalVisible] = useState(false);
   const [introOpensChatWhenAccepted, setIntroOpensChatWhenAccepted] = useState(false);
+  const [risingStarYear, setRisingStarYear] = useState<number | null>(null);
 
   const otherUserId = profile?.userId || null;
   const pendingRequestState = useEngageStore((s) =>
@@ -235,6 +238,18 @@ export default function CommunityProfileScreen() {
       cancelled = true;
     };
   }, [profile?.profilePicture]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadRisingStar() {
+      const year = await getProfileRisingStarYear(profileId || profile?.id);
+      if (!cancelled) setRisingStarYear(year);
+    }
+    void loadRisingStar();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.id, profileId]);
 
   useEffect(() => {
     let mounted = true;
@@ -509,6 +524,11 @@ export default function CommunityProfileScreen() {
           </View>
           {!!profile.jobTitle && <Text style={styles.muted}>{profile.jobTitle}</Text>}
           {!!profile.company && <Text style={styles.muted}>{profile.company}</Text>}
+          {risingStarYear ? (
+            <View style={styles.risingStarWrap}>
+              <RisingStarBadge year={risingStarYear} />
+            </View>
+          ) : null}
           {canViewEmail && !!profile.email && (
             <Text style={styles.emailText}>{profile.email}</Text>
           )}
@@ -817,6 +837,7 @@ const styles = StyleSheet.create({
   },
   name: { fontSize: 18, fontWeight: '900', color: '#111827', flexShrink: 1 },
   emailText: { color: '#1f2937', fontSize: 13, marginTop: 2 },
+  risingStarWrap: { marginTop: 6 },
 
   headerActions: { flexDirection: 'row', gap: 6 },
   iconBtn: { padding: 6, borderRadius: 10 },

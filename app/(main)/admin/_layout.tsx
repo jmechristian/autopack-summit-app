@@ -51,6 +51,10 @@ export default function AdminLayout() {
             options={{ title: 'Leaderboard', headerBackVisible: false, headerLeft: adminBackButton }}
           />
           <Stack.Screen
+            name='rising-stars'
+            options={{ title: 'Rising Stars', headerBackVisible: false, headerLeft: adminBackButton }}
+          />
+          <Stack.Screen
             name='seating-chart'
             options={{ title: 'Seating Chart', headerBackVisible: false, headerLeft: adminBackButton }}
           />

@@ -1,15 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { AWARD_CATEGORIES, CONNECTION_MILESTONES } from '../../config/leaderboardPoints';
 import { useLeaderboardStore } from '../../store/leaderboardStore';
 import { autopackColors } from '../../theme';
 import { ui } from '../../ui/tokens';
+import { PointsGuideSkeleton } from './LeaderboardSkeletons';
 
 export default function PointsGuideScreen() {
   const myScore = useLeaderboardStore((s) => s.myScore);
   const loading = useLeaderboardStore((s) => s.loading);
+  const scoreLoading = useLeaderboardStore((s) => s.scoreLoading);
+  const lastScoreAt = useLeaderboardStore((s) => s.lastScoreAt);
+  const error = useLeaderboardStore((s) => s.error);
   const refresh = useLeaderboardStore((s) => s.refresh);
 
   useFocusEffect(
@@ -18,16 +23,31 @@ export default function PointsGuideScreen() {
     }, [refresh]),
   );
 
+  const waitingForScore = !myScore && !error && (scoreLoading || lastScoreAt == null);
   const connections = myScore?.counts.connections ?? 0;
 
+  if (waitingForScore) {
+    return <PointsGuideSkeleton />;
+  }
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <Animated.ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      entering={FadeIn.duration(220)}
+      refreshControl={
+        <RefreshControl
+          refreshing={!!myScore && (scoreLoading || loading)}
+          onRefresh={() => void refresh({ force: true })}
+        />
+      }
+    >
       <View style={styles.hero}>
         <Text style={styles.heroEyebrow}>Your breakdown</Text>
         <Text style={styles.heroTitle}>{myScore?.total ?? 0} pts</Text>
         <Text style={styles.heroHint}>{myScore?.nextHint || 'Earn points by jumping into the summit.'}</Text>
-        <Text style={styles.heroHint}>Scores save as you earn them. Pull to refresh the leaderboard for the latest ranks.</Text>
-        {loading && !myScore ? <ActivityIndicator color='#111827' style={{ marginTop: 8 }} /> : null}
+        <Text style={styles.heroHint}>Scores save as you earn them. Pull to refresh for the latest totals.</Text>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
 
       <View style={styles.card}>
@@ -82,7 +102,7 @@ export default function PointsGuideScreen() {
           </View>
         );
       })}
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }
 
@@ -97,6 +117,7 @@ const styles = StyleSheet.create({
   heroEyebrow: { fontWeight: '800', textTransform: 'uppercase', color: '#374151', fontSize: 12 },
   heroTitle: { marginTop: 4, fontSize: 32, fontWeight: '900', color: '#111827' },
   heroHint: { marginTop: 6, color: '#374151', fontWeight: '600' },
+  error: { marginTop: 8, color: ui.colors.danger, fontWeight: '600' },
   card: {
     backgroundColor: '#fff',
     borderRadius: 14,

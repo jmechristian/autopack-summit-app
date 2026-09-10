@@ -33,6 +33,7 @@ type LeaderboardState = {
   rankedAll: RankedLeaderboardEntry[];
   entries: RankedLeaderboardEntry[];
   loading: boolean;
+  scoreLoading: boolean;
   rankingUnavailable: boolean;
   error: string | null;
   lastBoardAt: number | null;
@@ -57,6 +58,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
   rankedAll: [],
   entries: [],
   loading: false,
+  scoreLoading: false,
   rankingUnavailable: false,
   error: null,
   lastBoardAt: null,
@@ -90,7 +92,12 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     }
 
     const hasBoard = get().rankedAll.length > 0 || get().entries.length > 0;
-    set({ loading: !hasBoard, error: null });
+    const needsScore = includeMyScore && !scoreFresh;
+    set({
+      loading: !hasBoard || !boardFresh,
+      scoreLoading: needsScore,
+      error: null,
+    });
     try {
       let ranked = get().rankedAll.length ? get().rankedAll : get().entries;
       let rankingUnavailable = get().rankingUnavailable;
@@ -180,6 +187,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
           entries: visibleLeaderboard(ranked),
           rankingUnavailable,
           loading: false,
+          scoreLoading: false,
           lastBoardAt: Date.now(),
           lastScoreAt: Date.now(),
         });
@@ -194,11 +202,14 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
         entries: visibleLeaderboard(ranked),
         rankingUnavailable,
         loading: false,
+        scoreLoading: false,
         lastBoardAt: boardFresh ? get().lastBoardAt : Date.now(),
+        lastScoreAt: includeMyScore ? Date.now() : get().lastScoreAt,
       });
     } catch (error: any) {
       set({
         loading: false,
+        scoreLoading: false,
         error: error?.message || 'Unable to load the leaderboard.',
       });
     } finally {

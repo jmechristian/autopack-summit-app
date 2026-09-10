@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -10,12 +9,14 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useCurrentUserProfile } from '../../hooks/useApsStore';
 import { useLeaderboardStore } from '../../store/leaderboardStore';
 import { autopackColors } from '../../theme';
 import { ui } from '../../ui/tokens';
 import { LEADERBOARD_VISIBLE_LIMIT } from '../../config/leaderboardPoints';
 import { LeaderboardAvatar } from './LeaderboardAvatar';
+import { LeaderboardScreenSkeleton } from './LeaderboardSkeletons';
 
 function medalColor(rank: number) {
   if (rank === 1) return autopackColors.apYellow;
@@ -31,9 +32,11 @@ export default function LeaderboardScreen() {
   const myPoints = useLeaderboardStore((s) => s.myPoints);
   const entries = useLeaderboardStore((s) => s.entries);
   const loading = useLeaderboardStore((s) => s.loading);
+  const lastBoardAt = useLeaderboardStore((s) => s.lastBoardAt);
   const error = useLeaderboardStore((s) => s.error);
   const rankingUnavailable = useLeaderboardStore((s) => s.rankingUnavailable);
   const refresh = useLeaderboardStore((s) => s.refresh);
+  const waitingForBoard = !error && lastBoardAt == null && entries.length === 0;
 
   useFocusEffect(
     useCallback(() => {
@@ -46,13 +49,20 @@ export default function LeaderboardScreen() {
     return name || 'You';
   }, [profile?.firstName, profile?.lastName]);
 
+  if (waitingForBoard) {
+    return <LeaderboardScreenSkeleton />;
+  }
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={styles.container} entering={FadeIn.duration(220)}>
       <FlatList
         data={entries}
         keyExtractor={(item) => item.id}
         refreshControl={
-          <RefreshControl refreshing={loading && entries.length > 0} onRefresh={() => void refresh({ force: true })} />
+          <RefreshControl
+            refreshing={loading && !waitingForBoard}
+            onRefresh={() => void refresh({ force: true })}
+          />
         }
         contentContainerStyle={styles.content}
         ListHeaderComponent={
@@ -80,9 +90,6 @@ export default function LeaderboardScreen() {
               </Text>
             ) : null}
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            {loading && !myScore ? (
-              <ActivityIndicator color={ui.colors.primary} style={{ marginTop: 8 }} />
-            ) : null}
             {entries.length > 0 ? <Text style={styles.sectionTitle}>Top {LEADERBOARD_VISIBLE_LIMIT}</Text> : null}
             {entries.length > 0 ? (
               <Text style={styles.pullHint}>Pull to refresh for the latest scores.</Text>
@@ -120,7 +127,7 @@ export default function LeaderboardScreen() {
           );
         }}
       />
-    </View>
+    </Animated.View>
   );
 }
 

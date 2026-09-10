@@ -46,6 +46,8 @@ import {
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
 import { isWeb, platformUnavailableMessage } from '../../../src/utils/platform';
+import { RisingStarBadge } from '../../../src/components/risingStars/RisingStarBadge';
+import { getProfileRisingStarYear } from '../../../src/services/risingStars';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
@@ -74,6 +76,7 @@ export default function Profile() {
   const [linkedinFeedback, setLinkedinFeedback] = useState<string | null>(null);
   const [resumeFeedback, setResumeFeedback] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [risingStarYear, setRisingStarYear] = useState<number | null>(null);
 
   // Resolve profile picture from either URL or S3 key.
   React.useEffect(() => {
@@ -103,6 +106,18 @@ export default function Profile() {
   React.useEffect(() => {
     setLinkedinText(profile?.linkedin || '');
   }, [profile?.linkedin]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const loadRisingStar = async () => {
+      const year = await getProfileRisingStarYear(profile?.id);
+      if (!cancelled) setRisingStarYear(year);
+    };
+    void loadRisingStar();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.id]);
 
   const formatRegistrantType = (attendeeType?: string | null) => {
     if (!attendeeType) return '';
@@ -385,6 +400,11 @@ export default function Profile() {
           {!!roleCompanyLine && (
             <Text style={styles.roleCompanyText}>{roleCompanyLine}</Text>
           )}
+          {risingStarYear ? (
+            <View style={styles.risingStarWrap}>
+              <RisingStarBadge year={risingStarYear} />
+            </View>
+          ) : null}
           {!!profileEmail && (
             <Text style={styles.profileEmailText}>{profileEmail}</Text>
           )}
@@ -797,6 +817,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#6b7280',
     marginBottom: 2,
+  },
+  risingStarWrap: {
+    marginTop: 6,
+    marginBottom: 4,
   },
   profileEmailText: {
     fontSize: 14,

@@ -15,6 +15,7 @@ import { useCurrentUserProfile } from '../../../src/hooks/useApsStore';
 import { useEngageStore } from '../../../src/store/engageStore';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
+import { RisingStarCallout } from '../../../src/components/risingStars/RisingStarCallout';
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
@@ -208,6 +209,8 @@ export default function EngageHome() {
             </>
           )}
         </Pressable>
+
+        <RisingStarCallout />
 
         <View style={styles.toolsGrid}>
           {tiles.map((t) => (

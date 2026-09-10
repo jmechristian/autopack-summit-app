@@ -27,6 +27,8 @@ import { autopackColors } from '../../../src/theme';
 import { graphqlApiKeyClient } from '../../../src/utils/graphqlClient';
 import { resolveProfilePictureUri } from '../../../src/utils/storageUtils';
 import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
+import { listRisingStars } from '../../../src/services/risingStars';
+import { RisingStarMark } from '../../../src/components/risingStars/RisingStarMark';
 
 type CommunityProfile = {
   profileId: string; // ApsAppUserProfile.id
@@ -83,6 +85,7 @@ export default function CommunityIndex() {
   const [expertiseFilter, setExpertiseFilter] = useState<string[]>([]);
   const [expertisePickerOpen, setExpertisePickerOpen] = useState(false);
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
+  const [risingStarYears, setRisingStarYears] = useState<Record<string, number>>({});
   const [profilePictureUris, setProfilePictureUris] = useState<Record<string, string | null>>({});
   const avatarRequestedRef = useRef<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -183,6 +186,10 @@ export default function CommunityIndex() {
         return aFirst.localeCompare(bFirst);
       });
 
+      const stars = await listRisingStars();
+      const years: Record<string, number> = {};
+      for (const star of stars) years[star.id] = star.risingStarYear;
+      setRisingStarYears(years);
       setProfiles(all);
     } catch (e: any) {
       console.error('Error loading community users:', e);
@@ -366,6 +373,7 @@ export default function CommunityIndex() {
             initials={`${normalizeNamePart(profile.firstName).slice(0, 1)}${normalizeNamePart(profile.lastName).slice(0, 1)}`.toUpperCase()}
             isSelf={isSelf}
             hasNote={hasNote}
+            risingStarYear={risingStarYears[profile.profileId] || null}
             currentAppUserProfileId={currentProfileId}
             favorite={fav}
             pendingFavorite={pending}
@@ -382,6 +390,7 @@ export default function CommunityIndex() {
       pendingContactIds,
       currentProfileId,
       profileIdsWithNotes,
+      risingStarYears,
       profilePictureUris,
       contactRequestByUserId,
       onPressProfile,
@@ -396,6 +405,7 @@ export default function CommunityIndex() {
       profilePictureUris,
       contactRequestByUserId,
       profileIdsWithNotes,
+      risingStarYears,
     }),
     [
       favoriteContactIds,
@@ -403,6 +413,7 @@ export default function CommunityIndex() {
       profilePictureUris,
       contactRequestByUserId,
       profileIdsWithNotes,
+      risingStarYears,
     ]
   );
 
@@ -448,6 +459,16 @@ export default function CommunityIndex() {
           ) : null}
         </Pressable>
       </View>
+
+      <Pressable
+        style={[styles.risingStarKey, { marginHorizontal: contentInset }]}
+        onPress={() => router.push('/(main)/hub/rising-stars' as any)}
+        accessibilityRole='button'
+        accessibilityLabel='Rising Star key. RS means Rising Star honoree.'
+      >
+        <RisingStarMark />
+        <Text style={styles.risingStarKeyText}>Rising Star honoree</Text>
+      </Pressable>
 
       {expertiseFilter.length ? (
         <View style={[styles.filterBar, { marginHorizontal: contentInset }]}>
@@ -529,7 +550,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginVertical: 12,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  risingStarKey: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  risingStarKeyText: {
+    color: '#6b7280',
+    fontSize: 12,
+    fontWeight: '600',
   },
   searchWrap: {
     flex: 1,
