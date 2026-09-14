@@ -85,3 +85,57 @@ export const updateApsAppLeaderboardEntry = /* GraphQL */ `
     }
   }
 `;
+
+export const leaderboardStaffProfiles = /* GraphQL */ `
+  query LeaderboardStaffProfiles(
+    $filter: ModelApsAppUserProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listApsAppUserProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        attendeeType
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const leaderboardStaffRegistrants = /* GraphQL */ `
+  query LeaderboardStaffRegistrants(
+    $apsID: ID!
+    $filter: ModelApsRegistrantFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    apsRegistrantsByApsID(apsID: $apsID, filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        attendeeType
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const leaderboardProfileIdByRegistrant = /* GraphQL */ `
+  query LeaderboardProfileIdByRegistrant($registrantId: ID!) {
+    apsAppUsersByRegistrantId(registrantId: $registrantId, limit: 1) {
+      items {
+        id
+        profileId
+        profile {
+          id
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+`;

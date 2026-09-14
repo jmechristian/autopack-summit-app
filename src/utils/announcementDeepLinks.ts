@@ -1,3 +1,5 @@
+import { POST_EVENT_SURVEY_ROUTE } from '../config/postEventSurvey';
+
 export const DEFAULT_ANNOUNCEMENT_DEEP_LINK = 'app://notifications';
 
 export const APP_ANNOUNCEMENT_SCREENS = [
@@ -10,6 +12,7 @@ export const APP_ANNOUNCEMENT_SCREENS = [
   { id: 'leaderboard', label: 'Leaderboard', path: '/(main)/hub/leaderboard' },
   { id: 'points', label: 'How points work', path: '/(main)/hub/points' },
   { id: 'rising-stars', label: 'Rising Stars', path: '/(main)/hub/rising-stars' },
+  { id: 'post-event-survey', label: 'Post-event survey', path: POST_EVENT_SURVEY_ROUTE },
 ] as const;
 
 export type AppAnnouncementScreenId = (typeof APP_ANNOUNCEMENT_SCREENS)[number]['id'];
@@ -18,6 +21,7 @@ export type AnnouncementDeepLinkMode = 'app' | 'session' | 'custom';
 export function getAppAnnouncementScreenId(url?: string | null): AppAnnouncementScreenId | null {
   const trimmed = String(url || '').trim();
   if (!trimmed || isNotificationsDeepLink(trimmed)) return 'notifications';
+  if (isPostEventSurveyDeepLink(trimmed)) return 'post-event-survey';
   const match = APP_ANNOUNCEMENT_SCREENS.find((screen) => screen.path && screen.path === trimmed);
   return match?.id ?? null;
 }
@@ -52,6 +56,12 @@ export function extractSessionIdFromDeepLink(url?: string | null): string | null
   return null;
 }
 
+export function isPostEventSurveyDeepLink(url?: string | null): boolean {
+  const trimmed = String(url || '').trim().toLowerCase();
+  if (!trimmed) return false;
+  return trimmed.includes('post-event-survey') && !trimmed.includes('success');
+}
+
 export function isNotificationsDeepLink(url?: string | null): boolean {
   const trimmed = String(url || '').trim().toLowerCase();
   if (!trimmed) return true;
@@ -68,6 +78,8 @@ export function resolveAnnouncementDeepLink(url: string): string | null {
 
   const sessionId = extractSessionIdFromDeepLink(trimmed);
   if (sessionId) return buildSessionDeepLink(sessionId);
+
+  if (isPostEventSurveyDeepLink(trimmed)) return POST_EVENT_SURVEY_ROUTE;
 
   if (trimmed.startsWith('/(main)/')) return trimmed;
 
@@ -93,6 +105,10 @@ export function getAnnouncementDeepLinkDestination(
       kind: 'session',
       sessionId,
     };
+  }
+
+  if (isPostEventSurveyDeepLink(trimmed)) {
+    return { route: POST_EVENT_SURVEY_ROUTE, kind: 'in-app' };
   }
 
   const route = resolveAnnouncementDeepLink(trimmed);

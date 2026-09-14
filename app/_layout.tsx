@@ -9,6 +9,7 @@ import { configureAmplify } from '../src/amplifyConfig';
 import { PointsToastHost } from '../src/components/leaderboard/PointsToastHost';
 import { RiveLoaderProvider } from '../src/components/RiveLoader';
 import { theme } from '../src/theme';
+import { startIncomingAppLinkListener } from '../src/utils/incomingAppLinks';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -29,6 +30,8 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
+
+  useEffect(() => startIncomingAppLinkListener(), []);
 
   if (!loaded && !error) {
     return null;

@@ -15,6 +15,7 @@ enum RegistrantType {
   SPEAKER
   STAFF
   EXHIBITOR
+  WAITLIST
 }
 
 enum RegistrantStatus {
@@ -27,6 +28,13 @@ enum SponsorType {
   BOOTH
   TABLE
   NONE
+}
+
+enum PostEventSurveyIdentity {
+  SPONSOR
+  SOLUTION_PROVIDER
+  OEM
+  TIER_ONE
 }
 
 input SendModeratedDmMessageInput {
@@ -98,6 +106,20 @@ type AdminLatestTempCredentialResult {
   createdAt: AWSDateTime!
 }
 
+input AdminRegenerateAttendeeQrCodesInput {
+  eventId: ID
+  limit: Int
+  nextToken: String
+}
+
+type AdminRegenerateAttendeeQrCodesResult {
+  processed: Int!
+  updated: Int!
+  failed: Int!
+  nextToken: String
+  errors: [String!]
+}
+
 type AdminThinkificEnrollment {
   enrollmentId: Int
   courseId: Int
@@ -147,6 +169,11 @@ type Mutation {
     input: AdminCreateExhibitorInput!
   ): AdminCreateExhibitorResult
     @function(name: "apsPushFanout-${env}")
+    @aws_cognito_user_pools
+  adminRegenerateAttendeeQrCodes(
+    input: AdminRegenerateAttendeeQrCodesInput
+  ): AdminRegenerateAttendeeQrCodesResult
+    @function(name: "adminRegistrantOps-${env}")
     @aws_cognito_user_pools
   adminPublishDueAnnouncements(
     eventId: ID!
@@ -333,6 +360,8 @@ type ApsRegistrant
   appUser: ApsAppUser @hasOne(fields: ["appUserId"])
 
   notes: [ApsAppUserNote] @hasMany(indexName: "byRegistrant", fields: ["id"])
+  postEventSurveys: [ApsPostEventSurvey]
+    @hasMany(indexName: "byRegistrant", fields: ["id"])
   qrCode: String
 }
 
@@ -1291,7 +1320,8 @@ type ApsAnnouncementOpen
     ]
   ) {
   id: ID!
-  announcementId: ID! @index(name: "byAnnouncement", sortKeyFields: ["createdAt"])
+  announcementId: ID!
+    @index(name: "byAnnouncement", sortKeyFields: ["createdAt"])
   eventId: ID! @index(name: "byEventCreated", sortKeyFields: ["createdAt"])
   userId: ID!
   source: String
@@ -1423,6 +1453,46 @@ type ApsPushToken
   createdAt: AWSDateTime!
 }
 
+# One completed post-event survey per registrant per event.
+# Uniqueness is the deterministic id/surveyKey: pes:<eventId>|r:<registrantId>
+# Owner may create+read only (no updates), so it cannot be submitted twice.
+type ApsPostEventSurvey
+  @model
+  @aws_cognito_user_pools
+  @auth(
+    rules: [
+      { allow: owner, provider: userPools, operations: [create, read] }
+      { allow: groups, groups: ["Admin"], provider: userPools }
+    ]
+  ) {
+  id: ID!
+  owner: String
+  eventId: ID! @index(name: "byEvent", sortKeyFields: ["createdAt"])
+  registrantId: ID! @index(name: "byRegistrant")
+  registrant: ApsRegistrant! @belongsTo(fields: ["registrantId"])
+  userId: ID! @index(name: "byUser", sortKeyFields: ["createdAt"])
+  surveyKey: String! @index(name: "bySurveyKey")
+
+  identityType: PostEventSurveyIdentity
+  mostBeneficial: String
+  leastBeneficial: String
+  summitRating: Int
+  gainedValue: Boolean
+  gainedValueComments: String
+  favoritePresentation: String
+  sessionRatings: AWSJSON
+  networkGrowthRating: Int
+  improvementSuggestions: String
+  recommendName: String
+  recommendCompany: String
+  recommendEmail: String
+  recommendPhone: String
+
+  completedAt: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 # In-app feedback submissions (text + optional screenshot/image keys).
 type ApsAppFeedback
   @model
@@ -1479,7 +1549,9 @@ type ModelApsDmMessageConnection @aws_api_key @aws_cognito_user_pools {
   nextToken: String
 }
 
-type ModelApsAppLeaderboardEntryConnection @aws_api_key @aws_cognito_user_pools {
+type ModelApsAppLeaderboardEntryConnection
+  @aws_api_key
+  @aws_cognito_user_pools {
   items: [ApsAppLeaderboardEntry]!
   nextToken: String
 }

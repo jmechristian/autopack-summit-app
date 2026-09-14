@@ -10,6 +10,8 @@ projects:
       - src/graphql/customQueries.ts
       - src/graphql/dmOps.ts
       - src/graphql/engageState.ts
+      - src/graphql/postEventSurveyOps.ts
+      - src/graphql/leaderboardOps.ts
     extensions:
       amplify:
         codeGenTarget: typescript

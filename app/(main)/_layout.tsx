@@ -84,6 +84,24 @@ export default function MainTabs() {
       />
 
       <Tabs.Screen
+        name='open-profile'
+        options={{
+          href: null,
+          headerShown: false,
+          title: 'Profile',
+        }}
+      />
+
+      <Tabs.Screen
+        name='r/[registrantId]'
+        options={{
+          href: null,
+          headerShown: false,
+          title: 'Profile',
+        }}
+      />
+
+      <Tabs.Screen
         name='admin'
         options={{
           href: null,

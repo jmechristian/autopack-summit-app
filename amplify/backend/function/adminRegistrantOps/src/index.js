@@ -36,6 +36,9 @@ const SPEAKER_TABLE_NAME = process.env.SPEAKER_TABLE_NAME;
 const EXHIBITOR_QR_BUCKET = process.env.EXHIBITOR_QR_BUCKET || process.env.STORAGE_APSAPP_BUCKETNAME || 'apsapp';
 const EXHIBITOR_QR_SECRET = process.env.EXHIBITOR_QR_SECRET || TEMP_CREDENTIAL_SECRET;
 const EXHIBITOR_QR_KEY_PREFIX = 'qrcodes/exhibitor-passport';
+const ATTENDEE_QR_KEY_PREFIX = 'qrcodes';
+const ATTENDEE_QR_WEB_BASE = process.env.ATTENDEE_QR_WEB_BASE || 'https://autopacksummit.com/app/c';
+const CURRENT_EVENT_ID = process.env.APS_EVENT_ID || 'd00b35f5-c45b-42eb-b306-fa3dfeee0251';
 
 const cognito = new CognitoIdentityProviderClient({});
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
@@ -1105,18 +1108,19 @@ async function storeTempCredential({ apsID, registrantId, email, tempPassword })
   );
 }
 
-async function bestEffortSetRegistrantQrCode(registrantId, apsID) {
+async function bestEffortSetRegistrantQrCode(registrantId) {
   try {
-    const qrCode = `aps:${apsID}:registrant:${registrantId}`;
+    const uploaded = await uploadAttendeeQrPng(registrantId);
     await appsyncRequest(
       /* GraphQL */ `
         mutation UpdateApsRegistrant($input: UpdateApsRegistrantInput!) {
           updateApsRegistrant(input: $input) {
             id
+            qrCode
           }
         }
       `,
-      { input: { id: registrantId, qrCode } },
+      { input: { id: registrantId, qrCode: uploaded.publicUrl } },
     );
   } catch (error) {
     console.log('best-effort qrCode update failed', {
@@ -1124,6 +1128,35 @@ async function bestEffortSetRegistrantQrCode(registrantId, apsID) {
       message: error?.message || String(error),
     });
   }
+}
+
+function buildAttendeeQrPayload(registrantId) {
+  return `${ATTENDEE_QR_WEB_BASE}/${encodeURIComponent(String(registrantId))}`;
+}
+
+async function uploadAttendeeQrPng(registrantId) {
+  const payload = buildAttendeeQrPayload(registrantId);
+  const key = `${ATTENDEE_QR_KEY_PREFIX}/${registrantId}.png`;
+  const pngBuffer = await QRCode.toBuffer(payload, {
+    type: 'png',
+    width: 640,
+    errorCorrectionLevel: 'M',
+    margin: 1,
+  });
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: EXHIBITOR_QR_BUCKET,
+      Key: key,
+      Body: pngBuffer,
+      ContentType: 'image/png',
+      CacheControl: 'public, max-age=300',
+    }),
+  );
+  return {
+    key,
+    payload,
+    publicUrl: `${buildS3PublicUrl(EXHIBITOR_QR_BUCKET, key)}?v=${Date.now()}`,
+  };
 }
 
 function buildExhibitorPassportPayload(eventId, exhibitorId) {
@@ -1244,7 +1277,7 @@ async function handleAdminCreateRegistrant(event) {
     email,
     tempPassword: ensured.tempPassword,
   });
-  await bestEffortSetRegistrantQrCode(registrant.id, apsID);
+  await bestEffortSetRegistrantQrCode(registrant.id);
 
   return {
     id: registrant.id,
@@ -1381,6 +1414,65 @@ async function handleAdminCreateExhibitor(event) {
   };
 }
 
+async function handleAdminRegenerateAttendeeQrCodes(event) {
+  requireAdmin(event);
+  const input = event?.arguments?.input || {};
+  const eventId = String(input.eventId || CURRENT_EVENT_ID).trim();
+  const limit = Math.min(Math.max(Number(input.limit) || 20, 1), 40);
+  const nextTokenIn = input.nextToken ? String(input.nextToken) : null;
+  if (!eventId) throw new Error('eventId is required');
+
+  const page = await appsyncRequest(
+    /* GraphQL */ `
+      query AdminListRegistrantsForQr($apsID: ID!, $limit: Int, $nextToken: String) {
+        apsRegistrantsByApsID(apsID: $apsID, limit: $limit, nextToken: $nextToken) {
+          items {
+            id
+          }
+          nextToken
+        }
+      }
+    `,
+    { apsID: eventId, limit, nextToken: nextTokenIn },
+  );
+  const connection = page?.apsRegistrantsByApsID || {};
+  const items = (connection.items || []).filter((item) => item?.id);
+  const errors = [];
+  let updated = 0;
+  let failed = 0;
+
+  for (const item of items) {
+    try {
+      const uploaded = await uploadAttendeeQrPng(item.id);
+      await appsyncRequest(
+        /* GraphQL */ `
+          mutation UpdateApsRegistrantQr($input: UpdateApsRegistrantInput!) {
+            updateApsRegistrant(input: $input) {
+              id
+              qrCode
+            }
+          }
+        `,
+        { input: { id: item.id, qrCode: uploaded.publicUrl } },
+      );
+      updated += 1;
+    } catch (error) {
+      failed += 1;
+      if (errors.length < 12) {
+        errors.push(`${item.id}: ${error?.message || String(error)}`);
+      }
+    }
+  }
+
+  return {
+    processed: items.length,
+    updated,
+    failed,
+    nextToken: connection.nextToken || null,
+    errors,
+  };
+}
+
 exports.handler = async (event) => {
   if (event?.typeName === 'Mutation' && event?.fieldName === 'adminCreateRegistrant') {
     return handleAdminCreateRegistrant(event);
@@ -1393,6 +1485,9 @@ exports.handler = async (event) => {
   }
   if (event?.typeName === 'Mutation' && event?.fieldName === 'adminCreateExhibitor') {
     return handleAdminCreateExhibitor(event);
+  }
+  if (event?.typeName === 'Mutation' && event?.fieldName === 'adminRegenerateAttendeeQrCodes') {
+    return handleAdminRegenerateAttendeeQrCodes(event);
   }
   if (event?.typeName === 'Mutation' && event?.fieldName === 'deleteMyAccount') {
     return handleDeleteMyAccount(event);

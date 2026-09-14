@@ -649,3 +649,53 @@ export async function reissueAdminRegistrantTempPassword(input: {
   };
 }
 
+const adminRegenerateAttendeeQrCodesMutation = /* GraphQL */ `
+  mutation AdminRegenerateAttendeeQrCodes($input: AdminRegenerateAttendeeQrCodesInput) {
+    adminRegenerateAttendeeQrCodes(input: $input) {
+      processed
+      updated
+      failed
+      nextToken
+      errors
+    }
+  }
+`;
+
+export type AdminQrRegenProgress = {
+  processed: number;
+  updated: number;
+  failed: number;
+  done: boolean;
+};
+
+export async function regenerateAdminAttendeeQrCodes(
+  onProgress?: (progress: AdminQrRegenProgress) => void,
+): Promise<AdminQrRegenProgress> {
+  let nextToken: string | null = null;
+  let processed = 0;
+  let updated = 0;
+  let failed = 0;
+
+  do {
+    const resp = await graphqlAuthClient.graphql({
+      query: adminRegenerateAttendeeQrCodesMutation,
+      variables: {
+        input: {
+          eventId: APS_ID,
+          limit: 20,
+          nextToken: nextToken || undefined,
+        },
+      },
+    });
+    const out = (resp as any)?.data?.adminRegenerateAttendeeQrCodes;
+    if (!out) throw new Error('QR regeneration is not available yet. Deploy the latest API first.');
+    processed += Number(out.processed || 0);
+    updated += Number(out.updated || 0);
+    failed += Number(out.failed || 0);
+    nextToken = out.nextToken || null;
+    onProgress?.({ processed, updated, failed, done: !nextToken });
+  } while (nextToken);
+
+  return { processed, updated, failed, done: true };
+}
+

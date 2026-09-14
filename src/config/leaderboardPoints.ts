@@ -1,5 +1,9 @@
 export const LEADERBOARD_VISIBLE_LIMIT = 50;
 
+export function isStaffAttendeeType(type?: string | null) {
+  return String(type || '').toUpperCase() === 'STAFF';
+}
+
 export const CONNECTION_MILESTONES = [
   { id: 'connection_5', threshold: 5, points: 50, label: 'Connect with 5 people' },
   { id: 'connection_10', threshold: 10, points: 50, label: 'Connect with 10 people' },

@@ -1,7 +1,9 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
+import * as Linking from 'expo-linking';
 import { RiveLoader } from '../src/components/RiveLoader';
+import { isAttendeeDeepLink } from '../src/utils/attendeeQr';
 
 // Minimum time the splash animation stays visible (one full loop) once it starts
 // playing, so it never just "flashes" before we navigate away.
@@ -58,7 +60,15 @@ export default function Index() {
     const remaining = Math.max(0, MIN_SPLASH_DURATION - (Date.now() - start));
 
     const timer = setTimeout(() => {
-      if (!cancelled) router.replace(destinationRef.current as any);
+      void Linking.getInitialURL()
+        .then((url) => {
+          if (cancelled) return;
+          if (isAttendeeDeepLink(url)) return;
+          router.replace(destinationRef.current as any);
+        })
+        .catch(() => {
+          if (!cancelled) router.replace(destinationRef.current as any);
+        });
     }, remaining);
 
     return () => {

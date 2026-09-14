@@ -14,7 +14,9 @@ import {
 } from '../utils/pushNotifications';
 import { useEngageStore } from '../store/engageStore';
 import { resolveAnnouncementDeepLink } from '../utils/announcementDeepLinks';
+import { setIncomingAppLinkHandler } from '../utils/incomingAppLinks';
 import { isWeb } from '../utils/platform';
+import { resolveAttendeeQrPayload } from '../services/attendeeQr';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -230,6 +232,23 @@ export function AuthGuard({ children }: AuthGuardProps) {
       stopEngageRealtime();
     };
   }, [currentAppUser?.id, startEngageRealtime, stopEngageRealtime]);
+
+  useEffect(() => {
+    if (!currentAppUser?.id) {
+      setIncomingAppLinkHandler(null);
+      return;
+    }
+    setIncomingAppLinkHandler((url) => {
+      void resolveAttendeeQrPayload(url).then((resolved) => {
+        if (!resolved.ok) return;
+        router.push({
+          pathname: '/(main)/community/[id]',
+          params: { id: resolved.profileId },
+        });
+      });
+    });
+    return () => setIncomingAppLinkHandler(null);
+  }, [currentAppUser?.id]);
 
   // When app returns to foreground, refresh unread counts (no tab switching needed).
   useEffect(() => {

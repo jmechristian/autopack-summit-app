@@ -1,6 +1,7 @@
 import { APS_ID } from '../config/apsConfig';
 import {
   LEADERBOARD_VISIBLE_LIMIT,
+  isStaffAttendeeType,
   leaderboardDisplayName,
   scoreBreakdownPayload,
   type EvaluatedScore,
@@ -9,6 +10,9 @@ import {
   apsAppLeaderboardEntriesByEventIdAndUpdatedAt,
   createApsAppLeaderboardEntry,
   getApsAppLeaderboardEntry,
+  leaderboardProfileIdByRegistrant,
+  leaderboardStaffProfiles,
+  leaderboardStaffRegistrants,
   updateApsAppLeaderboardEntry,
 } from '../graphql/leaderboardOps';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../utils/graphqlClient';
@@ -104,6 +108,64 @@ export async function listLeaderboardEntries(eventId = APS_ID): Promise<Leaderbo
   }
   if (lastError) throw lastError;
   return [];
+}
+
+const STAFF_CACHE_MS = 60_000;
+let staffIdCache: { at: number; ids: Set<string> } | null = null;
+
+export async function listStaffProfileIds(): Promise<Set<string>> {
+  if (staffIdCache && Date.now() - staffIdCache.at < STAFF_CACHE_MS) {
+    return staffIdCache.ids;
+  }
+  const ids = new Set<string>();
+  try {
+    const staffProfiles = await drainIndexedList<{ id?: string | null; attendeeType?: string | null }>({
+      client: graphqlApiKeyClient,
+      query: leaderboardStaffProfiles,
+      field: 'listApsAppUserProfiles',
+      variables: { filter: { attendeeType: { eq: 'STAFF' } } },
+      pageSize: 200,
+    });
+    for (const row of staffProfiles) {
+      if (row.id && isStaffAttendeeType(row.attendeeType)) ids.add(row.id);
+    }
+
+    const staffRegistrants = await drainIndexedList<{ id?: string | null }>({
+      client: graphqlApiKeyClient,
+      query: leaderboardStaffRegistrants,
+      field: 'apsRegistrantsByApsID',
+      variables: { apsID: APS_ID, filter: { attendeeType: { eq: 'STAFF' } } },
+      pageSize: 200,
+    });
+    await Promise.all(
+      staffRegistrants.map(async (registrant) => {
+        if (!registrant.id) return;
+        try {
+          const resp = await graphqlApiKeyClient.graphql({
+            query: leaderboardProfileIdByRegistrant,
+            variables: { registrantId: registrant.id },
+          });
+          const appUser = (resp as any)?.data?.apsAppUsersByRegistrantId?.items?.find(Boolean);
+          const profileId = appUser?.profile?.id || appUser?.profileId;
+          if (profileId) ids.add(String(profileId));
+        } catch {
+          // keep going; missing profile just means they are not on the board
+        }
+      }),
+    );
+  } catch (error) {
+    console.warn('Staff leaderboard filter failed:', error);
+  }
+  staffIdCache = { at: Date.now(), ids };
+  return ids;
+}
+
+export function withoutStaffEntries<T extends { userProfileId: string }>(
+  entries: T[],
+  staffIds: Set<string>,
+) {
+  if (!staffIds.size) return entries;
+  return entries.filter((entry) => !staffIds.has(entry.userProfileId));
 }
 
 export function visibleLeaderboard(entries: RankedLeaderboardEntry[]) {

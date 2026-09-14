@@ -5,13 +5,21 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, 
 import { AppCard } from '../../../../src/ui/AppCard';
 import { AppScreen } from '../../../../src/ui/AppScreen';
 import { ui } from '../../../../src/ui/tokens';
-import { AdminRegistrantListItem, listAdminRegistrants } from '../../../../src/components/admin/registrants/adminRegistrantsService';
+import { confirmAction, showAlert } from '../../../../src/utils/alert';
+import {
+  AdminQrRegenProgress,
+  AdminRegistrantListItem,
+  listAdminRegistrants,
+  regenerateAdminAttendeeQrCodes,
+} from '../../../../src/components/admin/registrants/adminRegistrantsService';
 
 export default function AdminRegistrantsListScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [registrants, setRegistrants] = useState<AdminRegistrantListItem[]>([]);
+  const [regenBusy, setRegenBusy] = useState(false);
+  const [regenProgress, setRegenProgress] = useState<AdminQrRegenProgress | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -43,6 +51,30 @@ export default function AdminRegistrantsListScreen() {
     });
   }, [registrants, search]);
 
+  const runQrRegen = useCallback(() => {
+    confirmAction({
+      title: 'Regenerate attendee QR codes?',
+      message:
+        'This replaces every attendee QR with an app link so a phone camera opens the profile. Passport exhibitor codes are not changed.',
+      confirmText: 'Regenerate',
+      onConfirm: async () => {
+        try {
+          setRegenBusy(true);
+          setRegenProgress({ processed: 0, updated: 0, failed: 0, done: false });
+          const result = await regenerateAdminAttendeeQrCodes(setRegenProgress);
+          showAlert(
+            'QR codes updated',
+            `Updated ${result.updated} attendee codes${result.failed ? ` (${result.failed} failed)` : ''}.`,
+          );
+        } catch (e: any) {
+          showAlert('Could not regenerate QR codes', e?.message || 'Please try again after deploying the API.');
+        } finally {
+          setRegenBusy(false);
+        }
+      },
+    });
+  }, []);
+
   return (
     <AppScreen style={styles.screen}>
       <View style={styles.headerRow}>
@@ -59,6 +91,18 @@ export default function AdminRegistrantsListScreen() {
           <Text style={styles.createButtonText}>New</Text>
         </Pressable>
       </View>
+      <Pressable
+        style={[styles.regenButton, regenBusy && styles.regenButtonDisabled]}
+        onPress={runQrRegen}
+        disabled={regenBusy}
+      >
+        {regenBusy ? <ActivityIndicator size='small' color='#fff' /> : <Ionicons name='qr-code-outline' size={16} color='#fff' />}
+        <Text style={styles.createButtonText}>
+          {regenBusy
+            ? `Regenerating… ${regenProgress?.updated || 0}/${regenProgress?.processed || 0}`
+            : 'Regenerate attendee QR codes'}
+        </Text>
+      </Pressable>
 
       {loading ? (
         <View style={styles.centerWrap}>
@@ -126,6 +170,20 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: '#fff',
     fontWeight: '700',
+  },
+  regenButton: {
+    backgroundColor: ui.colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: ui.space.md,
+  },
+  regenButtonDisabled: {
+    opacity: 0.7,
   },
   centerWrap: {
     flex: 1,

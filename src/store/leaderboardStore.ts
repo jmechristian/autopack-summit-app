@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { APS_ID } from '../config/apsConfig';
 import {
   evaluateLeaderboardScore,
+  isStaffAttendeeType,
   leaderboardDisplayName,
   type EvaluatedScore,
 } from '../config/leaderboardPoints';
@@ -11,9 +12,11 @@ import {
   isLeaderboardSchemaError,
   leaderboardEntryId,
   listLeaderboardEntries,
+  listStaffProfileIds,
   rankLeaderboardEntries,
   upsertLeaderboardEntry,
   visibleLeaderboard,
+  withoutStaffEntries,
   type LeaderboardEntryRecord,
   type RankedLeaderboardEntry,
 } from '../services/leaderboardEntries';
@@ -49,6 +52,14 @@ function applyMyEntry(entries: RankedLeaderboardEntry[], mine: LeaderboardEntryR
 function findMine(ranked: RankedLeaderboardEntry[], profileId?: string | null) {
   if (!profileId) return null;
   return ranked.find((entry) => entry.userProfileId === profileId) || null;
+}
+
+function currentUserIsStaff() {
+  const appUser = useApsStore.getState().currentAppUser;
+  return (
+    isStaffAttendeeType(appUser?.profile?.attendeeType) ||
+    isStaffAttendeeType(appUser?.registrant?.attendeeType)
+  );
 }
 
 export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
@@ -104,21 +115,29 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
 
       if (!boardFresh) {
         try {
-          ranked = rankLeaderboardEntries(await listLeaderboardEntries());
+          const staffIds = await listStaffProfileIds();
+          if (profileId && currentUserIsStaff()) staffIds.add(profileId);
+          ranked = rankLeaderboardEntries(
+            withoutStaffEntries(await listLeaderboardEntries(), staffIds),
+          );
           rankingUnavailable = false;
           let listedMine = findMine(ranked, profileId);
+          let storedPoints: number | null = listedMine?.points ?? null;
           if (!listedMine && profileId) {
             const stored = await getLeaderboardEntry(leaderboardEntryId(profileId));
             if (stored && stored.points > 0) {
-              ranked = applyMyEntry(ranked, stored);
-              listedMine = findMine(ranked, profileId);
+              storedPoints = stored.points;
+              if (!staffIds.has(profileId)) {
+                ranked = applyMyEntry(ranked, stored);
+                listedMine = findMine(ranked, profileId);
+              }
             }
           }
           set({
             rankedAll: ranked,
             entries: visibleLeaderboard(ranked),
             myRank: listedMine?.rank ?? (profileId ? null : get().myRank),
-            myPoints: listedMine?.points ?? (profileId ? 0 : get().myPoints),
+            myPoints: storedPoints ?? (profileId ? 0 : get().myPoints),
             rankingUnavailable,
             lastBoardAt: Date.now(),
           });
@@ -149,6 +168,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
           profilePicture: profile?.profilePicture || null,
           points: myScore.total,
         };
+        const hideFromBoard = currentUserIsStaff();
         try {
           const saved = await upsertLeaderboardEntry({
             profileId,
@@ -160,16 +180,16 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
             profilePicture: profile?.profilePicture,
             score: myScore,
           });
-          ranked = applyMyEntry(ranked, saved || localEntry);
+          if (!hideFromBoard) ranked = applyMyEntry(ranked, saved || localEntry);
         } catch (error) {
-          ranked = applyMyEntry(ranked, localEntry);
+          if (!hideFromBoard) ranked = applyMyEntry(ranked, localEntry);
           if (isLeaderboardSchemaError(error)) {
             rankingUnavailable = true;
           } else {
             console.warn('Leaderboard ranking sync failed:', error);
           }
         }
-        const mine = findMine(ranked, profileId);
+        const mine = hideFromBoard ? null : findMine(ranked, profileId);
         if (celebrate && myScore.total > previousTotal) {
           const prevEarned = new Set(
             (previousScore?.awards || []).filter((award) => award.earned).map((award) => award.id),
