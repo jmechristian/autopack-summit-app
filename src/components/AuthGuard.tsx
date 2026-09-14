@@ -17,6 +17,7 @@ import { resolveAnnouncementDeepLink } from '../utils/announcementDeepLinks';
 import { setIncomingAppLinkHandler } from '../utils/incomingAppLinks';
 import { isWeb } from '../utils/platform';
 import { resolveAttendeeQrPayload } from '../services/attendeeQr';
+import { openProfileRouteFromLink } from '../utils/attendeeQr';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -239,6 +240,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
     setIncomingAppLinkHandler((url) => {
+      const attendeeRoute = openProfileRouteFromLink(url);
+      if (attendeeRoute) {
+        router.push(attendeeRoute as any);
+        return;
+      }
       void resolveAttendeeQrPayload(url).then((resolved) => {
         if (!resolved.ok) return;
         router.push({

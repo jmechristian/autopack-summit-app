@@ -29,6 +29,16 @@ export function captureIncomingAppLink(url?: string | null) {
   pendingUrl = next;
 }
 
+export function peekPendingIncomingAppLink() {
+  return pendingUrl;
+}
+
+export function takePendingIncomingAppLink() {
+  const url = pendingUrl;
+  pendingUrl = null;
+  return url;
+}
+
 export function setIncomingAppLinkHandler(next: IncomingLinkHandler | null) {
   handler = next;
   if (handler && pendingUrl) {

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking as RNLinking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { resolveAttendeeQrPayload } from '../../src/services/attendeeQr';
+import { connectFromAttendeeScan } from '../../src/services/qrConnect';
 import { autopackColors } from '../../src/theme';
 
 export default function ScanScreen() {
@@ -32,12 +33,29 @@ export default function ScanScreen() {
 
       void (async () => {
         const resolved = await resolveAttendeeQrPayload(data);
-        setProcessing(false);
         if (!resolved.ok) {
+          setProcessing(false);
           setLastError(resolved.error);
           return;
         }
 
+        let connectedViaScan = false;
+        try {
+          const handshake = await connectFromAttendeeScan({
+            profileId: resolved.profileId,
+            userId: resolved.userId,
+          });
+          if (handshake.blocked) {
+            setProcessing(false);
+            setLastError('This connection is blocked.');
+            return;
+          }
+          connectedViaScan = handshake.connected;
+        } catch (e: any) {
+          console.warn('QR contact handshake failed:', e);
+        }
+
+        setProcessing(false);
         const fromCapture = pathname?.includes('capture');
         router.navigate({
           pathname: '/(main)/community/[id]',
@@ -45,6 +63,7 @@ export default function ScanScreen() {
             id: resolved.profileId,
             returnTo: fromCapture ? '/(main)/hub/capture' : '/(main)/scan',
             returnLabel: fromCapture ? 'Back to Capture' : 'Back to Scan',
+            ...(connectedViaScan ? { connectedViaScan: '1' } : {}),
           },
         });
       })().catch(() => {
@@ -116,9 +135,9 @@ export default function ScanScreen() {
 
       <View style={styles.hintWrap}>
         <Text style={styles.hintTitle}>
-          {processing ? 'Looking up attendee…' : 'Point your camera at an attendee QR code'}
+          {processing ? 'Connecting…' : 'Point your camera at an attendee QR code'}
         </Text>
-        <Text style={styles.hintText}>We’ll open their profile so you can add them as a contact.</Text>
+        <Text style={styles.hintText}>We’ll add them as a contact and unlock messaging.</Text>
         {processing && <ActivityIndicator color="#fff" />}
 
         {!!lastError && <Text style={styles.errorText}>{lastError}</Text>}

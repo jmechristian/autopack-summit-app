@@ -194,6 +194,20 @@ type EngageStore = {
     eventId: string;
     otherUserId: string;
   }) => Promise<{ threadId: string }>;
+  /**
+   * In-person QR handshake: upsert an ACCEPTED contact request (same as both
+   * sides approving) and open messaging. Does not apply to passport QRs.
+   */
+  connectViaQrScan: (params: {
+    eventId: string;
+    otherUserId: string;
+    otherProfileId?: string;
+  }) => Promise<{
+    status: string;
+    requestId?: string;
+    threadId?: string;
+    alreadyConnected: boolean;
+  }>;
 };
 
 function nowIso(): string {
@@ -220,6 +234,58 @@ function dmParticipantStateKey(eventId: string, threadId: string, userId: string
   // Deterministic ID prevents duplicates for a given (eventId, threadId, userId).
   // This is safe because @model ids are client-supplied; auth allows owner by userId.
   return `e:${eventId}|t:${threadId}|u:${userId}`;
+}
+
+const createAppUserContactMinimal = /* GraphQL */ `
+  mutation CreateAppUserContactMinimal($input: CreateApsAppUserContactInput!) {
+    createApsAppUserContact(input: $input) {
+      id
+      __typename
+    }
+  }
+`;
+
+const getAppUserProfileIdMinimal = /* GraphQL */ `
+  query GetAppUserProfileIdMinimal($id: ID!) {
+    getApsAppUser(id: $id) {
+      id
+      profileId
+      __typename
+    }
+  }
+`;
+
+async function resolveProfileIdForUser(userId: string): Promise<string | null> {
+  try {
+    const resp = await graphqlApiKeyClient.graphql({
+      query: apsAppUserProfilesByUserId,
+      variables: { userId, limit: 1 },
+    });
+    const items = (resp.data as any)?.apsAppUserProfilesByUserId?.items || [];
+    const match = items.find((x: { id?: string | null } | null) => x?.id);
+    return match?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+async function ensureAppUserContactRecord(userId: string, contactProfileId: string) {
+  if (!userId || !contactProfileId) return;
+  try {
+    await graphqlApiKeyClient.graphql({
+      query: createAppUserContactMinimal,
+      variables: {
+        input: {
+          id: `auc:${userId}:${contactProfileId}`,
+          userId,
+          contactId: contactProfileId,
+        },
+      },
+    });
+  } catch {
+    // Public create may be denied; accepted ApsContactRequest still unlocks chat
+    // and is merged into the Contacts list.
+  }
 }
 
 async function getMySub(): Promise<string> {
@@ -1066,22 +1132,7 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
       });
     };
 
-    const resp = await graphqlAuthClient.graphql({
-      query: apsContactRequestsByRequestKey,
-      variables: { requestKey, limit: 1 },
-    });
-    const data = resp.data as {
-      apsContactRequestsByRequestKey?: {
-        items?: Array<{
-          id?: string | null;
-          status?: string | null;
-          introMessage?: string | null;
-          introSentAt?: string | null;
-          requestedByUserId?: string | null;
-        } | null>;
-      };
-    };
-    const existing = data.apsContactRequestsByRequestKey?.items?.find((x) => x?.id);
+    const existing = await getContactRequestForPair(eventId, a, b);
     if (existing?.id) {
       if (cleanedIntro && existing.status === 'PENDING' && !existing.introMessage) {
         try {
@@ -1203,6 +1254,133 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
     invalidateOwnedContactRequestCache();
     await Promise.allSettled([get().loadIncomingRequests(), get().loadSentRequests()]);
     setAppBadgeCount(get().getEngageBadgeCount());
+  },
+
+  async connectViaQrScan({ eventId, otherUserId, otherProfileId }) {
+    const mySub = await getMySub();
+    if (!eventId || !otherUserId) {
+      throw new Error('Unable to identify this attendee');
+    }
+    if (otherUserId === mySub) {
+      return { status: 'SELF', alreadyConnected: false };
+    }
+
+    const [a, b] = sortPair(mySub, otherUserId);
+    const requestKey = requestKeyFor(eventId, a, b);
+    const existing = await getContactRequestForPair(eventId, a, b);
+    const existingStatus = existing?.status || null;
+
+    if (existingStatus === 'BLOCKED') {
+      return {
+        status: 'BLOCKED',
+        requestId: existing?.id || undefined,
+        alreadyConnected: false,
+      };
+    }
+
+    let requestId = existing?.id || requestKey;
+    const alreadyConnected = existingStatus === 'ACCEPTED';
+
+    if (!alreadyConnected) {
+      if (existing?.id) {
+        await graphqlAuthClient.graphql({
+          query: updateApsContactRequest,
+          variables: {
+            input: {
+              id: existing.id,
+              status: 'ACCEPTED',
+              acceptedAt: nowIso(),
+            },
+          },
+        });
+        requestId = existing.id;
+      } else {
+        try {
+          const createResp = await graphqlAuthClient.graphql({
+            query: createApsContactRequest,
+            variables: {
+              input: {
+                id: requestKey,
+                eventId,
+                requestKey,
+                userAId: a,
+                userBId: b,
+                owners: [a, b],
+                requestedByUserId: mySub,
+                status: 'ACCEPTED',
+                acceptedAt: nowIso(),
+              },
+            },
+          });
+          requestId =
+            ((createResp.data as any)?.createApsContactRequest?.id as string | undefined) ||
+            requestKey;
+        } catch {
+          const raced = await getContactRequestForPair(eventId, a, b);
+          if (!raced?.id) throw new Error('Failed to connect via QR code');
+          if (raced.status === 'BLOCKED') {
+            return { status: 'BLOCKED', requestId: raced.id, alreadyConnected: false };
+          }
+          if (raced.status !== 'ACCEPTED') {
+            await graphqlAuthClient.graphql({
+              query: updateApsContactRequest,
+              variables: {
+                input: {
+                  id: raced.id,
+                  status: 'ACCEPTED',
+                  acceptedAt: nowIso(),
+                },
+              },
+            });
+          }
+          requestId = raced.id;
+        }
+      }
+    }
+
+    invalidateOwnedContactRequestCache();
+    set({
+      sentRequests: get().sentRequests.filter((r) => r.toUserId !== otherUserId),
+      incomingRequests: get().incomingRequests.filter((r) => r.fromUserId !== otherUserId),
+    });
+    void Promise.allSettled([get().loadIncomingRequests(), get().loadSentRequests()]).then(() => {
+      setAppBadgeCount(get().getEngageBadgeCount());
+    });
+    if (!alreadyConnected) refreshLeaderboardInBackground();
+
+    let threadId: string | undefined;
+    try {
+      const thread = await get().ensureDmThreadForAcceptedRequest({ eventId, otherUserId });
+      threadId = thread.threadId;
+    } catch (e) {
+      console.warn('QR connect created the contact but could not open a thread yet:', e);
+    }
+
+    const myProfileId = await (async () => {
+      try {
+        const resp = await graphqlApiKeyClient.graphql({
+          query: getAppUserProfileIdMinimal,
+          variables: { id: mySub },
+        });
+        return ((resp.data as any)?.getApsAppUser?.profileId as string | null) || null;
+      } catch {
+        return null;
+      }
+    })();
+    const theirProfileId = otherProfileId || (await resolveProfileIdForUser(otherUserId));
+    if (myProfileId && theirProfileId) {
+      await Promise.allSettled([
+        ensureAppUserContactRecord(mySub, theirProfileId),
+        ensureAppUserContactRecord(otherUserId, myProfileId),
+      ]);
+    }
+
+    return {
+      status: 'ACCEPTED',
+      requestId,
+      threadId,
+      alreadyConnected,
+    };
   },
 
   async ensureDmThreadForAcceptedRequest({ eventId, otherUserId }) {

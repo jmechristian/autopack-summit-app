@@ -25,6 +25,7 @@ const scanAppUserByRegistrantId = /* GraphQL */ `
         profileId
         profile {
           id
+          userId
           __typename
         }
         __typename
@@ -38,6 +39,7 @@ const scanGetProfile = /* GraphQL */ `
   query ScanGetApsAppUserProfile($id: ID!) {
     getApsAppUserProfile(id: $id) {
       id
+      userId
       __typename
     }
   }
@@ -54,8 +56,10 @@ const scanGetRegistrant = /* GraphQL */ `
 `;
 
 export type ResolveAttendeeQrResult =
-  | { ok: true; profileId: string }
+  | { ok: true; profileId: string; userId?: string }
   | { ok: false; error: string };
+
+type ResolvedProfile = { profileId: string; userId?: string };
 
 function graphqlData(resp: unknown): any {
   if (resp && typeof resp === 'object' && 'data' in resp) return (resp as any).data;
@@ -78,25 +82,35 @@ function emailCandidates(email: string) {
   return trimmed === lower ? [trimmed] : [lower, trimmed];
 }
 
-async function profileIdForRegistrant(registrantId: string): Promise<string | null> {
+async function profileForRegistrant(registrantId: string): Promise<ResolvedProfile | null> {
   const data = await graphqlSafe<{
     apsAppUsersByRegistrantId?: {
-      items?: Array<{ profileId?: string | null; profile?: { id?: string | null } | null } | null> | null;
+      items?: Array<{
+        id?: string | null;
+        profileId?: string | null;
+        profile?: { id?: string | null; userId?: string | null } | null;
+      } | null> | null;
     };
   }>(scanAppUserByRegistrantId, { registrantId });
   const user = data?.apsAppUsersByRegistrantId?.items?.find(Boolean);
-  return user?.profileId || user?.profile?.id || null;
+  const profileId = user?.profileId || user?.profile?.id || null;
+  if (!profileId) return null;
+  return { profileId, userId: user?.id || user?.profile?.userId || undefined };
 }
 
-async function profileExists(profileId: string): Promise<boolean> {
-  const data = await graphqlSafe<{ getApsAppUserProfile?: { id?: string | null } | null }>(scanGetProfile, {
+async function loadProfile(profileId: string): Promise<ResolvedProfile | null> {
+  const data = await graphqlSafe<{
+    getApsAppUserProfile?: { id?: string | null; userId?: string | null } | null;
+  }>(scanGetProfile, {
     id: profileId,
   });
-  return !!data?.getApsAppUserProfile?.id;
+  const profile = data?.getApsAppUserProfile;
+  if (!profile?.id) return null;
+  return { profileId: profile.id, userId: profile.userId || undefined };
 }
 
-async function resolveRegistrantId(registrantId: string): Promise<string | null> {
-  const fromUser = await profileIdForRegistrant(registrantId);
+async function resolveRegistrantId(registrantId: string): Promise<ResolvedProfile | null> {
+  const fromUser = await profileForRegistrant(registrantId);
   if (fromUser) return fromUser;
 
   const registrant = await graphqlSafe<{ getApsRegistrant?: { id?: string | null; appUserId?: string | null } | null }>(
@@ -106,7 +120,7 @@ async function resolveRegistrantId(registrantId: string): Promise<string | null>
   const appUserId = registrant?.getApsRegistrant?.appUserId;
   if (!appUserId) return null;
   const data = await graphqlSafe<{
-    getApsAppUser?: { profileId?: string | null; profile?: { id?: string | null } | null } | null;
+    getApsAppUser?: { id?: string | null; profileId?: string | null; profile?: { id?: string | null } | null } | null;
   }>(
     /* GraphQL */ `
       query ScanGetApsAppUser($id: ID!) {
@@ -123,10 +137,14 @@ async function resolveRegistrantId(registrantId: string): Promise<string | null>
     `,
     { id: appUserId },
   );
-  return data?.getApsAppUser?.profileId || data?.getApsAppUser?.profile?.id || null;
+  const profileId = data?.getApsAppUser?.profileId || data?.getApsAppUser?.profile?.id || null;
+  if (!profileId) return null;
+  return { profileId, userId: data?.getApsAppUser?.id || appUserId };
 }
 
-async function resolveEmail(email: string): Promise<{ profileId: string } | { registrantWithoutProfile: true } | null> {
+async function resolveEmail(
+  email: string,
+): Promise<ResolvedProfile | { registrantWithoutProfile: true } | null> {
   let sawRegistrant = false;
   for (const candidate of emailCandidates(email)) {
     const data = await graphqlSafe<{
@@ -138,8 +156,8 @@ async function resolveEmail(email: string): Promise<{ profileId: string } | { re
     const preferred = items.find((item) => item?.apsID === APS_ID) || items[0];
     if (!preferred?.id) continue;
     sawRegistrant = true;
-    const profileId = await profileIdForRegistrant(preferred.id);
-    if (profileId) return { profileId };
+    const resolved = await profileForRegistrant(preferred.id);
+    if (resolved) return resolved;
   }
   if (sawRegistrant) return { registrantWithoutProfile: true };
   return null;
@@ -154,21 +172,22 @@ async function resolveParsed(parsed: ParsedAttendeeQr): Promise<ResolveAttendeeQ
   }
 
   if (parsed.kind === 'profile' && parsed.profileId) {
-    if (await profileExists(parsed.profileId)) return { ok: true, profileId: parsed.profileId };
+    const existing = await loadProfile(parsed.profileId);
+    if (existing) return { ok: true, ...existing };
     const fromRegistrant = await resolveRegistrantId(parsed.profileId);
-    if (fromRegistrant) return { ok: true, profileId: fromRegistrant };
+    if (fromRegistrant) return { ok: true, ...fromRegistrant };
     return { ok: false, error: "We couldn't find an app profile for this attendee." };
   }
 
   if (parsed.kind === 'registrant' && parsed.registrantId) {
-    const profileId = await resolveRegistrantId(parsed.registrantId);
-    if (profileId) return { ok: true, profileId };
+    const resolved = await resolveRegistrantId(parsed.registrantId);
+    if (resolved) return { ok: true, ...resolved };
     return { ok: false, error: "This attendee hasn't set up their app profile yet." };
   }
 
   if (parsed.kind === 'email' && parsed.email) {
     const resolved = await resolveEmail(parsed.email);
-    if (resolved && 'profileId' in resolved) return { ok: true, profileId: resolved.profileId };
+    if (resolved && 'profileId' in resolved) return { ok: true, ...resolved };
     if (resolved && 'registrantWithoutProfile' in resolved) {
       return { ok: false, error: "This attendee hasn't set up their app profile yet." };
     }

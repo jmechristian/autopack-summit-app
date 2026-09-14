@@ -2464,6 +2464,21 @@ export type AdminCreateExhibitorResult = {
   qrCode: string,
 };
 
+export type AdminRegenerateAttendeeQrCodesInput = {
+  eventId?: string | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type AdminRegenerateAttendeeQrCodesResult = {
+  __typename: "AdminRegenerateAttendeeQrCodesResult",
+  processed: number,
+  updated: number,
+  failed: number,
+  nextToken?: string | null,
+  errors?: Array< string > | null,
+};
+
 export type AdminPublishDueAnnouncementsResult = {
   __typename: "AdminPublishDueAnnouncementsResult",
   publishedCount: number,
@@ -13851,6 +13866,21 @@ export type AdminCreateExhibitorMutation = {
     boothNumber?: string | null,
     passportQrPayload: string,
     qrCode: string,
+  } | null,
+};
+
+export type AdminRegenerateAttendeeQrCodesMutationVariables = {
+  input?: AdminRegenerateAttendeeQrCodesInput | null,
+};
+
+export type AdminRegenerateAttendeeQrCodesMutation = {
+  adminRegenerateAttendeeQrCodes?:  {
+    __typename: "AdminRegenerateAttendeeQrCodesResult",
+    processed: number,
+    updated: number,
+    failed: number,
+    nextToken?: string | null,
+    errors?: Array< string > | null,
   } | null,
 };
 

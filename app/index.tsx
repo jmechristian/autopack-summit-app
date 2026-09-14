@@ -3,7 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
 import * as Linking from 'expo-linking';
 import { RiveLoader } from '../src/components/RiveLoader';
-import { isAttendeeDeepLink } from '../src/utils/attendeeQr';
+import { openProfileRouteFromLink } from '../src/utils/attendeeQr';
+import {
+  peekPendingIncomingAppLink,
+  takePendingIncomingAppLink,
+} from '../src/utils/incomingAppLinks';
 
 // Minimum time the splash animation stays visible (one full loop) once it starts
 // playing, so it never just "flashes" before we navigate away.
@@ -63,7 +67,13 @@ export default function Index() {
       void Linking.getInitialURL()
         .then((url) => {
           if (cancelled) return;
-          if (isAttendeeDeepLink(url)) return;
+          const incoming = url || peekPendingIncomingAppLink();
+          const attendeeRoute = openProfileRouteFromLink(incoming);
+          if (attendeeRoute && destinationRef.current === '/(main)/hub') {
+            takePendingIncomingAppLink();
+            router.replace(attendeeRoute as any);
+            return;
+          }
           router.replace(destinationRef.current as any);
         })
         .catch(() => {

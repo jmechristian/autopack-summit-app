@@ -23,6 +23,10 @@ import { useCommunityStore } from '../../store/communityStore';
 import { resolveProfilePictureUri } from '../../utils/storageUtils';
 import { useNotesPresence } from '../../hooks/useNotesPresence';
 import { RiveLoader } from '../RiveLoader';
+import {
+  fetchOwnedContactRequestRows,
+  otherUserIdFromRequest,
+} from '../../utils/contactRequestQueries';
 
 // IMPORTANT:
 // Generated `getApsAppUserProfile` includes `notes { ... }`, but notes are now USER_POOLS-only.
@@ -164,6 +168,49 @@ export default function ContactsTool({
         }
         nextToken = data.apsAppUserContactsByUserId?.nextToken;
       } while (nextToken);
+
+      try {
+        const acceptedRows = await fetchOwnedContactRequestRows(currentAppUser.id);
+        const otherUserIds = Array.from(
+          new Set(
+            acceptedRows
+              .filter((row) => row.status === 'ACCEPTED')
+              .map((row) => otherUserIdFromRequest(row, currentAppUser.id))
+              .filter((id): id is string => !!id && id !== currentAppUser.id)
+          )
+        );
+        const acceptedProfiles = await Promise.all(
+          otherUserIds.map(async (userId) => {
+            try {
+              const resp = await graphqlApiKeyClient.graphql({
+                query: apsAppUserProfilesByUserId,
+                variables: { userId, limit: 1 },
+              });
+              const data = resp.data as {
+                apsAppUserProfilesByUserId?: { items?: Array<Profile | null> | null };
+              };
+              const p = (data.apsAppUserProfilesByUserId?.items || []).find((x) => !!x?.id) || null;
+              return { userId, profile: p };
+            } catch {
+              return { userId, profile: null };
+            }
+          })
+        );
+        for (const { userId, profile } of acceptedProfiles) {
+          if (!profile?.id) continue;
+          const row = acceptedRows.find(
+            (item) =>
+              item.status === 'ACCEPTED' && otherUserIdFromRequest(item, currentAppUser.id) === userId
+          );
+          all.push({
+            id: row?.id ? `accepted:${row.id}` : `accepted-user:${userId}`,
+            contactId: profile.id,
+            createdAt: row?.acceptedAt || row?.updatedAt || row?.createdAt || null,
+          });
+        }
+      } catch {
+        // Keep any ApsAppUserContact rows if accepted-request lookup fails.
+      }
 
       // Deduplicate by contactId
       const byContact = new Map<string, ContactItem>();

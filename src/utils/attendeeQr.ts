@@ -194,8 +194,30 @@ export function isPassportQrPayload(raw: string) {
 }
 
 export function isAttendeeDeepLink(raw?: string | null) {
+  return !!openProfileRouteFromLink(raw);
+}
+
+export function openProfileRouteFromLink(raw?: string | null) {
   const parsed = parseAttendeeQrPayload(String(raw || ''));
-  return parsed.kind === 'profile' || parsed.kind === 'registrant' || parsed.kind === 'email';
+  if (parsed.kind === 'registrant' && parsed.registrantId) {
+    return {
+      pathname: '/(main)/open-profile' as const,
+      params: { registrantId: parsed.registrantId },
+    };
+  }
+  if (parsed.kind === 'profile' && parsed.profileId) {
+    return {
+      pathname: '/(main)/open-profile' as const,
+      params: { profileId: parsed.profileId },
+    };
+  }
+  if (parsed.kind === 'email' && parsed.email) {
+    return {
+      pathname: '/(main)/open-profile' as const,
+      params: { email: parsed.email },
+    };
+  }
+  return null;
 }
 
 export function parseAttendeeQrPayload(payload: string): ParsedAttendeeQr {

@@ -113,8 +113,16 @@ export default function CommunityProfileScreen() {
   const insets = useSafeAreaInsets();
   const currentAppUser = useCurrentAppUser();
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
-  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    id?: string | string[];
+    connectedViaScan?: string | string[];
+  }>();
   const profileIdRaw = params.id;
+  const connectedViaScan = useMemo(() => {
+    const raw = params.connectedViaScan;
+    const first = Array.isArray(raw) ? raw[0] : raw;
+    return first === '1' || first === 'true';
+  }, [params.connectedViaScan]);
   const profileId = useMemo(() => {
     const first = Array.isArray(profileIdRaw) ? profileIdRaw[0] : profileIdRaw;
     if (!first) return '';
@@ -141,8 +149,10 @@ export default function CommunityProfileScreen() {
   const [pendingRequestStateRemote, setPendingRequestStateRemote] = useState<
     'incoming' | 'sent' | null
   >(null);
-  const [contactRequestStatusRemote, setContactRequestStatusRemote] = useState<string | null>(null);
-  const [hasAcceptedContactRecord, setHasAcceptedContactRecord] = useState(false);
+  const [contactRequestStatusRemote, setContactRequestStatusRemote] = useState<string | null>(
+    connectedViaScan ? 'ACCEPTED' : null
+  );
+  const [hasAcceptedContactRecord, setHasAcceptedContactRecord] = useState(connectedViaScan);
   const [addingPhoneContact, setAddingPhoneContact] = useState(false);
   const [requestActionBusy, setRequestActionBusy] = useState(false);
   const [introModalVisible, setIntroModalVisible] = useState(false);
@@ -172,7 +182,7 @@ export default function CommunityProfileScreen() {
   const refreshRequestState = useCallback(async () => {
     if (!otherUserId) {
       setPendingRequestStateRemote(null);
-      setContactRequestStatusRemote(null);
+      if (!connectedViaScan) setContactRequestStatusRemote(null);
       return;
     }
     const [state, status] = await Promise.all([
@@ -180,8 +190,21 @@ export default function CommunityProfileScreen() {
       fetchContactRequestStatus({ eventId: APS_ID, otherUserId }).catch(() => null),
     ]);
     setPendingRequestStateRemote(state);
-    setContactRequestStatusRemote(status);
-  }, [fetchContactRequestStatus, fetchPendingRequestState, otherUserId]);
+    if (status) {
+      setContactRequestStatusRemote(status);
+    } else if (connectedViaScan) {
+      setContactRequestStatusRemote('ACCEPTED');
+    } else {
+      setContactRequestStatusRemote(null);
+    }
+  }, [connectedViaScan, fetchContactRequestStatus, fetchPendingRequestState, otherUserId]);
+
+  useEffect(() => {
+    if (!connectedViaScan) return;
+    setContactRequestStatusRemote('ACCEPTED');
+    setHasAcceptedContactRecord(true);
+    setPendingRequestStateRemote(null);
+  }, [connectedViaScan]);
 
   useEffect(() => {
     void refreshRequestState();
@@ -209,16 +232,16 @@ export default function CommunityProfileScreen() {
           } | null;
         };
         const exists = !!(data.apsAppUserContactsByUserId?.items || []).find((x) => !!x?.id);
-        if (!cancelled) setHasAcceptedContactRecord(exists);
+        if (!cancelled) setHasAcceptedContactRecord(exists || connectedViaScan);
       } catch {
-        if (!cancelled) setHasAcceptedContactRecord(false);
+        if (!cancelled) setHasAcceptedContactRecord(connectedViaScan);
       }
     }
     void loadAcceptedContactRecord();
     return () => {
       cancelled = true;
     };
-  }, [currentAppUser?.id, currentProfileId, profile?.id]);
+  }, [connectedViaScan, currentAppUser?.id, currentProfileId, profile?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -329,7 +352,8 @@ export default function CommunityProfileScreen() {
   const isRequestAccepted = contactRequestStatusRemote === 'ACCEPTED';
   const canViewEmail = isSelf || isRequestAccepted || hasAcceptedContactRecord;
   const isRequestPending =
-    contactRequestStatusRemote === 'PENDING' || !!effectivePendingRequestState;
+    !isRequestAccepted &&
+    (contactRequestStatusRemote === 'PENDING' || !!effectivePendingRequestState);
   const requestTileLabel = isRequestAccepted
     ? 'Accepted'
     : isRequestPending

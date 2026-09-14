@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { RiveLoader } from '../../src/components/RiveLoader';
 import { resolveAttendeeQrPayload } from '../../src/services/attendeeQr';
+import { connectFromAttendeeScan } from '../../src/services/qrConnect';
+import { takePendingIncomingAppLink } from '../../src/utils/incomingAppLinks';
 import { autopackColors } from '../../src/theme';
 import { ui } from '../../src/ui/tokens';
 
@@ -18,6 +20,7 @@ export default function OpenProfileScreen() {
     id?: string | string[];
   }>();
   const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
   const payload = useMemo(() => {
     const profileId = firstParam(params.profileId);
@@ -32,28 +35,60 @@ export default function OpenProfileScreen() {
   }, [params.email, params.id, params.profileId, params.registrantId]);
 
   useEffect(() => {
+    takePendingIncomingAppLink();
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     if (!payload) {
       setError('That link is missing an attendee id.');
       return;
     }
 
-    void resolveAttendeeQrPayload(payload).then((resolved) => {
-      if (cancelled) return;
-      if (!resolved.ok) {
-        setError(resolved.error);
-        return;
-      }
-      router.replace({
-        pathname: '/(main)/community/[id]',
-        params: { id: resolved.profileId },
+    void resolveAttendeeQrPayload(payload)
+      .then(async (resolved) => {
+        if (cancelled) return;
+        if (!resolved.ok) {
+          setError(resolved.error);
+          return;
+        }
+
+        let connectedViaScan = false;
+        try {
+          const handshake = await connectFromAttendeeScan({
+            profileId: resolved.profileId,
+            userId: resolved.userId,
+          });
+          if (cancelled) return;
+          if (handshake.blocked) {
+            setError('This connection is blocked.');
+            return;
+          }
+          connectedViaScan = handshake.connected;
+        } catch (e: any) {
+          console.warn('QR contact handshake failed:', e);
+        }
+
+        if (cancelled) return;
+        setDone(true);
+        router.replace({
+          pathname: '/(main)/community/[id]',
+          params: {
+            id: resolved.profileId,
+            ...(connectedViaScan ? { connectedViaScan: '1' } : {}),
+          },
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setError('Unable to look up this QR code. Please try again.');
       });
-    });
 
     return () => {
       cancelled = true;
     };
   }, [payload]);
+
+  if (done) return null;
 
   if (error) {
     return (
@@ -67,7 +102,7 @@ export default function OpenProfileScreen() {
     );
   }
 
-  return <RiveLoader />;
+  return <RiveLoader overlay={false} />;
 }
 
 const styles = StyleSheet.create({
