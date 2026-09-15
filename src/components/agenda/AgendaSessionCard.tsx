@@ -12,9 +12,6 @@ type AgendaSessionCardProps = {
   speakerNames?: string[];
   sponsorNames?: string[];
   onPress: () => void;
-  isExpanded?: boolean;
-  showExpandToggle?: boolean;
-  onToggleExpand?: () => void;
   showNoteIcon?: boolean;
   showFavorite?: boolean;
   isFavorite?: boolean;
@@ -27,6 +24,8 @@ type AgendaSessionCardProps = {
   onPressPresentation?: () => void;
   /** Text link + chevron under the description (e.g. Hub Coming Up). */
   showViewSessionButton?: boolean;
+  /** Agenda list CTA that opens the session details page. */
+  showClickForMore?: boolean;
 };
 
 function formatPeopleList(names: string[]) {
@@ -42,9 +41,6 @@ export function AgendaSessionCard({
   speakerNames = [],
   sponsorNames = [],
   onPress,
-  isExpanded = false,
-  showExpandToggle = false,
-  onToggleExpand,
   showNoteIcon = false,
   showFavorite = false,
   isFavorite = false,
@@ -56,13 +52,10 @@ export function AgendaSessionCard({
   showPresentationButton = false,
   onPressPresentation,
   showViewSessionButton = false,
+  showClickForMore = false,
 }: AgendaSessionCardProps) {
   const descriptionLines =
-    typeof descriptionNumberOfLines === 'number'
-      ? descriptionNumberOfLines
-      : isExpanded
-        ? undefined
-        : 6;
+    typeof descriptionNumberOfLines === 'number' ? descriptionNumberOfLines : undefined;
   const hasTopRightMeta = showNoteIcon || showFavorite;
   const needsWideRightInset = isLive || showNoteIcon || showFavorite;
   const needsExtraWideRightInset = isLive && (showNoteIcon || showFavorite);
@@ -130,16 +123,16 @@ export function AgendaSessionCard({
         <View style={styles.divider} />
 
         {!!descriptionText && (
-          <>
-            <Text style={styles.description} numberOfLines={descriptionLines}>
-              {descriptionText}
-            </Text>
-            {showExpandToggle && !!onToggleExpand && (
-              <Pressable onPress={onToggleExpand} hitSlop={8} style={styles.readMoreBtn}>
-                <Text style={styles.readMoreText}>{isExpanded ? 'Show less' : 'Read more'}</Text>
-              </Pressable>
-            )}
-          </>
+          <Text style={styles.description} numberOfLines={descriptionLines}>
+            {descriptionText}
+          </Text>
+        )}
+
+        {showClickForMore && (
+          <Pressable onPress={onPress} hitSlop={8} style={styles.viewSessionBtn}>
+            <Text style={styles.viewSessionText}>Click for more</Text>
+            <Ionicons name='chevron-forward' size={16} color={autopackColors.apBlue} />
+          </Pressable>
         )}
 
         {showViewSessionButton && (
@@ -264,8 +257,6 @@ const styles = StyleSheet.create({
   location: { marginTop: 6, color: '#4B5563', fontWeight: '600' },
   divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 12 },
   description: { color: '#374151', lineHeight: 20 },
-  readMoreBtn: { alignSelf: 'flex-start', marginTop: 8 },
-  readMoreText: { color: autopackColors.apBlue, fontWeight: '700' },
   viewSessionBtn: {
     alignSelf: 'flex-start',
     marginTop: 12,

@@ -22,6 +22,7 @@ import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { isSessionLive } from '../../../src/utils/sessionLive';
+import { htmlToPlainText } from '../../../src/utils/htmlText';
 import { useContentInset, useMainTabScrollPadding } from '../../../src/utils/layout';
 import { refreshLeaderboardInBackground } from '../../../src/services/refreshLeaderboard';
 
@@ -158,21 +159,6 @@ function getSpeakerName(s: Speaker) {
   return `${first} ${last}`.trim();
 }
 
-function htmlToPlainText(input: string) {
-  return input
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/\s+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/[ \t]{2,}/g, ' ')
-    .trim();
-}
-
 const createFavoriteSession = /* GraphQL */ `
   mutation CreateFavoriteSession($input: CreateApsAppUserFavoriteSessionInput!) {
     createApsAppUserFavoriteSession(input: $input) {
@@ -201,7 +187,6 @@ export default function AgendaList() {
   const [search, setSearch] = useState('');
   const [sessions, setSessions] = useState<AgendaSession[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>('');
-  const [expandedById, setExpandedById] = useState<Record<string, boolean>>({});
   const [favoriteRecordIdBySessionId, setFavoriteRecordIdBySessionId] = useState<Record<string, string>>({});
   const [favoritePendingBySessionId, setFavoritePendingBySessionId] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -442,14 +427,12 @@ export default function AgendaList() {
     const time = getSessionTimeLabel(item);
     const title = getSessionTitle(item);
     const location = normalizeText(item.location);
-    const descriptionText = htmlToPlainText(normalizeText(item.description));
+    const descriptionText = htmlToPlainText(item.description);
     const speakers = (item.speakers || []).map((s) => getSpeakerName(s));
     const sponsors = (item.sponsors || []).map((s) => normalizeText(s.company?.name || ''));
     const hasNote = !!currentAppUser?.id && sessionIdsWithNotes.has(item.id);
     const isFavorite = !!favoriteRecordIdBySessionId[item.id];
     const isFavoritePending = !!favoritePendingBySessionId[item.id];
-    const isExpanded = !!expandedById[item.id];
-    const shouldShowToggle = descriptionText.length > 260;
     const live = isSessionLive(item, new Date(nowMs));
 
     return (
@@ -459,6 +442,7 @@ export default function AgendaList() {
         isLive={live}
         location={location}
         descriptionText={descriptionText}
+        descriptionNumberOfLines={6}
         speakerNames={speakers}
         sponsorNames={sponsors}
         onPress={() =>
@@ -467,11 +451,7 @@ export default function AgendaList() {
             params: { id: item.id },
           })
         }
-        isExpanded={isExpanded}
-        showExpandToggle={shouldShowToggle}
-        onToggleExpand={() =>
-          setExpandedById((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
-        }
+        showClickForMore
         showNoteIcon={hasNote}
         showFavorite={!!currentProfileId}
         isFavorite={isFavorite}
@@ -482,7 +462,6 @@ export default function AgendaList() {
       />
     );
   }, [
-    expandedById,
     sessionIdsWithNotes,
     currentAppUser?.id,
     currentProfileId,
