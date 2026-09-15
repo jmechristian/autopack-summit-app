@@ -159,7 +159,7 @@ export default function EngageHome() {
   useFocusEffect(
     useCallback(() => {
       loadPassportProgress();
-      void refreshLeaderboard({ includeMyScore: false });
+      void refreshLeaderboard();
     }, [loadPassportProgress, refreshLeaderboard]),
   );
 

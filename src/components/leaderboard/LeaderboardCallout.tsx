@@ -9,13 +9,15 @@ export function LeaderboardCallout({ style }: { style?: StyleProp<ViewStyle> }) 
   const myRank = useLeaderboardStore((s) => s.myRank);
   const myPoints = useLeaderboardStore((s) => s.myPoints);
   const loading = useLeaderboardStore((s) => s.loading);
+  const scoreLoading = useLeaderboardStore((s) => s.scoreLoading);
   const points = myScore?.total ?? myPoints;
   const hint = myScore?.nextHint;
+  const checking = (loading || scoreLoading) && points <= 0;
   const title = myRank
     ? `You’re #${myRank} · ${points} pts`
     : points > 0
       ? `${points} pts and climbing`
-      : loading
+      : checking
         ? 'Checking the board...'
         : 'Get on the board';
 

@@ -115,6 +115,35 @@ export const leaderboardStaffRegistrants = /* GraphQL */ `
       items {
         id
         attendeeType
+        appUserId
+        appUser {
+          id
+          profileId
+          profile {
+            id
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+
+export const leaderboardEventRegistrantTypes = /* GraphQL */ `
+  query LeaderboardEventRegistrantTypes(
+    $apsID: ID!
+    $filter: ModelApsRegistrantFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    apsRegistrantsByApsID(apsID: $apsID, filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        attendeeType
         __typename
       }
       nextToken

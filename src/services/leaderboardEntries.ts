@@ -13,6 +13,7 @@ import {
   leaderboardProfileIdByRegistrant,
   leaderboardStaffProfiles,
   leaderboardStaffRegistrants,
+  leaderboardEventRegistrantTypes,
   updateApsAppLeaderboardEntry,
 } from '../graphql/leaderboardOps';
 import { graphqlApiKeyClient, graphqlAuthClient } from '../utils/graphqlClient';
@@ -78,16 +79,22 @@ export function rankLeaderboardEntries(entries: LeaderboardEntryRecord[]): Ranke
 }
 
 export async function getLeaderboardEntry(id: string): Promise<LeaderboardEntryRecord | null> {
-  try {
-    const resp = await graphqlAuthClient.graphql({
-      query: getApsAppLeaderboardEntry,
-      variables: { id },
-    });
-    return asEntry((resp as any)?.data?.getApsAppLeaderboardEntry);
-  } catch (error) {
-    if (isLeaderboardSchemaError(error)) throw error;
-    return null;
+  let lastError: unknown = null;
+  for (const client of [graphqlApiKeyClient, graphqlAuthClient]) {
+    try {
+      const resp = await client.graphql({
+        query: getApsAppLeaderboardEntry,
+        variables: { id },
+      });
+      const entry = asEntry((resp as any)?.data?.getApsAppLeaderboardEntry);
+      if (entry) return entry;
+    } catch (error) {
+      lastError = error;
+      if (isLeaderboardSchemaError(error)) throw error;
+    }
   }
+  if (lastError && isLeaderboardSchemaError(lastError)) throw lastError;
+  return null;
 }
 
 export async function listLeaderboardEntries(eventId = APS_ID): Promise<LeaderboardEntryRecord[]> {
@@ -110,54 +117,102 @@ export async function listLeaderboardEntries(eventId = APS_ID): Promise<Leaderbo
   return [];
 }
 
-const STAFF_CACHE_MS = 60_000;
+const STAFF_CACHE_MS = 10 * 60_000;
+const STAFF_LOOKUP_CHUNK = 8;
 let staffIdCache: { at: number; ids: Set<string> } | null = null;
 
-export async function listStaffProfileIds(): Promise<Set<string>> {
-  if (staffIdCache && Date.now() - staffIdCache.at < STAFF_CACHE_MS) {
-    return staffIdCache.ids;
-  }
-  const ids = new Set<string>();
+async function listEventRegistrantsForStaff() {
   try {
-    const staffProfiles = await drainIndexedList<{ id?: string | null; attendeeType?: string | null }>({
-      client: graphqlApiKeyClient,
-      query: leaderboardStaffProfiles,
-      field: 'listApsAppUserProfiles',
-      variables: { filter: { attendeeType: { eq: 'STAFF' } } },
-      pageSize: 200,
-    });
-    for (const row of staffProfiles) {
-      if (row.id && isStaffAttendeeType(row.attendeeType)) ids.add(row.id);
-    }
-
-    const staffRegistrants = await drainIndexedList<{ id?: string | null }>({
+    return await drainIndexedList<{
+      id?: string | null;
+      attendeeType?: string | null;
+      appUser?: { profileId?: string | null; profile?: { id?: string | null } | null } | null;
+    }>({
       client: graphqlApiKeyClient,
       query: leaderboardStaffRegistrants,
       field: 'apsRegistrantsByApsID',
-      variables: { apsID: APS_ID, filter: { attendeeType: { eq: 'STAFF' } } },
+      variables: { apsID: APS_ID },
       pageSize: 200,
     });
-    await Promise.all(
-      staffRegistrants.map(async (registrant) => {
-        if (!registrant.id) return;
-        try {
-          const resp = await graphqlApiKeyClient.graphql({
-            query: leaderboardProfileIdByRegistrant,
-            variables: { registrantId: registrant.id },
-          });
-          const appUser = (resp as any)?.data?.apsAppUsersByRegistrantId?.items?.find(Boolean);
-          const profileId = appUser?.profile?.id || appUser?.profileId;
-          if (profileId) ids.add(String(profileId));
-        } catch {
-          // keep going; missing profile just means they are not on the board
-        }
+  } catch (error) {
+    console.warn('Nested staff registrant lookup failed, using type-only list:', error);
+    return drainIndexedList<{
+      id?: string | null;
+      attendeeType?: string | null;
+      appUser?: { profileId?: string | null; profile?: { id?: string | null } | null } | null;
+    }>({
+      client: graphqlApiKeyClient,
+      query: leaderboardEventRegistrantTypes,
+      field: 'apsRegistrantsByApsID',
+      variables: { apsID: APS_ID },
+      pageSize: 200,
+    });
+  }
+}
+
+async function profileIdForRegistrant(registrantId: string): Promise<string | null> {
+  for (const client of [graphqlApiKeyClient, graphqlAuthClient]) {
+    try {
+      const resp = await client.graphql({
+        query: leaderboardProfileIdByRegistrant,
+        variables: { registrantId },
+      });
+      const appUser = (resp as any)?.data?.apsAppUsersByRegistrantId?.items?.find(Boolean);
+      const profileId = appUser?.profile?.id || appUser?.profileId;
+      if (profileId) return String(profileId);
+    } catch {
+      // try the next client
+    }
+  }
+  return null;
+}
+
+/**
+ * Board-only staff set. Event registrant type is the source of truth (profile
+ * attendeeType is often unset). Never used by the personal Summit Score path.
+ */
+export async function listStaffProfileIds(): Promise<Set<string>> {
+  if (staffIdCache && Date.now() - staffIdCache.at < STAFF_CACHE_MS) {
+    return new Set(staffIdCache.ids);
+  }
+  const ids = new Set<string>();
+  try {
+    const [registrants, staffProfiles] = await Promise.all([
+      listEventRegistrantsForStaff(),
+      drainIndexedList<{ id?: string | null; attendeeType?: string | null }>({
+        client: graphqlApiKeyClient,
+        query: leaderboardStaffProfiles,
+        field: 'listApsAppUserProfiles',
+        variables: { filter: { attendeeType: { eq: 'STAFF' } } },
+        pageSize: 200,
       }),
-    );
+    ]);
+
+    const missingRegistrantIds: string[] = [];
+    for (const row of registrants) {
+      if (!row.id || !isStaffAttendeeType(row.attendeeType)) continue;
+      const nestedId = row.appUser?.profile?.id || row.appUser?.profileId;
+      if (nestedId) ids.add(String(nestedId));
+      else missingRegistrantIds.push(String(row.id));
+    }
+
+    for (let i = 0; i < missingRegistrantIds.length; i += STAFF_LOOKUP_CHUNK) {
+      const chunk = missingRegistrantIds.slice(i, i + STAFF_LOOKUP_CHUNK);
+      const profileIds = await Promise.all(chunk.map(profileIdForRegistrant));
+      for (const profileId of profileIds) {
+        if (profileId) ids.add(profileId);
+      }
+    }
+
+    for (const row of staffProfiles) {
+      if (row.id && isStaffAttendeeType(row.attendeeType)) ids.add(row.id);
+    }
   } catch (error) {
     console.warn('Staff leaderboard filter failed:', error);
+    return ids;
   }
   staffIdCache = { at: Date.now(), ids };
-  return ids;
+  return new Set(ids);
 }
 
 export function withoutStaffEntries<T extends { userProfileId: string }>(

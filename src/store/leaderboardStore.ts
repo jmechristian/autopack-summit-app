@@ -1,10 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { create } from 'zustand';
-import { APS_ID } from '../config/apsConfig';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import {
   evaluateLeaderboardScore,
   isStaffAttendeeType,
-  leaderboardDisplayName,
   type EvaluatedScore,
 } from '../config/leaderboardPoints';
 import {
@@ -17,16 +17,17 @@ import {
   upsertLeaderboardEntry,
   visibleLeaderboard,
   withoutStaffEntries,
-  type LeaderboardEntryRecord,
   type RankedLeaderboardEntry,
 } from '../services/leaderboardEntries';
 import { loadCurrentUserFacts } from '../services/leaderboardFacts';
 import { useApsStore } from './apsStore';
 import { usePointsToastStore } from './pointsToastStore';
 
-const BOARD_CACHE_MS = 60_000;
-const SCORE_CACHE_MS = 20_000;
+const BOARD_CACHE_MS = 120_000;
+const SCORE_CACHE_MS = 45_000;
 
+let boardInFlight = false;
+let scoreInFlight = false;
 let queuedRefresh: { force: boolean; includeMyScore: boolean; celebrate?: boolean } | null = null;
 
 type LeaderboardState = {
@@ -44,11 +45,6 @@ type LeaderboardState = {
   refresh: (opts?: { force?: boolean; includeMyScore?: boolean; celebrate?: boolean }) => Promise<void>;
 };
 
-function applyMyEntry(entries: RankedLeaderboardEntry[], mine: LeaderboardEntryRecord) {
-  const next = entries.filter((entry) => entry.userProfileId !== mine.userProfileId);
-  return rankLeaderboardEntries([...next, mine]);
-}
-
 function findMine(ranked: RankedLeaderboardEntry[], profileId?: string | null) {
   if (!profileId) return null;
   return ranked.find((entry) => entry.userProfileId === profileId) || null;
@@ -62,180 +58,221 @@ function currentUserIsStaff() {
   );
 }
 
-export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
-  myScore: null,
-  myRank: null,
-  myPoints: 0,
-  rankedAll: [],
-  entries: [],
-  loading: false,
-  scoreLoading: false,
-  rankingUnavailable: false,
-  error: null,
-  lastBoardAt: null,
-  lastScoreAt: null,
+function enqueue(opts?: { force?: boolean; includeMyScore?: boolean; celebrate?: boolean }) {
+  queuedRefresh = {
+    force: !!opts?.force || !!queuedRefresh?.force,
+    includeMyScore: opts?.includeMyScore !== false || queuedRefresh?.includeMyScore !== false,
+    celebrate: !!opts?.celebrate || !!queuedRefresh?.celebrate,
+  };
+}
 
-  refresh: async (opts) => {
-    if (get().loading) {
-      queuedRefresh = {
-        force: !!opts?.force || !!queuedRefresh?.force,
-        includeMyScore: opts?.includeMyScore !== false || queuedRefresh?.includeMyScore !== false,
-        celebrate: !!opts?.celebrate || !!queuedRefresh?.celebrate,
-      };
-      return;
-    }
-    const includeMyScore = opts?.includeMyScore !== false;
-    const celebrate = !!opts?.celebrate;
-    const previousScore = get().myScore;
-    const previousTotal = previousScore?.total ?? get().myPoints;
-    const now = Date.now();
-    const appUser = useApsStore.getState().currentAppUser;
-    const profile = appUser?.profile || null;
-    const profileId = profile?.id || null;
-    const boardFresh = !opts?.force && !!get().lastBoardAt && now - get().lastBoardAt! < BOARD_CACHE_MS;
-    const scoreFresh = !opts?.force && !!get().lastScoreAt && now - get().lastScoreAt! < SCORE_CACHE_MS;
-    if (boardFresh && (!includeMyScore || scoreFresh)) {
-      const mine = findMine(get().rankedAll, profileId);
-      if (mine && (mine.points !== get().myPoints || mine.rank !== get().myRank)) {
-        set({ myRank: mine.rank, myPoints: mine.points });
-      }
-      return;
-    }
-
-    const hasBoard = get().rankedAll.length > 0 || get().entries.length > 0;
-    const needsScore = includeMyScore && !scoreFresh;
-    set({
-      loading: !hasBoard || !boardFresh,
-      scoreLoading: needsScore,
+export const useLeaderboardStore = create<LeaderboardState>()(
+  persist(
+    (set, get) => ({
+      myScore: null,
+      myRank: null,
+      myPoints: 0,
+      rankedAll: [],
+      entries: [],
+      loading: false,
+      scoreLoading: false,
+      rankingUnavailable: false,
       error: null,
+      lastBoardAt: null,
+      lastScoreAt: null,
+
+      refresh: async (opts) => {
+        const includeMyScore = opts?.includeMyScore !== false;
+        const force = !!opts?.force;
+        const celebrate = !!opts?.celebrate;
+        const now = Date.now();
+        const state = get();
+        const appUser = useApsStore.getState().currentAppUser;
+        const profile = appUser?.profile || null;
+        const profileId = profile?.id || null;
+        const boardFresh = !force && !!state.lastBoardAt && now - state.lastBoardAt! < BOARD_CACHE_MS;
+        const scoreFresh = !force && !!state.lastScoreAt && now - state.lastScoreAt! < SCORE_CACHE_MS;
+
+        if (boardFresh && (!includeMyScore || scoreFresh)) {
+          return;
+        }
+
+        const wantBoard = !boardFresh;
+        const wantScore = includeMyScore && !scoreFresh && !!profileId && !!appUser?.id;
+        const wantHydrate = !wantScore && !!profileId && state.myPoints <= 0;
+
+        const tasks: Promise<void>[] = [];
+
+        if (wantBoard) {
+          if (boardInFlight) enqueue(opts);
+          else tasks.push(loadBoard(set, get, profileId));
+        }
+
+        if (wantScore) {
+          if (scoreInFlight) enqueue({ ...opts, includeMyScore: true, celebrate });
+          else {
+            tasks.push(
+              loadScore(set, get, {
+                profile,
+                profileId: profileId!,
+                appUserId: appUser!.id,
+                celebrate,
+                previousScore: state.myScore,
+                previousTotal: state.myScore?.total ?? state.myPoints,
+              }),
+            );
+          }
+        } else if (wantHydrate) {
+          if (!scoreInFlight) tasks.push(hydrateStoredPoints(set, get, profileId!));
+        }
+
+        if (!tasks.length) return;
+        await Promise.all(tasks);
+
+        const next = queuedRefresh;
+        queuedRefresh = null;
+        if (next) void get().refresh(next);
+      },
+    }),
+    {
+      name: 'aps-leaderboard-score',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        myScore: state.myScore,
+        myPoints: state.myPoints,
+      }),
+    },
+  ),
+);
+
+async function hydrateStoredPoints(
+  set: (partial: Partial<LeaderboardState>) => void,
+  get: () => LeaderboardState,
+  profileId: string,
+) {
+  try {
+    const stored = await getLeaderboardEntry(leaderboardEntryId(profileId));
+    if (!stored || stored.points <= 0) return;
+    set({
+      myPoints: Math.max(stored.points, get().myPoints),
     });
-    try {
-      let ranked = get().rankedAll.length ? get().rankedAll : get().entries;
-      let rankingUnavailable = get().rankingUnavailable;
-
-      if (!boardFresh) {
-        try {
-          const staffIds = await listStaffProfileIds();
-          if (profileId && currentUserIsStaff()) staffIds.add(profileId);
-          ranked = rankLeaderboardEntries(
-            withoutStaffEntries(await listLeaderboardEntries(), staffIds),
-          );
-          rankingUnavailable = false;
-          let listedMine = findMine(ranked, profileId);
-          let storedPoints: number | null = listedMine?.points ?? null;
-          if (!listedMine && profileId) {
-            const stored = await getLeaderboardEntry(leaderboardEntryId(profileId));
-            if (stored && stored.points > 0) {
-              storedPoints = stored.points;
-              if (!staffIds.has(profileId)) {
-                ranked = applyMyEntry(ranked, stored);
-                listedMine = findMine(ranked, profileId);
-              }
-            }
-          }
-          set({
-            rankedAll: ranked,
-            entries: visibleLeaderboard(ranked),
-            myRank: listedMine?.rank ?? (profileId ? null : get().myRank),
-            myPoints: storedPoints ?? (profileId ? 0 : get().myPoints),
-            rankingUnavailable,
-            lastBoardAt: Date.now(),
-          });
-        } catch (error) {
-          if (isLeaderboardSchemaError(error)) {
-            rankingUnavailable = true;
-          } else {
-            console.warn('Leaderboard list failed:', error);
-          }
-        }
-      }
-
-      if (includeMyScore && profileId && appUser?.id && !scoreFresh) {
-        const user = await getCurrentUser();
-        const facts = await loadCurrentUserFacts({
-          profile,
-          appUserId: appUser.id,
-          cognitoUserId: user.userId,
-        });
-        const myScore = evaluateLeaderboardScore(facts);
-        const localEntry: LeaderboardEntryRecord = {
-          id: leaderboardEntryId(profileId),
-          eventId: APS_ID,
-          userProfileId: profileId,
-          displayName: leaderboardDisplayName(profile?.firstName, profile?.lastName),
-          company: profile?.company || null,
-          jobTitle: profile?.jobTitle || null,
-          profilePicture: profile?.profilePicture || null,
-          points: myScore.total,
-        };
-        const hideFromBoard = currentUserIsStaff();
-        try {
-          const saved = await upsertLeaderboardEntry({
-            profileId,
-            ownerUserId: user.userId,
-            firstName: profile?.firstName,
-            lastName: profile?.lastName,
-            company: profile?.company,
-            jobTitle: profile?.jobTitle,
-            profilePicture: profile?.profilePicture,
-            score: myScore,
-          });
-          if (!hideFromBoard) ranked = applyMyEntry(ranked, saved || localEntry);
-        } catch (error) {
-          if (!hideFromBoard) ranked = applyMyEntry(ranked, localEntry);
-          if (isLeaderboardSchemaError(error)) {
-            rankingUnavailable = true;
-          } else {
-            console.warn('Leaderboard ranking sync failed:', error);
-          }
-        }
-        const mine = hideFromBoard ? null : findMine(ranked, profileId);
-        if (celebrate && myScore.total > previousTotal) {
-          const prevEarned = new Set(
-            (previousScore?.awards || []).filter((award) => award.earned).map((award) => award.id),
-          );
-          const unlocked = previousScore
-            ? myScore.awards.filter((award) => award.earned && !prevEarned.has(award.id)).map((award) => award.label)
-            : [];
-          usePointsToastStore.getState().show(myScore.total - previousTotal, unlocked);
-        }
-        set({
-          myScore,
-          myRank: mine?.rank ?? null,
-          myPoints: mine?.points ?? myScore.total,
-          rankedAll: ranked,
-          entries: visibleLeaderboard(ranked),
-          rankingUnavailable,
-          loading: false,
-          scoreLoading: false,
-          lastBoardAt: Date.now(),
-          lastScoreAt: Date.now(),
-        });
-        return;
-      }
-
-      const mine = findMine(ranked, profileId);
-      set({
-        myRank: mine?.rank ?? get().myRank,
-        myPoints: mine?.points ?? get().myPoints,
-        rankedAll: ranked,
-        entries: visibleLeaderboard(ranked),
-        rankingUnavailable,
-        loading: false,
-        scoreLoading: false,
-        lastBoardAt: boardFresh ? get().lastBoardAt : Date.now(),
-        lastScoreAt: includeMyScore ? Date.now() : get().lastScoreAt,
-      });
-    } catch (error: any) {
-      set({
-        loading: false,
-        scoreLoading: false,
-        error: error?.message || 'Unable to load the leaderboard.',
-      });
-    } finally {
-      const next = queuedRefresh;
-      queuedRefresh = null;
-      if (next) void get().refresh(next);
+  } catch (error) {
+    if (!isLeaderboardSchemaError(error)) {
+      console.warn('Leaderboard stored score lookup failed:', error);
     }
+  }
+}
+
+async function loadBoard(
+  set: (partial: Partial<LeaderboardState>) => void,
+  get: () => LeaderboardState,
+  profileId: string | null,
+) {
+  boardInFlight = true;
+  const hasBoard = get().rankedAll.length > 0 || get().entries.length > 0;
+  set({ loading: !hasBoard, error: null });
+  try {
+    const [listed, staffIds] = await Promise.all([listLeaderboardEntries(), listStaffProfileIds()]);
+    if (profileId && currentUserIsStaff()) staffIds.add(profileId);
+
+    const ranked = rankLeaderboardEntries(withoutStaffEntries(listed, staffIds));
+    const listedMine = findMine(ranked, profileId);
+
+    set({
+      rankedAll: ranked,
+      entries: visibleLeaderboard(ranked),
+      myRank: listedMine?.rank ?? (profileId && staffIds.has(profileId) ? null : get().myRank),
+      rankingUnavailable: false,
+      loading: false,
+      lastBoardAt: Date.now(),
+    });
+  } catch (error) {
+    if (isLeaderboardSchemaError(error)) {
+      set({ rankingUnavailable: true, loading: false, lastBoardAt: Date.now() });
+    } else {
+      console.warn('Leaderboard list failed:', error);
+      set({
+        loading: false,
+        error: (error as { message?: string })?.message || 'Unable to load the leaderboard.',
+      });
+    }
+  } finally {
+    boardInFlight = false;
+  }
+}
+
+async function loadScore(
+  set: (partial: Partial<LeaderboardState>) => void,
+  get: () => LeaderboardState,
+  params: {
+    profile: NonNullable<ReturnType<typeof useApsStore.getState>['currentAppUser']>['profile'];
+    profileId: string;
+    appUserId: string;
+    celebrate: boolean;
+    previousScore: EvaluatedScore | null;
+    previousTotal: number;
   },
-}));
+) {
+  const profile = params.profile;
+  if (!profile) return;
+
+  scoreInFlight = true;
+  set({ scoreLoading: !get().myScore && get().myPoints <= 0, error: null });
+  try {
+    await hydrateStoredPoints(set, get, params.profileId);
+
+    const user = await getCurrentUser();
+    const facts = await loadCurrentUserFacts({
+      profile,
+      appUserId: params.appUserId,
+      cognitoUserId: user.userId,
+    });
+    const myScore = evaluateLeaderboardScore(facts);
+    const hideFromBoard = currentUserIsStaff();
+
+    if (!hideFromBoard) {
+      try {
+        await upsertLeaderboardEntry({
+          profileId: params.profileId,
+          ownerUserId: user.userId,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          company: profile.company,
+          jobTitle: profile.jobTitle,
+          profilePicture: profile.profilePicture,
+          score: myScore,
+        });
+      } catch (error) {
+        if (isLeaderboardSchemaError(error)) {
+          set({ rankingUnavailable: true });
+        } else {
+          console.warn('Leaderboard ranking sync failed:', error);
+        }
+      }
+    }
+
+    if (params.celebrate && myScore.total > params.previousTotal) {
+      const prevEarned = new Set(
+        (params.previousScore?.awards || []).filter((award) => award.earned).map((award) => award.id),
+      );
+      const unlocked = params.previousScore
+        ? myScore.awards.filter((award) => award.earned && !prevEarned.has(award.id)).map((award) => award.label)
+        : [];
+      usePointsToastStore.getState().show(myScore.total - params.previousTotal, unlocked);
+    }
+
+    set({
+      myScore,
+      myPoints: myScore.total,
+      scoreLoading: false,
+      lastScoreAt: Date.now(),
+    });
+  } catch (error: any) {
+    set({
+      scoreLoading: false,
+      error: error?.message || 'Unable to load your summit score.',
+    });
+  } finally {
+    scoreInFlight = false;
+  }
+}

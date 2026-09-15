@@ -52,7 +52,13 @@ async function safeList<T>(fn: () => Promise<T[]>, fallback: T[] = []): Promise<
   }
 }
 
+const EXHIBITOR_COUNT_TTL_MS = 10 * 60_000;
+let exhibitorCountCache: { at: number; count: number } | null = null;
+
 export async function loadExhibitorCount(eventId = APS_ID): Promise<number> {
+  if (exhibitorCountCache && Date.now() - exhibitorCountCache.at < EXHIBITOR_COUNT_TTL_MS) {
+    return exhibitorCountCache.count;
+  }
   const ids = new Set<string>();
   let nextToken: string | null | undefined = null;
   do {
@@ -69,6 +75,7 @@ export async function loadExhibitorCount(eventId = APS_ID): Promise<number> {
     }
     nextToken = data?.nextToken;
   } while (nextToken);
+  exhibitorCountCache = { at: Date.now(), count: ids.size };
   return ids.size;
 }
 
@@ -285,19 +292,26 @@ async function countAnnouncementOpens(userId: string): Promise<number> {
       variables: { eventId: APS_ID, sortDirection: 'DESC' },
     }),
   );
-  const ids = announcements.map((item) => item.id).filter((id): id is string => !!id).slice(0, 40);
-  const results = await Promise.all(
-    ids.map(async (announcementId) => {
-      try {
-        const resp = (await graphqlAuthClient.graphql({
-          query: getApsAnnouncementOpen as any,
-          variables: { id: `o:${announcementId}|u:${userId}` },
-        })) as any;
-        return Number(!!resp?.data?.getApsAnnouncementOpen?.id);
-      } catch {
-        return 0;
-      }
-    }),
-  );
-  return results.reduce((sum: number, value: number) => sum + value, 0);
+  const ids = announcements.map((item) => item.id).filter((id): id is string => !!id).slice(0, 24);
+  let opened = 0;
+  for (let i = 0; i < ids.length; i += 8) {
+    const batch = ids.slice(i, i + 8);
+    const results = await Promise.all(
+      batch.map(async (announcementId) => {
+        try {
+          const resp = (await graphqlAuthClient.graphql({
+            query: getApsAnnouncementOpen as any,
+            variables: { id: `o:${announcementId}|u:${userId}` },
+          })) as any;
+          return Number(!!resp?.data?.getApsAnnouncementOpen?.id);
+        } catch {
+          return 0;
+        }
+      }),
+    );
+    opened += results.reduce((sum: number, value: number) => sum + value, 0);
+    // Award only needs 3 opens; stop hitting AppSync once that's met.
+    if (opened >= 3) return opened;
+  }
+  return opened;
 }

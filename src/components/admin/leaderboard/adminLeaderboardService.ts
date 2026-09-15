@@ -3,6 +3,7 @@ import { APS_ID } from '../../../config/apsConfig';
 import {
   emptyLeaderboardFacts,
   evaluateLeaderboardScore,
+  isStaffAttendeeType,
   leaderboardDisplayName,
   type AwardCategoryId,
   type EvaluatedScore,
@@ -402,6 +403,12 @@ export async function recalculateAllLeaderboardScores(): Promise<{
     if (row.points <= 0) continue;
     const bundle = byProfile.get(row.profileId);
     if (!bundle) continue;
+    if (
+      isStaffAttendeeType(bundle.registrant.attendeeType) ||
+      isStaffAttendeeType(bundle.profile.attendeeType)
+    ) {
+      continue;
+    }
     try {
       await upsertLeaderboardEntry({
         profileId: bundle.profile.id,

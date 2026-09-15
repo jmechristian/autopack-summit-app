@@ -37,6 +37,7 @@ export default function LeaderboardScreen() {
   const rankingUnavailable = useLeaderboardStore((s) => s.rankingUnavailable);
   const refresh = useLeaderboardStore((s) => s.refresh);
   const waitingForBoard = !error && lastBoardAt == null && entries.length === 0;
+  const showFullSkeleton = waitingForBoard && (myScore?.total ?? myPoints) <= 0;
 
   useFocusEffect(
     useCallback(() => {
@@ -49,7 +50,7 @@ export default function LeaderboardScreen() {
     return name || 'You';
   }, [profile?.firstName, profile?.lastName]);
 
-  if (waitingForBoard) {
+  if (showFullSkeleton) {
     return <LeaderboardScreenSkeleton />;
   }
 

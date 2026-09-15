@@ -405,13 +405,13 @@ export default function HubScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void refreshLeaderboard({ includeMyScore: false });
+      void refreshLeaderboard();
     }, [refreshLeaderboard]),
   );
 
   useEffect(() => {
     if (!profile?.id) return;
-    void refreshLeaderboard({ includeMyScore: false });
+    void refreshLeaderboard();
   }, [profile?.id, refreshLeaderboard]);
 
   useEffect(() => {
