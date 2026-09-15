@@ -77,8 +77,16 @@ type QuickTool = {
 
 const MAX_QUICK_TOOLS = 8;
 const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v3';
+const CAPTURE_TOOL_ID = 'lead-capture';
+const EXHIBITOR_PROFILE_TOOL_ID = 'exhibitor-profile';
+
+function sameToolIds(a: string[], b: string[]) {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
 // Default pinned quick tools (max 8)
 const DEFAULT_TOOL_IDS = [
+  CAPTURE_TOOL_ID,
   'contacts',
   'requests',
   'messages',
@@ -86,18 +94,50 @@ const DEFAULT_TOOL_IDS = [
   'sponsors',
   'speakers',
   'exhibitors',
-  'lead-capture',
 ];
 const EXHIBITOR_DEFAULT_TOOL_IDS = [
-  'exhibitor-profile',
+  CAPTURE_TOOL_ID,
+  EXHIBITOR_PROFILE_TOOL_ID,
   'contacts',
   'requests',
   'messages',
   'announcements',
   'sponsors',
   'speakers',
-  'lead-capture',
 ];
+const PREVIOUS_DEFAULT_TOOL_IDS = [
+  'contacts',
+  'requests',
+  'messages',
+  'announcements',
+  'sponsors',
+  'speakers',
+  'exhibitors',
+  CAPTURE_TOOL_ID,
+];
+const PREVIOUS_EXHIBITOR_DEFAULT_TOOL_IDS = [
+  EXHIBITOR_PROFILE_TOOL_ID,
+  'contacts',
+  'requests',
+  'messages',
+  'announcements',
+  'sponsors',
+  'speakers',
+  CAPTURE_TOOL_ID,
+];
+
+function isUnchangedStockQuickTools(ids: string[]) {
+  return sameToolIds(ids, PREVIOUS_DEFAULT_TOOL_IDS) || sameToolIds(ids, PREVIOUS_EXHIBITOR_DEFAULT_TOOL_IDS);
+}
+
+function withExhibitorProfileTool(ids: string[]) {
+  if (ids.includes(EXHIBITOR_PROFILE_TOOL_ID)) return ids;
+  const rest = ids.filter((id) => id !== EXHIBITOR_PROFILE_TOOL_ID);
+  if (rest[0] === CAPTURE_TOOL_ID) {
+    return [CAPTURE_TOOL_ID, EXHIBITOR_PROFILE_TOOL_ID, ...rest.slice(1)].slice(0, MAX_QUICK_TOOLS);
+  }
+  return [EXHIBITOR_PROFILE_TOOL_ID, ...rest].slice(0, MAX_QUICK_TOOLS);
+}
 
 const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'contacts', icon: 'person', label: 'Contacts', route: '/(main)/hub/contacts' },
@@ -275,7 +315,9 @@ export default function HubScreen() {
               deduped.push(id);
               if (deduped.length >= MAX_QUICK_TOOLS) break;
             }
-            if (deduped.length) setSelectedToolIds(deduped);
+            if (deduped.length && !isUnchangedStockQuickTools(deduped)) {
+              setSelectedToolIds(deduped);
+            }
           }
         }
       } catch (e) {
@@ -324,11 +366,8 @@ export default function HubScreen() {
 
   useEffect(() => {
     if (!toolsLoaded || hasExhibitorProfile !== true) return;
-    if (selectedToolIds.includes('exhibitor-profile')) return;
-    const next = ['exhibitor-profile', ...selectedToolIds.filter((id) => id !== 'exhibitor-profile')].slice(
-      0,
-      MAX_QUICK_TOOLS,
-    );
+    if (selectedToolIds.includes(EXHIBITOR_PROFILE_TOOL_ID)) return;
+    const next = withExhibitorProfileTool(selectedToolIds);
     setSelectedToolIds(next);
     setEditingToolIds(next);
     AsyncStorage.setItem(QUICK_TOOLS_STORAGE_KEY, JSON.stringify(next)).catch((e) => {
