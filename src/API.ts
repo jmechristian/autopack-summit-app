@@ -451,7 +451,6 @@ export enum RegistrantType {
   SPEAKER = "SPEAKER",
   STAFF = "STAFF",
   EXHIBITOR = "EXHIBITOR",
-  WAITLIST = "WAITLIST",
 }
 
 
@@ -1029,6 +1028,7 @@ export enum RegistrantStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
+  WAITLIST = "WAITLIST",
 }
 
 
