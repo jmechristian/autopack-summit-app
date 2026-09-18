@@ -180,35 +180,46 @@ export default function EngageHome() {
       <View style={[styles.body, frame, { paddingHorizontal: contentInset }]}>
         <LeaderboardCallout />
 
-        <Pressable
-          style={styles.passportCard}
-          onPress={() => router.push('/(main)/hub/passport' as any)}
-        >
-          <View style={styles.passportHeaderRow}>
-            <View style={styles.passportIconWrap}>
-              <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
-            </View>
-            <View style={styles.passportTitleWrap}>
-              <Text style={styles.passportEyebrow}>Passport Challenge</Text>
-              <Text style={styles.passportTitle}>
-                {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
-              </Text>
-            </View>
-            <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
-          </View>
-          {passportLoading ? (
-            <ActivityIndicator color='#fff' style={styles.passportLoader} />
-          ) : (
-            <>
-              <Text style={styles.passportSubtitle}>
-                {passportCollected} of {passportTotal} exhibitor stamps collected
-              </Text>
-              <View style={styles.passportProgressTrack}>
-                <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
+        <View style={styles.passportCard}>
+          <Pressable
+            style={styles.passportCardMain}
+            onPress={() => router.push('/(main)/hub/passport' as any)}
+          >
+            <View style={styles.passportHeaderRow}>
+              <View style={styles.passportIconWrap}>
+                <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
               </View>
-            </>
-          )}
-        </Pressable>
+              <View style={styles.passportTitleWrap}>
+                <Text style={styles.passportEyebrow}>Passport Challenge</Text>
+                <Text style={styles.passportTitle}>
+                  {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
+                </Text>
+              </View>
+              <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
+            </View>
+            {passportLoading ? (
+              <ActivityIndicator color='#fff' style={styles.passportLoader} />
+            ) : (
+              <>
+                <Text style={styles.passportSubtitle}>
+                  {passportCollected} of {passportTotal} exhibitor stamps collected
+                </Text>
+                <View style={styles.passportProgressTrack}>
+                  <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
+                </View>
+              </>
+            )}
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(main)/hub/passport-leaderboard' as any)}
+            hitSlop={8}
+            style={styles.passportLeaderboardLink}
+            accessibilityRole='button'
+            accessibilityLabel='View passport leaderboard'
+          >
+            <Text style={styles.passportLeaderboardLinkText}>View Leaderboard</Text>
+          </Pressable>
+        </View>
 
         <RisingStarCallout />
 
@@ -266,6 +277,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     gap: 10,
   },
+  passportCardMain: { gap: 10 },
   passportHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -299,6 +311,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 999,
     backgroundColor: ui.colors.secondary,
+  },
+  passportLeaderboardLink: { alignSelf: 'flex-start' },
+  passportLeaderboardLinkText: {
+    color: '#fff',
+    fontWeight: '800',
+    textDecorationLine: 'underline',
   },
   toolsGrid: {
     flexDirection: 'row',

@@ -25,6 +25,10 @@ import { autopackColors } from '../../../src/theme';
 import { APS_ID } from '../../../src/config/apsConfig';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
 import {
+  graphqlWithSpeakerOrderFallback,
+  orderByIds,
+} from '../../../src/utils/speakerOrder';
+import {
   apsAppExhibitorProfilesByCompanyId,
   apsAppUserPassportStampsByUserProfileIdAndCreatedAt,
 } from '../../../src/graphql/queries';
@@ -460,10 +464,14 @@ export default function HubScreen() {
         const all: any[] = [];
         let nextToken: string | null | undefined = null;
         do {
-          const resp = await graphqlApiKeyClient.graphql({
-            query: apsAppSessionsByAgendaIdWithRelations,
-            variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
-          });
+          const resp = await graphqlWithSpeakerOrderFallback(
+            (query) =>
+              graphqlApiKeyClient.graphql({
+                query,
+                variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
+              }),
+            apsAppSessionsByAgendaIdWithRelations,
+          );
           const data = resp.data as any;
           const conn = data?.apsAppSessionsByAgendaId;
           const items: Array<any> = conn?.items || [];
@@ -486,9 +494,13 @@ export default function HubScreen() {
           const title = normalizeText(it?.title) || 'Session';
           const location = normalizeText(it?.location);
           const time = formatTimeRange(it?.startTime, it?.endTime);
-          const speakerNames = (it?.speakers?.items || [])
-            .map((x: any) => x?.aPSSpeaker)
-            .filter(Boolean)
+          const speakerNames = orderByIds(
+            (it?.speakers?.items || [])
+              .map((x: any) => x?.aPSSpeaker)
+              .filter(Boolean),
+            (sp: any) => sp?.id,
+            it?.speakerOrder,
+          )
             .map((sp: any) =>
               `${normalizeText(sp?.firstName || sp?.profile?.firstName)} ${normalizeText(
                 sp?.lastName || sp?.profile?.lastName,
@@ -964,32 +976,46 @@ export default function HubScreen() {
 
   const sideStackBlock = (
     <>
-      <Pressable style={styles.passportCard} onPress={() => router.push('/(main)/hub/passport' as any)}>
-        <View style={styles.passportHeaderRow}>
-          <View style={styles.passportIconWrap}>
-            <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
-          </View>
-          <View style={styles.passportTitleWrap}>
-            <Text style={styles.passportEyebrow}>Passport Challenge</Text>
-            <Text style={styles.passportTitle}>
-              {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
-            </Text>
-          </View>
-          <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
-        </View>
-        {passportLoading ? (
-          <ActivityIndicator color='#fff' style={styles.passportLoader} />
-        ) : (
-          <>
-            <Text style={styles.passportSubtitle}>
-              {passportCollected} of {passportTotal} exhibitor stamps collected
-            </Text>
-            <View style={styles.passportProgressTrack}>
-              <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
+      <View style={styles.passportCard}>
+        <Pressable
+          style={styles.passportCardMain}
+          onPress={() => router.push('/(main)/hub/passport' as any)}
+        >
+          <View style={styles.passportHeaderRow}>
+            <View style={styles.passportIconWrap}>
+              <Ionicons name='book-outline' size={20} color={ui.colors.primary} />
             </View>
-          </>
-        )}
-      </Pressable>
+            <View style={styles.passportTitleWrap}>
+              <Text style={styles.passportEyebrow}>Passport Challenge</Text>
+              <Text style={styles.passportTitle}>
+                {passportLoading ? 'Loading progress...' : `${passportPercent}% Complete`}
+              </Text>
+            </View>
+            <Ionicons name='chevron-forward' size={22} color='rgba(255,255,255,0.9)' />
+          </View>
+          {passportLoading ? (
+            <ActivityIndicator color='#fff' style={styles.passportLoader} />
+          ) : (
+            <>
+              <Text style={styles.passportSubtitle}>
+                {passportCollected} of {passportTotal} exhibitor stamps collected
+              </Text>
+              <View style={styles.passportProgressTrack}>
+                <View style={[styles.passportProgressFill, { width: `${passportPercent}%` }]} />
+              </View>
+            </>
+          )}
+        </Pressable>
+        <Pressable
+          onPress={() => router.push('/(main)/hub/passport-leaderboard' as any)}
+          hitSlop={8}
+          style={styles.passportLeaderboardLink}
+          accessibilityRole='button'
+          accessibilityLabel='View passport leaderboard'
+        >
+          <Text style={styles.passportLeaderboardLinkText}>View Leaderboard</Text>
+        </Pressable>
+      </View>
 
       <RisingStarCallout style={styles.risingStarCallout} />
 
@@ -1375,6 +1401,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     gap: 10,
   },
+  passportCardMain: { gap: 10 },
   passportHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1408,6 +1435,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 999,
     backgroundColor: ui.colors.secondary,
+  },
+  passportLeaderboardLink: { alignSelf: 'flex-start' },
+  passportLeaderboardLinkText: {
+    color: '#fff',
+    fontWeight: '800',
+    textDecorationLine: 'underline',
   },
   feedbackCallout: {
     flexDirection: 'row',

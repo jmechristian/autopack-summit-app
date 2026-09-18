@@ -10,13 +10,17 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { LEADERBOARD_VISIBLE_LIMIT } from '../../config/leaderboardPoints';
 import { useCurrentUserProfile } from '../../hooks/useApsStore';
+import {
+  rankPassportLeaderboard,
+  visibleLeaderboard,
+} from '../../services/leaderboardEntries';
 import { useLeaderboardStore } from '../../store/leaderboardStore';
 import { autopackColors } from '../../theme';
 import { ui } from '../../ui/tokens';
-import { LEADERBOARD_VISIBLE_LIMIT } from '../../config/leaderboardPoints';
-import { LeaderboardAvatar } from './LeaderboardAvatar';
-import { LeaderboardScreenSkeleton } from './LeaderboardSkeletons';
+import { LeaderboardAvatar } from '../leaderboard/LeaderboardAvatar';
+import { LeaderboardScreenSkeleton } from '../leaderboard/LeaderboardSkeletons';
 
 function medalColor(rank: number) {
   if (rank === 1) return autopackColors.apYellow;
@@ -25,19 +29,19 @@ function medalColor(rank: number) {
   return ui.colors.subtle;
 }
 
-export default function LeaderboardScreen() {
+function stampLabel(count: number) {
+  return `${count} stamp${count === 1 ? '' : 's'}`;
+}
+
+export default function PassportLeaderboardScreen() {
   const profile = useCurrentUserProfile();
   const myScore = useLeaderboardStore((s) => s.myScore);
-  const myRank = useLeaderboardStore((s) => s.myRank);
-  const myPoints = useLeaderboardStore((s) => s.myPoints);
-  const entries = useLeaderboardStore((s) => s.entries);
+  const rankedAll = useLeaderboardStore((s) => s.rankedAll);
   const loading = useLeaderboardStore((s) => s.loading);
   const lastBoardAt = useLeaderboardStore((s) => s.lastBoardAt);
   const error = useLeaderboardStore((s) => s.error);
   const rankingUnavailable = useLeaderboardStore((s) => s.rankingUnavailable);
   const refresh = useLeaderboardStore((s) => s.refresh);
-  const waitingForBoard = !error && lastBoardAt == null && entries.length === 0;
-  const showFullSkeleton = waitingForBoard && (myScore?.total ?? myPoints) <= 0;
 
   useFocusEffect(
     useCallback(() => {
@@ -45,63 +49,70 @@ export default function LeaderboardScreen() {
     }, [refresh]),
   );
 
+  const rows = useMemo(
+    () => visibleLeaderboard(rankPassportLeaderboard(rankedAll)),
+    [rankedAll],
+  );
+  const myStamps = myScore?.counts.stamps ?? 0;
+  const stampTotal = myScore?.counts.stampTotal ?? 0;
+  const mine = useMemo(
+    () => rows.find((row) => row.userProfileId === profile?.id) || null,
+    [profile?.id, rows],
+  );
   const myName = useMemo(() => {
     const name = `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim();
     return name || 'You';
   }, [profile?.firstName, profile?.lastName]);
+  const waiting = !error && lastBoardAt == null && rankedAll.length === 0 && myStamps <= 0;
 
-  if (showFullSkeleton) {
-    return <LeaderboardScreenSkeleton />;
-  }
+  if (waiting) return <LeaderboardScreenSkeleton />;
 
   return (
     <Animated.View style={styles.container} entering={FadeIn.duration(220)}>
       <FlatList
-        data={entries}
+        data={rows}
         keyExtractor={(item) => item.id}
         refreshControl={
-          <RefreshControl
-            refreshing={loading && !waitingForBoard}
-            onRefresh={() => void refresh({ force: true })}
-          />
+          <RefreshControl refreshing={loading && !waiting} onRefresh={() => void refresh({ force: true })} />
         }
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.headerBlock}>
-            <Pressable style={styles.youCard} onPress={() => router.push('/(main)/hub/points' as any)}>
+            <Pressable style={styles.youCard} onPress={() => router.push('/(main)/hub/passport' as any)}>
               <View style={styles.youTop}>
                 <LeaderboardAvatar name={myName} picture={profile?.profilePicture} size={52} />
                 <View style={styles.youText}>
-                  <Text style={styles.youEyebrow}>Your summit score</Text>
+                  <Text style={styles.youEyebrow}>Your passport</Text>
                   <Text style={styles.youTitle}>
-                    {myRank ? `#${myRank}` : 'Unranked'} · {myScore?.total ?? myPoints} pts
+                    {mine ? `#${mine.rank}` : 'Unranked'} · {stampLabel(mine?.stamps ?? myStamps)}
                   </Text>
-                  <Text style={styles.youHint}>{myScore?.nextHint || 'Complete an action to start scoring.'}</Text>
+                  <Text style={styles.youHint}>
+                    {stampTotal > 0
+                      ? `${mine?.stamps ?? myStamps} of ${stampTotal} exhibitor stamps collected`
+                      : 'Scan exhibitor QR codes to climb this board.'}
+                  </Text>
                 </View>
               </View>
               <View style={styles.breakdownRow}>
-                <Text style={styles.breakdownLink}>See your breakdown</Text>
+                <Text style={styles.breakdownLink}>Back to your passport</Text>
                 <Ionicons name='chevron-forward' size={16} color='#111827' />
               </View>
             </Pressable>
-
             {rankingUnavailable ? (
               <Text style={styles.notice}>
-                Rankings go live after the leaderboard table is published. Your personal score still works.
+                Rankings go live after the leaderboard table is published. Your personal stamps still work.
               </Text>
             ) : null}
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            {entries.length > 0 ? <Text style={styles.sectionTitle}>Top {LEADERBOARD_VISIBLE_LIMIT}</Text> : null}
-            {entries.length > 0 ? (
-              <Text style={styles.pullHint}>Pull to refresh for the latest scores.</Text>
+            {rows.length > 0 ? <Text style={styles.sectionTitle}>Top {LEADERBOARD_VISIBLE_LIMIT} collectors</Text> : null}
+            {rows.length > 0 ? (
+              <Text style={styles.pullHint}>Ranked by unique exhibitor stamps. Pull to refresh.</Text>
             ) : null}
           </View>
         }
         ListEmptyComponent={
-          !loading ? (
-            <Text style={styles.empty}>
-              Be first on the board — finish your profile or send a connection.
-            </Text>
+          !loading && !rankingUnavailable ? (
+            <Text style={styles.empty}>Be first on the passport board — scan an exhibitor QR.</Text>
           ) : null
         }
         renderItem={({ item }) => {
@@ -133,7 +144,7 @@ export default function LeaderboardScreen() {
                   </Text>
                 )}
               </View>
-              <Text style={styles.rowPoints}>{item.points}</Text>
+              <Text style={styles.rowPoints}>{item.stamps}</Text>
               <Ionicons name='chevron-forward' size={16} color={ui.colors.muted} />
             </Pressable>
           );

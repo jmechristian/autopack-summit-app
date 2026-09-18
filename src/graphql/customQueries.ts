@@ -306,6 +306,7 @@ export const apsAppSessionsByAgendaIdWithRelations = /* GraphQL */ `
         embedUrl
         location
         description
+        speakerOrder
         speakers {
           items {
             id
@@ -367,6 +368,7 @@ export const getApsAppSessionWithRelations = /* GraphQL */ `
       embedUrl
       location
       description
+      speakerOrder
       speakers {
         items {
           id

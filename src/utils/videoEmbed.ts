@@ -79,3 +79,19 @@ export function isAllowedVideoUrl(raw?: string | null) {
   if (!value) return true; // empty is allowed (clears / omits)
   return !!parseVideoEmbed(value);
 }
+
+/** Native WebView origin YouTube requires as HTTP Referer (Error 153 without it). */
+export const NATIVE_VIDEO_EMBED_ORIGIN = 'https://com.packagingschool.autopacksummit';
+
+export function videoEmbedSrc(embedUrl: string, origin?: string) {
+  if (!/youtube\.com|youtube-nocookie\.com/i.test(embedUrl)) return embedUrl;
+  try {
+    const url = new URL(embedUrl);
+    url.searchParams.set('playsinline', '1');
+    url.searchParams.set('rel', '0');
+    if (origin) url.searchParams.set('origin', origin);
+    return url.toString();
+  } catch {
+    return embedUrl;
+  }
+}

@@ -196,6 +196,15 @@ export default function PassportScreen() {
             {isWeb ? 'Scan on mobile app' : 'Scan Passport QR'}
           </Text>
         </Pressable>
+        <Pressable
+          onPress={() => router.push('/(main)/hub/passport-leaderboard' as any)}
+          hitSlop={8}
+          style={styles.leaderboardLinkWrap}
+          accessibilityRole='button'
+          accessibilityLabel='View passport leaderboard'
+        >
+          <Text style={styles.leaderboardLink}>View Leaderboard</Text>
+        </Pressable>
         {isWeb ? (
           <Text style={styles.webHint}>{platformUnavailableMessage('Passport QR scanning')}</Text>
         ) : null}
@@ -300,6 +309,12 @@ const styles = StyleSheet.create({
   },
   primaryBtnDisabled: { opacity: 0.55 },
   primaryBtnText: { color: '#fff', fontWeight: '900' },
+  leaderboardLinkWrap: { alignSelf: 'flex-start' },
+  leaderboardLink: {
+    color: '#fff',
+    fontWeight: '800',
+    textDecorationLine: 'underline',
+  },
   webHint: {
     color: 'rgba(255,255,255,0.85)',
     fontSize: 12,

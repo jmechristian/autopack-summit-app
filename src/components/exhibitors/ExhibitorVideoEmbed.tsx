@@ -1,20 +1,18 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { parseVideoEmbed } from '../../utils/videoEmbed';
+import {
+  NATIVE_VIDEO_EMBED_ORIGIN,
+  parseVideoEmbed,
+  videoEmbedSrc,
+} from '../../utils/videoEmbed';
 
 type Props = {
   url?: string | null;
   caption?: string | null;
 };
 
-/** App origin YouTube requires as HTTP Referer in WebViews (Error 153 without it). */
-const EMBED_ORIGIN = 'https://com.packagingschool.autopacksummit';
-
 function buildPlayerHtml(embedUrl: string) {
-  const src =
-    embedUrl.includes('youtube.com') || embedUrl.includes('youtube-nocookie.com')
-      ? `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}playsinline=1&rel=0&origin=${encodeURIComponent(EMBED_ORIGIN)}`
-      : embedUrl;
+  const src = videoEmbedSrc(embedUrl, NATIVE_VIDEO_EMBED_ORIGIN);
 
   return `<!DOCTYPE html>
 <html>
@@ -52,7 +50,7 @@ export function ExhibitorVideoEmbed({ url, caption }: Props) {
         <WebView
           source={{
             html: buildPlayerHtml(parsed.embedUrl),
-            baseUrl: EMBED_ORIGIN,
+            baseUrl: NATIVE_VIDEO_EMBED_ORIGIN,
           }}
           style={styles.webview}
           allowsFullscreenVideo

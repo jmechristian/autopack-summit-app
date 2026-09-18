@@ -29,6 +29,7 @@ export type LeaderboardEntryRecord = {
   jobTitle?: string | null;
   profilePicture?: string | null;
   points: number;
+  stamps: number;
   breakdown?: string | Record<string, unknown> | null;
   updatedAt?: string | null;
 };
@@ -50,8 +51,20 @@ export function isLeaderboardSchemaError(error: unknown) {
   );
 }
 
+export function stampsFromBreakdown(raw?: string | Record<string, unknown> | null) {
+  if (!raw) return 0;
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const stamps = Number(parsed?.counts?.stamps || 0);
+    return Number.isFinite(stamps) && stamps > 0 ? stamps : 0;
+  } catch {
+    return 0;
+  }
+}
+
 function asEntry(raw: any): LeaderboardEntryRecord | null {
   if (!raw?.id || !raw.userProfileId) return null;
+  const breakdown = raw.breakdown || null;
   return {
     id: String(raw.id),
     owner: raw.owner || null,
@@ -62,7 +75,8 @@ function asEntry(raw: any): LeaderboardEntryRecord | null {
     jobTitle: raw.jobTitle || null,
     profilePicture: raw.profilePicture || null,
     points: Number(raw.points || 0),
-    breakdown: raw.breakdown || null,
+    stamps: stampsFromBreakdown(breakdown),
+    breakdown,
     updatedAt: raw.updatedAt || null,
   };
 }
@@ -76,6 +90,25 @@ export function rankLeaderboardEntries(entries: LeaderboardEntryRecord[]): Ranke
     return a.displayName.localeCompare(b.displayName);
   });
   return sorted.map((entry, index) => ({ ...entry, rank: index + 1 }));
+}
+
+export function rankPassportLeaderboard(entries: LeaderboardEntryRecord[]): RankedLeaderboardEntry[] {
+  const sorted = [...entries]
+    .filter((entry) => (entry.stamps || stampsFromBreakdown(entry.breakdown)) > 0)
+    .sort((a, b) => {
+      const aStamps = a.stamps || stampsFromBreakdown(a.breakdown);
+      const bStamps = b.stamps || stampsFromBreakdown(b.breakdown);
+      if (bStamps !== aStamps) return bStamps - aStamps;
+      const aTime = a.updatedAt || '';
+      const bTime = b.updatedAt || '';
+      if (aTime !== bTime) return aTime.localeCompare(bTime);
+      return a.displayName.localeCompare(b.displayName);
+    });
+  return sorted.map((entry, index) => ({
+    ...entry,
+    stamps: entry.stamps || stampsFromBreakdown(entry.breakdown),
+    rank: index + 1,
+  }));
 }
 
 export async function getLeaderboardEntry(id: string): Promise<LeaderboardEntryRecord | null> {

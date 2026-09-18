@@ -238,16 +238,40 @@ export async function uploadFeedbackImage(fileUri: string): Promise<string> {
   }
 }
 
-const MAX_EXHIBITOR_HANDOUT_SIZE = 15 * 1024 * 1024; // 15MB
+export const MAX_EXHIBITOR_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_EXHIBITOR_HANDOUT_SIZE = 15 * 1024 * 1024; // 15MB
+
+export type ExhibitorAssetKind = 'logo' | 'photo' | 'handout';
+
+export function exhibitorAssetMaxBytes(kind: ExhibitorAssetKind) {
+  return kind === 'handout' ? MAX_EXHIBITOR_HANDOUT_SIZE : MAX_EXHIBITOR_IMAGE_SIZE;
+}
+
+export function exhibitorAssetMaxLabel(kind: ExhibitorAssetKind) {
+  return `${Math.round(exhibitorAssetMaxBytes(kind) / (1024 * 1024))}MB`;
+}
+
+export function exhibitorAssetTooLargeMessage(kind: ExhibitorAssetKind) {
+  const label = exhibitorAssetMaxLabel(kind);
+  if (kind === 'handout') return `New handouts must be ${label} or smaller.`;
+  if (kind === 'logo') return `New logos must be ${label} or smaller.`;
+  return `New photos must be ${label} or smaller each.`;
+}
+
+export function isExhibitorAssetTooLarge(kind: ExhibitorAssetKind, bytes?: number | null) {
+  return Number(bytes) > exhibitorAssetMaxBytes(kind);
+}
 
 /**
  * Upload an exhibitor logo, photo, or handout to S3.
+ * Size limits apply only to new uploads — existing stored keys are never
+ * re-checked or rewritten by this helper.
  * @returns S3 key (path) to store on the company/exhibitor record
  */
 export async function uploadExhibitorAsset(params: {
   fileUri: string;
   companyId: string;
-  kind: 'logo' | 'photo' | 'handout';
+  kind: ExhibitorAssetKind;
   mimeType?: string | null;
   fileName?: string | null;
 }): Promise<string> {
@@ -258,6 +282,10 @@ export async function uploadExhibitorAsset(params: {
     const response = await fetch(params.fileUri);
     const blob = await response.blob();
 
+    if (isExhibitorAssetTooLarge(params.kind, blob.size)) {
+      throw new Error(exhibitorAssetTooLargeMessage(params.kind));
+    }
+
     const fromName = (params.fileName || '').split('.').pop();
     const fromUri = (params.fileUri.split('.').pop() || '').split('?')[0];
     const extension = (fromName || fromUri || 'bin').toLowerCase();
@@ -267,9 +295,6 @@ export async function uploadExhibitorAsset(params: {
 
     let contentType = params.mimeType || blob.type || undefined;
     if (params.kind === 'handout') {
-      if (blob.size > MAX_EXHIBITOR_HANDOUT_SIZE) {
-        throw new Error('Handout must be 15MB or smaller.');
-      }
       contentType = contentType || 'application/pdf';
     } else {
       contentType = contentType || 'image/jpeg';

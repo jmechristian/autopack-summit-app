@@ -22,6 +22,9 @@ import { useCurrentAppUser } from '../../hooks/useApsStore';
 import { autopackColors } from '../../theme';
 import { graphqlAuthClient, graphqlApiKeyClient } from '../../utils/graphqlClient';
 import {
+  exhibitorAssetMaxLabel,
+  exhibitorAssetTooLargeMessage,
+  isExhibitorAssetTooLarge,
   resolveProfilePictureUri,
   uploadExhibitorAsset,
 } from '../../utils/storageUtils';
@@ -798,9 +801,14 @@ export default function ExhibitorProfileScreen() {
     });
     if (picked.canceled || !picked.assets?.[0]?.uri) return;
 
+    const asset = picked.assets[0];
+    if (isExhibitorAssetTooLarge('logo', asset.fileSize)) {
+      Alert.alert('File too large', exhibitorAssetTooLargeMessage('logo'));
+      return;
+    }
+
     setUploadingLogo(true);
     try {
-      const asset = picked.assets[0];
       const key = await uploadExhibitorAsset({
         fileUri: asset.uri,
         companyId: profile.company.id,
@@ -832,9 +840,14 @@ export default function ExhibitorProfileScreen() {
     });
     if (picked.canceled || !picked.assets?.[0]?.uri) return;
 
+    const asset = picked.assets[0];
+    if (isExhibitorAssetTooLarge('handout', asset.size)) {
+      Alert.alert('File too large', exhibitorAssetTooLargeMessage('handout'));
+      return;
+    }
+
     setUploadingHandout(true);
     try {
-      const asset = picked.assets[0];
       const key = await uploadExhibitorAsset({
         fileUri: asset.uri,
         companyId: profile.company.id,
@@ -893,25 +906,46 @@ export default function ExhibitorProfileScreen() {
     try {
       const created: SingleRow[] = [];
       const previews: Record<string, string | null> = {};
+      let skippedLarge = 0;
       for (const asset of picked.assets.slice(0, remaining)) {
         if (!asset.uri) continue;
-        const key = await uploadExhibitorAsset({
-          fileUri: asset.uri,
-          companyId: profile.company.id,
-          kind: 'photo',
-          mimeType: asset.mimeType,
-          fileName: asset.fileName,
-        });
-        const id = makeRowId();
-        created.push({ id, text: key });
-        previews[id] = await resolveProfilePictureUri(key);
+        if (isExhibitorAssetTooLarge('photo', asset.fileSize)) {
+          skippedLarge += 1;
+          continue;
+        }
+        try {
+          const key = await uploadExhibitorAsset({
+            fileUri: asset.uri,
+            companyId: profile.company.id,
+            kind: 'photo',
+            mimeType: asset.mimeType,
+            fileName: asset.fileName,
+          });
+          const id = makeRowId();
+          created.push({ id, text: key });
+          previews[id] = await resolveProfilePictureUri(key);
+        } catch (e: any) {
+          const message = String(e?.message || '');
+          if (message.includes('or smaller')) {
+            skippedLarge += 1;
+            continue;
+          }
+          throw e;
+        }
       }
-      if (!created.length) return;
-      setForm((prev) => ({
-        ...prev,
-        photos: [...prev.photos, ...created].slice(0, MAX_PHOTOS),
-      }));
-      setFormPhotoPreviews((prev) => ({ ...prev, ...previews }));
+      if (created.length) {
+        setForm((prev) => ({
+          ...prev,
+          photos: [...prev.photos, ...created].slice(0, MAX_PHOTOS),
+        }));
+        setFormPhotoPreviews((prev) => ({ ...prev, ...previews }));
+      }
+      if (skippedLarge) {
+        Alert.alert(
+          created.length ? 'Some photos were skipped' : 'File too large',
+          exhibitorAssetTooLargeMessage('photo'),
+        );
+      }
     } catch (e: any) {
       Alert.alert('Upload failed', e?.message || 'Could not upload photos.');
     } finally {
@@ -1318,6 +1352,7 @@ export default function ExhibitorProfileScreen() {
           <TextInput value={form.companyCountry} onChangeText={(v) => setForm((p) => ({ ...p, companyCountry: v }))} style={styles.input} />
 
           <Text style={styles.fieldLabel}>Logo</Text>
+          <Text style={styles.fieldHint}>New uploads max {exhibitorAssetMaxLabel('logo')}.</Text>
           <View style={styles.uploadRow}>
             <View style={styles.logoUploadPreview}>
               {formLogoPreview || logoUri ? (
@@ -1422,7 +1457,9 @@ export default function ExhibitorProfileScreen() {
           </Pressable>
 
           <Text style={styles.fieldLabel}>Handouts</Text>
-          <Text style={styles.fieldHint}>Limit 1 — upload a file or paste a URL.</Text>
+          <Text style={styles.fieldHint}>
+            Limit 1 — new files max {exhibitorAssetMaxLabel('handout')}, or paste a URL.
+          </Text>
           {form.handouts.length > 0 ? (
             <View style={styles.assetRow}>
               <Ionicons name="document-text-outline" size={18} color={autopackColors.apBlue} />
@@ -1468,7 +1505,9 @@ export default function ExhibitorProfileScreen() {
           )}
 
           <Text style={styles.fieldLabel}>Photos</Text>
-          <Text style={styles.fieldHint}>Limit {MAX_PHOTOS} — upload only.</Text>
+          <Text style={styles.fieldHint}>
+            Limit {MAX_PHOTOS} — new uploads max {exhibitorAssetMaxLabel('photo')} each.
+          </Text>
           <View style={styles.photoGrid}>
             {form.photos.map((row) => {
               const uri = formPhotoPreviews[row.id];

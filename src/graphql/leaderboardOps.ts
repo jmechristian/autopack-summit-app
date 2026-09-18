@@ -37,6 +37,7 @@ export const apsAppLeaderboardEntriesByEventIdAndUpdatedAt = /* GraphQL */ `
         jobTitle
         profilePicture
         points
+        breakdown
         updatedAt
         __typename
       }

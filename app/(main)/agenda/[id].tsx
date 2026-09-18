@@ -20,6 +20,10 @@ import {
   apsAppSessionsByAgendaIdWithRelations,
   getApsAppSessionWithRelations,
 } from '../../../src/graphql/customQueries';
+import {
+  graphqlWithSpeakerOrderFallback,
+  orderByIds,
+} from '../../../src/utils/speakerOrder';
 import { NotesSection } from '../../../src/components/notes/NotesSection';
 import { RiveLoader } from '../../../src/components/RiveLoader';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
@@ -175,10 +179,14 @@ export default function AgendaDetails() {
       setError(null);
       setLoading(true);
       try {
-        const resp = await graphqlApiKeyClient.graphql({
-          query: getApsAppSessionWithRelations,
-          variables: { id },
-        });
+        const resp = await graphqlWithSpeakerOrderFallback(
+          (query) =>
+            graphqlApiKeyClient.graphql({
+              query,
+              variables: { id },
+            }),
+          getApsAppSessionWithRelations,
+        );
         const data = resp.data as any;
         const it = data?.getApsAppSession;
         if (!it?.id) throw new Error('Session not found');
@@ -188,10 +196,14 @@ export default function AgendaDetails() {
           // while the agenda index query still has the value.
           let nextToken: string | null | undefined = null;
           do {
-            const listResp = await graphqlApiKeyClient.graphql({
-              query: apsAppSessionsByAgendaIdWithRelations,
-              variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
-            });
+            const listResp = await graphqlWithSpeakerOrderFallback(
+              (query) =>
+                graphqlApiKeyClient.graphql({
+                  query,
+                  variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
+                }),
+              apsAppSessionsByAgendaIdWithRelations,
+            );
             const listData = listResp.data as any;
             const conn = listData?.apsAppSessionsByAgendaId;
             const match = (conn?.items || []).find((x: any) => x?.id === it.id);
@@ -202,9 +214,13 @@ export default function AgendaDetails() {
             nextToken = conn?.nextToken;
           } while (nextToken);
         }
-        const speakers: Speaker[] = (it.speakers?.items || [])
-          .map((j: any) => j?.aPSSpeaker)
-          .filter(Boolean);
+        const speakers: Speaker[] = orderByIds(
+          (it.speakers?.items || [])
+            .map((j: any) => j?.aPSSpeaker)
+            .filter(Boolean),
+          (sp) => sp?.id,
+          it.speakerOrder,
+        );
         const sponsors: Sponsor[] = (it.sponsors?.items || [])
           .map((j: any) => j?.apsSponsor)
           .filter(Boolean);

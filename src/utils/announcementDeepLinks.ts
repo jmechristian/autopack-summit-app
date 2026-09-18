@@ -10,6 +10,7 @@ export const APP_ANNOUNCEMENT_SCREENS = [
   { id: 'engage', label: 'Engage', path: '/(main)/engage' },
   { id: 'community', label: 'Community', path: '/(main)/community' },
   { id: 'leaderboard', label: 'Leaderboard', path: '/(main)/hub/leaderboard' },
+  { id: 'passport-leaderboard', label: 'Passport Leaderboard', path: '/(main)/hub/passport-leaderboard' },
   { id: 'points', label: 'How points work', path: '/(main)/hub/points' },
   { id: 'rising-stars', label: 'Rising Stars', path: '/(main)/hub/rising-stars' },
   { id: 'post-event-survey', label: 'Post-event survey', path: POST_EVENT_SURVEY_ROUTE },

@@ -17,6 +17,10 @@ import { apsAppUserFavoriteSessionsByUserProfileIdAndCreatedAt } from '../../../
 import { graphqlApiKeyClient, graphqlAuthClient } from '../../../src/utils/graphqlClient';
 import { drainIndexedList } from '../../../src/utils/paginateGraphql';
 import { apsAppSessionsByAgendaIdWithRelations } from '../../../src/graphql/customQueries';
+import {
+  graphqlWithSpeakerOrderFallback,
+  orderByIds,
+} from '../../../src/utils/speakerOrder';
 import { useNotesPresence } from '../../../src/hooks/useNotesPresence';
 import { useCurrentAppUser } from '../../../src/hooks/useApsStore';
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
@@ -208,19 +212,27 @@ export default function AgendaList() {
       const all: AgendaSession[] = [];
       let nextToken: string | null | undefined = null;
       do {
-        const resp = await graphqlApiKeyClient.graphql({
-          query: apsAppSessionsByAgendaIdWithRelations,
-          variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
-        });
+        const resp = await graphqlWithSpeakerOrderFallback(
+          (query) =>
+            graphqlApiKeyClient.graphql({
+              query,
+              variables: { agendaId: AGENDA_ID, limit: 200, nextToken },
+            }),
+          apsAppSessionsByAgendaIdWithRelations,
+        );
 
         const data = resp.data as any;
         const conn = data?.apsAppSessionsByAgendaId;
         const items: any[] = conn?.items || [];
         for (const it of items) {
           if (!it?.id) continue;
-          const speakers: Speaker[] = (it.speakers?.items || [])
-            .map((j: any) => j?.aPSSpeaker)
-            .filter(Boolean);
+          const speakers: Speaker[] = orderByIds(
+            (it.speakers?.items || [])
+              .map((j: any) => j?.aPSSpeaker)
+              .filter(Boolean),
+            (sp) => sp?.id,
+            it.speakerOrder,
+          );
           const sponsors: Sponsor[] = (it.sponsors?.items || [])
             .map((j: any) => j?.apsSponsor)
             .filter(Boolean);
