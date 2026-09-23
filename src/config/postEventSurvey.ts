@@ -61,6 +61,14 @@ export function postEventSurveyKey(registrantId: string, eventId = APS_ID) {
   return `pes:${eventId}|r:${registrantId}`;
 }
 
+export function postEventSurveyIdentityLabel(value?: string | null) {
+  return POST_EVENT_SURVEY_IDENTITIES.find((item) => item.value === value)?.label || '';
+}
+
+export function postEventSurveySessionTitle(id?: string | null) {
+  return POST_EVENT_SURVEY_SESSIONS.find((item) => item.id === id)?.title || String(id || 'Session');
+}
+
 export function identityFromAttendeeType(
   attendeeType?: string | null,
 ): PostEventSurveyIdentity | null {

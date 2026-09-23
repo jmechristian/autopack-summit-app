@@ -20,10 +20,18 @@ export default function HubLayout() {
       <Stack.Screen name='leaderboard' options={{ title: 'Leaderboard' }} />
       <Stack.Screen name='points' options={{ title: 'How points work' }} />
       <Stack.Screen name='rising-stars' options={{ title: 'Rising Stars' }} />
-      <Stack.Screen name='post-event-survey/index' options={{ title: 'Post-Event Survey' }} />
+      <Stack.Screen name='post-event-survey/index' options={{ title: 'How did we do?' }} />
       <Stack.Screen
         name='post-event-survey/success'
-        options={{ title: 'Thank you', headerBackVisible: false, gestureEnabled: false }}
+        options={{
+          title: 'Thanks',
+          headerBackVisible: false,
+          gestureEnabled: false,
+          headerStyle: { backgroundColor: '#041E36' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { color: '#fff' },
+          headerShadowVisible: false,
+        }}
       />
       <Stack.Screen name='passport' options={{ title: 'Passport Challenge' }} />
       <Stack.Screen name='passport-leaderboard' options={{ title: 'Passport Leaderboard' }} />

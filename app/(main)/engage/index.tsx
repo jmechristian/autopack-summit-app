@@ -16,6 +16,7 @@ import { useEngageStore } from '../../../src/store/engageStore';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
 import { RisingStarCallout } from '../../../src/components/risingStars/RisingStarCallout';
+import { PostEventSurveyCallout } from '../../../src/components/survey/PostEventSurveyCallout';
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
@@ -223,6 +224,8 @@ export default function EngageHome() {
 
         <RisingStarCallout />
 
+        <PostEventSurveyCallout style={styles.surveyCallout} />
+
         <View style={styles.toolsGrid}>
           {tiles.map((t) => (
             <View key={t.id} style={{ width: toolsCellWidth }}>
@@ -268,6 +271,9 @@ const styles = StyleSheet.create({
   },
   certificateCard: {
     marginTop: 16,
+  },
+  surveyCallout: {
+    marginBottom: 16,
   },
   passportCard: {
     marginBottom: 16,

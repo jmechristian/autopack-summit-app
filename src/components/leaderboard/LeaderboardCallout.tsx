@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { HUB_MODULE_CARD_MIN_HEIGHT } from '../hub/hubModuleCard';
 import { useLeaderboardStore } from '../../store/leaderboardStore';
 import { ui } from '../../ui/tokens';
 
@@ -55,6 +56,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 18,
     backgroundColor: ui.colors.secondary,
+    minHeight: HUB_MODULE_CARD_MIN_HEIGHT,
     paddingHorizontal: 16,
     paddingVertical: 20,
     gap: 10,

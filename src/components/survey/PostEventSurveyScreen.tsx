@@ -25,6 +25,7 @@ import {
 import { useCurrentAppUser, useCurrentUserRegistrant } from '../../hooks/useApsStore';
 import {
   getMyPostEventSurvey,
+  getPostEventSurveyOpen,
   isPostEventSurveySchemaError,
   submitPostEventSurvey,
 } from '../../services/postEventSurvey';
@@ -116,6 +117,7 @@ export default function PostEventSurveyScreen() {
   const registrantId = registrant?.id || currentAppUser?.registrantId || null;
 
   const [loading, setLoading] = useState(true);
+  const [locked, setLocked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -167,6 +169,9 @@ export default function PostEventSurveyScreen() {
           goToSuccess();
           return;
         }
+        const isOpen = await getPostEventSurveyOpen();
+        if (cancelled) return;
+        setLocked(!isOpen);
         setLoadError(null);
         setLoading(false);
       } catch (error) {
@@ -221,6 +226,25 @@ export default function PostEventSurveyScreen() {
       return;
     }
 
+    let isOpen = false;
+    try {
+      isOpen = await getPostEventSurveyOpen();
+    } catch (error) {
+      Alert.alert(
+        'Could not submit',
+        (error as { message?: string })?.message || 'Please try again in a moment.',
+      );
+      return;
+    }
+    if (!isOpen) {
+      setLocked(true);
+      Alert.alert(
+        'Not open yet',
+        'The Post Event Survey unlocks closer to the end of the event.',
+      );
+      return;
+    }
+
     setSubmitting(true);
     try {
       await submitPostEventSurvey({
@@ -265,7 +289,7 @@ export default function PostEventSurveyScreen() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color={autopackColors.apBlue} />
-        <Text style={styles.muted}>Checking your survey…</Text>
+        <Text style={styles.muted}>One second…</Text>
       </View>
     );
   }
@@ -275,6 +299,21 @@ export default function PostEventSurveyScreen() {
       <View style={styles.centered}>
         <Text style={styles.emptyTitle}>Registration needed</Text>
         <Text style={styles.lead}>We could not match this app account to a registrant.</Text>
+      </View>
+    );
+  }
+
+  if (locked) {
+    return (
+      <View style={styles.centered}>
+        <Ionicons name="lock-closed" size={42} color={ui.colors.muted} />
+        <Text style={styles.emptyTitle}>Post Event Survey</Text>
+        <Text style={[styles.lead, styles.leadCenter]}>
+          Tell us how the show went. This unlocks closer to the end of the event. Complete it and
+          present your confirmation screen at the registration desk for your Automotive Packaging
+          Summit t-shirt.
+        </Text>
+        <AppButton title="Back to Hub" onPress={() => router.replace('/(main)/hub')} />
       </View>
     );
   }
@@ -290,11 +329,11 @@ export default function PostEventSurveyScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 28 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.kicker}>2026 Post-Event Survey</Text>
-        <Text style={styles.title}>How was the summit?</Text>
+        <Text style={styles.kicker}>Automotive Packaging Summit</Text>
+        <Text style={styles.title}>How did we do?</Text>
         <Text style={styles.lead}>
-          This is optional, but you can only submit it once. After you send it, we will lock your
-          answers and show a confirmation screen.
+          We'd love your thoughts on the show. You only get one pass at this. When you send it,
+          the next screen is what you show at the registration desk for a free t-shirt.
         </Text>
 
         {loadError ? <Text style={styles.error}>{loadError}</Text> : null}
@@ -478,7 +517,7 @@ export default function PostEventSurveyScreen() {
         />
 
         <AppButton
-          title={submitting ? 'Submitting…' : 'Submit survey'}
+          title={submitting ? 'Sending…' : 'Share my thoughts'}
           onPress={() => void submit()}
           disabled={disabled}
           style={styles.submit}
@@ -486,10 +525,10 @@ export default function PostEventSurveyScreen() {
         {submitting ? (
           <View style={styles.busyRow}>
             <ActivityIndicator color={autopackColors.apBlue} />
-            <Text style={styles.muted}>Saving your response…</Text>
+            <Text style={styles.muted}>Sending that along…</Text>
           </View>
         ) : (
-          <Text style={styles.footnote}>You can only complete this once.</Text>
+          <Text style={styles.footnote}>One response per person. Make it count.</Text>
         )}
       </ScrollView>
     </KeyboardAvoidingView>
@@ -517,6 +556,7 @@ const styles = StyleSheet.create({
   title: { ...ui.text.h1, marginTop: 2 },
   emptyTitle: { ...ui.text.h2, textAlign: 'center' },
   lead: { color: ui.colors.muted, lineHeight: 20, marginBottom: 6 },
+  leadCenter: { textAlign: 'center' },
   error: { color: ui.colors.danger, lineHeight: 20, marginBottom: 8 },
   label: { fontWeight: '800', color: ui.colors.text, marginTop: 12 },
   fieldHint: { color: ui.colors.muted, fontSize: 13, fontWeight: '700', marginTop: 4 },

@@ -60,7 +60,9 @@ import {
 import { AgendaSessionCard } from '../../../src/components/agenda/AgendaSessionCard';
 import { ApcCertificateCard } from '../../../src/components/certificate/ApcCertificateCard';
 import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
+import { HUB_MODULE_CARD_MIN_HEIGHT } from '../../../src/components/hub/hubModuleCard';
 import { RisingStarCallout } from '../../../src/components/risingStars/RisingStarCallout';
+import { PostEventSurveyCallout } from '../../../src/components/survey/PostEventSurveyCallout';
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
 import { HubHeroRive } from '../../../src/components/hub/HubHeroRive';
@@ -1019,6 +1021,8 @@ export default function HubScreen() {
 
       <RisingStarCallout style={styles.risingStarCallout} />
 
+      <PostEventSurveyCallout style={styles.surveyCallout} />
+
       <SafeEnteringView entering={FadeInDown.duration(600).delay(180)}>
         <HubSponsorBlock />
       </SafeEnteringView>
@@ -1378,6 +1382,7 @@ const styles = StyleSheet.create({
   body: { paddingVertical: 16, gap: 12 },
   leaderboardCallout: { marginBottom: 0 },
   risingStarCallout: { marginBottom: 0 },
+  surveyCallout: { marginBottom: 0 },
   editLink: {
     color: autopackColors.apBlue,
     fontSize: 13,
@@ -1397,6 +1402,7 @@ const styles = StyleSheet.create({
   passportCard: {
     borderRadius: 18,
     backgroundColor: ui.colors.primary,
+    minHeight: HUB_MODULE_CARD_MIN_HEIGHT,
     paddingHorizontal: 16,
     paddingVertical: 20,
     gap: 10,
