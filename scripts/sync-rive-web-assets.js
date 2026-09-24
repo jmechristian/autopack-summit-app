@@ -10,6 +10,7 @@ const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
 const wasmSrc = path.join(root, 'node_modules/@rive-app/canvas/rive.wasm');
 const rivSrc = path.join(root, 'assets/hub_header.riv');
+const surveyRivSrc = path.join(root, 'assets/survey_complete.riv');
 
 fs.mkdirSync(publicDir, { recursive: true });
 
@@ -25,4 +26,11 @@ if (!fs.existsSync(rivSrc)) {
 } else {
   fs.copyFileSync(rivSrc, path.join(publicDir, 'hub_header.riv'));
   console.log('[sync-rive-web-assets] wrote public/hub_header.riv');
+}
+
+if (!fs.existsSync(surveyRivSrc)) {
+  console.warn('[sync-rive-web-assets] missing', surveyRivSrc);
+} else {
+  fs.copyFileSync(surveyRivSrc, path.join(publicDir, 'survey_complete.riv'));
+  console.log('[sync-rive-web-assets] wrote public/survey_complete.riv');
 }

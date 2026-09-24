@@ -240,7 +240,7 @@ export default function PostEventSurveyScreen() {
       setLocked(true);
       Alert.alert(
         'Not open yet',
-        'The Post Event Survey unlocks closer to the end of the event.',
+        'The Post Event Survey is not open yet.',
       );
       return;
     }
@@ -309,9 +309,9 @@ export default function PostEventSurveyScreen() {
         <Ionicons name="lock-closed" size={42} color={ui.colors.muted} />
         <Text style={styles.emptyTitle}>Post Event Survey</Text>
         <Text style={[styles.lead, styles.leadCenter]}>
-          Tell us how the show went. This unlocks closer to the end of the event. Complete it and
-          present your confirmation screen at the registration desk for your Automotive Packaging
-          Summit t-shirt.
+          This will unlock closer to the end of the event. Tell us how the show went. Complete it
+          and present your confirmation screen at the registration desk for your Automotive
+          Packaging Summit t-shirt.
         </Text>
         <AppButton title="Back to Hub" onPress={() => router.replace('/(main)/hub')} />
       </View>

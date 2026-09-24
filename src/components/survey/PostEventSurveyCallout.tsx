@@ -52,10 +52,10 @@ export function PostEventSurveyCallout({ style }: { style?: StyleProp<ViewStyle>
 
   const title = completed ? "You're all set" : 'Post Event Survey';
   const subtitle = completed
-    ? 'Show this at the registration desk and grab your free t-shirt.'
+    ? 'Tap to open your confirmation screen and present it at the registration desk for your Automotive Packaging Summit t-shirt. One per registrant.'
     : open
       ? 'How did we do? Complete your survey and present your confirmation screen at the registration desk to get your Automotive Packaging Summit t-shirt.'
-      : 'Tell us how the show went. This unlocks closer to the end of the event. Complete it and present your confirmation screen at the registration desk for your Automotive Packaging Summit t-shirt.';
+      : 'Tell us how the show went. Complete it and present your confirmation screen at the registration desk for your Automotive Packaging Summit t-shirt.';
 
   return (
     <Pressable
@@ -69,7 +69,7 @@ export function PostEventSurveyCallout({ style }: { style?: StyleProp<ViewStyle>
           ? 'Open your summit feedback confirmation'
           : open
             ? 'Open the Post Event Survey'
-            : 'Post Event Survey, locked until closer to the end of the event'
+            : 'Post Event Survey, not open yet'
       }
     >
       <View style={styles.headerRow}>

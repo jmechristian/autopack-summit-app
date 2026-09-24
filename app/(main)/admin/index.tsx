@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppScreen } from '../../../src/ui/AppScreen';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
+import { useMainTabScrollPadding } from '../../../src/utils/layout';
 
 type AdminSection = {
   key:
@@ -18,6 +19,7 @@ type AdminSection = {
     | 'leaderboard'
     | 'rising-stars'
     | 'post-event-survey'
+    | 'certificate'
     | 'seating-chart'
     | 'announcements';
   title: string;
@@ -35,13 +37,20 @@ const sections: AdminSection[] = [
   { key: 'leaderboard', title: 'Leaderboard', icon: 'trophy-outline' },
   { key: 'rising-stars', title: 'Rising Stars', icon: 'star-outline' },
   { key: 'post-event-survey', title: 'Post-Event Survey', icon: 'clipboard-outline' },
+  { key: 'certificate', title: 'Certificate', icon: 'school-outline' },
   { key: 'seating-chart', title: 'Seating Chart', icon: 'grid-outline' },
   { key: 'announcements', title: 'Announcements', icon: 'megaphone-outline' },
 ];
 
 export default function AdminHomeScreen() {
+  const tabScrollPad = useMainTabScrollPadding();
   return (
     <AppScreen style={styles.screen}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ paddingBottom: tabScrollPad }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.grid}>
         {sections.map((section) => (
           <View
@@ -62,6 +71,7 @@ export default function AdminHomeScreen() {
           </View>
         ))}
       </View>
+      </ScrollView>
     </AppScreen>
   );
 }
@@ -69,6 +79,9 @@ export default function AdminHomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: '#E6F1F8',
+  },
+  scroll: {
+    flex: 1,
   },
   grid: {
     flexDirection: 'row',

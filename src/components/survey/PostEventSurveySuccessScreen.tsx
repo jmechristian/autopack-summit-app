@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -10,12 +9,13 @@ import { useApsStore } from '../../store/apsStore';
 import { autopackColors } from '../../theme';
 import { AppButton } from '../../ui/AppButton';
 import { ui } from '../../ui/tokens';
+import { SurveyCompleteRive } from './SurveyCompleteRive';
 import { VerticalGradient } from './VerticalGradient';
 
 export default function PostEventSurveySuccessScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const animationSize = Math.min(260, Math.max(180, width - 96));
+  const animationSize = Math.max(220, width - 48);
   const currentAppUser = useCurrentAppUser();
   const registrant = useCurrentUserRegistrant();
   const userLoading = useApsStore((state) => state.loading.currentAppUser);
@@ -66,18 +66,18 @@ export default function PostEventSurveySuccessScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom + 24, paddingTop: 28 }]}>
+    <View style={[styles.container, { paddingBottom: insets.bottom + 24, paddingTop: insets.top + 8 }]}>
       <VerticalGradient from="#041E36" to="#0E6EAB" />
       <View
         style={[styles.animationSquare, { width: animationSize, height: animationSize }]}
         accessibilityLabel="Celebration animation"
       >
-        <Ionicons name="sparkles" size={48} color={autopackColors.apYellow} />
+        <SurveyCompleteRive />
       </View>
       <Text style={styles.kicker}>That's a wrap</Text>
-      <Text style={styles.title}>Thanks for telling us</Text>
+      <Text style={styles.title}>Survey Complete!</Text>
       <Text style={styles.body}>
-        This is the good stuff. Your thoughts help shape next year's Automotive Packaging Summit.
+        Thank you for completing the survey. Your thoughts help shape next year's Automotive Packaging Summit.
       </Text>
       <Text style={styles.directions}>
         Show this screen at the registration desk and they'll hand you a free t-shirt.
@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
   },
   animationSquare: {
     borderRadius: 28,
+    overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(228,168,0,0.85)',
     backgroundColor: 'rgba(255,255,255,0.08)',

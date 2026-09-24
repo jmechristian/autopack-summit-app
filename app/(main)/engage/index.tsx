@@ -17,6 +17,7 @@ import { ApcCertificateCard } from '../../../src/components/certificate/ApcCerti
 import { LeaderboardCallout } from '../../../src/components/leaderboard/LeaderboardCallout';
 import { RisingStarCallout } from '../../../src/components/risingStars/RisingStarCallout';
 import { PostEventSurveyCallout } from '../../../src/components/survey/PostEventSurveyCallout';
+import { CertificateOfCompletionCallout } from '../../../src/components/certificate/CertificateOfCompletionCallout';
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { IconCard } from '../../../src/ui/IconCard';
 import { ui } from '../../../src/ui/tokens';
@@ -225,6 +226,8 @@ export default function EngageHome() {
         <RisingStarCallout />
 
         <PostEventSurveyCallout style={styles.surveyCallout} />
+
+        <CertificateOfCompletionCallout style={styles.surveyCallout} />
 
         <View style={styles.toolsGrid}>
           {tiles.map((t) => (

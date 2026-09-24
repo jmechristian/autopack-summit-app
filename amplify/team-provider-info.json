@@ -31,7 +31,7 @@
           "thinkificEnrollmentsUrl": "https://api.thinkific.com/api/public/v1/enrollments",
           "apcTotalCourses": "10",
           "deploymentBucketName": "amplify-autopacksummitapp-dev-99bc6-deployment",
-          "s3Key": "amplify-builds/apsPushFanout-75584b4b3335776f524a-build.zip",
+          "s3Key": "amplify-builds/apsPushFanout-52414a5548724a4d6951-build.zip",
           "apsEventId": "d00b35f5-c45b-42eb-b306-fa3dfeee0251"
         },
         "adminRegistrantOps": {}

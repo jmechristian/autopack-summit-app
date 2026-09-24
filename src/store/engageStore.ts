@@ -642,11 +642,20 @@ export const useEngageStore = create<EngageStore>((set, get) => ({
             AppState.currentState === 'active' &&
             get().activeThreadId !== threadId
           ) {
-            void scheduleLocalNotification({
-              title: 'New message',
-              body: body || 'You have a new message',
-              data: { type: 'dm', threadId },
-            }).catch(() => {});
+            void (async () => {
+              const knownTitle = get().inbox.find((item) => item.threadId === threadId)?.title;
+              const senderName =
+                knownTitle && knownTitle !== 'Conversation'
+                  ? knownTitle
+                  : msg.senderUserId
+                    ? await profileLabel(String(msg.senderUserId))
+                    : 'New message';
+              await scheduleLocalNotification({
+                title: senderName || 'New message',
+                body: body || 'You have a new message',
+                data: { type: 'dm', threadId },
+              });
+            })().catch(() => {});
           }
         }
       },

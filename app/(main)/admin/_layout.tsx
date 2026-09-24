@@ -59,6 +59,10 @@ export default function AdminLayout() {
             options={{ title: 'Post-Event Survey', headerBackVisible: false, headerLeft: adminBackButton }}
           />
           <Stack.Screen
+            name='certificate'
+            options={{ title: 'Certificate', headerBackVisible: false, headerLeft: adminBackButton }}
+          />
+          <Stack.Screen
             name='seating-chart'
             options={{ title: 'Seating Chart', headerBackVisible: false, headerLeft: adminBackButton }}
           />

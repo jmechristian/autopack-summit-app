@@ -63,6 +63,7 @@ import { LeaderboardCallout } from '../../../src/components/leaderboard/Leaderbo
 import { HUB_MODULE_CARD_MIN_HEIGHT } from '../../../src/components/hub/hubModuleCard';
 import { RisingStarCallout } from '../../../src/components/risingStars/RisingStarCallout';
 import { PostEventSurveyCallout } from '../../../src/components/survey/PostEventSurveyCallout';
+import { CertificateOfCompletionCallout } from '../../../src/components/certificate/CertificateOfCompletionCallout';
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
 import { HubHeroRive } from '../../../src/components/hub/HubHeroRive';
@@ -82,36 +83,39 @@ type QuickTool = {
 };
 
 const MAX_QUICK_TOOLS = 8;
-const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v3';
+const QUICK_TOOLS_STORAGE_KEY = 'hub.quickTools.v4';
 const CAPTURE_TOOL_ID = 'lead-capture';
+const SCAN_EXHIBITOR_TOOL_ID = 'scan-exhibitor';
 const EXHIBITOR_PROFILE_TOOL_ID = 'exhibitor-profile';
+const PINNED_TOOL_IDS = [CAPTURE_TOOL_ID, SCAN_EXHIBITOR_TOOL_ID];
 
 function sameToolIds(a: string[], b: string[]) {
   return a.length === b.length && a.every((id, index) => id === b[index]);
 }
 
-// Default pinned quick tools (max 8)
+// Default pinned quick tools (max 8). v4 ignores older on-device lists so everyone gets this order.
 const DEFAULT_TOOL_IDS = [
   CAPTURE_TOOL_ID,
+  SCAN_EXHIBITOR_TOOL_ID,
   'contacts',
   'requests',
   'messages',
   'announcements',
   'sponsors',
   'speakers',
-  'exhibitors',
 ];
 const EXHIBITOR_DEFAULT_TOOL_IDS = [
   CAPTURE_TOOL_ID,
+  SCAN_EXHIBITOR_TOOL_ID,
   EXHIBITOR_PROFILE_TOOL_ID,
   'contacts',
   'requests',
   'messages',
   'announcements',
   'sponsors',
-  'speakers',
 ];
 const PREVIOUS_DEFAULT_TOOL_IDS = [
+  CAPTURE_TOOL_ID,
   'contacts',
   'requests',
   'messages',
@@ -119,9 +123,9 @@ const PREVIOUS_DEFAULT_TOOL_IDS = [
   'sponsors',
   'speakers',
   'exhibitors',
-  CAPTURE_TOOL_ID,
 ];
 const PREVIOUS_EXHIBITOR_DEFAULT_TOOL_IDS = [
+  CAPTURE_TOOL_ID,
   EXHIBITOR_PROFILE_TOOL_ID,
   'contacts',
   'requests',
@@ -129,20 +133,26 @@ const PREVIOUS_EXHIBITOR_DEFAULT_TOOL_IDS = [
   'announcements',
   'sponsors',
   'speakers',
-  CAPTURE_TOOL_ID,
 ];
+
+function isPinnedQuickTool(id: string) {
+  return PINNED_TOOL_IDS.includes(id);
+}
 
 function isUnchangedStockQuickTools(ids: string[]) {
   return sameToolIds(ids, PREVIOUS_DEFAULT_TOOL_IDS) || sameToolIds(ids, PREVIOUS_EXHIBITOR_DEFAULT_TOOL_IDS);
 }
 
+function withPinnedQuickTools(ids: string[]) {
+  const rest = ids.filter((id) => !isPinnedQuickTool(id));
+  return [...PINNED_TOOL_IDS, ...rest].slice(0, MAX_QUICK_TOOLS);
+}
+
 function withExhibitorProfileTool(ids: string[]) {
-  if (ids.includes(EXHIBITOR_PROFILE_TOOL_ID)) return ids;
-  const rest = ids.filter((id) => id !== EXHIBITOR_PROFILE_TOOL_ID);
-  if (rest[0] === CAPTURE_TOOL_ID) {
-    return [CAPTURE_TOOL_ID, EXHIBITOR_PROFILE_TOOL_ID, ...rest.slice(1)].slice(0, MAX_QUICK_TOOLS);
-  }
-  return [EXHIBITOR_PROFILE_TOOL_ID, ...rest].slice(0, MAX_QUICK_TOOLS);
+  const pinned = withPinnedQuickTools(ids);
+  if (pinned.includes(EXHIBITOR_PROFILE_TOOL_ID)) return pinned;
+  const rest = pinned.filter((id) => id !== EXHIBITOR_PROFILE_TOOL_ID && !isPinnedQuickTool(id));
+  return [...PINNED_TOOL_IDS, EXHIBITOR_PROFILE_TOOL_ID, ...rest].slice(0, MAX_QUICK_TOOLS);
 }
 
 const ALL_QUICK_TOOLS: QuickTool[] = [
@@ -154,6 +164,7 @@ const ALL_QUICK_TOOLS: QuickTool[] = [
   { id: 'qr', icon: 'qr-code', label: 'My QR Code', route: '/(main)/hub/qr' },
   { id: 'exhibitor-profile', icon: 'construct', label: 'Exhibitor Profile', route: '/(main)/hub/exhibitor-profile' },
   { id: 'lead-capture', icon: 'scan', label: 'Capture Contact', route: '/(main)/hub/capture' },
+  { id: 'scan-exhibitor', icon: 'scan-circle', label: 'Scan Exhibitor', route: '/(main)/hub/passport-scan' },
   { id: 'favorites', icon: 'star', label: 'Favorites', route: '/(main)/hub/favorites' },
   { id: 'exhibitors', icon: 'business', label: 'Exhibitors', route: '/(main)/hub/exhibitors' },
   { id: 'sponsors', icon: 'ribbon', label: 'Sponsors', route: '/(main)/hub/sponsors' },
@@ -321,8 +332,9 @@ export default function HubScreen() {
               deduped.push(id);
               if (deduped.length >= MAX_QUICK_TOOLS) break;
             }
-            if (deduped.length && !isUnchangedStockQuickTools(deduped)) {
-              setSelectedToolIds(deduped);
+            const pinned = withPinnedQuickTools(deduped);
+            if (pinned.length && !isUnchangedStockQuickTools(deduped)) {
+              setSelectedToolIds(pinned);
             }
           }
         }
@@ -373,6 +385,9 @@ export default function HubScreen() {
   useEffect(() => {
     if (!toolsLoaded || hasExhibitorProfile !== true) return;
     if (selectedToolIds.includes(EXHIBITOR_PROFILE_TOOL_ID)) return;
+    // Only fill the third slot while the list is still the stock default.
+    // A removed Exhibitor Profile stays removed.
+    if (!sameToolIds(selectedToolIds, DEFAULT_TOOL_IDS)) return;
     const next = withExhibitorProfileTool(selectedToolIds);
     setSelectedToolIds(next);
     setEditingToolIds(next);
@@ -658,10 +673,11 @@ export default function HubScreen() {
   };
 
   const persistTools = async (rawList: string[]) => {
-    const cleaned = rawList
-      .filter((id) => toolMap.has(id))
-      .filter((id, idx, arr) => arr.indexOf(id) === idx)
-      .slice(0, MAX_QUICK_TOOLS);
+    const cleaned = withPinnedQuickTools(
+      rawList
+        .filter((id) => toolMap.has(id))
+        .filter((id, idx, arr) => arr.indexOf(id) === idx),
+    );
 
     setEditingToolIds(cleaned);
     setSelectedToolIds(cleaned);
@@ -673,6 +689,7 @@ export default function HubScreen() {
   };
 
   const toggleToolInEdit = (id: string) => {
+    if (isPinnedQuickTool(id)) return;
     setEditingToolIds((prev) => {
       let next = prev;
       if (prev.includes(id)) {
@@ -686,11 +703,12 @@ export default function HubScreen() {
   };
 
   const moveTool = (id: string, direction: number) => {
+    if (isPinnedQuickTool(id)) return;
     setEditingToolIds((prev) => {
       const idx = prev.indexOf(id);
       if (idx === -1) return prev;
       const nextIdx = idx + direction;
-      if (nextIdx < 0 || nextIdx >= prev.length) return prev;
+      if (nextIdx < PINNED_TOOL_IDS.length || nextIdx >= prev.length) return prev;
       const copy = [...prev];
       const temp = copy[idx];
       copy[idx] = copy[nextIdx];
@@ -826,7 +844,10 @@ export default function HubScreen() {
               iconColor='#FFFFFF'
               iconSize={20}
               onPress={() => handleToolPress(t)}
-              style={[styles.toolsCard, styles.toolsCardPrimary]}
+              style={[
+                styles.toolsCard,
+                isPinnedQuickTool(t.id) ? styles.toolsCardScan : styles.toolsCardPrimary,
+              ]}
               iconWrapStyle={styles.toolsIconWrap}
               labelStyle={styles.toolsCardLabel}
             />
@@ -1023,6 +1044,8 @@ export default function HubScreen() {
 
       <PostEventSurveyCallout style={styles.surveyCallout} />
 
+      <CertificateOfCompletionCallout style={styles.surveyCallout} />
+
       <SafeEnteringView entering={FadeInDown.duration(600).delay(180)}>
         <HubSponsorBlock />
       </SafeEnteringView>
@@ -1136,7 +1159,7 @@ export default function HubScreen() {
               <View>
                 <Text style={styles.modalTitle}>Customize quick tools</Text>
                 <Text style={styles.modalHint}>
-                  Pick up to {MAX_QUICK_TOOLS} items. Use arrows to reorder.
+                  Pick up to {MAX_QUICK_TOOLS - PINNED_TOOL_IDS.length} items. Capture Contact and Scan Exhibitor stay at the top.
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setToolsModalVisible(false)}>
@@ -1164,6 +1187,9 @@ export default function HubScreen() {
                   editingToolIds.map((id, index) => {
                     const tool = toolMap.get(id);
                     if (!tool) return null;
+                    const pinned = isPinnedQuickTool(id);
+                    const moveUpDisabled = pinned || index <= PINNED_TOOL_IDS.length;
+                    const moveDownDisabled = pinned || index === editingToolIds.length - 1;
                     return (
                       <View key={id} style={styles.selectedRow}>
                         <View style={styles.selectedRowLeft}>
@@ -1176,30 +1202,32 @@ export default function HubScreen() {
                         <View style={styles.selectedRowActions}>
                           <TouchableOpacity
                             onPress={() => moveTool(id, -1)}
-                            disabled={index === 0}
+                            disabled={moveUpDisabled}
                             style={[
                               styles.reorderButton,
-                              index === 0 && styles.reorderButtonDisabled,
+                              moveUpDisabled && styles.reorderButtonDisabled,
                             ]}
                           >
                             <Ionicons name='chevron-up' size={18} color={ui.colors.text} />
                           </TouchableOpacity>
                           <TouchableOpacity
                             onPress={() => moveTool(id, 1)}
-                            disabled={index === editingToolIds.length - 1}
+                            disabled={moveDownDisabled}
                             style={[
                               styles.reorderButton,
-                              index === editingToolIds.length - 1 && styles.reorderButtonDisabled,
+                              moveDownDisabled && styles.reorderButtonDisabled,
                             ]}
                           >
                             <Ionicons name='chevron-down' size={18} color={ui.colors.text} />
                           </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => toggleToolInEdit(id)}
-                            style={styles.removeButton}
-                          >
-                            <Ionicons name='close' size={16} color='#DC2626' />
-                          </TouchableOpacity>
+                          {pinned ? null : (
+                            <TouchableOpacity
+                              onPress={() => toggleToolInEdit(id)}
+                              style={styles.removeButton}
+                            >
+                              <Ionicons name='close' size={16} color='#DC2626' />
+                            </TouchableOpacity>
+                          )}
                         </View>
                       </View>
                     );
@@ -1211,6 +1239,7 @@ export default function HubScreen() {
               <View style={styles.addChipsWrap}>
                 {orderedAvailableTools.map((tool) => {
                   const isSelected = editingToolIds.includes(tool.id);
+                  const pinned = isPinnedQuickTool(tool.id);
                   const disabled = !isSelected && maxReached;
                   return (
                     <TouchableOpacity
@@ -1222,7 +1251,7 @@ export default function HubScreen() {
                       ]}
                       activeOpacity={0.85}
                       onPress={() => toggleToolInEdit(tool.id)}
-                      disabled={disabled}
+                      disabled={pinned || disabled}
                     >
                       <Ionicons
                         name={tool.icon}
@@ -1246,7 +1275,7 @@ export default function HubScreen() {
                 })}
               </View>
               {maxReached && (
-                <Text style={styles.limitText}>You can pin up to {MAX_QUICK_TOOLS} tools.</Text>
+                <Text style={styles.limitText}>You can pick up to {MAX_QUICK_TOOLS - PINNED_TOOL_IDS.length} items.</Text>
               )}
 
               <View style={styles.modalFooterInline}>
@@ -1495,6 +1524,9 @@ const styles = StyleSheet.create({
   },
   toolsCardPrimary: {
     backgroundColor: ui.colors.primary,
+  },
+  toolsCardScan: {
+    backgroundColor: autopackColors.apDarkBlue,
   },
   toolsIconWrap: {
     width: 30,

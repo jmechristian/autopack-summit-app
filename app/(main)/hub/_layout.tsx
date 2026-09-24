@@ -24,13 +24,8 @@ export default function HubLayout() {
       <Stack.Screen
         name='post-event-survey/success'
         options={{
-          title: 'Thanks',
-          headerBackVisible: false,
+          headerShown: false,
           gestureEnabled: false,
-          headerStyle: { backgroundColor: '#041E36' },
-          headerTintColor: '#fff',
-          headerTitleStyle: { color: '#fff' },
-          headerShadowVisible: false,
         }}
       />
       <Stack.Screen name='passport' options={{ title: 'Passport Challenge' }} />
