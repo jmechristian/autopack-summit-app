@@ -1033,6 +1033,7 @@ export enum RegistrantStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
   WAITLIST = "WAITLIST",
+  ARCHIVED = "ARCHIVED",
 }
 
 

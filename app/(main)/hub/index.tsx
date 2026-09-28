@@ -48,11 +48,7 @@ import {
   useContentFrame,
   useMainTabScrollPadding,
 } from '../../../src/utils/layout';
-import {
-  compareSessionsByStart,
-  isSessionLive,
-  isSessionUpcoming,
-} from '../../../src/utils/sessionLive';
+import { isSessionLive } from '../../../src/utils/sessionLive';
 import {
   formatAgendaDateLabel,
   formatAgendaTimeRange,
@@ -67,7 +63,11 @@ import { CertificateOfCompletionCallout } from '../../../src/components/certific
 import { useLeaderboardStore } from '../../../src/store/leaderboardStore';
 import { SafeEnteringView } from '../../../src/components/SafeEnteringView';
 import { HubHeroRive } from '../../../src/components/hub/HubHeroRive';
-import { HubCountdownStrip } from '../../../src/components/hub/HubCountdownStrip';
+import {
+  COUNTDOWN_TARGET_MS,
+  HubCountdownStrip,
+  selectUpcomingSessions,
+} from '../../../src/components/hub/HubCountdownStrip';
 import { HubHelpMenu } from '../../../src/components/hub/HubHelpMenu';
 import { HubQrBadge } from '../../../src/components/hub/HubQrBadge';
 import { HubSponsorBlock } from '../../../src/components/hub/HubSponsorBlock';
@@ -218,24 +218,7 @@ function resolvePresentationUrl(embedUrl?: string | null) {
 }
 
 function selectHubSessions(sessions: NextSession[], now: Date) {
-  const liveSessions = sessions
-    .filter((session) => isSessionLive(session, now))
-    .sort(compareSessionsByStart);
-
-  if (liveSessions.length) {
-    return { sessions: liveSessions, headerLabel: 'Live Now' as const };
-  }
-
-  const upcomingSessions = sessions
-    .filter((session) => isSessionUpcoming(session, now))
-    .sort(compareSessionsByStart);
-
-  if (!upcomingSessions.length) {
-    return { sessions: [], headerLabel: 'Coming Up' as const };
-  }
-
-  // Skip the first two agenda items (e.g. registration / welcome) and start at the 3rd.
-  return { sessions: upcomingSessions.slice(2), headerLabel: 'Coming Up' as const };
+  return { sessions: selectUpcomingSessions(sessions, now), headerLabel: 'Coming Up' as const };
 }
 
 function htmlToPlainText(input: string) {
@@ -312,7 +295,13 @@ export default function HubScreen() {
     const intervalId = setInterval(() => {
       setNowMs(Date.now());
     }, 30000);
-    return () => clearInterval(intervalId);
+    const untilCountdown = COUNTDOWN_TARGET_MS - Date.now();
+    const countdownId =
+      untilCountdown > 0 ? setTimeout(() => setNowMs(Date.now()), untilCountdown) : undefined;
+    return () => {
+      clearInterval(intervalId);
+      if (countdownId) clearTimeout(countdownId);
+    };
   }, []);
 
   useEffect(() => {
@@ -1124,7 +1113,7 @@ export default function HubScreen() {
           <View style={[styles.wideRow, { gap: wideCols.gap }]}>
             <View style={[styles.wideHeroCol, { width: wideCols.hero }]}>
               <View style={styles.countdownInStack}>
-                <HubCountdownStrip />
+                <HubCountdownStrip sessions={allSessions} />
               </View>
               {comingUpBlock}
               <LeaderboardCallout style={styles.leaderboardCallout} />
@@ -1135,7 +1124,7 @@ export default function HubScreen() {
       ) : (
         <>
           {heroBlock}
-          <HubCountdownStrip />
+          <HubCountdownStrip sessions={allSessions} />
           <View style={[styles.body, { paddingHorizontal: contentInset }]}>
             {quickToolsBlock}
             {comingUpBlock}
