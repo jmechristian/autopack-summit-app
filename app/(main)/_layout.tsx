@@ -1,5 +1,6 @@
 import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
 import { AuthGuard } from '../../src/components/AuthGuard';
 import { CenteredTabBar } from '../../src/components/CenteredTabBar';
 import { autopackColors } from '../../src/theme';
@@ -9,7 +10,7 @@ export default function MainTabs() {
   const engageBadgeCount = useEngageStore((s) => s.getEngageBadgeCount());
   const goToTabRoot = (path: '/(main)/hub' | '/(main)/agenda' | '/(main)/engage' | '/(main)/community' | '/(main)/profile') => ({
     tabPress: () => {
-      router.replace(path);
+      if (Platform.OS === 'ios') router.replace(path);
     },
   });
 

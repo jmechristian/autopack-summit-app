@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { InteractionManager, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { InteractionManager, Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import Rive, { Alignment, Fit } from 'rive-react-native';
 import { autopackColors } from '../../theme';
 
@@ -83,7 +83,7 @@ export function HubHeroRive({
       ]}
       testID={testID}
     >
-      {source && mountRive ? (
+      {source && mountRive && Platform.OS !== 'android' ? (
         <RiveLayer
           source={source}
           artboardName={artboardName}

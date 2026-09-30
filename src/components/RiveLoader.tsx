@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   StyleProp,
   StyleSheet,
   View,
@@ -76,7 +77,7 @@ function RiveLoaderPlayback({
   onReady,
   testID,
 }: PlaybackProps) {
-  const [useFallback, setUseFallback] = useState(false);
+  const [useFallback, setUseFallback] = useState(Platform.OS === 'android');
   const [hasPlayed, setHasPlayed] = useState(false);
 
   useEffect(() => {
