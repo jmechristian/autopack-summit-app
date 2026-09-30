@@ -52,7 +52,6 @@ type FlatRow =
 /** Integer heights only — keep getItemLayout exact on Android. */
 const SECTION_HEADER_HEIGHT = 32;
 const DIVIDER_HEIGHT = 1;
-const PAGE_SIZE = 25;
 
 function normalizeNamePart(v?: string | null) {
   return (v || '').trim();
@@ -83,9 +82,7 @@ export default function CommunityIndex() {
   const currentProfileId = currentAppUser?.profileId || currentAppUser?.profile?.id || null;
   const { profileIdsWithNotes } = useNotesPresence();
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(0);
   const [expertiseFilter, setExpertiseFilter] = useState<string[]>([]);
-  const listRef = useRef<FlatList<FlatRow>>(null);
   const [expertisePickerOpen, setExpertisePickerOpen] = useState(false);
   const [profiles, setProfiles] = useState<CommunityProfile[]>([]);
   const [risingStarYears, setRisingStarYears] = useState<Record<string, number>>({});
@@ -229,21 +226,6 @@ export default function CommunityIndex() {
     });
   }, [profiles, search, expertiseFilter]);
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount - 1);
-  const pageProfiles = useMemo(() => {
-    const start = currentPage * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [currentPage, filtered]);
-
-  useEffect(() => {
-    setPage(0);
-  }, [search, expertiseFilter]);
-
-  useEffect(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [currentPage]);
-
   const toggleExpertiseFilter = useCallback((tag: string) => {
     setExpertiseFilter((prev) =>
       prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
@@ -252,7 +234,7 @@ export default function CommunityIndex() {
 
   const sections: CommunitySection[] = useMemo(() => {
     const map = new Map<string, CommunityProfile[]>();
-    for (const p of pageProfiles) {
+    for (const p of filtered) {
       const key = getSectionKey(p);
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(p);
@@ -265,7 +247,7 @@ export default function CommunityIndex() {
     });
 
     return titles.map((title) => ({ title, data: map.get(title)! }));
-  }, [pageProfiles]);
+  }, [filtered]);
 
   // FlatList avoids Android SectionList sticky/footer layout thrash. Letter rows are
   // normal items; iOS still pins them via stickyHeaderIndices.
@@ -520,46 +502,6 @@ export default function CommunityIndex() {
         mode='filter'
       />
 
-      {filtered.length > PAGE_SIZE ? (
-        <View style={[styles.pager, { marginHorizontal: contentInset }]}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Previous page"
-            disabled={currentPage === 0}
-            onPress={() => setPage(Math.max(0, currentPage - 1))}
-            style={[styles.pagerBtn, currentPage === 0 && styles.pagerBtnDisabled]}
-          >
-            <Ionicons name="chevron-back" size={18} color={currentPage === 0 ? '#9ca3af' : '#111827'} />
-            <Text style={[styles.pagerBtnText, currentPage === 0 && styles.pagerBtnTextDisabled]}>Previous</Text>
-          </Pressable>
-          <Text style={styles.pagerLabel}>
-            {currentPage * PAGE_SIZE + 1}–{Math.min(filtered.length, (currentPage + 1) * PAGE_SIZE)} of{' '}
-            {filtered.length}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Next page"
-            disabled={currentPage >= pageCount - 1}
-            onPress={() => setPage(Math.min(pageCount - 1, currentPage + 1))}
-            style={[styles.pagerBtn, currentPage >= pageCount - 1 && styles.pagerBtnDisabled]}
-          >
-            <Text
-              style={[
-                styles.pagerBtnText,
-                currentPage >= pageCount - 1 && styles.pagerBtnTextDisabled,
-              ]}
-            >
-              Next
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={currentPage >= pageCount - 1 ? '#9ca3af' : '#111827'}
-            />
-          </Pressable>
-        </View>
-      ) : null}
-
       {error ? (
         <View style={[styles.errorBox, { paddingHorizontal: contentInset }]}>
           <Text style={styles.errorTitle}>Couldn’t load community</Text>
@@ -570,7 +512,6 @@ export default function CommunityIndex() {
         </View>
       ) : (
         <FlatList
-          ref={listRef}
           data={flatRows}
           keyExtractor={(item) => item.key}
           stickyHeaderIndices={stickyHeaderIndices}
@@ -670,36 +611,6 @@ const styles = StyleSheet.create({
   },
   filterBar: {
     marginBottom: 8,
-  },
-  pager: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 8,
-  },
-  pagerBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-  },
-  pagerBtnDisabled: {
-    opacity: 0.7,
-  },
-  pagerBtnText: {
-    color: '#111827',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  pagerBtnTextDisabled: {
-    color: '#9ca3af',
-  },
-  pagerLabel: {
-    color: '#6b7280',
-    fontSize: 13,
-    fontWeight: '600',
   },
   filterMeta: {
     flexDirection: 'row',
